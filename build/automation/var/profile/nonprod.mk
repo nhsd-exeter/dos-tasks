@@ -1,10 +1,10 @@
--include $(VAR_DIR)/platform-texas/v1/account-live-k8s-prod.mk
+-include $(VAR_DIR)/platform-texas/v1/account-live-k8s-nonprod.mk
 
 # ==============================================================================
 # Service variables
 
 PROJECT_IMAGE_TAG :=
-ENV := live
+ENV := nonprod
 SERVICE_PREFIX := $(PROJECT_ID)-$(ENV)
 AWS_LAMBDA_ECR = $(or $(AWS_ACCOUNT_ID), 000000000000).dkr.ecr.$(AWS_DEFAULT_REGION).amazonaws.com
 
@@ -12,4 +12,4 @@ AWS_LAMBDA_ECR = $(or $(AWS_ACCOUNT_ID), 000000000000).dkr.ecr.$(AWS_DEFAULT_REG
 # Infrastructure variables
 
 STACKS := s3
-ENVIRONMENT_LIST := ["live"]
+ENVIRONMENT_LIST := ["test","test1","test2","test3","test4","fix","performance","regression"]
