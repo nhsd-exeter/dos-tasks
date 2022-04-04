@@ -1,0 +1,54 @@
+pipeline {
+  agent { label "jenkins-slave" }
+  parameters {
+    choice(name: 'Task', choices: ['all', 'referralroles'], description: 'Select which HK task to deploy')
+  }
+  options {
+    buildDiscarder(logRotator(daysToKeepStr: "7", numToKeepStr: "13"))
+    disableConcurrentBuilds()
+    parallelsAlwaysFailFast()
+    timeout(time: 25, unit: "MINUTES")
+  }
+  environment {
+    BUILD_DATE = sh(returnStdout: true, script: "date -u +'%Y-%m-%dT%H:%M:%S%z'").trim()
+    PROFILE = "nonprod"
+    ENVIRONMENT = "nonprod"
+    TASK = "${params.Task}"
+  }
+  triggers { pollSCM("* * * * *") }
+  stages {
+    stage("Show Configuration") {
+      steps {
+        script { sh "make show-configuration" }
+      }
+    }
+
+    stage("Build") {
+      steps {
+        script { sh "make build" }
+        script { sh "make unit-test" }
+        script { sh "make push" }
+      }
+    }
+
+    stage("Test") {
+      steps {
+        script { sh "echo Running Tests..." }
+      }
+    }
+
+    stage("Deploy") {
+      steps {
+        script { sh "make provision | tee /tmp/terraform_changes.txt" }
+      }
+    }
+
+    stage("Deployment Summary") {
+      script { sh "make deployment-summary" }
+    }
+  }
+  post {
+    always { sh "make pipeline-send-notification PIPELINE_NAME='DoS Tasks (NonProd)' BUILD_STATUS=${currentBuild.currentResult}" }
+    cleanup { sh "make clean" }
+  }
+}
