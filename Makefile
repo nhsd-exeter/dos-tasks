@@ -16,8 +16,9 @@ build: project-config # Build project - mandatory: TASK=[hk task]
 
 build-image: # TODO: fill out generic build process for images | Builds images - mandatory: NAME=[hk name]
 	rm -rf $(DOCKER_DIR)/hk/assets/*
-	cp $(APPLICATION_DIR)/$(NAME) $(DOCKER_DIR)/hk/assets
+	cp -r $(APPLICATION_DIR)/$(NAME) $(DOCKER_DIR)/hk/assets/
 	make docker-build NAME=hk-$(NAME)
+	rm -rf $(DOCKER_DIR)/hk/assets/*
 
 
 start: project-start # Start project
