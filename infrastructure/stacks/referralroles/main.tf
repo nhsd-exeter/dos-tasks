@@ -4,7 +4,7 @@ resource "aws_lambda_function" "hk_referralroles_lambda" {
   publish       = true
   package_type  = "Image"
   timeout       = "30"
-  image_uri     = "${var.aws_ecr}/${var.project_group_short}/${var.project_name_short}/hk-referralroles:${var.image_version}"
+  image_uri     = "${var.aws_lambda_ecr}/${var.project_group_short}/${var.project_name_short}/hk-referralroles:${var.image_version}"
   tracing_config {
     mode = "Active"
   }
@@ -26,7 +26,7 @@ resource "aws_lambda_function_event_invoke_config" "hk_referralroles_lambda_invo
 }
 
 resource "aws_iam_role" "hk_referralroles_lambda_role" {
-  name               = "${var.service_prefix}-rd-role"
+  name               = "${var.service_prefix}-hk-referralroles-role"
   path               = "/"
   assume_role_policy = <<EOF
 {
@@ -45,7 +45,7 @@ EOF
 }
 
 resource "aws_iam_role_policy" "hk_referralroles_lambda_role_policy" {
-  name   = "${var.service_prefix}-rd-role-policy"
+  name   = "${var.service_prefix}-hk-referralroles-role-policy"
   role   = aws_iam_role.hk_referralroles_lambda_role.name
   policy = <<POLICY
 {
@@ -98,6 +98,6 @@ POLICY
 }
 
 resource "aws_cloudwatch_log_group" "hk_referralroles_lambda_log_group" {
-  name              = "/aws/lambda/${var.service_prefix}-referralroles-lambda"
+  name              = "/aws/lambda/${var.service_prefix}-hk-referralroles-lambda"
   retention_in_days = "0"
 }

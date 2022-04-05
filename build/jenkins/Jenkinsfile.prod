@@ -1,0 +1,56 @@
+pipeline {
+  agent { label "jenkins-slave" }
+  parameters {
+    choice(name: 'Task', choices: ['none', 'all', 'referralroles'], description: 'Select which HK task to deploy')
+  }
+  options {
+    buildDiscarder(logRotator(daysToKeepStr: "7", numToKeepStr: "13"))
+    disableConcurrentBuilds()
+    parallelsAlwaysFailFast()
+    timeout(time: 50, unit: "MINUTES")
+  }
+  environment {
+    GIT_TAG = "${env.BRANCH_NAME}"
+    PROFILE = sh(returnStdout: true, script: "make parse-profile-from-tag GIT_TAG=$GIT_TAG").trim()
+    TASK = "${params.Task}"
+  }
+  triggers { pollSCM(env.BRANCH_NAME == "master" ? "* * * * *" : "") }
+  stages {
+    stage("Show Configuration") {
+      when { expression { env.PROFILE == "put" || env.PROFILE == "live" } }
+      steps {
+        script { sh "make show-configuration" }
+      }
+    }
+
+    stage("Propagate Artefacts") {
+      when {
+        expression { params.Task != "none" }
+        expression { env.PROFILE == "put" || env.PROFILE == "live" }
+      }
+      steps {
+        script { sh "make propagate ARTEFACTS=${params.Task}" }
+      }
+    }
+
+    stage("Deploy") {
+      when {
+        expression { params.Task != "none" }
+        expression { env.PROFILE == "put" || env.PROFILE == "live" }
+      }
+      steps {
+        script { sh "make provision | tee /tmp/terraform_changes.txt" }
+      }
+    }
+
+    stage("Deployment Summary") {
+      when { expression { env.PROFILE == "put" || env.PROFILE == "live" } }
+      steps {
+        script { sh "make deployment-summary" }
+      }
+    }
+  }
+  post {
+    always { sh "make pipeline-send-notification PIPELINE_NAME='DoS Tasks (Prod)' BUILD_STATUS=${currentBuild.currentResult}" }
+  }
+}

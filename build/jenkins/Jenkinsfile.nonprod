@@ -1,7 +1,7 @@
 pipeline {
   agent { label "jenkins-slave" }
   parameters {
-    choice(name: 'Task', choices: ['all', 'referralroles'], description: 'Select which HK task to deploy')
+    choice(name: 'Task', choices: ['none', 'all', 'referralroles'], description: 'Select which HK task to deploy')
   }
   options {
     buildDiscarder(logRotator(daysToKeepStr: "7", numToKeepStr: "13"))
@@ -24,6 +24,7 @@ pipeline {
     }
 
     stage("Build") {
+      when { expression { params.Task != "none" } }
       steps {
         script { sh "make build" }
         script { sh "make unit-test" }
@@ -32,12 +33,14 @@ pipeline {
     }
 
     stage("Test") {
+      when { expression { params.Task != "none" } }
       steps {
         script { sh "echo Running Tests..." }
       }
     }
 
     stage("Deploy") {
+      when { expression { params.Task != "none" } }
       steps {
         script { sh "make provision | tee /tmp/terraform_changes.txt" }
       }
