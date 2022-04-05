@@ -118,6 +118,17 @@ resource "aws_iam_role_policy" "lambda_role_policy" {
     {
       "Effect": "Allow",
       "Action": [
+        "lambda:InvokeFunction",
+        "lambda:InvokeAsync"
+      ],
+      "Resource": [
+        "arn:aws:lambda:${var.aws_region}:${var.aws_account_id}:function:${var.service_prefix}-*",
+        "arn:aws:lambda:${var.aws_region}:${var.aws_account_id}:function:${var.service_prefix}-*:*"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
         "xray:PutTraceSegments",
         "xray:PutTelemetryRecords",
         "xray:GetSamplingRules",
