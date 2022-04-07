@@ -18,5 +18,5 @@ ENVIRONMENT_LIST := ["test","test1","test2","test3","test4","fix","performance",
 
 TF_VAR_image_version := $(or $(BUILD_TAG), latest)
 TF_VAR_s3_tf_state_key := $(PROJECT_ID)/$(ENV)/s3/terraform.state
-TF_VAR_security_groups_tf_state_key := $(PROJECT_ID)/$(ENV)/security_groups/terraform.state
+TF_VAR_security_groups_tf_state_key := $(PROJECT_ID)/$(ENV)/security-groups/terraform.state
 TF_VAR_core_dos_db_sg := sg-05fdf44634b750fbd

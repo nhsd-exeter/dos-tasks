@@ -15,7 +15,7 @@ variable "aws_region" {
 }
 
 variable "aws_account_id" {
-  description = "AWS account Number for Athena log location"
+  description = "AWS account"
 }
 
 variable "texas_terraform_state_store" {
@@ -42,6 +42,34 @@ variable "service_prefix" {
   description = "The service prefix for the application"
 }
 
+variable "project_group_short" {
+  description = "Short name for project group"
+}
+
+variable "project_name_short" {
+  description = "Short name for project"
+}
+
+# ##############
+# # LAMBDA
+# ##############
+
 variable "s3_tf_state_key" {
   description = "State store for s3 stack terraform"
+}
+
+variable "image_version" {
+  description = "The version of the Lambda docker image"
+}
+
+variable "aws_lambda_ecr" {
+  description = "ECR repository to store lambda docker images"
+}
+
+variable "vpc_terraform_state_key" {
+  description = "State store for VPC stack terraform"
+}
+
+variable "security_groups_tf_state_key" {
+  description = "State store for security groups stack terraform"
 }

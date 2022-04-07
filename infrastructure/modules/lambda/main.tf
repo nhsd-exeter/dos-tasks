@@ -3,14 +3,14 @@ resource "aws_lambda_function" "lambda" {
   role          = aws_iam_role.lambda_role.arn
   publish       = true
   package_type  = "Image"
-  image_uri     = "${var.aws_lambda_ecr}/${var.project_group_short}/${var.project_name_short}/${var.name}:${var.image_version}"
+  image_uri     = var.image_uri
 
   timeout     = var.timeout
   memory_size = var.memory_size
 
   vpc_config {
-    subnet_ids         = [data.terraform_remote_state.vpc.outputs.private_subnets[0], data.terraform_remote_state.vpc.outputs.private_subnets[1], data.terraform_remote_state.vpc.outputs.private_subnets[2]]
-    security_group_ids = [data.terraform_remote_state.security_groups.outputs.lambda_security_group_id]
+    subnet_ids         = var.subnet_ids
+    security_group_ids = var.security_group_ids
   }
 
   tags = var.tags
@@ -18,7 +18,7 @@ resource "aws_lambda_function" "lambda" {
     mode = "Active"
   }
   environment {
-    variables = var.environment
+    variables = var.env_vars
   }
   depends_on = [
     aws_iam_role.lambda_role,
@@ -75,7 +75,7 @@ resource "aws_iam_role_policy" "lambda_role_policy" {
         "secretsmanager:List*"
       ],
       "Resource": [
-        "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account_id}:secret:${var.project_group_short}*",
+        "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account_id}:secret:uec-dos*",
         "arn:aws:secretsmanager:${var.aws_region}:${var.aws_account_id}:secret:core-dos*"
       ]
     },
@@ -85,8 +85,8 @@ resource "aws_iam_role_policy" "lambda_role_policy" {
         "s3:*"
       ],
       "Resource": [
-        "${data.terraform_remote_state.s3.outputs.s3_bucket_id}",
-        "${data.terraform_remote_state.s3.outputs.s3_bucket_id}/*"
+        "${var.s3_bucket_arn}",
+        "${var.s3_bucket_arn}/*"
       ]
     },
     {
@@ -106,7 +106,7 @@ resource "aws_iam_role_policy" "lambda_role_policy" {
     {
       "Effect": "Allow",
       "Action": [
-        "rds-db:connect",
+        "rds-db:connect"
       ],
       "Resource": [
         "arn:aws:rds:${var.aws_region}:${var.aws_account_id}:db:dos-*",
