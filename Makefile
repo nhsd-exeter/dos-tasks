@@ -118,8 +118,8 @@ tag: # Tag commit for production deployment as `[YYYYmmddHHMMSS]-[env]` - mandat
 trust-certificate: ssl-trust-certificate-project ## Trust the SSL development certificate
 
 create-artefact-repositories: # Create ECR repositories to store the artefacts - mandatory: AWS_ACCOUNT=[account]
-	make docker-create-repositories NAME=hk-filter
-	make docker-create-repositories NAME=hk-referralroles
+	make docker-create-repository NAME=hk-filter
+	make docker-create-repository NAME=hk-referralroles
 
 # ==============================================================================
 
