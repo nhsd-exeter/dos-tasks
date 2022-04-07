@@ -5,7 +5,7 @@ include $(abspath $(PROJECT_DIR)/build/automation/init.mk)
 # Development workflow targets
 
 build: project-config # Build project - mandatory: TASK=[hk task]
-	make docker-build NAME=hk-filter
+	make build-image NAME=hk-filter AWS_ECR=$(AWS_LAMBDA_ECR)
 	if [ $(TASK) == 'all' ]; then
 		for task in $$(echo $(TASKS) | tr "," "\n"); do
 			make build-image NAME="hk-$$task" AWS_ECR=$(AWS_LAMBDA_ECR)
@@ -16,8 +16,8 @@ build: project-config # Build project - mandatory: TASK=[hk task]
 
 build-image: # TODO: fill out generic build process for images | Builds images - mandatory: NAME=[hk name]
 	rm -rf $(DOCKER_DIR)/hk/assets/*
-	cp -r $(APPLICATION_DIR)/$(NAME) $(DOCKER_DIR)/hk/assets/
-	make docker-build NAME=hk-$(NAME)
+	cp -r $(APPLICATION_DIR)/$(NAME)/* $(DOCKER_DIR)/hk/assets/
+	make docker-image NAME=$(NAME)
 	rm -rf $(DOCKER_DIR)/hk/assets/*
 
 
@@ -35,7 +35,7 @@ test: # Test project
 
 push: # Push project artefacts to the registry - mandatory: TASK=[hk task]
 	eval "$$(make aws-assume-role-export-variables)"
-	make docker-push NAME=hk-filter
+	make docker-push NAME=hk-filter AWS_ECR=$(AWS_LAMBDA_ECR)
 	if [ $(TASK) == 'all' ]; then
 		for task in $$(echo $(TASKS) | tr "," "\n"); do
 			make docker-push NAME="hk-$$task" AWS_ECR=$(AWS_LAMBDA_ECR)
