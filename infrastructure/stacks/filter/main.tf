@@ -1,6 +1,7 @@
 module "filter_lambda" {
   source = "../../modules/lambda"
   name   = "hk-filter"
+  tags   = local.standard_tags
 }
 
 resource "aws_lambda_permission" "hk_bucket_trigger" {
