@@ -5,6 +5,7 @@
 
 PROJECT_IMAGE_TAG :=
 ENV := nonprod
+ENVIRONMENT := nonprod
 SERVICE_PREFIX := $(PROJECT_ID)-$(ENV)
 AWS_LAMBDA_ECR = $(or $(AWS_ACCOUNT_ID), 000000000000).dkr.ecr.$(AWS_DEFAULT_REGION).amazonaws.com
 
