@@ -60,13 +60,14 @@ variable "env_vars" {
   description = "Map of environment variables"
   type        = map
   default = {
-    "Service" = "core-dos"
+    "service" = "core-dos",
+    "profile" = "nonprod"
   }
 }
 
 variable "timeout" {
-  description = "Timeout of the lambda function"
-  default     = "30"
+  description = "Timeout of the lambda function in seconds"
+  default     = "900"
 }
 
 variable "retry_attempts" {
