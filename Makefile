@@ -66,6 +66,11 @@ unit-test: # Runs unit tests for task - mandatory: TASK=[hk task]
 
 clean: # Clean up project
 
+
+# --------------------------------------
+unit-test-task: # TODO: Run task unit tests
+
+
 # --------------------------------------
 
 lambda-alias: ### Updates new lambda version with alias based on commit hash - Mandatory PROFILE=[profile]
