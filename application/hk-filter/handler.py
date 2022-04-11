@@ -3,7 +3,7 @@ import json
 import os
 
 secrets_client = boto3.client("secretsmanager")
-lambda_client = boto3.client("lambda", region_name="eu-west-2")
+lambda_client = boto3.client("lambda")
 
 
 def request(event, context):
