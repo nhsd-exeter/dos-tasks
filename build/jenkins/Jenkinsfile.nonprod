@@ -26,9 +26,9 @@ pipeline {
     stage("Build") {
       when { expression { params.Task != "none" } }
       steps {
-        script { sh "make build TASK=${params.TASK}" }
-        script { sh "make unit-test TASK=${params.TASK}" }
-        script { sh "make push TASK=${params.TASK}" }
+        script { sh "make build TASK=${params.Task}" }
+        script { sh "make unit-test TASK=${params.Task}" }
+        script { sh "make push TASK=${params.Task}" }
       }
     }
 
@@ -42,7 +42,7 @@ pipeline {
     stage("Deploy") {
       when { expression { params.Task != "none" } }
       steps {
-        script { sh "make provision TASK=${params.TASK} | tee /tmp/terraform_changes.txt" }
+        script { sh "make provision TASK=${params.Task} | tee /tmp/terraform_changes.txt" }
       }
     }
 
