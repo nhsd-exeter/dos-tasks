@@ -47,7 +47,9 @@ pipeline {
     }
 
     stage("Deployment Summary") {
-      script { sh "make deployment-summary" }
+      steps {
+        script { sh "make deployment-summary" }
+      }
     }
   }
   post {

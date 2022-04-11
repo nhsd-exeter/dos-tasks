@@ -22,7 +22,6 @@ build-image: # TODO: fill out generic build process for images | Builds images -
 	make docker-image NAME=$(NAME)
 	rm -rf $(DOCKER_DIR)/hk/assets/*
 
-
 start: project-start # Start project
 
 stop: project-stop # Stop project
