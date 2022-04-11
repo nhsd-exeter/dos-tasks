@@ -26,9 +26,9 @@ pipeline {
     stage("Build") {
       when { expression { params.Task != "none" } }
       steps {
-        script { sh "make build" }
-        script { sh "make unit-test" }
-        script { sh "make push" }
+        script { sh "make build TASK=${params.TASK}" }
+        script { sh "make unit-test TASK=${params.TASK}" }
+        script { sh "make push TASK=${params.TASK}" }
       }
     }
 
@@ -42,18 +42,19 @@ pipeline {
     stage("Deploy") {
       when { expression { params.Task != "none" } }
       steps {
-        script { sh "make provision | tee /tmp/terraform_changes.txt" }
+        script { sh "make provision TASK=${params.TASK} | tee /tmp/terraform_changes.txt" }
       }
     }
 
     stage("Deployment Summary") {
+      when { expression { params.Task != "none" } }
       steps {
         script { sh "make deployment-summary" }
       }
     }
   }
   post {
-    always { sh "make pipeline-send-notification PIPELINE_NAME='DoS Tasks (NonProd)' BUILD_STATUS=${currentBuild.currentResult}" }
+    always { sh "make pipeline-send-notification PIPELINE_NAME='UEC DoS Tasks HK (NonProd)' BUILD_STATUS=${currentBuild.currentResult}" }
     cleanup { sh "make clean" }
   }
 }
