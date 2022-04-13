@@ -72,12 +72,21 @@ unit-test-task: # TODO: Run task unit tests
 
 # --------------------------------------
 
-lambda-alias: ### Updates new lambda version with alias based on commit hash - Mandatory PROFILE=[profile]
+lambda-alias: ### Updates new lambda version with alias based on commit hash - Mandatory PROFILE=[profile], TASK=[hk task]
 	eval "$$(make aws-assume-role-export-variables)"
-	function=$(SERVICE_PREFIX)-rd-lambda
-	versions=$$(make -s aws-lambda-get-latest-version NAME=$$function)
-	version=$$(echo $$versions | make -s docker-run-tools CMD="jq '.Versions[-1].Version'" | tr -d '"')
-	make aws-lambda-create-alias NAME=$$function VERSION=$$version
+	if [ $(TASK) == 'all' ]; then
+		for task in $$(echo $(TASKS) | tr "," "\n"); do
+			function=$(SERVICE_PREFIX)-hk-$$task-lambda
+			versions=$$(make -s aws-lambda-get-latest-version NAME=$$function)
+			version=$$(echo $$versions | make -s docker-run-tools CMD="jq '.Versions[-1].Version'" | tr -d '"')
+			make aws-lambda-create-alias NAME=$$function VERSION=$$version
+		done
+	else
+		function=$(SERVICE_PREFIX)-hk-$(TASK)-lambda
+		versions=$$(make -s aws-lambda-get-latest-version NAME=$$function)
+		version=$$(echo $$versions | make -s docker-run-tools CMD="jq '.Versions[-1].Version'" | tr -d '"')
+		make aws-lambda-create-alias NAME=$$function VERSION=$$version
+	fi
 
 aws-lambda-get-latest-version: ### Fetches the latest function version for a lambda function - Mandatory NAME=[lambda function name]
 	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
