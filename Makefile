@@ -4,8 +4,23 @@ include $(abspath $(PROJECT_DIR)/build/automation/init.mk)
 # ==============================================================================
 # Development workflow targets
 
-build: project-config # Build project
-	make docker-build NAME=NAME_TEMPLATE_TO_REPLACE
+build: project-config # Build project - mandatory: TASK=[hk task]
+	make build-image NAME=hk-filter AWS_ECR=$(AWS_LAMBDA_ECR)
+	if [ $(TASK) == 'all' ]; then
+		for task in $$(echo $(TASKS) | tr "," "\n"); do
+			make build-image NAME="hk-$$task" AWS_ECR=$(AWS_LAMBDA_ECR)
+		done
+	else
+		make build-image NAME=hk-$(TASK) AWS_ECR=$(AWS_LAMBDA_ECR)
+	fi
+
+build-image: # TODO: fill out generic build process for images | Builds images - mandatory: NAME=[hk name]
+	rm -rf $(DOCKER_DIR)/hk/assets/*
+	rm -rf $(DOCKER_DIR)/hk/Dockerfile.effective
+	rm -rf $(DOCKER_DIR)/hk/.version
+	cp -r $(APPLICATION_DIR)/$(NAME)/* $(DOCKER_DIR)/hk/assets/
+	make docker-image NAME=$(NAME)
+	rm -rf $(DOCKER_DIR)/hk/assets/*
 
 start: project-start # Start project
 
@@ -19,122 +34,107 @@ test: # Test project
 	make start
 	make stop
 
-push: # Push project artefacts to the registry
-	make docker-push NAME=NAME_TEMPLATE_TO_REPLACE
+push: # Push project artefacts to the registry - mandatory: TASK=[hk task]
+	eval "$$(make aws-assume-role-export-variables)"
+	make docker-push NAME=hk-filter AWS_ECR=$(AWS_LAMBDA_ECR)
+	if [ $(TASK) == 'all' ]; then
+		for task in $$(echo $(TASKS) | tr "," "\n"); do
+			make docker-push NAME="hk-$$task" AWS_ECR=$(AWS_LAMBDA_ECR)
+		done
+	else
+		make docker-push NAME=hk-$(TASK) AWS_ECR=$(AWS_LAMBDA_ECR)
+	fi
 
-deploy: # Deploy artefacts - mandatory: PROFILE=[name]
-	make project-deploy STACK=application PROFILE=$(PROFILE)
+provision: # Provision environment - mandatory: PROFILE=[name], TASK=[hk task]
+	eval "$$(make secret-fetch-and-export-variables)"
+	make terraform-apply-auto-approve STACK=$(STACKS) PROFILE=$(PROFILE)
+	if [ $(TASK) == 'all' ]; then
+		make terraform-apply-auto-approve STACK=$(TASKS) PROFILE=$(PROFILE)
+	else
+		make terraform-apply-auto-approve STACK=$(TASK) PROFILE=$(PROFILE)
+	fi
 
-provision: # Provision environment - mandatory: PROFILE=[name]
-	make terraform-apply-auto-approve STACK=database PROFILE=$(PROFILE)
+unit-test: # Runs unit tests for task - mandatory: TASK=[hk task]
+	if [ $(TASK) == 'all' ]; then
+		for task in $$(echo $(TASKS) | tr "," "\n"); do
+			make unit-test-task TASK="$$task"
+		done
+	else
+		make unit-test-task TASK=$(TASK)
+	fi
 
 clean: # Clean up project
+
+
+# --------------------------------------
+unit-test-task: # TODO: Run task unit tests
+
+
+# --------------------------------------
+
+lambda-alias: ### Updates new lambda version with alias based on commit hash - Mandatory PROFILE=[profile], TASK=[hk task]
+	eval "$$(make aws-assume-role-export-variables)"
+	if [ $(TASK) == 'all' ]; then
+		for task in $$(echo $(TASKS) | tr "," "\n"); do
+			function=$(SERVICE_PREFIX)-hk-$$task-lambda
+			versions=$$(make -s aws-lambda-get-latest-version NAME=$$function)
+			version=$$(echo $$versions | make -s docker-run-tools CMD="jq '.Versions[-1].Version'" | tr -d '"')
+			make aws-lambda-create-alias NAME=$$function VERSION=$$version
+		done
+	else
+		function=$(SERVICE_PREFIX)-hk-$(TASK)-lambda
+		versions=$$(make -s aws-lambda-get-latest-version NAME=$$function)
+		version=$$(echo $$versions | make -s docker-run-tools CMD="jq '.Versions[-1].Version'" | tr -d '"')
+		make aws-lambda-create-alias NAME=$$function VERSION=$$version
+	fi
+
+aws-lambda-get-latest-version: ### Fetches the latest function version for a lambda function - Mandatory NAME=[lambda function name]
+	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
+		$(AWSCLI) lambda list-versions-by-function \
+			--function-name $(NAME) \
+			--output json \
+		"
+
+aws-lambda-create-alias: ### Creates an alias for a lambda version - Mandatory NAME=[lambda function name], VERSION=[lambda version]
+	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
+		$(AWSCLI) lambda create-alias \
+			--name $(VERSION)-$(BUILD_COMMIT_HASH) \
+			--function-name $(NAME) \
+			--function-version $(VERSION) \
+		"
+
+# --------------------------------------
+
+deployment-summary: # Returns a deployment summary
+	echo Terraform Changes
+	cat /tmp/terraform_changes.txt | grep -E 'Apply...'
+
+pipeline-send-notification: ## Send Slack notification with the pipeline status - mandatory: PIPELINE_NAME,BUILD_STATUS
+	eval "$$(make aws-assume-role-export-variables)"
+	eval "$$(make secret-fetch-and-export-variables NAME=$(DEPLOYMENT_SECRETS))"
+	make slack-it
+
+propagate: # Propagate the image to production ecr - mandatory: BUILD_COMMIT_HASH=[image hash],GIT_TAG=[git tag],ARTEFACTS=[comma separated list]
+	eval "$$(make aws-assume-role-export-variables PROFILE=$(PROFILE))"
+	for image in $$(echo $(or $(ARTEFACTS), $(ARTEFACT)) | tr "," "\n"); do
+		make docker-image-find-and-version-as COMMIT=$(BUILD_COMMIT_HASH) NAME=$$image TAG=$(GIT_TAG) AWS_ECR=$(AWS_LAMBDA_ECR)
+	done
+
+parse-profile-from-tag: # Return profile based off of git tag - Mandatory GIT_TAG=[git tag]
+	echo $(GIT_TAG) | cut -d "-" -f2
+
+tag: # Tag commit for production deployment as `[YYYYmmddHHMMSS]-[env]` - mandatory: PROFILE=[profile name],COMMIT=[hash]
+	hash=$$(make git-hash COMMIT=$(COMMIT))
+	make git-tag-create-environment-deployment PROFILE=$(PROFILE) COMMIT=$$hash
 
 # ==============================================================================
 # Supporting targets
 
 trust-certificate: ssl-trust-certificate-project ## Trust the SSL development certificate
 
-# ==============================================================================
-# Pipeline targets
-
-build-artefact:
-	echo TODO: $(@)
-
-publish-artefact:
-	echo TODO: $(@)
-
-backup-data:
-	echo TODO: $(@)
-
-provision-infractructure:
-	echo TODO: $(@)
-
-deploy-artefact:
-	echo TODO: $(@)
-
-apply-data-changes:
-	echo TODO: $(@)
-
-# --------------------------------------
-
-run-static-analisys:
-	echo TODO: $(@)
-
-run-unit-test:
-	echo TODO: $(@)
-
-run-smoke-test:
-	echo TODO: $(@)
-
-run-integration-test:
-	echo TODO: $(@)
-
-run-contract-test:
-	echo TODO: $(@)
-
-run-functional-test:
-	[ $$(make project-branch-func-test) != true ] && exit 0
-	echo TODO: $(@)
-
-run-performance-test:
-	[ $$(make project-branch-perf-test) != true ] && exit 0
-	echo TODO: $(@)
-
-run-security-test:
-	[ $$(make project-branch-sec-test) != true ] && exit 0
-	echo TODO: $(@)
-
-# --------------------------------------
-
-remove-unused-environments:
-	echo TODO: $(@)
-
-remove-old-artefacts:
-	echo TODO: $(@)
-
-remove-old-backups:
-	echo TODO: $(@)
-
-# --------------------------------------
-
-pipeline-finalise: ## Finalise pipeline execution - mandatory: PIPELINE_NAME,BUILD_STATUS
-	# Check if BUILD_STATUS is SUCCESS or FAILURE
-	make pipeline-send-notification
-
-pipeline-send-notification: ## Send Slack notification with the pipeline status - mandatory: PIPELINE_NAME,BUILD_STATUS
-	eval "$$(make aws-assume-role-export-variables)"
-	eval "$$(make secret-fetch-and-export-variables NAME=$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)-$(PROFILE)/deployment)"
-	make slack-it
-
-# --------------------------------------
-
-pipeline-check-resources: ## Check all the pipeline deployment supporting resources - optional: PROFILE=[name]
-	profiles="$$(make project-list-profiles)"
-	# for each profile
-	#export PROFILE=$$profile
-	# TODO:
-	# table: $(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)-deployment
-	# secret: $(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)-$(PROFILE)/deployment
-	# bucket: $(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)-$(PROFILE)-deployment
-	# certificate: SSL_DOMAINS_PROD
-	# repos: DOCKER_REPOSITORIES
-
-pipeline-create-resources: ## Create all the pipeline deployment supporting resources - optional: PROFILE=[name]
-	profiles="$$(make project-list-profiles)"
-	# for each profile
-	#export PROFILE=$$profile
-	# TODO:
-	# Per AWS accoount, i.e. `nonprod` and `prod`
-	eval "$$(make aws-assume-role-export-variables)"
-	#make aws-dynamodb-create NAME=$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)-deployment ATTRIBUTE_DEFINITIONS= KEY_SCHEMA=
-	#make secret-create NAME=$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)-$(PROFILE)/deployment VARS=DB_PASSWORD,SMTP_PASSWORD,SLACK_WEBHOOK_URL
-	#make aws-s3-create NAME=$(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)-$(PROFILE)-deployment
-	#make ssl-request-certificate-prod SSL_DOMAINS_PROD
-	# Centralised, i.e. `mgmt`
-	eval "$$(make aws-assume-role-export-variables AWS_ACCOUNT_ID=$(AWS_ACCOUNT_ID_MGMT))"
-	#make docker-create-repository NAME=NAME_TEMPLATE_TO_REPLACE
-	#make aws-codeartifact-setup REPOSITORY_NAME=$(PROJECT_GROUP_SHORT)
+create-artefact-repositories: # Create ECR repositories to store the artefacts - mandatory: AWS_ACCOUNT=[account]
+	make docker-create-repository NAME=hk-filter
+	make docker-create-repository NAME=hk-referralroles
 
 # ==============================================================================
 
