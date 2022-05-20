@@ -14,10 +14,11 @@ build: project-config # Build project - mandatory: TASK=[hk task]
 		make build-image NAME=hk-$(TASK) AWS_ECR=$(AWS_LAMBDA_ECR)
 	fi
 
-build-image: # TODO: fill out generic build process for images | Builds images - mandatory: NAME=[hk name]
+build-image: # Builds images - mandatory: NAME=[hk name]
 	rm -rf $(DOCKER_DIR)/hk/assets/*
 	rm -rf $(DOCKER_DIR)/hk/Dockerfile.effective
 	rm -rf $(DOCKER_DIR)/hk/.version
+	mkdir $(DOCKER_DIR)/hk/assets/utilities
 	cp -r $(APPLICATION_DIR)/$(NAME)/* $(DOCKER_DIR)/hk/assets/
 	cp -r $(APPLICATION_DIR)/utilities/* $(DOCKER_DIR)/hk/assets/utilities/
 	make docker-image NAME=$(NAME)
