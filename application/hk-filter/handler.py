@@ -11,7 +11,14 @@ start = datetime.utcnow()
 
 def request(event, context):
     print("Event: {}".format(event))
-    message.send_start_message({"filename": event["Records"][0]["s3"]["object"]["key"], "env": event["Records"][0]["s3"]["object"]["key"].split("/")[0], "bucket": event["Records"][0]["s3"]["bucket"]["name"]}, start)
+    message.send_start_message(
+        {
+            "filename": event["Records"][0]["s3"]["object"]["key"],
+            "env": event["Records"][0]["s3"]["object"]["key"].split("/")[0],
+            "bucket": event["Records"][0]["s3"]["bucket"]["name"],
+        },
+        start,
+    )
     process_event(event)
 
 

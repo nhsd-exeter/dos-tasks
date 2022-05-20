@@ -1,11 +1,9 @@
 import boto3
-import os
 import base64
 from botocore.exceptions import ClientError
 from utilities import message
 
-AWS_REGION = os.environ["AWS_REGION"]
-secrets_client = boto3.client("secretsmanager", region_name=AWS_REGION)
+secrets_client = boto3.client("secretsmanager")
 
 
 class SECRETS:

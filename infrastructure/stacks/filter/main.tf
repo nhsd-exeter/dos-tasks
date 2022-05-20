@@ -13,12 +13,11 @@ module "filter_lambda" {
   tags           = local.standard_tags
 
   env_vars = {
-    "TASK"               = "filter"
-    "PROFILE"            = var.profile,
-    "SERVICE"            = var.service_tag_common,
-    "SECRET_STORE"       = var.deployment_secrets,
-    "SLACK_WEBHOOK_URL"  = var.slack_webhook_url,
-    "AWS_DEFAULT_REGION" = var.aws_region
+    "TASK"              = "filter"
+    "PROFILE"           = var.profile,
+    "SERVICE"           = var.service_tag_common,
+    "SECRET_STORE"      = var.deployment_secrets,
+    "SLACK_WEBHOOK_URL" = var.slack_webhook_url,
   }
 }
 

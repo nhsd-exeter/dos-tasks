@@ -1,11 +1,9 @@
 import boto3
-import os
 from botocore.exceptions import ClientError
 from utilities import message, logging
 
-AWS_REGION = os.environ["AWS_REGION"]
-s3_client = boto3.client("s3", region_name=AWS_REGION)
-s3_resource = boto3.resource("s3", region_name=AWS_REGION)
+s3_client = boto3.client("s3")
+s3_resource = boto3.resource("s3")
 
 
 class S3:

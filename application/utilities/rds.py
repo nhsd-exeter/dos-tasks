@@ -1,10 +1,8 @@
 import boto3
-import os
 from botocore.exceptions import ClientError
 from utilities import message
 
-AWS_REGION = os.environ["AWS_REGION"]
-rds_client = boto3.client("rds", region_name=AWS_REGION)
+rds_client = boto3.client("rds")
 
 
 class RDS:
