@@ -13,13 +13,13 @@ def request(event, context):
     filename = event["filename"]
     bucket = event["bucket"]
     db_connection = connect_to_database(env, event, start)
-    s3, csv_file = retrieve_file_from_bucket(bucket, filename, event, start)
+    csv_file = retrieve_file_from_bucket(bucket, filename, event, start)
     lines = process_file(csv_file, event, start)
     for row in lines:
         if check_table_for_id(db_connection, row, filename, event, start):
             query, data = generate_db_query(row, event, start)
             execute_db_query(db_connection, query, data, row)
-    cleanup(db_connection, s3, bucket, filename, event, start)
+    cleanup(db_connection, bucket, filename, event, start)
 
 
 def connect_to_database(env, event, start):
@@ -34,7 +34,7 @@ def connect_to_database(env, event, start):
 def retrieve_file_from_bucket(bucket, filename, event, start):
     logging.log_for_audit("Looking in {} for {} file".format(bucket, filename))
     s3_bucket = s3.S3
-    return s3_bucket, s3_bucket.get_object(bucket, filename, event, start)
+    return s3_bucket.get_object(bucket, filename, event, start)
 
 
 def process_file(csv_file, event, start):
@@ -146,13 +146,13 @@ def execute_db_query(db_connection, query, data, line):
         cursor.close()
 
 
-def cleanup(db_connection, s3, bucket, filename, event, start):
+def cleanup(db_connection, bucket, filename, event, start):
     # Close DB connection
     logging.log_for_audit("Closing DB connection...")
     db_connection.close()
     # Archive file
-    s3.copy_object(bucket, filename, event, start)
-    s3.delete_object(bucket, filename, event, start)
+    s3.S3.copy_object(bucket, filename, event, start)
+    s3.S3.delete_object(bucket, filename, event, start)
     logging.log_for_audit("Archived file {} to /archive/{}".format(filename, filename))
     # Send Slack Notification
     logging.log_for_audit("Sending slack message...")
