@@ -20,6 +20,7 @@ pipeline {
     stage("Show Configuration") {
       steps {
         script { sh "make show-configuration" }
+        script { sh "make docker-config" }
       }
     }
 
