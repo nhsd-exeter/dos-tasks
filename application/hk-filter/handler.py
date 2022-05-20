@@ -1,9 +1,11 @@
+from utilities.logging import log_for_audit
+from datetime import datetime
 import boto3
 import json
 import os
 
-secrets_client = boto3.client("secretsmanager")
 lambda_client = boto3.client("lambda")
+start = datetime.utcnow()
 
 
 def request(event, context):
@@ -14,6 +16,11 @@ def request(event, context):
 def process_event(event):
     try:
         filename = event["Records"][0]["s3"]["object"]["key"]
+        if not filename.endswith(".csv"):
+            log_for_audit("Incorrect file extension, found: {}, expected: '.csv'".format(filename.split(".")[1]))
+            raise UnicodeDecodeError(
+                "Incorrect file extension, found: {}, expected: '.csv'".format(filename.split(".")[1])
+            )
         print("Filename: {}".format(filename))
         bucket = event["Records"][0]["s3"]["bucket"]["name"]
         if filename.split("/")[1] == "archive":
@@ -30,7 +37,8 @@ def process_event(event):
 
 
 def invoke_hk_lambda(task, filename, env, bucket):
-    profile = os.environ.get("profile")
+    profile = os.environ.get("PROFILE")
+    # version = os.environ.get(task)
     payload = {"filename": filename, "env": env, "bucket": bucket}
     function = "uec-dos-tasks-{0}-hk-{1}-lambda".format(profile, task)
 

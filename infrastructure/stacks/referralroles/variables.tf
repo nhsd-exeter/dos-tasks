@@ -21,3 +21,11 @@ variable "vpc_terraform_state_key" {
 variable "security_groups_tf_state_key" {
   description = "State store for security groups stack terraform"
 }
+
+variable "slack_webhook_url" {
+  description = "Webhook for slack notifications"
+}
+
+variable "deployment_secrets" {
+  description = "Deployment secret store"
+}

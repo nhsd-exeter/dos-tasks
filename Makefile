@@ -19,6 +19,7 @@ build-image: # TODO: fill out generic build process for images | Builds images -
 	rm -rf $(DOCKER_DIR)/hk/Dockerfile.effective
 	rm -rf $(DOCKER_DIR)/hk/.version
 	cp -r $(APPLICATION_DIR)/$(NAME)/* $(DOCKER_DIR)/hk/assets/
+	cp -r $(APPLICATION_DIR)/utilities/* $(DOCKER_DIR)/hk/assets/utilities/
 	make docker-image NAME=$(NAME)
 	rm -rf $(DOCKER_DIR)/hk/assets/*
 
