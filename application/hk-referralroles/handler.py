@@ -26,6 +26,7 @@ def connect_to_database(env, event, start):
     db = database.DB()
     logging.log_for_audit("Setting DB connection details")
     if not db.db_set_connection_details(env, event, start):
+        logging.log_for_error("Error DB Paramater(s) not found in secrets store.")
         message.send_failure_slack_message(event, start)
         raise ValueError("DB Paramater(s) not found in secrets store")
     return db.db_connect(event, start)
@@ -40,7 +41,7 @@ def retrieve_file_from_bucket(bucket, filename, event, start):
 def process_file(csv_file, event, start):
     lines = {}
     count = 0
-    csv_reader = csv.reader(csv_file)
+    csv_reader = csv.reader(csv_file.split("\n"))
     for line in csv_reader:
         count += 1
         if len(line) == 0:
