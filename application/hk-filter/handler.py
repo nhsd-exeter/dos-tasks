@@ -1,4 +1,5 @@
 from utilities.logging import log_for_audit
+from utilities import message
 from datetime import datetime
 import boto3
 import json
@@ -10,6 +11,7 @@ start = datetime.utcnow()
 
 def request(event, context):
     print("Event: {}".format(event))
+    message.send_start_message({"filename": event["Records"][0]["s3"]["object"]["key"], "env": event["Records"][0]["s3"]["object"]["key"].split("/")[0], "bucket": event["Records"][0]["s3"]["bucket"]["name"]}, start)
     process_event(event)
 
 
@@ -31,6 +33,7 @@ def process_event(event):
             task = filename.split("/")[1].split("_")[1].split(".")[0]
     except Exception as e:
         print("Error Processing Event: {}".format(e))
+        message.send_failure_slack_message({"filename": filename, "env": env, "bucket": bucket}, start)
     else:
         print("Invoking HK {} lambda function for {} environment".format(task, env))
         invoke_hk_lambda(task, filename, env, bucket)
@@ -44,7 +47,8 @@ def invoke_hk_lambda(task, filename, env, bucket):
 
     try:
         response = lambda_client.invoke(FunctionName=function, InvocationType="Event", Payload=json.dumps(payload))
-
         print("Response: {}".format(response))
+        message.send_success_slack_message(payload, start)
     except Exception as e:
         print("Error Invoking Lambda: {}".format(e))
+        message.send_failure_slack_message(payload, start)

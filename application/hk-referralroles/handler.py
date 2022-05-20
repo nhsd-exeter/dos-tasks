@@ -7,6 +7,7 @@ start = datetime.utcnow()
 
 
 def request(event, context):
+    message.send_start_message(event, start)
     print("Event: {}".format(event))
     env = event["env"]
     filename = event["filename"]

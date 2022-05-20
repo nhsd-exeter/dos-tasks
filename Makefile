@@ -6,7 +6,7 @@ include $(abspath $(PROJECT_DIR)/build/automation/init.mk)
 
 build: # Build project - mandatory: TASK=[hk task]
 	make build-image NAME=hk-filter AWS_ECR=$(AWS_LAMBDA_ECR)
-	if [ $(TASK) == 'all' ]; then
+	if [ "$(TASK)" == "all" ]; then
 		for task in $$(echo $(TASKS) | tr "," "\n"); do
 			make build-image NAME="hk-$$task" AWS_ECR=$(AWS_LAMBDA_ECR)
 		done
@@ -39,7 +39,7 @@ test: # Test project
 push: # Push project artefacts to the registry - mandatory: TASK=[hk task]
 	eval "$$(make aws-assume-role-export-variables)"
 	make docker-push NAME=hk-filter AWS_ECR=$(AWS_LAMBDA_ECR)
-	if [ $(TASK) == 'all' ]; then
+	if [ "$(TASK)" == "all" ]; then
 		for task in $$(echo $(TASKS) | tr "," "\n"); do
 			make docker-push NAME="hk-$$task" AWS_ECR=$(AWS_LAMBDA_ECR)
 		done
@@ -50,14 +50,14 @@ push: # Push project artefacts to the registry - mandatory: TASK=[hk task]
 provision: # Provision environment - mandatory: PROFILE=[name], TASK=[hk task]
 	eval "$$(make secret-fetch-and-export-variables)"
 	make terraform-apply-auto-approve STACK=$(STACKS) PROFILE=$(PROFILE)
-	if [ $(TASK) == 'all' ]; then
+	if [ "$(TASK)" == "all" ]; then
 		make terraform-apply-auto-approve STACK=$(TASKS) PROFILE=$(PROFILE)
 	else
 		make terraform-apply-auto-approve STACK=$(TASK) PROFILE=$(PROFILE)
 	fi
 
 unit-test: # Runs unit tests for task - mandatory: TASK=[hk task]
-	if [ $(TASK) == 'all' ]; then
+	if [ "$(TASK)" == "all" ]; then
 		for task in $$(echo $(TASKS) | tr "," "\n"); do
 			make unit-test-task TASK="$$task"
 		done
@@ -76,7 +76,7 @@ unit-test-task: # TODO: Run task unit tests
 
 lambda-alias: ### Updates new lambda version with alias based on commit hash - Mandatory PROFILE=[profile], TASK=[hk task]
 	eval "$$(make aws-assume-role-export-variables)"
-	if [ $(TASK) == 'all' ]; then
+	if [ "$(TASK)" == "all" ]; then
 		for task in $$(echo $(TASKS) | tr "," "\n"); do
 			function=$(SERVICE_PREFIX)-hk-$$task-lambda
 			versions=$$(make -s aws-lambda-get-latest-version NAME=$$function)

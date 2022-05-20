@@ -88,6 +88,41 @@ Start Time: *{start}* | Finish Time: *{finish}* | Duration: *{duration}*""".form
     return requests.post(slack_webhook_url, json.dumps(failure_payload), headers=headers)
 
 
+def send_start_message(event, start):
+    env = event["env"]
+    file = event["filename"]
+    bucket = event["bucket"]
+    start = start.strftime("%Y-%m-%d %H:%M:%S")
+    start_payload = {
+        "attachments": [
+            {
+                "color": "#ffa500",
+                "blocks": [
+                    {"type": "header", "text": {"type": "plain_text", "text": "{} HK Lambda".format(task)}},
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": """Status: Job Starting :trex:
+Project: *uec-dos-tasks* | Environment: *{env}* | Profile: *{profile}*
+Task: *{task}* | File: *{file}* | Bucket: *{bucket}*
+Start Time: *{start}*""".format(
+                                env=env,
+                                profile=profile,
+                                task=task,
+                                file=file,
+                                bucket=bucket,
+                                start=start,
+                            ),
+                        },
+                    },
+                ],
+            }
+        ]
+    }
+    return requests.post(slack_webhook_url, json.dumps(start_payload), headers=headers)
+
+
 def calculate_execution_time(start):
     now = datetime.utcnow()
     finish = now.strftime("%Y-%m-%d %H:%M:%S")
