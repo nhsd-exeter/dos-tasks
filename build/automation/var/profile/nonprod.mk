@@ -14,7 +14,7 @@ AWS_LAMBDA_ECR = $(or $(AWS_ACCOUNT_ID), 000000000000).dkr.ecr.$(AWS_DEFAULT_REG
 
 STACKS := secrets,s3,security-groups,filter
 TASKS := referralroles
-ENVIRONMENT_LIST := ["test","test1","test2","test3","test4","fix","performance","regression"]
+ENVIRONMENT_LIST := ["test","test1","test2","test3","test4","fix","performance","regression","teamb"]
 
 TF_VAR_deployment_secrets := $(DEPLOYMENT_SECRETS)
 TF_VAR_image_version := $(or $(BUILD_TAG), latest)
