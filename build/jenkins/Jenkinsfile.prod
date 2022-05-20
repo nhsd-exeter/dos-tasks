@@ -20,7 +20,6 @@ pipeline {
       when { expression { env.PROFILE == "put" || env.PROFILE == "live" } }
       steps {
         script { sh "make show-configuration" }
-        script { sh "make docker-config" }
       }
     }
 
@@ -53,5 +52,6 @@ pipeline {
   }
   post {
     always { sh "make pipeline-send-notification PIPELINE_NAME='DoS Tasks (Prod)' BUILD_STATUS=${currentBuild.currentResult}" }
+    cleanup { sh "make clean" }
   }
 }

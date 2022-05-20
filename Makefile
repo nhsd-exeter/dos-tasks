@@ -66,7 +66,7 @@ unit-test: # Runs unit tests for task - mandatory: TASK=[hk task]
 	fi
 
 clean: # Clean up project
-
+	make docker-network-remove
 
 # --------------------------------------
 unit-test-task: # TODO: Run task unit tests
