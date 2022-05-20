@@ -23,7 +23,7 @@ def request(event, context):
 
 
 def connect_to_database(env, event, start):
-    db = database.DB
+    db = database.DB()
     logging.log_for_audit("Setting DB connection details")
     if not db.db_set_connection_details(env, event, start):
         message.send_failure_slack_message(event, start)
