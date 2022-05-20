@@ -15,10 +15,10 @@ def request(event, context):
     db_connection = connect_to_database(env, event, start)
     csv_file = retrieve_file_from_bucket(bucket, filename, event, start)
     lines = process_file(csv_file, event, start)
-    for row in lines:
-        if check_table_for_id(db_connection, row, filename, event, start):
-            query, data = generate_db_query(row, event, start)
-            execute_db_query(db_connection, query, data, row)
+    for row, values in lines.items():
+        if check_table_for_id(db_connection, row, values, filename, event, start):
+            query, data = generate_db_query(values, event, start)
+            execute_db_query(db_connection, query, data, row, values)
     cleanup(db_connection, bucket, filename, event, start)
 
 
@@ -54,93 +54,93 @@ def process_file(csv_file, event, start):
     return lines
 
 
-def generate_db_query(row, event, start):
-    if row["action"] == ("CREATE" or "INSERT"):
-        return create_query(row)
-    elif row["action"] == ("UPDATE" or "MODIFY"):
-        return update_query(row)
-    elif row["action"] == ("DELETE" or "REMOVE"):
-        return delete_query(row)
+def generate_db_query(row_values, event, start):
+    if row_values["action"] == ("CREATE" or "INSERT"):
+        return create_query(row_values)
+    elif row_values["action"] == ("UPDATE" or "MODIFY"):
+        return update_query(row_values)
+    elif row_values["action"] == ("DELETE" or "REMOVE"):
+        return delete_query(row_values)
     else:
-        logging.log_for_error("Action {} not in approved list of actions".format(row["action"]))
+        logging.log_for_error("Action {} not in approved list of actions".format(row_values["action"]))
         message.send_failure_slack_message(event, start)
-        raise psycopg2.DatabaseError("Database Action {} is invalid".format(row["action"]))
+        raise psycopg2.DatabaseError("Database Action {} is invalid".format(row_values["action"]))
 
 
-def create_query(row):
+def create_query(row_values):
     query = """
         insert into pathwaysdos.referralroles (id, name) values (%s, %s)
         returning id, name;
     """
     data = (
-        row["id"],
-        row["name"],
+        row_values["id"],
+        row_values["name"],
     )
     return query, data
 
 
-def update_query(row):
+def update_query(row_values):
     query = """
         update pathwaysdos.referralroles set name = (%s) where id = (%s);
     """
     data = (
-        row["id"],
-        row["name"],
+        row_values["id"],
+        row_values["name"],
     )
     return query, data
 
 
-def delete_query(row):
+def delete_query(row_values):
     query = """
         delete from pathwaysdos.referralroles where id = (%s)
     """
-    data = (row["id"],)
+    data = (row_values["id"],)
     return query, data
 
 
-def check_table_for_id(db_connection, line, filename, event, start):
+def check_table_for_id(db_connection, line, values, filename, event, start):
     try:
         with db_connection.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
             select_query = """select * from pathwaysdos.referralroles where id=%s"""
-            cursor.execute(select_query, (line["id"],))
+            cursor.execute(select_query, (values["id"],))
             if cursor.rowcount == 0:
                 record_exists = True
             else:
                 record_exists = False
     except Exception as e:
-        logging.log_for_error("Error checking table referralroles for ID {}. Error: {}".format(line["id"], e))
+        logging.log_for_error("Error checking table referralroles for ID {}. Error: {}".format(values["id"], e))
         message.send_failure_slack_message(event, start)
         raise e
-    if record_exists and line["action"] == ("UPDATE" or "MODIFY" or "DELETE" or "REMOVE"):
+    if record_exists and values["action"] == ("UPDATE" or "MODIFY" or "DELETE" or "REMOVE"):
         return True
-    elif not record_exists and line["action"] == ("CREATE" or "INSERT"):
+    elif not record_exists and values["action"] == ("CREATE" or "INSERT"):
         return True
     else:
         if record_exists:
             logging.log_for_error(
                 "Action {} but the record with ID {} already exists. File: {} | Line: {} | Name: {}".format(
-                    line["action"], line["id"], filename, line.key, line["name"]
+                    values["action"], values["id"], filename, line, values["name"]
                 )
             )
         elif not record_exists:
             logging.log_for_error(
                 "Action {} but the record with ID {} does not exist. File: {} | Line: {} | Name: {}".format(
-                    line["action"], line["id"], filename, line.key, line["name"]
+                    values["action"], values["id"], filename, line, values["name"]
                 )
             )
         return False
 
 
-def execute_db_query(db_connection, query, data, line):
+def execute_db_query(db_connection, query, data, line, values):
     cursor = db_connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
     try:
         cursor.execute(query, data)
         db_connection.commit()
         logging.log_for_audit(
-            "Action: {}, ID: {}, for referralrole {}".format(query["action"], query["id"], query["name"])
+            "Action: {}, ID: {}, for referralrole {}".format(values["action"], values["id"], values["name"])
         )
     except Exception as e:
-        logging.log_for_error("Line {} in transaction failed. Rolling back".format(line.key))
+        logging.log_for_error("Line {} in transaction failed. Rolling back".format(line))
         logging.log_for_error("Error: {}".format(e))
         db_connection.rollback()
     finally:
