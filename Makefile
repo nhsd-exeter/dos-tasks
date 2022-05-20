@@ -4,7 +4,7 @@ include $(abspath $(PROJECT_DIR)/build/automation/init.mk)
 # ==============================================================================
 # Development workflow targets
 
-build: project-config # Build project - mandatory: TASK=[hk task]
+build: # Build project - mandatory: TASK=[hk task]
 	make build-image NAME=hk-filter AWS_ECR=$(AWS_LAMBDA_ECR)
 	if [ $(TASK) == 'all' ]; then
 		for task in $$(echo $(TASKS) | tr "," "\n"); do
