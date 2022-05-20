@@ -14,7 +14,7 @@ variable "project_group_short" {}
 variable "project_name" {}
 variable "project_name_short" {}
 variable "service_tag" {}
-varibale "service_tag_common" {}
+variable "service_tag_common" {}
 variable "project_tag" {}
 variable "profile" {}
 variable "service_prefix" {}

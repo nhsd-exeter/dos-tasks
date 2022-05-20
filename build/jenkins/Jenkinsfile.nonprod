@@ -26,8 +26,8 @@ pipeline {
     stage("Build") {
       when { expression { params.Task != "none" } }
       steps {
-        script { sh "make build TASK=${params.Task}" }
         script { sh "make unit-test TASK=${params.Task}" }
+        script { sh "make build TASK=${params.Task}" }
         script { sh "make push TASK=${params.Task}" }
       }
     }
