@@ -20,7 +20,7 @@ class S3:
 
     @staticmethod
     def upload_file(bucket, file, event, start):
-        upload_location = "{}/archive/{}".format(file.split("/")[1], file.split("/")[2])
+        upload_location = "{}/archive/{}".format(file.split("/")[0], file.split("/")[1])
         try:
             s3_resource.meta.client.upload_file(file, bucket, upload_location)
             return upload_location
@@ -49,7 +49,7 @@ class S3:
 
     @staticmethod
     def put_object(bucket, file, event, start):
-        upload_location = "{}/archive/{}".format(file.split("/")[1], file.split("/")[2])
+        upload_location = "{}/archive/{}".format(file.split("/")[0], file.split("/")[1])
         try:
             response = s3_client.put_object(Bucket=bucket, Key=upload_location, Body=file)
             return response
@@ -66,7 +66,7 @@ class S3:
     def copy_object(bucket, file, event, start):
         try:
             response = s3_client.copy_object(
-                Bucket=bucket, CopySource="{}/{}".format(bucket, file), Key="/archive/{}".format(file)
+                Bucket=bucket, CopySource="{}/{}".format(bucket, file), Key="{}/archive/{}".format(file.split("/")[0], file.split("/")[1])
             )
             return response
         except ClientError as e:

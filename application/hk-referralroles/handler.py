@@ -155,7 +155,7 @@ def cleanup(db_connection, bucket, filename, event, start):
     # Archive file
     s3.S3.copy_object(bucket, filename, event, start)
     s3.S3.delete_object(bucket, filename, event, start)
-    logging.log_for_audit("Archived file {} to /archive/{}".format(filename, filename))
+    logging.log_for_audit("Archived file {} to {}/archive/{}".format(filename, filename.split("/")[0], filename.split("/")[1]))
     # Send Slack Notification
     logging.log_for_audit("Sending slack message...")
     message.send_success_slack_message(event, start)
