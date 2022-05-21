@@ -56,11 +56,11 @@ def process_file(csv_file, event, start):
 
 
 def generate_db_query(row_values, event, start):
-    if row_values["action"] == ("CREATE" or "INSERT"):
+    if row_values["action"] in ("CREATE", "INSERT"):
         return create_query(row_values)
-    elif row_values["action"] == ("UPDATE" or "MODIFY"):
+    elif row_values["action"] in ("UPDATE", "MODIFY"):
         return update_query(row_values)
-    elif row_values["action"] == ("DELETE" or "REMOVE"):
+    elif row_values["action"] in ("DELETE", "REMOVE"):
         return delete_query(row_values)
     else:
         logging.log_for_error("Action {} not in approved list of actions".format(row_values["action"]))
@@ -112,9 +112,9 @@ def check_table_for_id(db_connection, line, values, filename, event, start):
         logging.log_for_error("Error checking table referralroles for ID {}. Error: {}".format(values["id"], e))
         message.send_failure_slack_message(event, start)
         raise e
-    if record_exists and values["action"] == "UPDATE" or "MODIFY" or "DELETE" or "REMOVE":
+    if record_exists and values["action"] in ("UPDATE", "MODIFY", "DELETE", "REMOVE"):
         return True
-    elif not record_exists and values["action"] == "CREATE" or "INSERT":
+    elif not record_exists and values["action"] in ("CREATE", "INSERT"):
         return True
     else:
         if record_exists:

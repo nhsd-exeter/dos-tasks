@@ -11,14 +11,15 @@ start = datetime.utcnow()
 
 def request(event, context):
     print("Event: {}".format(event))
-    message.send_start_message(
-        {
-            "filename": event["Records"][0]["s3"]["object"]["key"],
-            "env": event["Records"][0]["s3"]["object"]["key"].split("/")[0],
-            "bucket": event["Records"][0]["s3"]["bucket"]["name"],
-        },
-        start,
-    )
+    if "archive" not in event["Records"][0]["s3"]["object"]["key"]:
+        message.send_start_message(
+            {
+                "filename": event["Records"][0]["s3"]["object"]["key"],
+                "env": event["Records"][0]["s3"]["object"]["key"].split("/")[0],
+                "bucket": event["Records"][0]["s3"]["bucket"]["name"],
+            },
+            start,
+        )
     process_event(event)
 
 
@@ -32,11 +33,8 @@ def process_event(event):
             )
         print("Filename: {}".format(filename))
         bucket = event["Records"][0]["s3"]["bucket"]["name"]
-        if filename.split("/")[1] == "archive":
+        if "archive" in filename:
             print("Archived file...")
-            message.send_success_slack_message(
-                {"filename": filename, "env": filename.split("/")[0], "bucket": bucket}, start
-            )
             return
         else:
             env = filename.split("/")[0]
