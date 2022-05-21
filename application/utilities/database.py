@@ -26,13 +26,13 @@ class DB:
         if formatted_secrets is not None:
             if db_host_key in formatted_secrets:
                 self.db_host = formatted_secrets[db_host_key]
-                logging.log_for_diagnostics(self.db_host)
+                logging.log_for_diagnostics("Host: {}".format(self.db_host))
             else:
                 connection_details_set = False
                 logging.log_for_diagnostics("No DB_HOST secret var set")
             if db_user_key in formatted_secrets:
                 self.db_user = formatted_secrets[db_user_key]
-                logging.log_for_diagnostics(self.db_user)
+                logging.log_for_diagnostics("User: {}".format(self.db_user))
             else:
                 connection_details_set = False
                 logging.log_for_diagnostics("No DB_USER secret var set")
@@ -43,9 +43,10 @@ class DB:
                 connection_details_set = False
                 logging.log_for_diagnostics("No DB_PASSWORD secret set")
             if profile != "prod" and env != "performance":
-                self.DB_NAME = "pathwaysdos_{}".format(env)
+                self.db_name = "pathwaysdos_{}".format(env)
             else:
-                self.DB_NAME = "pathwaysdos"
+                self.db_name = "pathwaysdos"
+            logging.log_for_diagnostics("DB Name: {}".format(self.db_name))
         else:
             connection_details_set = False
             logging.log_for_diagnostics("Secrets not set")
