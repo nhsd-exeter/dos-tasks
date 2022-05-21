@@ -66,7 +66,9 @@ class S3:
     def copy_object(bucket, file, event, start):
         try:
             response = s3_client.copy_object(
-                Bucket=bucket, CopySource="{}/{}".format(bucket, file), Key="{}/archive/{}".format(file.split("/")[0], file.split("/")[1])
+                Bucket=bucket,
+                CopySource="{}/{}".format(bucket, file),
+                Key="{}/archive/{}".format(file.split("/")[0], file.split("/")[1]),
             )
             return response
         except ClientError as e:

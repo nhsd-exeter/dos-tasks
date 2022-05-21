@@ -85,8 +85,8 @@ def update_query(row_values):
         update pathwaysdos.referralroles set name = (%s) where id = (%s);
     """
     data = (
-        row_values["id"],
         row_values["name"],
+        row_values["id"],
     )
     return query, data
 
@@ -112,9 +112,9 @@ def check_table_for_id(db_connection, line, values, filename, event, start):
         logging.log_for_error("Error checking table referralroles for ID {}. Error: {}".format(values["id"], e))
         message.send_failure_slack_message(event, start)
         raise e
-    if record_exists and values["action"] == ("UPDATE" or "MODIFY" or "DELETE" or "REMOVE"):
+    if record_exists and values["action"] == "UPDATE" or "MODIFY" or "DELETE" or "REMOVE":
         return True
-    elif not record_exists and values["action"] == ("CREATE" or "INSERT"):
+    elif not record_exists and values["action"] == "CREATE" or "INSERT":
         return True
     else:
         if record_exists:
@@ -155,7 +155,9 @@ def cleanup(db_connection, bucket, filename, event, start):
     # Archive file
     s3.S3.copy_object(bucket, filename, event, start)
     s3.S3.delete_object(bucket, filename, event, start)
-    logging.log_for_audit("Archived file {} to {}/archive/{}".format(filename, filename.split("/")[0], filename.split("/")[1]))
+    logging.log_for_audit(
+        "Archived file {} to {}/archive/{}".format(filename, filename.split("/")[0], filename.split("/")[1])
+    )
     # Send Slack Notification
     logging.log_for_audit("Sending slack message...")
     message.send_success_slack_message(event, start)
