@@ -104,7 +104,7 @@ def check_table_for_id(db_connection, line, values, filename, event, start):
         with db_connection.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
             select_query = """select * from pathwaysdos.referralroles where id=%s"""
             cursor.execute(select_query, (values["id"],))
-            if cursor.rowcount == 0:
+            if cursor.rowcount != 0:
                 record_exists = True
             else:
                 record_exists = False

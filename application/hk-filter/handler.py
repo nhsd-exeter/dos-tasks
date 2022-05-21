@@ -34,6 +34,7 @@ def process_event(event):
         bucket = event["Records"][0]["s3"]["bucket"]["name"]
         if filename.split("/")[1] == "archive":
             print("Archived file...")
+            message.send_success_slack_message({"filename": filename, "env": filename.split("/")[0], "bucket": bucket}, start)
             return
         else:
             env = filename.split("/")[0]
@@ -41,6 +42,7 @@ def process_event(event):
     except Exception as e:
         print("Error Processing Event: {}".format(e))
         message.send_failure_slack_message({"filename": filename, "env": env, "bucket": bucket}, start)
+        raise e
     else:
         print("Invoking HK {} lambda function for {} environment".format(task, env))
         invoke_hk_lambda(task, filename, env, bucket)
@@ -59,3 +61,4 @@ def invoke_hk_lambda(task, filename, env, bucket):
     except Exception as e:
         print("Error Invoking Lambda: {}".format(e))
         message.send_failure_slack_message(payload, start)
+        raise e
