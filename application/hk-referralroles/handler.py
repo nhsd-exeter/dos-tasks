@@ -1,5 +1,6 @@
 import csv
 import psycopg2
+import psycopg2.extras
 from utilities import s3, logging, database, message
 from datetime import datetime
 
