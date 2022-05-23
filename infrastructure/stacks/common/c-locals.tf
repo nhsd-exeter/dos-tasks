@@ -15,6 +15,7 @@ locals {
     project_name        = var.project_name
     project_name_short  = var.project_name_short
     service_tag         = var.service_tag
+    service_tag_common  = var.service_tag_common
     project_tag         = var.project_tag
     profile             = var.profile
     service_prefix      = var.service_prefix
@@ -23,8 +24,8 @@ locals {
 
   standard_tags = {
     Programme   = var.programme
-    Service     = "core-dos"
-    Project     = "core-dos"
+    Service     = var.service_tag_common
+    Project     = var.service_tag_common
     Environment = var.profile
   }
 }

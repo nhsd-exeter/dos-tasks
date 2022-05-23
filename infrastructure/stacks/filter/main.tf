@@ -11,6 +11,14 @@ module "filter_lambda" {
   aws_account_id = var.aws_account_id
   service_prefix = var.service_prefix
   tags           = local.standard_tags
+
+  env_vars = {
+    "TASK"              = "filter"
+    "PROFILE"           = var.profile,
+    "SERVICE"           = var.service_tag_common,
+    "SECRET_STORE"      = var.deployment_secrets,
+    "SLACK_WEBHOOK_URL" = var.slack_webhook_url,
+  }
 }
 
 resource "aws_lambda_permission" "hk_bucket_trigger" {

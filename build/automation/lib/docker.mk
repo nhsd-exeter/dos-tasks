@@ -207,6 +207,9 @@ docker-prune: docker-clean ### Clean Docker resources - optional: ALL=true
 	docker network rm $(DOCKER_NETWORK) 2> /dev/null ||:
 	[[ "$(ALL)" =~ ^(true|yes|y|on|1|TRUE|YES|Y|ON)$$ ]] && docker system prune --volumes --all --force ||:
 
+docker-network-remove: ### Remove Docker network
+	docker network rm $(DOCKER_NETWORK) 2> /dev/null ||:
+
 # ==============================================================================
 
 docker-create-dockerfile: ### Create effective Dockerfile - mandatory: NAME; optional FILE=[Dockerfile name, defaults to Dockerfile]

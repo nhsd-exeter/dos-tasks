@@ -52,5 +52,6 @@ pipeline {
   }
   post {
     always { sh "make pipeline-send-notification PIPELINE_NAME='DoS Tasks (Prod)' BUILD_STATUS=${currentBuild.currentResult}" }
+    cleanup { sh "make clean" }
   }
 }
