@@ -7,7 +7,7 @@ secret-get-random-string secret-random: ### Generate random string - optional: L
 	fi
 	echo "$$str"
 
-secret-fetch-and-export-variables: ### Get secret and print variable exports - mandatory: NAME=[secret name]; return: [variables export]
+secret-fetch-and-export-variables: ### Get secret and print variable exports - mandatory: NAME|DEPLOYMENT_SECRETS=[secret name]; return: [variables export]
 	if [ -n "$(NAME)" ] || [ -n "$(DEPLOYMENT_SECRETS)" ]; then
 		# set up
 		eval "$$(make aws-assume-role-export-variables)"

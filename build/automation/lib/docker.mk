@@ -9,16 +9,16 @@ DOCKER_NETWORK = $(PROJECT_GROUP_SHORT)/$(PROJECT_NAME_SHORT)/$(BUILD_ID)
 DOCKER_REGISTRY = $(AWS_ECR)/$(PROJECT_GROUP_SHORT)/$(PROJECT_NAME_SHORT)
 DOCKER_LIBRARY_REGISTRY = nhsd
 
-DOCKER_ALPINE_VERSION = 3.13.5
+DOCKER_ALPINE_VERSION = 3.15.0
 DOCKER_COMPOSER_VERSION = 2.0.13
 DOCKER_CONFIG_LINT_VERSION = v1.6.0
-DOCKER_DIND_VERSION = 20.10.6-dind
-DOCKER_EDITORCONFIG_CHECKER_VERSION = 2.3.5
-DOCKER_ELASTICSEARCH_VERSION = 7.13.0
+DOCKER_DIND_VERSION = 20.10.12-dind
+DOCKER_EDITORCONFIG_CHECKER_VERSION = 2.4.0
+DOCKER_ELASTICSEARCH_VERSION = 7.17.0
 DOCKER_GRADLE_VERSION = 7.0.2-jdk$(JAVA_VERSION)
 DOCKER_LOCALSTACK_VERSION = $(LOCALSTACK_VERSION)
 DOCKER_MAVEN_VERSION = 3.8.1-openjdk-$(JAVA_VERSION)-slim
-DOCKER_NGINX_VERSION = 1.21.0-alpine
+DOCKER_NGINX_VERSION = 1.21.6-alpine
 DOCKER_NODE_VERSION = $(NODE_VERSION)-alpine
 DOCKER_OPENJDK_VERSION = $(JAVA_VERSION)-alpine
 DOCKER_POSTGRES_VERSION = $(POSTGRES_VERSION)-alpine
@@ -79,9 +79,6 @@ docker-build docker-image: ### Build Docker image - mandatory: NAME; optional: V
 		make build __DOCKER_BUILD=true && exit || cd $(PROJECT_DIR)
 	elif [ -d $(DOCKER_DIR)/$(NAME) ] && [ -z "$(__DOCKER_BUILD)" ]; then
 		cd $(DOCKER_DIR)/$(NAME)
-		make build __DOCKER_BUILD=true && exit || cd $(PROJECT_DIR)
-	elif [ -d $(DOCKER_DIR)/hk ] && [ -z "$(__DOCKER_BUILD)" ]; then
-		cd $(DOCKER_DIR)/hk
 		make build __DOCKER_BUILD=true && exit || cd $(PROJECT_DIR)
 	fi
 	# Dockerfile
@@ -206,9 +203,6 @@ docker-prune: docker-clean ### Clean Docker resources - optional: ALL=true
 	docker rmi --force $$(docker images | grep $(DOCKER_LIBRARY_REGISTRY) | awk '{ print $$3 }') 2> /dev/null ||:
 	docker network rm $(DOCKER_NETWORK) 2> /dev/null ||:
 	[[ "$(ALL)" =~ ^(true|yes|y|on|1|TRUE|YES|Y|ON)$$ ]] && docker system prune --volumes --all --force ||:
-
-docker-network-remove: ### Remove Docker network
-	docker network rm $(DOCKER_NETWORK) 2> /dev/null ||:
 
 # ==============================================================================
 
@@ -411,9 +405,9 @@ docker-run-composer: ### Run composer container - mandatory: CMD; optional: DIR,
 
 docker-run-editorconfig: ### Run editorconfig container - optional: DIR=[working directory],EXCLUDE=[file pattern e.g. '\.txt$$'],ARGS=[Docker args],VARS_FILE=[Makefile vars file],IMAGE=[image name],CONTAINER=[container name]
 	if [ $(PROJECT_NAME) = $(DEVOPS_PROJECT_NAME) ]; then
-		exclude='$(shell [ -n "$(EXCLUDE)" ] && echo '$(EXCLUDE)|')markdown|linux-amd64$$|\.drawio|\.p12|\.so$$'
+		exclude='$(shell [ -n "$(EXCLUDE)" ] && echo '$(EXCLUDE)|')markdown|linux-amd64$$|\.drawio|\.p12|\.jks|\.so$$'
 	else
-		exclude='$(shell [ -n "$(EXCLUDE)" ] && echo '$(EXCLUDE)|')build/automation|markdown|linux-amd64$$|\.drawio|\.p12|\.so$$'
+		exclude='$(shell [ -n "$(EXCLUDE)" ] && echo '$(EXCLUDE)|')build/automation|markdown|linux-amd64$$|\.drawio|\.p12|\.jks|\.so$$'
 	fi
 	make docker-config > /dev/null 2>&1
 	image=$$([ -n "$(IMAGE)" ] && echo $(IMAGE) || echo mstruebing/editorconfig-checker:$(DOCKER_EDITORCONFIG_CHECKER_VERSION))
@@ -782,6 +776,11 @@ docker-compose-log: ### Log Docker Compose output - optional: DO_NOT_FOLLOW=true
 	docker-compose --file $$yml \
 		logs $$(echo $(DO_NOT_FOLLOW) | grep -E 'true|yes|y|on|1|TRUE|YES|Y|ON' > /dev/null 2>&1 && : || echo "--follow")
 
+docker-compose-exec: ### Run Docker Compose exec command - mandatory: CMD; optional: YML=[docker-compose.yml, defaults to $(DOCKER_COMPOSE_YML)]
+	yml=$$(make _docker-get-docker-compose-yml YML=$(YML))
+	docker-compose --file $$yml \
+		exec $(CMD)
+
 # ==============================================================================
 
 _docker-get-dir:
@@ -789,8 +788,6 @@ _docker-get-dir:
 		echo $(DOCKER_CUSTOM_DIR)/$(NAME)
 	elif [ -d $(DOCKER_LIB_IMAGE_DIR)/$(NAME) ]; then
 		echo $(DOCKER_LIB_IMAGE_DIR)/$(NAME)
-	elif [ -d $(DOCKER_DIR)/hk ]; then
-		echo $(DOCKER_DIR)/hk
 	else
 		echo $(DOCKER_DIR)/$(NAME)
 	fi
@@ -840,8 +837,8 @@ docker-image-get-digest: ### Get image digest by matching tag pattern - mandato
 		REPO=$$(make _docker-get-reg)/$(NAME) \
 		TAG=$(or $(VERSION), $(TAG))
 
-docker-image-find-and-version-as: ### Find image based on git commit hash and tag it - mandatory: VERSION|TAG=[new version/tag],NAME=[image name]; optional: COMMIT=[git commit hash, defaults to HEAD]
-	commit=$(or $(COMMIT), master)
+docker-image-find-and-version-as: ### Find image based on git commit hash and tag it - mandatory: VERSION|TAG=[new version/tag],NAME=[image name]; optional: COMMIT=[git commit hash, defaults to main]
+	commit=$(or $(COMMIT), $$(make git-branch-get-main-name))
 	hash=$$(make git-commit-get-hash COMMIT=$$commit)
 	digest=$$(make docker-image-get-digest NAME=$(NAME) TAG=$$hash)
 	make docker-pull NAME=$(NAME) DIGEST=$$digest

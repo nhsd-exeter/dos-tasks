@@ -3,9 +3,8 @@ FROM python:latest as base
 # ==============================================================================
 
 FROM base as builder
-ARG PYTHON_BASE_PACKAGES
 ENV \
-    GOSU_VERSION="1.12"
+    GOSU_VERSION="1.14"
 
 RUN set -eux && \
     \
@@ -13,11 +12,10 @@ RUN set -eux && \
     apk add --no-cache \
         ca-certificates \
         dpkg \
-        g++ \
         gnupg \
-        linux-headers \
         wget \
     && \
+    \
     # Get gosu
     dpkgArch="$(dpkg --print-architecture | awk -F- '{ print $NF }')" && \
     wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch" && \
@@ -27,17 +25,12 @@ RUN set -eux && \
     gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu && \
     gpgconf --kill all && \
     rm -rf "$GNUPGHOME" /usr/local/bin/gosu.asc && \
-    chmod +x /usr/local/bin/gosu && \
-    \
-    # Get Python packages
-    mkdir /packages && cd /packages && \
-    pip install --upgrade pip && \
-    pip install --prefix=/packages --no-warn-script-location \
-        $PYTHON_BASE_PACKAGES
+    chmod +x /usr/local/bin/gosu
 
 # ==============================================================================
 
 FROM base
+ARG PYTHON_BASE_PACKAGES
 ENV \
     LANG="C.UTF-8" \
     LC_ALL="C.UTF-8" \
@@ -49,7 +42,6 @@ ENV \
     TZ="UTC"
 
 COPY --from=builder /usr/local/bin/gosu /usr/local/bin/gosu
-COPY --from=builder /packages /usr/local
 COPY assets/ /
 RUN set -eux && \
     \
@@ -58,23 +50,33 @@ RUN set -eux && \
         bash \
         bind-tools \
         ca-certificates \
+        cmake \
         curl \
+        g++ \
         git \
         gnupg \
         graphviz \
         iputils \
+        linux-headers \
         make \
         msttcorefonts-installer \
         net-tools \
         netcat-openbsd \
+        openssl-dev \
         unzip \
         wget \
         zip \
     && \
     update-ms-fonts && \
     \
+    # Get Python packages
+    pip install --upgrade pip && \
+    pip install --no-warn-script-location \
+        $PYTHON_BASE_PACKAGES \
+    && \
+    \
     # Install aws-iam-authenticator
-    curl -o aws-iam-authenticator https://amazon-eks.s3-us-west-2.amazonaws.com/1.19.6/2021-01-05/bin/linux/amd64/aws-iam-authenticator && \
+    curl -o aws-iam-authenticator https://amazon-eks.s3-us-west-2.amazonaws.com/1.21.2/2021-07-05/bin/linux/amd64/aws-iam-authenticator && \
     chmod +x ./aws-iam-authenticator && \
     mv ./aws-iam-authenticator /usr/local/bin/aws-iam-authenticator && \
     \
@@ -89,12 +91,12 @@ RUN set -eux && \
     mv ./jq-linux64 /usr/local/bin/jq && \
     \
     # Install yq
-    curl -LO https://github.com/mikefarah/yq/releases/download/v4.9.3/yq_linux_amd64 && \
+    curl -LO https://github.com/mikefarah/yq/releases/download/v4.20.2/yq_linux_amd64 && \
     chmod +x ./yq_linux_amd64 && \
     mv ./yq_linux_amd64 /usr/local/bin/yq && \
     \
     # Install kubectl
-    curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.21.1/bin/linux/amd64/kubectl && \
+    curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.23.4/bin/linux/amd64/kubectl && \
     chmod +x ./kubectl && \
     mv ./kubectl /usr/local/bin/kubectl && \
     \

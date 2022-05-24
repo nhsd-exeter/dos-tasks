@@ -66,9 +66,13 @@ Clone the repository
     git clone [project-url]
     cd ./[project-dir]
 
-The following is equivalent to the `curl -L bit.ly/make-devops-macos-setup | bash` command
+The following is equivalent to the `curl -L bit.ly/make-devops-macos-setup | bash` command. If that step has already been done it can be omitted at this point
 
     make macos-setup
+
+There are essential configuration options that **must** be set before proceeding any further. As a minimum the following command will ensure that tooling like `docker` and `git` are going to operate as expected, including local secret scanning and code formatting are enabled
+
+    make setup
 
 Please, ask one of your colleagues for the AWS account numbers used by the project. The next command will prompt you to provide them. This information can be sourced from a properly set up project by running `make show-configuration | grep ^AWS_ACCOUNT_ID_`
 
@@ -80,6 +84,7 @@ Generate and trust a self-signed certificate that will be used locally to enable
 
 ### Local Project Setup
 
+    make [? python|java]-virtualenv
     make build
     make start log
     open https://ui.project.local:8443
@@ -88,8 +93,8 @@ Generate and trust a self-signed certificate that will be used locally to enable
 
 Here is the list of the development practices that have to be followed by the team and the individual members:
 
-- Only use single canonical branch **master**. Any intermediate branch significantly increases the maintenance overhead of the repository.
-- Apply the git rebase workflow and never merge from master to a task branch. Follow the **squash-rebase-merge** pattern to keep the history linear and clean.
+- Only use single canonical branch **main**. Any intermediate branch significantly increases the maintenance overhead of the repository.
+- Apply the git rebase workflow and never merge from main to a task branch. Follow the **squash-rebase-merge** pattern to keep the history linear and clean.
 - Cryptographically sign your commits using **gpg** to ensure its content have not been tampered with.
 - Format the summary message of your pull request (merge request) using the following pattern **"JIRA-XXX Summary of the change being made"** for complines and clarity as well as to enable tooling to produce release notes automatically.
 - Announce your PR/MR on the development Slack channel to allow any team member to review it and to share the knowledge. A change can be merged only if all comments have been addressed and it has been **approved by at least one peer**. Make good use of paring/mobbing/swarming practices for collaborative coding.
