@@ -1,5 +1,5 @@
 pipeline {
-  agent { label "jenkins-slave" }
+  agent any
   parameters {
     choice(name: 'Task', choices: ['none', 'all', 'referralroles'], description: 'Select which HK task to deploy')
   }
@@ -14,7 +14,7 @@ pipeline {
     PROFILE = sh(returnStdout: true, script: "make parse-profile-from-tag GIT_TAG=$GIT_TAG").trim()
     TASK = "${params.Task}"
   }
-  triggers { pollSCM(env.BRANCH_NAME == "master" ? "* * * * *" : "") }
+  triggers { pollSCM(env.BRANCH_NAME == "main" ? "* * * * *" : "") }
   stages {
     stage("Show Configuration") {
       when { expression { env.PROFILE == "put" || env.PROFILE == "live" } }

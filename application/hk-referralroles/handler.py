@@ -51,7 +51,7 @@ def process_file(csv_file, event, start):
             logging.log_for_error("Incorrect line format, should be 3 but is {}".format(len(line)))
             message.send_failure_slack_message(event, start)
             raise IndexError("Unexpected data in csv file")
-        lines[str(count)] = {"id": line[0], "name": line[1], "action": line[2]}
+        lines[str(count)] = {"id": int(line[0]), "name": line[1], "action": line[2]}
     return lines
 
 
