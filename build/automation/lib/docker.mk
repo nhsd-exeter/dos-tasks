@@ -80,6 +80,9 @@ docker-build docker-image: ### Build Docker image - mandatory: NAME; optional: V
 	elif [ -d $(DOCKER_DIR)/$(NAME) ] && [ -z "$(__DOCKER_BUILD)" ]; then
 		cd $(DOCKER_DIR)/$(NAME)
 		make build __DOCKER_BUILD=true && exit || cd $(PROJECT_DIR)
+	elif [ -d $(DOCKER_DIR)/hk ] && [ -z "$(__DOCKER_BUILD)" ]; then
+		cd $(DOCKER_DIR)/hk
+		make build __DOCKER_BUILD=true && exit || cd $(PROJECT_DIR)
 	fi
 	# Dockerfile
 	make NAME=$(NAME) \
@@ -203,6 +206,9 @@ docker-prune: docker-clean ### Clean Docker resources - optional: ALL=true
 	docker rmi --force $$(docker images | grep $(DOCKER_LIBRARY_REGISTRY) | awk '{ print $$3 }') 2> /dev/null ||:
 	docker network rm $(DOCKER_NETWORK) 2> /dev/null ||:
 	[[ "$(ALL)" =~ ^(true|yes|y|on|1|TRUE|YES|Y|ON)$$ ]] && docker system prune --volumes --all --force ||:
+
+docker-network-remove: ### Remove Docker network
+	docker network rm $(DOCKER_NETWORK) 2> /dev/null ||:
 
 # ==============================================================================
 
@@ -788,6 +794,8 @@ _docker-get-dir:
 		echo $(DOCKER_CUSTOM_DIR)/$(NAME)
 	elif [ -d $(DOCKER_LIB_IMAGE_DIR)/$(NAME) ]; then
 		echo $(DOCKER_LIB_IMAGE_DIR)/$(NAME)
+	elif [ -d $(DOCKER_DIR)/hk ]; then
+		echo $(DOCKER_DIR)/hk
 	else
 		echo $(DOCKER_DIR)/$(NAME)
 	fi
