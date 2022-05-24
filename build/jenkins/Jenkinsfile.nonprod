@@ -1,5 +1,5 @@
 pipeline {
-  agent { label "jenkins-slave" }
+  agent any
   parameters {
     choice(name: 'Task', choices: ['none', 'all', 'referralroles'], description: 'Select which HK task to deploy')
   }
