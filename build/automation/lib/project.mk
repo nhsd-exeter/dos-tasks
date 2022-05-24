@@ -15,7 +15,6 @@ project-config: ### Configure project environment
 	# Make sure project's SSL certificate is created
 	if [ ! -f $(SSL_CERTIFICATE_DIR)/certificate.pem ]; then
 		make ssl-generate-certificate-project
-		[ $(PROJECT_NAME) != "make-devops" ] && rm -f $(SSL_CERTIFICATE_DIR)/.gitignore
 	fi
 	# Re-configure developer's environment on demand
 	if [ -n "$(_PROJECT_CONFIG_DEV_ENV_TIMESTAMP)" ] && ([ ! -f $(_PROJECT_CONFIG_DEV_ENV_TIMESTAMP_FILE) ] || [ $(_PROJECT_CONFIG_DEV_ENV_TIMESTAMP) -gt $$(cat $(_PROJECT_CONFIG_DEV_ENV_TIMESTAMP_FILE)) ]) && [ $(BUILD_ID) -eq 0 ]; then
@@ -143,9 +142,9 @@ project-list-profiles: ### List all the profiles
 		[ $$profile != local ] && echo $$profile ||:
 	done
 
-project-tag-as-environment-deployment: ### Tag environment deployment - mandatory: ARTEFACT|ARTEFACTS=[comma-separated image names],PROFILE=[profile name]; optional: COMMIT=[git release candidate tag name, defaults to master]
-	[ $(PROFILE) = local ] && (echo "ERROR: Please, specify the PROFILE"; exit 1)
-	commit=$(or $(COMMIT), master)
+project-tag-as-environment-deployment: ### Tag environment deployment - mandatory: ARTEFACT|ARTEFACTS=[comma-separated image names],PROFILE=[profile name]; optional: COMMIT=[git release candidate tag name, defaults to main]
+	[ $(PROFILE) == local ] && (echo "ERROR: Please, specify the PROFILE"; exit 1)
+	commit=$(or $(COMMIT), $$(make git-branch-get-main-name))
 	git_tag=$$(make git-tag-get-environment-deployment COMMIT=$$commit ENVIRONMENT=$(ENVIRONMENT))
 	for image in $$(echo $(or $(ARTEFACTS), $(ARTEFACT)) | tr "," "\n"); do
 		make docker-image-find-and-version-as \

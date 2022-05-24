@@ -4,7 +4,7 @@ TERRAFORM_STATE_STORE = $(or $(TEXAS_TERRAFORM_STATE_STORE), state-store-$(AWS_A
 TERRAFORM_STATE_LOCK = $(or $(TEXAS_TERRAFORM_STATE_LOCK), state-lock-$(AWS_ACCOUNT_NAME))
 TERRAFORM_STATE_KEY = $(PROJECT_GROUP_SHORT)-$(PROJECT_NAME_SHORT)/$(ENVIRONMENT)
 TERRAFORM_STATE_KEY_SHARED = texas
-TERRAFORM_VERSION = $(or $(TEXAS_TERRAFORM_VERSION), 0.13.6)
+TERRAFORM_VERSION = $(or $(TEXAS_TERRAFORM_VERSION), 0.13.7)
 
 # ==============================================================================
 
@@ -105,9 +105,9 @@ terraform-export-variables: ### Get environment variables as TF_VAR_[name] varia
 	make terraform-export-variables-from-shell PATTERN="^(DB|DATABASE|APP|APPLICATION|UI|API|SERVER|HOST|URL)"
 	make terraform-export-variables-from-shell PATTERN="^(PROFILE|ENVIRONMENT|BUILD|PROGRAMME|ORG|SERVICE|PROJECT)"
 
-terraform-export-variables-from-secret: ### Get secret as TF_VAR_[name] variables - mandatory: NAME=[secret name]; return: [variables export]
-	if [ -n "$(NAME)" ]; then
-		secret=$$(make secret-fetch NAME=$(NAME))
+terraform-export-variables-from-secret: ### Get secret as TF_VAR_[name] variables - mandatory: NAME|DEPLOYMENT_SECRETS=[secret name]; return: [variables export]
+	if [ -n "$(NAME)" ] || [ -n "$(DEPLOYMENT_SECRETS)" ]; then
+		secret=$$(make secret-fetch NAME=$(or $(NAME), $(DEPLOYMENT_SECRETS)))
 		exports=$$(make terraform-export-variables-from-json JSON="$$secret")
 		echo "$$exports"
 	fi
@@ -120,14 +120,14 @@ terraform-export-variables-from-shell: ### Convert environment variables as TF_V
 		for str in $$(env | grep -Ei "$(PATTERN)" | sed -e 's/[[:space:]]*$$//' | grep -Ev '^[A-Za-z0-9_]+=$$' | sort | grep -Ev "$$exclude"); do
 			key=$$(cut -d "=" -f1 <<<"$$str" | tr '[:upper:]' '[:lower:]')
 			value=$$(cut -d "=" -f2- <<<"$$str")
-			echo "export TF_VAR_$${key}='$$(echo $${value} | sed -e 's/[[:space:]]/_/g')'"
+			echo "export TF_VAR_$${key}='$$(echo $${value} | sed -e 's/[[:space:]]/_/g' | sed 's/"//g' | sed "s/'//g")'"
 		done
 	fi
 	if [ -n "$(VARS)" ]; then
 		for str in $$(echo "$(VARS)" | sed 's/,/\n/g' | sort); do
 			key=$$(echo "$$str" | tr '[:upper:]' '[:lower:]')
 			value=$$(cut -d "=" -f2- <<<"$$str")
-			echo "export TF_VAR_$${key}='$$(echo $${value} | sed -e 's/[[:space:]]/_/g')'"
+			echo "export TF_VAR_$${key}='$$(echo $${value} | sed -e 's/[[:space:]]/_/g' | sed 's/"//g' | sed "s/'//g")'"
 		done
 	fi
 	IFS=$$OLDIFS
@@ -278,10 +278,10 @@ terraform-check-module-versions: ### Check Terraform module versions alignment
 # ==============================================================================
 
 _terraform-copy-common: # Copies all common terraform files to the desired stack - Mandatory: STACK - name of stack to copy common terraform file into
-	cp $(TERRAFORM_DIR)/common/c-*.tf $(TERRAFORM_DIR)/$(STACK)
+	cp $(TERRAFORM_DIR)/common/common-*.tf $(TERRAFORM_DIR)/$(STACK)
 
 _terraform-remove-common: # Removes all common terraform files from the desired stack - Mandatory: STACK - name of stack to clean up common terraform file from
-	rm -f $(TERRAFORM_DIR)/$(STACK)/c-*.tf
+	rm -f $(TERRAFORM_DIR)/$(STACK)/common-*.tf
 
 # ==============================================================================
 
