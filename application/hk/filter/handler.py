@@ -1,15 +1,15 @@
-from utilities.logging import log_for_audit
-from utilities import message
+from .utilities.logging import log_for_audit
+from .utilities import message
 from datetime import datetime
 import boto3
 import json
 import os
 
 lambda_client = boto3.client("lambda")
-start = datetime.utcnow()
 
 
 def request(event, context):
+    start = datetime.utcnow()
     print("Event: {}".format(event))
     if "archive" not in event["Records"][0]["s3"]["object"]["key"]:
         message.send_start_message(
@@ -20,15 +20,15 @@ def request(event, context):
             },
             start,
         )
-    process_event(event)
+    process_event(event, start)
 
 
-def process_event(event):
+def process_event(event, start):
     try:
         filename = event["Records"][0]["s3"]["object"]["key"]
         if not filename.endswith(".csv"):
             log_for_audit("Incorrect file extension, found: {}, expected: '.csv'".format(filename.split(".")[1]))
-            raise UnicodeDecodeError(
+            raise IOError(
                 "Incorrect file extension, found: {}, expected: '.csv'".format(filename.split(".")[1])
             )
         print("Filename: {}".format(filename))
@@ -41,14 +41,14 @@ def process_event(event):
             task = filename.split("/")[1].split("_")[1].split(".")[0]
     except Exception as e:
         print("Error Processing Event: {}".format(e))
-        message.send_failure_slack_message({"filename": filename, "env": env, "bucket": bucket}, start)
+        # message.send_failure_slack_message({"filename": filename, "env": env, "bucket": bucket}, start)
         raise e
     else:
         print("Invoking HK {} lambda function for {} environment".format(task, env))
-        invoke_hk_lambda(task, filename, env, bucket)
+        invoke_hk_lambda(task, filename, env, bucket, start)
 
 
-def invoke_hk_lambda(task, filename, env, bucket):
+def invoke_hk_lambda(task, filename, env, bucket, start):
     profile = os.environ.get("PROFILE")
     # version = os.environ.get(task)
     payload = {"filename": filename, "env": env, "bucket": bucket}

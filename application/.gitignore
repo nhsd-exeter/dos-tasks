@@ -1,1 +1,4 @@
-# TODO: https://github.com/github/gitignore
+coverage.xml
+.coverage
+**/__pycache__/
+.pytest_cache

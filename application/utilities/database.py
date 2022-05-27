@@ -1,7 +1,7 @@
 import os
 import json
 import psycopg2
-from utilities import secrets, logging, message
+from . import secrets, logging, message
 
 db_host_key = "DB_HOST"
 db_user_key = "DB_USER"

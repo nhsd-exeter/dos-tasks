@@ -1,7 +1,7 @@
 import boto3
 import base64
 from botocore.exceptions import ClientError
-from utilities import message
+from . import message
 
 secrets_client = boto3.client("secretsmanager")
 

@@ -1,6 +1,6 @@
 import boto3
 from botocore.exceptions import ClientError
-from utilities import message, logging
+from . import message, logging
 
 s3_client = boto3.client("s3")
 s3_resource = boto3.resource("s3")
