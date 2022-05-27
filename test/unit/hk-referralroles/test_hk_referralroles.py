@@ -1,7 +1,9 @@
 from unittest.mock import Mock, patch
 import psycopg2
 import pytest
-from .. import handler
+# from .. import handler
+from application.hk.referralroles import handler
+# from _pytest.monkeypatch import MonkeyPatch
 
 file_path = "application.hk.referralroles.handler"
 mock_event = {"filename": "mock_filename", "env": "mock_env", "bucket": "mock_bucket"}
