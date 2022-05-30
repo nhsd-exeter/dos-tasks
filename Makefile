@@ -131,6 +131,15 @@ coverage: ### Run test coverage - mandatory: PROFILE=[profile]
 
 
 # --------------------------------------
+python-code-coverage-html: ### Test Python code with 'coverage' - mandatory: CMD=[test program]; optional: DIR,FILES=[file or pattern],EXCLUDE=[comma-separated list]
+	make docker-run-tools SH=y DIR=$(or $(DIR), $(APPLICATION_DIR_REL)) CMD=" \
+		python -m coverage run \
+			--source=$(or $(FILES), '.') \
+			--omit=*/tests/*,$(EXCLUDE) \
+			$(or $(CMD), -m pytest) && \
+		python -m coverage html \
+	"
+# --------------------------------------
 
 security-scan: ### Fetches container scan report and returns findings - Mandatory PROFILE=[profile], TASK=[hk task], TAG=[image tag]
 	eval "$$(make aws-assume-role-export-variables)"

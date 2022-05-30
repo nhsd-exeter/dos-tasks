@@ -11,6 +11,7 @@ lambda_client = boto3.client("lambda")
 def request(event, context):
     start = datetime.utcnow()
     print("Event: {}".format(event))
+    # TODO if it is archive can't we drop out here and not do process event
     if "archive" not in event["Records"][0]["s3"]["object"]["key"]:
         send_start_message(
             {
@@ -24,6 +25,11 @@ def request(event, context):
     return "HK task filtered successfully"
 
 
+# TODO move the csv check in case a format changes for one ?
+# mave csv check a util method or a separate testable function
+# TODO pass in filename, event and bucket as we already have extracted these so why
+# TODO why repeat the archive check just to throw it out
+#  do it again ?
 def process_event(event, start):
     try:
         filename = event["Records"][0]["s3"]["object"]["key"]
