@@ -1,3 +1,4 @@
+from urllib.parse import non_hierarchical
 import boto3
 import pytest
 from moto import mock_s3, mock_secretsmanager
@@ -11,16 +12,13 @@ from datetime import datetime
 
 sys.path.append(".")
 from .. import handler
+from .. utilities import database, message, s3, secrets
 
 class TestHandler:
-    filename = "sg.csv"
+    filename = "test/sg.csv"
 
-    db_secrets = {
-        "DB_HOST": "localhost",
-        "DB_NAME": "pathwaysdos_dev",
-        "DB_USER": "postgres",
-        "DB_USER_PASSWORD": "postgres",
-    }
+    db_secrets = '{"DB_HOST": "localhost","DB_NAME": "pathwaysdos_dev","DB_USER": "postgres","DB_USER_PASSWORD": "postgres"}'
+
     s3_bucket_name = "nhsd-texasplatform-service"
     secret_name = "placeholder-secret"
 
@@ -227,7 +225,6 @@ class TestHandler:
         csv_dict["csv_zcode"] = False
         csv_dict["action"] = "CREATE"
         query, data = handler.generate_db_query(csv_dict)
-        # query, data = handler.create_query(csv_dict)
         mapping = {ord(c): None for c in remove}
         assert query.translate(mapping) == create_query_string.translate(mapping),"Query syntax mismatched"
         assert data[0] == csv_dict["csv_sgid"]
@@ -244,7 +241,6 @@ class TestHandler:
         csv_dict["csv_zcode"] = False
         csv_dict["action"] = "UPDATE"
         query, data = handler.generate_db_query(csv_dict)
-        # query, data = handler.update_query(csv_dict)
         mapping = {ord(c): None for c in remove}
         assert query.translate(mapping) == update_query_string.translate(mapping),"Query syntax mismatched"
         assert data[0] == csv_dict["csv_name"]
@@ -260,7 +256,6 @@ class TestHandler:
         csv_dict["csv_zcode"] = False
         csv_dict["action"] = "DELETE"
         query, data = handler.generate_db_query(csv_dict)
-        #  query, data = handler.delete_query(csv_dict)
         mapping = {ord(c): None for c in remove}
         assert query.translate(mapping) == delete_query_string.translate(mapping),"Query syntax mismatched"
         assert data[0] == csv_dict["csv_sgid"]
@@ -275,7 +270,95 @@ class TestHandler:
             query, data = handler.generate_db_query(csv_dict)
 
 
-# mock tests below
+# mock tests below -match='must be 0 or None'
+
+    def test_db_connect_fails_to_set_connection_details(self):
+        start = datetime.utcnow()
+        payload = {"filename": "test-file.csv", "env": "unittest", "bucket": "NoSuchBucket"}
+        with pytest.raises(ValueError, match='One or more DB Parameters not found in secrets store'):
+            with mock.patch(database.__name__ + '.DB.db_set_connection_details', return_value=False):
+                with mock.patch(message.__name__ + '.send_failure_slack_message', return_value = None):
+                    handler.connect_to_database("unittest",payload,start)
+
+    def test_db_connect(self):
+        start = datetime.utcnow()
+        payload = {"filename": "test-file.csv", "env": "unittest", "bucket": "NoSuchBucket"}
+        with pytest.raises(Exception):
+            with mock.patch(database.__name__ + '.DB.db_set_connection_details', return_value=True):
+                handler.connect_to_database("unittest",payload,start)
+
+    def test_extract_data_from_file_valid_length(self):
+        csv_file = """2001,"Automated insert String","INSERT"\n"""
+        start = datetime.utcnow()
+        event = {"filename": self.filename, "env": "unittest", "bucket": "test-symptomgroups-bucket"}
+        with mock.patch(message.__name__ + '.send_failure_slack_message', return_value = None):
+            lines = handler.extract_data_from_file(csv_file, event, start)
+            assert len(lines) == 1
+
+    def test_extract_data_from_file_empty_second_line(self):
+        csv_file = """2001,"Automated insert String","INSERT"\n\n"""
+        start = datetime.utcnow()
+        event = {"filename": self.filename, "env": "unittest", "bucket": "test-symptomgroups-bucket"}
+        with mock.patch(message.__name__ + '.send_failure_slack_message', return_value = None):
+            lines = handler.extract_data_from_file(csv_file, event, start)
+            assert len(lines) == 1
+
+    def test_extract_data_from_file_incomplete_second_line(self):
+        csv_file = """2001,"Automated insert String","INSERT"\n \n"""
+        start = datetime.utcnow()
+        event = {"filename": self.filename, "env": "unittest", "bucket": "test-symptomgroups-bucket"}
+        with pytest.raises(IndexError, match="Unexpected data in csv file"):
+            with mock.patch(message.__name__ + '.send_failure_slack_message', return_value = None):
+                lines = handler.extract_data_from_file(csv_file, event, start)
+                assert len(lines) == 1
+
+    @mock.patch("psycopg2.connect")
+    def test_execute_db_query(self, mock_db_connect):
+        line = """2001,"New Symptom Group","INSERT"\n"""
+        data = ("New Symptom Group", "None", 2001)
+        values = {}
+        values["action"] = "Update"
+        values['id'] = 2001
+        values['name'] = "New Symptom Group"
+        mock_db_connect.cursor.return_value.__enter__.return_value.rowcount = 1
+        query = """update pathwaysdos.symptomgroups set name = (%s), zcodeexists = (%s)
+            where id = (%s);"""
+        handler.execute_db_query(mock_db_connect, query, data, line, values)
+
+    @mock.patch("psycopg2.connect")
+    def test_process_extracted_data(self,mock_db_connect):
+        row_data = {}
+        csv_dict = {}
+        csv_dict["csv_sgid"] = self.csv_sg_id
+        csv_dict["csv_name"] = self.csv_sg_desc
+        csv_dict["csv_zcode"] = False
+        csv_dict["action"] = "DELETE"
+        row_data[0]=csv_dict
+        mock_db_connect.cursor.return_value.__enter__.return_value.rowcount = 1
+        handler.process_extracted_data(mock_db_connect, row_data)
+
+    @mock.patch("psycopg2.connect")
+    def test_process_extracted_data_error(self,mock_db_connect):
+        row_data = {}
+        csv_dict = {}
+        csv_dict["csv_sgid"] = self.csv_sg_id
+        csv_dict["csv_name"] = self.csv_sg_desc
+        csv_dict["csv_zcode"] = False
+        csv_dict["action"] = "DELETE"
+        row_data[0]=csv_dict
+        mock_db_connect = ""
+        with pytest.raises(Exception):
+            handler.process_extracted_data(mock_db_connect, row_data)
+
+    @mock_s3
+    def test_get_csv_from_s3(self):
+        # 1.Prep
+        start = datetime.utcnow()
+        event = {"filename": self.filename, "env": "unittest", "bucket": "test-symptomgroups-bucket"}
+        with mock.patch(s3.__name__ + '.S3.get_object', return_value=None):
+            csv_file = handler.retrieve_file_from_bucket("test-symptomgroups-bucket", self.filename,event,start)
+            assert csv_file == None
+
     @mock.patch("psycopg2.connect")
     def test_record_exists(self, mock_db_connect):
         csv_dict = {}
@@ -284,7 +367,7 @@ class TestHandler:
         csv_dict["action"] = "DELETE"
         csv_dict["csv_zcode"] = None
         mock_db_connect.cursor.return_value.__enter__.return_value.rowcount = 1
-        assert handler.record_exists(mock_db_connect,csv_dict)
+        assert handler.does_record_exist(mock_db_connect,csv_dict)
 
     @mock.patch("psycopg2.connect")
     def test_record_does_not_exist(self, mock_db_connect):
@@ -294,7 +377,7 @@ class TestHandler:
         csv_dict["action"] = "DELETE"
         csv_dict["csv_zcode"] = None
         mock_db_connect.cursor.return_value.__enter__.return_value.rowcount = 0
-        assert not handler.record_exists(mock_db_connect,csv_dict)
+        assert not handler.does_record_exist(mock_db_connect,csv_dict)
 
     @mock.patch("psycopg2.connect")
     def test_record_does_exception(self, mock_db_connect):
@@ -305,5 +388,63 @@ class TestHandler:
         csv_dict["csv_zcode"] = None
         mock_db_connect = ""
         with pytest.raises(Exception):
-            handler.record_exists(mock_db_connect,csv_dict)
+            handler.does_record_exist(mock_db_connect,csv_dict)
 
+    @mock.patch("psycopg2.connect")
+    def test_cleanup(self,mock_db_connect):
+        filename = 'test/mock-test.csv'
+        start = datetime.utcnow()
+        bucket = "NoSuchBucket"
+        event = {"filename": self.filename, "env": "unittest", "bucket": bucket}
+        mock_db_connect.cursor.return_value.__enter__.return_value.rowcount = 0
+        with mock.patch(s3.__name__ + '.S3.copy_object', return_value=None):
+            with mock.patch(s3.__name__ + '.S3.delete_object', return_value=None):
+                with mock.patch(message.__name__ + '.send_success_slack_message', return_value = None):
+                    handler.cleanup(mock_db_connect, bucket, filename, event, start)
+
+    # @mock.patch("psycopg2.connect")
+    # @mock_secretsmanager
+    # @mock.patch("boto3.Session")
+    # @mock.patch.dict(os.environ, {"AWS_REGION": "eu-west-2", "SECRETS_NAME": secret_name})
+    def test_handler(self):
+        # 1. Prep
+        # create a mock s3 bucket and load file
+        # self.add_file_to_s3_bucket(self.filename)
+        # create mock event
+        payload = {"filename": self.filename, "env": "unittest", "bucket": "NoSuchBucket"}
+        # session = boto3.session.Session()
+        # secrets_client = session.client(service_name="secretsmanager", region_name="eu-west-2")
+        # secrets_client.create_secret(Name=self.secret_name, SecretString=json.dumps(self.db_secrets))
+        # 2. Act
+        with pytest.raises(Exception):
+            with mock.patch(database.__name__ + '.DB.db_set_connection_details', return_value=True):
+                with mock.patch(message.__name__ + '.send_failure_slack_message', return_value = None):
+                    with mock.patch(message.__name__ + '.send_start_message', return_value = None):
+                        with mock.patch(s3.__name__ + '.S3.get_object', return_value=None):
+                            with mock.patch(secrets.__name__ + '.SECRETS.get_secret_value', return_value = json.dumps(self.db_secrets)):
+                                response = handler.request(event=payload, context=None)
+
+    # @mock_secretsmanager
+    # @mock.patch.dict(os.environ, {"AWS_REGION": "eu-west-2", "SECRETS_NAME": secret_name})
+    # @mock.patch("boto3.Session")
+    @mock.patch("psycopg2.connect")
+    def test_handler_pass(self,mock_db_connect):
+        # 1. Prep
+        # create a mock s3 bucket and load file
+        # self.add_file_to_s3_bucket(self.filename)
+        # create mock event
+        payload = {"filename": self.filename, "env": "unittest", "bucket": "NoSuchBucket"}
+        # session = boto3.session.Session()
+        # secrets_client = session.client(service_name="secretsmanager", region_name="eu-west-2")
+        # secrets_client.create_secret(Name=self.secret_name, SecretString=json.dumps(self.db_secrets))
+        # 2. Act
+        mock_db_connect.cursor.return_value.__enter__.return_value.rowcount = 1
+        with mock.patch(database.__name__ + '.DB.db_set_connection_details', return_value=True):
+            with mock.patch(message.__name__ + '.send_failure_slack_message', return_value = None):
+                with mock.patch(message.__name__ + '.send_start_message', return_value = None):
+                    with mock.patch(s3.__name__ + '.S3.get_object', return_value="""2001,"New Symptom Group","UPDATE"\n"""):
+                        with mock.patch(secrets.__name__ + '.SECRETS.get_secret_value', return_value = 'SecretString=' + json.dumps(self.db_secrets)):
+                            with mock.patch(s3.__name__ + '.S3.copy_object', return_value=None):
+                                with mock.patch(s3.__name__ + '.S3.delete_object', return_value=None):
+                                    with mock.patch(message.__name__ + '.send_success_slack_message', return_value = None):
+                                        handler.request(event=payload, context=None)

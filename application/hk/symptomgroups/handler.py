@@ -35,7 +35,7 @@ def connect_to_database(env, event, start):
     if not db.db_set_connection_details(env, event, start):
         log_for_error(log_prefix, "Error DB Paramater(s) not found in secrets store.")
         message.send_failure_slack_message(event, start)
-        raise ValueError("DB Paramater(s) not found in secrets store")
+        raise ValueError("One or more DB Parameters not found in secrets store")
     return db.db_connect(event, start)
 
 
@@ -51,26 +51,26 @@ def extract_data_from_file(csv_file, event, start):
     csv_reader = csv.reader(csv_file.split("\n"))
     for line in csv_reader:
         count += 1
-        query_data = extract_query_data_from_csv(line)
-        if len(query_data) == 0:
-            continue
-        if len(query_data) != data_column_count:
-            log_for_error(
-                log_prefix,
-                "Problem constructing data from csv expecting {} items but have {}".format(
-                    str(data_column_count), str(len(query_data))
-                ),
-            )
-            message.send_failure_slack_message(event, start)
-            raise IndexError("Unexpected data in csv file")
-        lines[str(count)] = {"id": int(line[0]), "name": line[1], "action": line[2]}
+        if len(line) > 0:
+            query_data = extract_query_data_from_csv(line)
+            if len(query_data) != data_column_count:
+                log_for_error(
+                    log_prefix,
+                    "Problem constructing data from csv expecting {} items but have {}".format(
+                        str(data_column_count), str(len(query_data))
+                    ),
+                )
+                message.send_failure_slack_message(event, start)
+                raise IndexError("Unexpected data in csv file")
+            lines[str(count)] = query_data
     return lines
 
 
 def process_extracted_data(db_connection, row_data):
     for row_number, row_values in row_data.items():
         try:
-            if record_exists(db_connection, row_values) and valid_action(record_exists, row_values):
+            record_exists = does_record_exist(db_connection, row_values)
+            if valid_action(record_exists, row_values):
                 query, data = generate_db_query(row_values)
                 execute_db_query(db_connection, query, data, row_number, row_values)
         except Exception as e:
@@ -97,7 +97,7 @@ def valid_action(record_exists, row_data):
     return valid_action
 
 
-def record_exists(db, row_dict):
+def does_record_exist(db, row_dict):
     """
     Checks to see if symptom group already exists in db with the id
     """
@@ -212,7 +212,7 @@ def execute_db_query(db_connection, query, data, line, values):
 
 def cleanup(db_connection, bucket, filename, event, start):
     # Close DB connection
-    log_for_audit("Closing DB connection...")
+    log_for_audit(log_prefix,"Closing DB connection...")
     db_connection.close()
     # Archive file
     s3.S3.copy_object(bucket, filename, event, start)
