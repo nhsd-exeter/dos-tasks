@@ -4,9 +4,10 @@ import psycopg2.extras
 from utilities import s3, logger, database, message
 from datetime import datetime
 
+start = datetime.utcnow()
+
 
 def request(event, context):
-    start = datetime.utcnow()
     message.send_start_message(event, start)
     print("Event: {}".format(event))
     env = event["env"]
