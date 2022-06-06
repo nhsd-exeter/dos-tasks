@@ -212,7 +212,7 @@ def execute_db_query(db_connection, query, data, line, values):
 
 def cleanup(db_connection, bucket, filename, event, start):
     # Close DB connection
-    log_for_audit(log_prefix,"Closing DB connection...")
+    log_for_audit(log_prefix, "Closing DB connection...")
     db_connection.close()
     # Archive file
     s3.S3.copy_object(bucket, filename, event, start)
