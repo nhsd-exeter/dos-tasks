@@ -22,11 +22,12 @@ module "filter_lambda" {
 }
 
 resource "aws_lambda_permission" "hk_bucket_trigger" {
-  statement_id  = "AllowExecutionFromS3Bucket"
-  action        = "lambda:InvokeFunction"
-  function_name = module.filter_lambda.lambda_arn
-  principal     = "s3.amazonaws.com"
-  source_arn    = data.terraform_remote_state.s3.outputs.s3_bucket_arn
+  statement_id   = "AllowExecutionFromS3Bucket"
+  action         = "lambda:InvokeFunction"
+  function_name  = module.filter_lambda.lambda_arn
+  principal      = "s3.amazonaws.com"
+  source_account = var.aws_account_id
+  source_arn     = data.terraform_remote_state.s3.outputs.s3_bucket_arn
 }
 
 resource "aws_s3_bucket_notification" "hk_bucket_notification" {

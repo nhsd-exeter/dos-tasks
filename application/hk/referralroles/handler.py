@@ -20,15 +20,16 @@ def request(event, context):
             query, data = generate_db_query(values, event, start)
             execute_db_query(db_connection, query, data, row, values)
     cleanup(db_connection, bucket, filename, event, start)
+    return "Referral Roles execution successful"
 
 
 def connect_to_database(env, event, start):
     db = database.DB()
     logging.log_for_audit("Setting DB connection details")
     if not db.db_set_connection_details(env, event, start):
-        logging.log_for_error("Error DB Paramater(s) not found in secrets store.")
+        logging.log_for_error("Error DB Parameter(s) not found in secrets store.")
         message.send_failure_slack_message(event, start)
-        raise ValueError("DB Paramater(s) not found in secrets store")
+        raise ValueError("DB Parameter(s) not found in secrets store")
     return db.db_connect(event, start)
 
 
@@ -50,7 +51,7 @@ def process_file(csv_file, event, start):
             logging.log_for_error("Incorrect line format, should be 3 but is {}".format(len(line)))
             message.send_failure_slack_message(event, start)
             raise IndexError("Unexpected data in csv file")
-        lines[str(count)] = {"id": int(line[0]), "name": line[1], "action": line[2]}
+        lines[str(count)] = {"id": line[0], "name": line[1], "action": line[2]}
     return lines
 
 
@@ -160,3 +161,4 @@ def cleanup(db_connection, bucket, filename, event, start):
     # Send Slack Notification
     logging.log_for_audit("Sending slack message...")
     message.send_success_slack_message(event, start)
+    return "Cleanup Successful"

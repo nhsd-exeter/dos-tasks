@@ -1,3 +1,4 @@
+
 PROJECT_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 include $(abspath $(PROJECT_DIR)/build/automation/init.mk)
 
@@ -57,6 +58,7 @@ provision: # Provision environment - mandatory: PROFILE=[name], TASK=[hk task]
 	fi
 
 unit-test: # Runs unit tests for task - mandatory: TASK=[hk task]
+	make unit-test-utilities
 	make unit-test-task TASK=filter
 	if [ "$(TASK)" == "all" ]; then
 		for task in $$(echo $(TASKS) | tr "," "\n"); do
@@ -81,6 +83,63 @@ unit-test-task: # Run task unit tests - mandatory: TASK=[name of task]
 	make docker-run-tools CMD="python3 -m pytest application/hk/$(TASK)/test/test_hk_$(TASK).py"
 	rm -rf $(APPLICATION_DIR)/hk/$(TASK)/test
 	rm -rf $(APPLICATION_DIR)/hk/$(TASK)/utilities
+
+unit-test-utilities: # Run utilities unit tests
+	rm -rf $(APPLICATION_DIR)/utilities/test
+	mkdir $(APPLICATION_DIR)/utilities/test
+	cp $(APPLICATION_TEST_DIR)/unit/utilities/* $(APPLICATION_DIR)/utilities/test
+	make docker-run-tools CMD="python3 -m pytest application/utilities/test/"
+	rm -rf $(APPLICATION_DIR)/utilities/test
+
+coverage: ### Run test coverage - mandatory: PROFILE=[profile]
+	tasks=$(TASKS),filter
+	for task in $$(echo $$tasks | tr "," "\n"); do
+		rm -rf $(APPLICATION_DIR)/hk/$$task/test
+		rm -rf $(APPLICATION_DIR)/hk/$$task/utilities
+		mkdir $(APPLICATION_DIR)/hk/$$task/test
+		mkdir $(APPLICATION_DIR)/hk/$$task/utilities
+		cp $(APPLICATION_TEST_DIR)/unit/hk-$$task/* $(APPLICATION_DIR)/hk/$$task/test
+		cp $(APPLICATION_DIR)/utilities/*.py $(APPLICATION_DIR)/hk/$$task/utilities
+	done
+	rm -rf $(APPLICATION_DIR)/utilities/test
+	mkdir $(APPLICATION_DIR)/utilities/test
+	cp $(APPLICATION_TEST_DIR)/unit/utilities/* $(APPLICATION_DIR)/utilities/test
+	make python-code-coverage EXCLUDE=*/test/*,hk/*/utilities/* ARGS="--env TASK=utilities --env SLACK_WEBHOOK_URL=https://slackmockurl.com/ --env PROFILE=local"
+	for task in $$(echo $$tasks | tr "," "\n"); do
+		rm -rf $(APPLICATION_DIR)/hk/$$task/test
+		rm -rf $(APPLICATION_DIR)/hk/$$task/utilities
+	done
+	rm -rf $(APPLICATION_DIR)/utilities/test
+
+
+# --------------------------------------
+
+security-scan: ### Fetches container scan report and returns findings - Mandatory PROFILE=[profile], TASK=[hk task], TAG=[image tag]
+	eval "$$(make aws-assume-role-export-variables)"
+	scan=$$(make -s aws-describe-image-scan TASK=$(TASK) TAG=$(TAG))
+	findings=$$(echo $$scan | make -s docker-run-tools CMD="jq '.imageScanFindings.findingSeverityCounts'" | tr -d '"')
+	echo $$findings
+	vulnerabilities=0
+	for level in $$(echo $(VULNERABILITY_LEVEL) | tr "," "\n"); do
+		if grep -q "$$level" <<< "$$findings"; then
+			vulnerabilities=1
+			break
+		fi
+	done
+	if [ $$vulnerabilities -gt 0 ]; then
+		echo false
+	else
+		echo true
+	fi
+
+
+aws-describe-image-scan: ### Describesr ECR image scan report - Mandatory PROFILE=[profile], TASK=[hk task], TAG=[image tag]
+		make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
+		$(AWSCLI) ecr describe-image-scan-findings \
+			--repository-name $(PROJECT_GROUP_SHORT)/$(PROJECT_NAME_SHORT)/hk-$(TASK) \
+			--image-id imageTag=$(TAG) \
+			--output json \
+		"
 
 # --------------------------------------
 

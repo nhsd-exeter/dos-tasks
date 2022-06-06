@@ -5,7 +5,7 @@ import json
 
 slack_webhook_url = os.environ.get("SLACK_WEBHOOK_URL")
 profile = os.environ.get("PROFILE")
-task = os.environ.get("TASK").capitalize()
+task = os.environ.get("TASK")
 headers = {"Content-type": "application/json"}
 
 # Email Function (Include template CR for prod)
@@ -23,7 +23,7 @@ def send_success_slack_message(event, start):
             {
                 "color": "#0def42",
                 "blocks": [
-                    {"type": "header", "text": {"type": "plain_text", "text": "{} HK Lambda".format(task)}},
+                    {"type": "header", "text": {"type": "plain_text", "text": "{} HK Lambda".format(task.capitalize())}},
                     {
                         "type": "section",
                         "text": {
@@ -61,7 +61,7 @@ def send_failure_slack_message(event, start):
             {
                 "color": "#dc3d2a",
                 "blocks": [
-                    {"type": "header", "text": {"type": "plain_text", "text": "{} HK Lambda".format(task)}},
+                    {"type": "header", "text": {"type": "plain_text", "text": "{} HK Lambda".format(task.capitalize())}},
                     {
                         "type": "section",
                         "text": {
@@ -98,7 +98,7 @@ def send_start_message(event, start):
             {
                 "color": "#ffa500",
                 "blocks": [
-                    {"type": "header", "text": {"type": "plain_text", "text": "{} HK Lambda".format(task)}},
+                    {"type": "header", "text": {"type": "plain_text", "text": "{} HK Lambda".format(task.capitalize())}},
                     {
                         "type": "section",
                         "text": {
@@ -126,5 +126,5 @@ Start Time: *{start}*""".format(
 def calculate_execution_time(start):
     now = datetime.utcnow()
     finish = now.strftime("%Y-%m-%d %H:%M:%S")
-    duration = now - start
+    duration = str(now - start).split(".")[0]
     return finish, duration
