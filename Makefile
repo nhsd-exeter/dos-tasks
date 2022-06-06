@@ -6,13 +6,13 @@ include $(abspath $(PROJECT_DIR)/build/automation/init.mk)
 # Development workflow targets
 
 build: # Build project - mandatory: TASK=[hk task]
-	make build-image NAME=hk-filter AWS_ECR=$(AWS_LAMBDA_ECR)
+	make build-image NAME=filter AWS_ECR=$(AWS_LAMBDA_ECR)
 	if [ "$(TASK)" == "all" ]; then
 		for task in $$(echo $(TASKS) | tr "," "\n"); do
-			make build-image NAME="hk-$$task" AWS_ECR=$(AWS_LAMBDA_ECR)
+			make build-image NAME="$$task" AWS_ECR=$(AWS_LAMBDA_ECR)
 		done
 	else
-		make build-image NAME=hk-$(TASK) AWS_ECR=$(AWS_LAMBDA_ECR)
+		make build-image NAME=$(TASK) AWS_ECR=$(AWS_LAMBDA_ECR)
 	fi
 
 build-image: # Builds images - mandatory: NAME=[hk name]
