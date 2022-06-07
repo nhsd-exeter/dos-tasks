@@ -1,4 +1,3 @@
-import os
 import pytest
 import json
 from moto import mock_secretsmanager
