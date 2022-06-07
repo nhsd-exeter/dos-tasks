@@ -4,6 +4,10 @@ import pytest
 from .. import handler
 
 file_path = "application.hk.referralroles.handler"
+mock_event = {"filename": "mock_filename", "env": "mock_env", "bucket": "mock_bucket"}
+mock_context = ""
+mock_env = "mock_env"
+start = ""
 
 
 @patch(f"{file_path}.connect_to_database", return_value="db_connection")
@@ -15,8 +19,6 @@ file_path = "application.hk.referralroles.handler"
 @patch(f"{file_path}.cleanup")
 @patch(f"{file_path}.message.send_start_message")
 def test_request_success_with_check_table_for_id_is_true(mock_send_start_message, mock_cleanup, mock_execute_db_query, mock_generate_db_query, mock_check_table_for_id, mock_process_file, mock_retrieve_file_from_bucket, mock_db_connection):
-    mock_event = {"filename": "mock_filename", "env": "mock_env", "bucket": "mock_bucket"}
-    mock_context = ""
     result = handler.request(mock_event, mock_context)
     assert result == "Referral Roles execution successful"
     mock_send_start_message.assert_called_once()
@@ -38,8 +40,6 @@ def test_request_success_with_check_table_for_id_is_true(mock_send_start_message
 @patch(f"{file_path}.cleanup")
 @patch(f"{file_path}.message.send_start_message")
 def test_request_success_with_check_table_for_id_is_false(mock_send_start_message, mock_cleanup, mock_execute_db_query, mock_generate_db_query, mock_check_table_for_id, mock_process_file, mock_retrieve_file_from_bucket, mock_db_connection):
-    mock_event = {"filename": "mock_filename", "env": "mock_env", "bucket": "mock_bucket"}
-    mock_context = ""
     result = handler.request(mock_event, mock_context)
     assert result == "Referral Roles execution successful"
     mock_send_start_message.assert_called_once()
@@ -96,9 +96,6 @@ def test_delete_query():
 def test_connect_to_database_success(mock_db_object):
     mock_db_object().db_set_connection_details = Mock(return_value=True)
     mock_db_object().db_connect = Mock(return_value="Connection Established")
-    mock_env = ""
-    mock_event = ""
-    start = ""
     result = handler.connect_to_database(mock_env, mock_event, start)
     assert result == "Connection Established"
     mock_db_object().db_set_connection_details.assert_called_once()
@@ -109,34 +106,27 @@ def test_connect_to_database_success(mock_db_object):
 @patch(f"{file_path}.database.DB")
 def test_connect_to_database_returns_error(mock_db_object, mock_send_failure_slack_message):
     mock_db_object().db_set_connection_details = Mock(return_value=False)
-    mock_env = ""
-    mock_event = ""
-    start = ""
     with pytest.raises(ValueError) as assertion:
         result = handler.connect_to_database(mock_env, mock_event, start)
-        assert str(assertion.value) == "DB Parameter(s) not found in secrets store"
+    assert str(assertion.value) == "DB Parameter(s) not found in secrets store"
     mock_db_object().db_set_connection_details.assert_called_once()
     mock_send_failure_slack_message.assert_called_once()
 
 
 @patch(f"{file_path}.s3.S3")
 def test_retrieve_file_from_bucket(mock_s3_object):
-    mock_s3_object.get_object = Mock(return_value="Object returned")
+    mock_s3_object().get_object = Mock(return_value="Object returned")
     mock_bucket = ""
     mock_filename = ""
-    mock_event = ""
-    start = ""
     result = handler.retrieve_file_from_bucket(mock_bucket, mock_filename, mock_event, start)
     assert result == "Object returned"
-    mock_s3_object.get_object.assert_called_once()
+    mock_s3_object().get_object.assert_called_once()
 
 
 def test_process_file_success():
     mock_csv_file = """001,"Mock Create Role","CREATE"
 002,"Mock Update Role","UPDATE"
 003,"Mock Delete Role","DELETE"""
-    mock_event = ""
-    start = ""
     lines = handler.process_file(mock_csv_file, mock_event, start)
     assert lines == {"1": {"id": "001", "name": "Mock Create Role", "action": "CREATE"},
                     "2": {"id": "002", "name": "Mock Update Role", "action": "UPDATE"},
@@ -150,8 +140,6 @@ def test_process_file_success_with_empty_line():
 002,"Mock Update Role","UPDATE"
 003,"Mock Delete Role","DELETE"
 """
-    mock_event = ""
-    start = ""
     lines = handler.process_file(mock_csv_file, mock_event, start)
     assert lines == {"2": {"id": "001", "name": "Mock Create Role", "action": "CREATE"},
                     "4": {"id": "002", "name": "Mock Update Role", "action": "UPDATE"},
@@ -165,11 +153,9 @@ def test_process_file_raises_error_with_incorrect_line_format(mock_send_failure_
 002,"Mock Update Role","UPDATE"
 003,"Mock Delete Role","DELETE"
     """
-    mock_event = ""
-    start = ""
     with pytest.raises(IndexError) as assertion:
         lines = handler.process_file(mock_csv_file, mock_event, start)
-        assert str(assertion.value) == "Unexpected data in csv file"
+    assert str(assertion.value) == "Unexpected data in csv file"
     mock_send_failure_slack_message.assert_called_once()
 
 
@@ -178,8 +164,6 @@ def test_process_file_raises_error_with_incorrect_line_format(mock_send_failure_
 @patch(f"{file_path}.delete_query", return_value="Delete Query")
 def test_generate_db_query_create(mock_delete_query, mock_update_query, mock_create_query):
     mock_row_values = {"id": "001", "name": "Mock Create Role", "action": "CREATE"}
-    mock_event = ""
-    start = ""
     result = handler.generate_db_query(mock_row_values, mock_event, start)
     assert result == "Create Query"
     mock_delete_query.assert_not_called()
@@ -191,8 +175,6 @@ def test_generate_db_query_create(mock_delete_query, mock_update_query, mock_cre
 @patch(f"{file_path}.delete_query", return_value="Delete Query")
 def test_generate_db_query_update(mock_delete_query, mock_update_query, mock_create_query):
     mock_row_values = {"id": "002", "name": "Mock Update Role", "action": "UPDATE"}
-    mock_event = ""
-    start = ""
     result = handler.generate_db_query(mock_row_values, mock_event, start)
     assert result == "Update Query"
     mock_delete_query.assert_not_called()
@@ -205,8 +187,6 @@ def test_generate_db_query_update(mock_delete_query, mock_update_query, mock_cre
 @patch(f"{file_path}.delete_query", return_value="Delete Query")
 def test_generate_db_query_delete(mock_delete_query, mock_update_query, mock_create_query):
     mock_row_values = {"id": "003", "name": "Mock Delete Role", "action": "DELETE"}
-    mock_event = ""
-    start = ""
     result = handler.generate_db_query(mock_row_values, mock_event, start)
     assert result == "Delete Query"
     mock_delete_query.assert_called_once_with(mock_row_values)
@@ -220,11 +200,9 @@ def test_generate_db_query_delete(mock_delete_query, mock_update_query, mock_cre
 @patch(f"{file_path}.message.send_failure_slack_message")
 def test_generate_db_query_raises_error(mock_send_failure_slack_message, mock_delete_query, mock_update_query, mock_create_query):
     mock_row_values = {"id": "001", "name": "Mock Create Role", "action": "UNKNOWN"}
-    mock_event = ""
-    start = ""
     with pytest.raises(psycopg2.DatabaseError) as assertion:
         result = handler.generate_db_query(mock_row_values, mock_event, start)
-        assert str(assertion.value) == "Database Action UNKNOWN is invalid"
+    assert str(assertion.value) == "Database Action UNKNOWN is invalid"
     mock_send_failure_slack_message.assert_called_once_with(mock_event, start)
     mock_delete_query.assert_not_called()
     mock_update_query.assert_not_called()
@@ -238,8 +216,6 @@ def test_check_table_for_id_create_success(mock_db_connect):
     mock_line = "1"
     mock_values = {"id": "001", "name": "Mock Create Role", "action": "CREATE"}
     mock_filename = ""
-    mock_event = ""
-    start = ""
     result = handler.check_table_for_id(mock_db_connect, mock_line, mock_values, mock_filename, mock_event, start)
     assert result == True
     mock_db_connect.cursor().__enter__().execute.assert_called_once()
@@ -251,8 +227,6 @@ def test_check_table_for_id_update_success(mock_db_connect):
     mock_line = "2"
     mock_values = {"id": "002", "name": "Mock Update Role", "action": "UPDATE"}
     mock_filename = ""
-    mock_event = ""
-    start = ""
     result = handler.check_table_for_id(mock_db_connect, mock_line, mock_values, mock_filename, mock_event, start)
     assert result == True
     mock_db_connect.cursor().__enter__().execute.assert_called_once()
@@ -264,8 +238,6 @@ def test_check_table_for_id_delete_success(mock_db_connect):
     mock_line = "3"
     mock_values = {"id": "003", "name": "Mock Delete Role", "action": "DELETE"}
     mock_filename = ""
-    mock_event = ""
-    start = ""
     result = handler.check_table_for_id(mock_db_connect, mock_line, mock_values, mock_filename, mock_event, start)
     assert result == True
     mock_db_connect.cursor().__enter__().execute.assert_called_once()
@@ -277,8 +249,6 @@ def test_check_table_for_id_record_exists_returns_false_when_action_create(mock_
     mock_line = "1"
     mock_values = {"id": "001", "name": "Mock Create Role", "action": "CREATE"}
     mock_filename = ""
-    mock_event = ""
-    start = ""
     result = handler.check_table_for_id(mock_db_connect, mock_line, mock_values, mock_filename, mock_event, start)
     assert result == False
     mock_db_connect.cursor().__enter__().execute.assert_called_once()
@@ -290,8 +260,6 @@ def test_check_table_for_id_not_record_exists_returns_false_when_action_delete(m
     mock_line = "3"
     mock_values = {"id": "003", "name": "Mock Delete Role", "action": "DELETE"}
     mock_filename = ""
-    mock_event = ""
-    start = ""
     result = handler.check_table_for_id(mock_db_connect, mock_line, mock_values, mock_filename, mock_event, start)
     assert result == False
     mock_db_connect.cursor().__enter__().execute.assert_called_once()
@@ -303,8 +271,6 @@ def test_check_table_for_id_raises_error(mock_send_failure_slack_message):
     mock_line = "1"
     mock_values = {"id": "001", "name": "Mock Create Role", "action": "CREATE"}
     mock_filename = ""
-    mock_event = ""
-    start = ""
     with pytest.raises(Exception):
         result = handler.check_table_for_id(mock_db_connect, mock_line, mock_values, mock_filename, mock_event, start)
     mock_send_failure_slack_message.assert_called_once_with(mock_event, start)
@@ -339,15 +305,13 @@ def test_execute_db_query_rollback(mock_db_connect):
 @patch(f"{file_path}.message.send_success_slack_message")
 def test_cleanup_success(mock_send_success_slack_message, mock_s3_object, mock_db_connect):
     mock_db_connect.close.return_value = "Closed connection"
-    mock_s3_object.copy_object = Mock(return_value="Object copied")
-    mock_s3_object.delete_object = Mock(return_value="Object deleted")
+    mock_s3_object().copy_object = Mock(return_value="Object copied")
+    mock_s3_object().delete_object = Mock(return_value="Object deleted")
     mock_bucket = ""
     mock_filename = "local/DPTS-001_referralroles.csv"
-    mock_event = ""
-    start = ""
     result = handler.cleanup(mock_db_connect, mock_bucket, mock_filename, mock_event, start)
     assert result == "Cleanup Successful"
     mock_db_connect.close.assert_called_once()
-    mock_s3_object.copy_object.assert_called_once_with(mock_bucket, mock_filename, mock_event, start)
-    mock_s3_object.delete_object.assert_called_once_with(mock_bucket, mock_filename, mock_event, start)
+    mock_s3_object().copy_object.assert_called_once_with(mock_bucket, mock_filename, mock_event, start)
+    mock_s3_object().delete_object.assert_called_once_with(mock_bucket, mock_filename, mock_event, start)
     mock_send_success_slack_message.assert_called_once_with(mock_event, start)

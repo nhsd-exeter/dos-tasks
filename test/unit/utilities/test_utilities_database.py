@@ -1,7 +1,5 @@
-import os
 import psycopg2
 import pytest
-import boto3
 from unittest.mock import patch
 from .. import database
 

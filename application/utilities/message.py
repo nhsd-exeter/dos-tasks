@@ -23,7 +23,10 @@ def send_success_slack_message(event, start):
             {
                 "color": "#0def42",
                 "blocks": [
-                    {"type": "header", "text": {"type": "plain_text", "text": "{} HK Lambda".format(task.capitalize())}},
+                    {
+                        "type": "header",
+                        "text": {"type": "plain_text", "text": "{} HK Lambda".format(task.capitalize())},
+                    },
                     {
                         "type": "section",
                         "text": {
@@ -61,7 +64,10 @@ def send_failure_slack_message(event, start):
             {
                 "color": "#dc3d2a",
                 "blocks": [
-                    {"type": "header", "text": {"type": "plain_text", "text": "{} HK Lambda".format(task.capitalize())}},
+                    {
+                        "type": "header",
+                        "text": {"type": "plain_text", "text": "{} HK Lambda".format(task.capitalize())},
+                    },
                     {
                         "type": "section",
                         "text": {
@@ -98,7 +104,10 @@ def send_start_message(event, start):
             {
                 "color": "#ffa500",
                 "blocks": [
-                    {"type": "header", "text": {"type": "plain_text", "text": "{} HK Lambda".format(task.capitalize())}},
+                    {
+                        "type": "header",
+                        "text": {"type": "plain_text", "text": "{} HK Lambda".format(task.capitalize())},
+                    },
                     {
                         "type": "section",
                         "text": {
