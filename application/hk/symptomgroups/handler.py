@@ -7,9 +7,8 @@ from datetime import datetime
 
 sys.path.append(".")
 
-from .utilities.job_logger import log_for_audit, log_for_diagnostics, log_for_error  # noqa
+from .utilities.logging import log_for_audit, log_for_error  # noqa
 
-log_prefix = "SymptomGroups"
 csv_column_count = 3
 data_column_count = 4
 
@@ -31,16 +30,16 @@ def request(event, context):
 
 def connect_to_database(env, event, start):
     db = database.DB()
-    log_for_audit(log_prefix, "Setting DB connection details")
+    log_for_audit("Setting DB connection details")
     if not db.db_set_connection_details(env, event, start):
-        log_for_error(log_prefix, "Error DB Paramater(s) not found in secrets store.")
+        log_for_error("Error DB Paramater(s) not found in secrets store.")
         message.send_failure_slack_message(event, start)
         raise ValueError("One or more DB Parameters not found in secrets store")
     return db.db_connect(event, start)
 
 
 def retrieve_file_from_bucket(bucket, filename, event, start):
-    log_for_audit(log_prefix, "Looking in {} for {} file".format(bucket, filename))
+    log_for_audit("Looking in {} for {} file".format(bucket, filename))
     s3_bucket = s3.S3
     return s3_bucket.get_object(bucket, filename, event, start)
 
@@ -55,7 +54,6 @@ def extract_data_from_file(csv_file, event, start):
             query_data = extract_query_data_from_csv(line)
             if len(query_data) != data_column_count:
                 log_for_error(
-                    log_prefix,
                     "Problem constructing data from csv expecting {} items but have {}".format(
                         str(data_column_count), str(len(query_data))
                     ),
@@ -75,7 +73,6 @@ def process_extracted_data(db_connection, row_data):
                 execute_db_query(db_connection, query, data, row_number, row_values)
         except Exception as e:
             log_for_error(
-                log_prefix,
                 "Processing symptom group data failed with |{0}|{1}|{2}| => {3}".format(
                     row_values["csv_sgid"], row_values["csv_name"], row_values["csv_zcode"], str(e)
                 ),
@@ -92,7 +89,7 @@ def valid_action(record_exists, row_data):
 
     if not valid_action:
         log_for_error(
-            log_prefix, "Invalid action {} for the record with ID {}".format(row_data["action"], row_data["csv_sgid"])
+            "Invalid action {} for the record with ID {}".format(row_data["action"], row_data["csv_sgid"])
         )
     return valid_action
 
@@ -110,7 +107,6 @@ def does_record_exist(db, row_dict):
                 record_exists = True
     except Exception as e:
         log_for_error(
-            log_prefix,
             "Select symptom group by id failed - {0} => {1}".format(row_dict["csv_sgid"], str(e)),
         )
         raise e
@@ -121,7 +117,7 @@ def check_csv_format(csv_row):
     if len(csv_row) == csv_column_count:
         return True
     else:
-        log_for_audit(log_prefix, "CSV format invalid - invalid length")
+        log_for_audit("CSV format invalid - invalid length")
         return False
 
 
@@ -149,7 +145,7 @@ def extract_query_data_from_csv(line):
             csv_dict["csv_zcode"] = csv_zcode
             csv_dict["action"] = csv_action
         except Exception as ex:
-            log_for_audit(log_prefix, "CSV data invalid " + ex)
+            log_for_audit("CSV data invalid " + ex)
 
     return csv_dict
 
@@ -162,7 +158,7 @@ def generate_db_query(row_values):
     elif row_values["action"] in ("DELETE"):
         return delete_query(row_values)
     else:
-        log_for_error(log_prefix, "Action {} not in approved list of actions".format(row_values["action"]))
+        log_for_error("Action {} not in approved list of actions".format(row_values["action"]))
         # message.send_failure_slack_message(event, start)
         raise psycopg2.DatabaseError("Database Action {} is invalid".format(row_values["action"]))
 
@@ -202,11 +198,11 @@ def execute_db_query(db_connection, query, data, line, values):
         cursor.execute(query, data)
         db_connection.commit()
         log_for_audit(
-            log_prefix, "Action: {}, ID: {}, for symptomgroup {}".format(values["action"], values["id"], values["name"])
+            "Action: {}, ID: {}, for symptomgroup {}".format(values["action"], values["id"], values["name"])
         )
     except Exception as e:
-        log_for_error(log_prefix, "Line {} in transaction failed. Rolling back".format(line))
-        log_for_error(log_prefix, "Error: {}".format(e))
+        log_for_error("Line {} in transaction failed. Rolling back".format(line))
+        log_for_error("Error: {}".format(e))
         db_connection.rollback()
     finally:
         cursor.close()
@@ -214,14 +210,14 @@ def execute_db_query(db_connection, query, data, line, values):
 
 def cleanup(db_connection, bucket, filename, event, start):
     # Close DB connection
-    log_for_audit(log_prefix, "Closing DB connection...")
+    log_for_audit("Closing DB connection...")
     db_connection.close()
     # Archive file
     s3.S3.copy_object(bucket, filename, event, start)
     s3.S3.delete_object(bucket, filename, event, start)
     log_for_audit(
-        log_prefix, "Archived file {} to {}/archive/{}".format(filename, filename.split("/")[0], filename.split("/")[1])
+        "Archived file {} to {}/archive/{}".format(filename, filename.split("/")[0], filename.split("/")[1])
     )
     # Send Slack Notification
-    log_for_audit(log_prefix, "Sending slack message...")
+    log_for_audit("Sending slack message...")
     message.send_success_slack_message(event, start)

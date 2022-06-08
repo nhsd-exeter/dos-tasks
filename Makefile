@@ -104,8 +104,12 @@ unit-test-utilities: # Run utilities unit tests
 		CMD="python3 -m pytest utilities/test/"
 	rm -rf $(APPLICATION_DIR)/utilities/test
 
-coverage: ### Run test coverage - mandatory: PROFILE=[profile]
-	tasks=$(TASKS),filter
+coverage: ## Run test coverage - mandatory: PROFILE=[profile] TASK=[task]
+	if [ "$(TASK)" = "" ]; then
+		tasks=$(TASKS),filter
+	else
+		tasks=$(TASK)
+	fi
 	pythonpath=/tmp/.packages:/project/application/utilities
 	for task in $$(echo $$tasks | tr "," "\n"); do
 		pythonpath+=:/project/application/hk/
@@ -129,6 +133,19 @@ coverage: ### Run test coverage - mandatory: PROFILE=[profile]
 	done
 	rm -rf $(APPLICATION_DIR)/utilities/test
 
+python-code-coverage-format: ### Test Python code with 'coverage' - mandatory: CMD=[test program]; optional: DIR,FILES=[file or pattern],EXCLUDE=[comma-separated list],FORMAT=[xml,html]
+	if [ "$(FORMAT)" = "" ]; then
+		format=xml
+	else
+		format=$(FORMAT)
+	fi
+	make docker-run-tools SH=y DIR=$(or $(DIR), $(APPLICATION_DIR_REL)) ARGS="$(ARGS)" CMD=" \
+		python -m coverage run \
+			--source=$(or $(FILES), '.') \
+			--omit=*/tests/*,$(EXCLUDE) \
+			$(or $(CMD), -m pytest) && \
+		python -m coverage $$(echo $$format | tr "," "\n") \
+	"
 security-scan: ### Fetches container scan report and returns findings - Mandatory PROFILE=[profile], TASK=[hk task], TAG=[image tag]
 	eval "$$(make aws-assume-role-export-variables)"
 	scan=$$(make -s aws-describe-image-scan TASK=$(TASK) TAG=$(TAG))
