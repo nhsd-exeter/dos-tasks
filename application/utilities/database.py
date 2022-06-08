@@ -1,7 +1,7 @@
 import os
 import json
 import psycopg2
-from utilities import secrets, logging, message
+from . import secrets, logging, message
 
 db_host_key = "DB_HOST"
 db_user_key = "DB_USER"
@@ -19,7 +19,7 @@ class DB:
         self.db_password = ""
 
     def db_set_connection_details(self, env, event, start):
-        secret_list = secrets.SECRETS.get_secret_value(secret_store, event, start)
+        secret_list = secrets.SECRETS().get_secret_value(secret_store, event, start)
         formatted_secrets = json.loads(secret_list, strict=False)
         connection_details_set = True
 

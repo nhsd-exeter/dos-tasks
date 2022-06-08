@@ -1,13 +1,12 @@
 import csv
 import psycopg2
 import psycopg2.extras
-from utilities import s3, logging, database, message
+from .utilities import s3, logging, database, message
 from datetime import datetime
-
-start = datetime.utcnow()
 
 
 def request(event, context):
+    start = datetime.utcnow()
     message.send_start_message(event, start)
     print("Event: {}".format(event))
     env = event["env"]
@@ -21,21 +20,22 @@ def request(event, context):
             query, data = generate_db_query(values, event, start)
             execute_db_query(db_connection, query, data, row, values)
     cleanup(db_connection, bucket, filename, event, start)
+    return "Referral Roles execution successful"
 
 
 def connect_to_database(env, event, start):
     db = database.DB()
     logging.log_for_audit("Setting DB connection details")
     if not db.db_set_connection_details(env, event, start):
-        logging.log_for_error("Error DB Paramater(s) not found in secrets store.")
+        logging.log_for_error("Error DB Parameter(s) not found in secrets store.")
         message.send_failure_slack_message(event, start)
-        raise ValueError("DB Paramater(s) not found in secrets store")
+        raise ValueError("DB Parameter(s) not found in secrets store")
     return db.db_connect(event, start)
 
 
 def retrieve_file_from_bucket(bucket, filename, event, start):
     logging.log_for_audit("Looking in {} for {} file".format(bucket, filename))
-    s3_bucket = s3.S3
+    s3_bucket = s3.S3()
     return s3_bucket.get_object(bucket, filename, event, start)
 
 
@@ -51,7 +51,7 @@ def process_file(csv_file, event, start):
             logging.log_for_error("Incorrect line format, should be 3 but is {}".format(len(line)))
             message.send_failure_slack_message(event, start)
             raise IndexError("Unexpected data in csv file")
-        lines[str(count)] = {"id": int(line[0]), "name": line[1], "action": line[2]}
+        lines[str(count)] = {"id": line[0], "name": line[1], "action": line[2]}
     return lines
 
 
@@ -153,11 +153,13 @@ def cleanup(db_connection, bucket, filename, event, start):
     logging.log_for_audit("Closing DB connection...")
     db_connection.close()
     # Archive file
-    s3.S3.copy_object(bucket, filename, event, start)
-    s3.S3.delete_object(bucket, filename, event, start)
+    s3_class = s3.S3()
+    s3_class.copy_object(bucket, filename, event, start)
+    s3_class.delete_object(bucket, filename, event, start)
     logging.log_for_audit(
         "Archived file {} to {}/archive/{}".format(filename, filename.split("/")[0], filename.split("/")[1])
     )
     # Send Slack Notification
     logging.log_for_audit("Sending slack message...")
     message.send_success_slack_message(event, start)
+    return "Cleanup Successful"

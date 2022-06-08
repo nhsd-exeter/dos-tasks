@@ -5,19 +5,24 @@ PYTHON_VERSION = $(PYTHON_VERSION_MAJOR).$(PYTHON_VERSION_MINOR).$(PYTHON_VERSIO
 PYTHON_BASE_PACKAGES = \
 	awscli-local==0.18 \
 	awscli==1.22.64 \
-	black==22.1.0 \
+	black==22.3.0 \
 	boto3==1.21.9 \
 	bpython \
 	configparser \
 	coverage \
 	diagrams==0.21.1 \
 	flake8 \
+	mock \
+	moto \
 	mypy \
 	prettytable \
+	psycopg2 \
 	pyflakes \
 	pygments \
 	pylint \
 	pytest \
+	pytest-env \
+	pytest-mock \
 	pyyaml \
 	requests==2.27.1
 
@@ -74,7 +79,7 @@ python-code-check: ### Check Python code with 'flake8' - optional: FILES=[direc
 	"
 
 python-code-coverage: ### Test Python code with 'coverage' - mandatory: CMD=[test program]; optional: DIR,FILES=[file or pattern],EXCLUDE=[comma-separated list]
-	make docker-run-tools SH=y DIR=$(or $(DIR), $(APPLICATION_DIR_REL)) CMD=" \
+	make docker-run-tools SH=y DIR=$(or $(DIR), $(APPLICATION_DIR_REL)) ARGS="$(ARGS)" CMD=" \
 		python -m coverage run \
 			--source=$(or $(FILES), '.') \
 			--omit=*/tests/*,$(EXCLUDE) \
