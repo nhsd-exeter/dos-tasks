@@ -6,10 +6,11 @@ import json
 import os
 
 lambda_client = boto3.client("lambda")
-start = datetime.utcnow()
+
 
 
 def request(event, context):
+    start = datetime.utcnow()
     print("Event: {}".format(event))
     if "archive" not in event["Records"][0]["s3"]["object"]["key"]:
         send_start_message(
@@ -24,7 +25,7 @@ def request(event, context):
     return "HK task filtered successfully"
 
 
-def process_event(event):
+def process_event(event,start):
     try:
         filename = event["Records"][0]["s3"]["object"]["key"]
         if "archive" in filename:
@@ -46,7 +47,7 @@ def process_event(event):
     return "HK Filter Event processed successfully"
 
 
-def invoke_hk_lambda(task, filename, env, bucket):
+def invoke_hk_lambda(task, filename, env, bucket,start):
     profile = os.environ.get("PROFILE")
     # version = os.environ.get(task)
     payload = {"filename": filename, "env": env, "bucket": bucket}

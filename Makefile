@@ -9,10 +9,10 @@ build: # Build project - mandatory: TASK=[hk task]
 	make build-image NAME=filter AWS_ECR=$(AWS_LAMBDA_ECR)
 	if [ "$(TASK)" == "all" ]; then
 		for task in $$(echo $(TASKS) | tr "," "\n"); do
-			make build-image NAME="hk-$$task" AWS_ECR=$(AWS_LAMBDA_ECR)
+			make build-image NAME="$$task" AWS_ECR=$(AWS_LAMBDA_ECR)
 		done
 	else
-		make build-image NAME=hk-$(TASK) AWS_ECR=$(AWS_LAMBDA_ECR)
+		make build-image NAME=$(TASK) AWS_ECR=$(AWS_LAMBDA_ECR)
 	fi
 
 build-image: # Builds images - mandatory: NAME=[hk name]
@@ -128,18 +128,6 @@ coverage: ### Run test coverage - mandatory: PROFILE=[profile]
 		rm -rf $(APPLICATION_DIR)/hk/$$task/utilities
 	done
 	rm -rf $(APPLICATION_DIR)/utilities/test
-
-
-# --------------------------------------
-python-code-coverage-html: ### Test Python code with 'coverage' - mandatory: CMD=[test program]; optional: DIR,FILES=[file or pattern],EXCLUDE=[comma-separated list]
-	make docker-run-tools SH=y DIR=$(or $(DIR), $(APPLICATION_DIR_REL)) CMD=" \
-		python -m coverage run \
-			--source=$(or $(FILES), '.') \
-			--omit=*/tests/*,$(EXCLUDE) \
-			$(or $(CMD), -m pytest) && \
-		python -m coverage html \
-	"
-# --------------------------------------
 
 security-scan: ### Fetches container scan report and returns findings - Mandatory PROFILE=[profile], TASK=[hk task], TAG=[image tag]
 	eval "$$(make aws-assume-role-export-variables)"

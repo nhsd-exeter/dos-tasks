@@ -66,6 +66,11 @@ RUN set -eux && \
         unzip \
         wget \
         zip \
+        postgresql-libs \
+        musl-dev \
+        gcc \
+        libffi-dev \
+        postgresql-dev \
     && \
     update-ms-fonts && \
     \
