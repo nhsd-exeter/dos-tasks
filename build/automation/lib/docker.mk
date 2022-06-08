@@ -794,10 +794,10 @@ _docker-get-dir:
 		echo $(DOCKER_CUSTOM_DIR)/$(NAME)
 	elif [ -d $(DOCKER_LIB_IMAGE_DIR)/$(NAME) ]; then
 		echo $(DOCKER_LIB_IMAGE_DIR)/$(NAME)
-	elif [ -d $(DOCKER_DIR)/hk ]; then
-		echo $(DOCKER_DIR)/hk
-	else
+	elif [ -d $(DOCKER_DIR)/$(NAME) ]; then
 		echo $(DOCKER_DIR)/$(NAME)
+	else
+		echo $(DOCKER_DIR)/hk
 	fi
 
 _docker-get-reg:

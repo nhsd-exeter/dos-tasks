@@ -73,6 +73,12 @@ clean: # Clean up project
 
 # --------------------------------------
 
+build-tester: # Builds image used for testing - mandatory: PROFILE=[name]
+	make docker-image NAME=tester
+
+push-tester: # Pushes image used for testing - mandatory: PROFILE=[name]
+	make docker-push NAME=tester
+
 unit-test-task: # Run task unit tests - mandatory: TASK=[name of task]
 	rm -rf $(APPLICATION_DIR)/hk/$(TASK)/test
 	rm -rf $(APPLICATION_DIR)/hk/$(TASK)/utilities
@@ -80,7 +86,8 @@ unit-test-task: # Run task unit tests - mandatory: TASK=[name of task]
 	mkdir $(APPLICATION_DIR)/hk/$(TASK)/utilities
 	cp $(APPLICATION_TEST_DIR)/unit/hk-$(TASK)/* $(APPLICATION_DIR)/hk/$(TASK)/test
 	cp $(APPLICATION_DIR)/utilities/*.py $(APPLICATION_DIR)/hk/$(TASK)/utilities
-	make docker-run-tools CMD="python3 -m pytest application/hk/$(TASK)/test/test_hk_$(TASK).py"
+	make docker-run-tools IMAGE=$$(make _docker-get-reg)/tester:latest \
+		CMD="python3 -m pytest application/hk/$(TASK)/test/test_hk_$(TASK).py"
 	rm -rf $(APPLICATION_DIR)/hk/$(TASK)/test
 	rm -rf $(APPLICATION_DIR)/hk/$(TASK)/utilities
 
@@ -88,7 +95,8 @@ unit-test-utilities: # Run utilities unit tests
 	rm -rf $(APPLICATION_DIR)/utilities/test
 	mkdir $(APPLICATION_DIR)/utilities/test
 	cp $(APPLICATION_TEST_DIR)/unit/utilities/* $(APPLICATION_DIR)/utilities/test
-	make docker-run-tools CMD="python3 -m pytest application/utilities/test/"
+	make docker-run-tools IMAGE=$$(make _docker-get-reg)/tester:latest \
+		CMD="python3 -m pytest application/utilities/test/"
 	rm -rf $(APPLICATION_DIR)/utilities/test
 
 coverage: ### Run test coverage - mandatory: PROFILE=[profile]
@@ -104,7 +112,9 @@ coverage: ### Run test coverage - mandatory: PROFILE=[profile]
 	rm -rf $(APPLICATION_DIR)/utilities/test
 	mkdir $(APPLICATION_DIR)/utilities/test
 	cp $(APPLICATION_TEST_DIR)/unit/utilities/* $(APPLICATION_DIR)/utilities/test
-	make python-code-coverage EXCLUDE=*/test/*,hk/*/utilities/* ARGS="--env TASK=utilities --env SLACK_WEBHOOK_URL=https://slackmockurl.com/ --env PROFILE=local"
+	make python-code-coverage IMAGE=$$(make _docker-get-reg)/tester:latest \
+		EXCLUDE=*/test/*,hk/*/utilities/* \
+		ARGS="--env TASK=utilities --env SLACK_WEBHOOK_URL=https://slackmockurl.com/ --env PROFILE=local"
 	for task in $$(echo $$tasks | tr "," "\n"); do
 		rm -rf $(APPLICATION_DIR)/hk/$$task/test
 		rm -rf $(APPLICATION_DIR)/hk/$$task/utilities
@@ -206,6 +216,9 @@ trust-certificate: ssl-trust-certificate-project ## Trust the SSL development ce
 create-artefact-repositories: # Create ECR repositories to store the artefacts - mandatory: AWS_ACCOUNT=[account]
 	make docker-create-repository NAME=hk-filter
 	make docker-create-repository NAME=hk-referralroles
+
+create-tester-repository: # Create ECR repositories to store the artefacts
+	make docker-create-repository NAME=tester
 
 # ==============================================================================
 

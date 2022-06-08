@@ -22,7 +22,7 @@ jobs:
           build/automation/etc/githooks/scripts/terraform-format-pre-commit.sh
       - name: Create coverage report
         run: |
-          make coverage PROFILE=nonprod
+          make build-tester coverage PROFILE=nonprod
       - uses: sonarsource/sonarcloud-github-action@master
         # SEE: https://github.com/SonarSource/sonarcloud-github-action
         env:
