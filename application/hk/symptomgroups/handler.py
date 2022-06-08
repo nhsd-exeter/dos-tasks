@@ -88,9 +88,7 @@ def valid_action(record_exists, row_data):
         valid_action = True
 
     if not valid_action:
-        log_for_error(
-            "Invalid action {} for the record with ID {}".format(row_data["action"], row_data["csv_sgid"])
-        )
+        log_for_error("Invalid action {} for the record with ID {}".format(row_data["action"], row_data["csv_sgid"]))
     return valid_action
 
 
@@ -197,9 +195,7 @@ def execute_db_query(db_connection, query, data, line, values):
     try:
         cursor.execute(query, data)
         db_connection.commit()
-        log_for_audit(
-            "Action: {}, ID: {}, for symptomgroup {}".format(values["action"], values["id"], values["name"])
-        )
+        log_for_audit("Action: {}, ID: {}, for symptomgroup {}".format(values["action"], values["id"], values["name"]))
     except Exception as e:
         log_for_error("Line {} in transaction failed. Rolling back".format(line))
         log_for_error("Error: {}".format(e))
@@ -215,9 +211,7 @@ def cleanup(db_connection, bucket, filename, event, start):
     # Archive file
     s3.S3.copy_object(bucket, filename, event, start)
     s3.S3.delete_object(bucket, filename, event, start)
-    log_for_audit(
-        "Archived file {} to {}/archive/{}".format(filename, filename.split("/")[0], filename.split("/")[1])
-    )
+    log_for_audit("Archived file {} to {}/archive/{}".format(filename, filename.split("/")[0], filename.split("/")[1]))
     # Send Slack Notification
     log_for_audit("Sending slack message...")
     message.send_success_slack_message(event, start)
