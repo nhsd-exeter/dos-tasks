@@ -42,6 +42,14 @@ variable "s3_bucket_arn" {
   description = "ARN of Housekeeping bucket"
 }
 
+variable "splunk_firehose_subscription" {
+  description = "Name of splunk firehose subscription"
+}
+
+variable "splunk_firehose_role" {
+  description = "Name of splunk firehose IAM role"
+}
+
 # ##############
 # # Inputs
 # ##############
