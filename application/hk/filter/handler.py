@@ -1,5 +1,5 @@
-from .utilities.logging import log_for_audit
-from .utilities.message import send_start_message, send_success_slack_message, send_failure_slack_message
+from utilities.logger import log_for_audit
+from utilities.message import send_start_message, send_success_slack_message, send_failure_slack_message
 from datetime import datetime
 import boto3
 import json

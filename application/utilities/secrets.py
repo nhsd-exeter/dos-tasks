@@ -1,7 +1,7 @@
 import boto3
 import base64
 from botocore.exceptions import ClientError
-from . import message, logging
+from utilities import message, logger
 
 
 class SECRETS:
@@ -13,11 +13,11 @@ class SECRETS:
             print(secret_store_name)
             response = self.secrets_client.get_secret_value(SecretId=secret_store_name)
         except ClientError as e:
-            logging.log_for_error("Error retrieving secrets: {}".format(e))
+            logger.log_for_error("Error retrieving secrets: {}".format(e))
             message.send_failure_slack_message(event, start)
             raise e
         except Exception as e:
-            logging.log_for_error("Error retrieving secrets: {}".format(e))
+            logger.log_for_error("Error retrieving secrets: {}".format(e))
             message.send_failure_slack_message(event, start)
             raise e
         else:

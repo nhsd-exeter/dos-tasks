@@ -1,7 +1,7 @@
 import os
 import json
 import psycopg2
-from . import secrets, logging, message
+from utilities import secrets, logger, message
 
 db_host_key = "DB_HOST"
 db_user_key = "DB_USER"
@@ -26,30 +26,30 @@ class DB:
         if formatted_secrets is not None:
             if db_host_key in formatted_secrets:
                 self.db_host = formatted_secrets[db_host_key]
-                logging.log_for_diagnostics("Host: {}".format(self.db_host))
+                logger.log_for_diagnostics("Host: {}".format(self.db_host))
             else:
                 connection_details_set = False
-                logging.log_for_diagnostics("No DB_HOST secret var set")
+                logger.log_for_diagnostics("No DB_HOST secret var set")
             if db_user_key in formatted_secrets:
                 self.db_user = formatted_secrets[db_user_key]
-                logging.log_for_diagnostics("User: {}".format(self.db_user))
+                logger.log_for_diagnostics("User: {}".format(self.db_user))
             else:
                 connection_details_set = False
-                logging.log_for_diagnostics("No DB_USER secret var set")
+                logger.log_for_diagnostics("No DB_USER secret var set")
             if db_password_key in formatted_secrets:
                 self.db_password = formatted_secrets[db_password_key]
-                logging.log_for_diagnostics("DB_PASSWORD secret set")
+                logger.log_for_diagnostics("DB_PASSWORD secret set")
             else:
                 connection_details_set = False
-                logging.log_for_diagnostics("No DB_PASSWORD secret set")
+                logger.log_for_diagnostics("No DB_PASSWORD secret set")
             if profile != "prod" and env != "performance":
                 self.db_name = "pathwaysdos_{}".format(env)
             else:
                 self.db_name = "pathwaysdos"
-            logging.log_for_diagnostics("DB Name: {}".format(self.db_name))
+            logger.log_for_diagnostics("DB Name: {}".format(self.db_name))
         else:
             connection_details_set = False
-            logging.log_for_diagnostics("Secrets not set")
+            logger.log_for_diagnostics("Secrets not set")
         return connection_details_set
 
     def db_connect(self, event, start):
@@ -58,6 +58,6 @@ class DB:
                 host=self.db_host, dbname=self.db_name, user=self.db_user, password=self.db_password
             )
         except Exception:
-            logging.log_for_error("Connection parameters not set correctly")
+            logger.log_for_error("Connection parameters not set correctly")
             message.send_failure_slack_message(event, start)
             raise psycopg2.InterfaceError()
