@@ -1,0 +1,6 @@
+.version
+Dockerfile.effective
+assets/*
+!assets/requirements.txt
+!assets/.gitkeep
+!assets/log/.gitkeep
