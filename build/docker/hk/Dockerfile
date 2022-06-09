@@ -10,4 +10,4 @@ RUN pip3 install pytest
 
 EXPOSE 8080
 
-CMD [ "task.handler.request" ]
+CMD [ "handler.request" ]
