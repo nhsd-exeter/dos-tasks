@@ -21,6 +21,7 @@ build-image: # Builds images - mandatory: NAME=[hk name]
 	rm -rf $(DOCKER_DIR)/hk/.version
 	mkdir $(DOCKER_DIR)/hk/assets/utilities
 	cp -r $(APPLICATION_DIR)/hk/$(NAME)/*.py $(DOCKER_DIR)/hk/assets/
+	cp -r $(APPLICATION_DIR)/hk/$(NAME)/requirements.txt $(DOCKER_DIR)/hk/assets/
 	rm -rf $(DOCKER_DIR)/hk/assets/__init__.py
 	cp -r $(APPLICATION_DIR)/utilities/*.py $(DOCKER_DIR)/hk/assets/utilities/
 	rm -rf $(DOCKER_DIR)/hk/assets/utilities/__init__.py

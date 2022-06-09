@@ -16,6 +16,7 @@ VULNERABILITY_LEVEL := CRITICAL,HIGH
 STACKS := secrets,s3,security-groups,filter
 TASKS := referralroles
 ENVIRONMENT_LIST := ["test","test1","test2","test3","test4","fix","performance","regression","teamb"]
+TF_VAR_environment_list := $(ENVIRONMENT_LIST)
 
 TF_VAR_deployment_secrets := $(DEPLOYMENT_SECRETS)
 TF_VAR_image_version := $(or $(BUILD_TAG), latest)
