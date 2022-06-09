@@ -51,7 +51,9 @@ def invoke_hk_lambda(task, filename, env, bucket, start):
     # version = os.environ.get(task)
     payload = {"filename": filename, "env": env, "bucket": bucket}
     function = "uec-dos-tasks-{0}-hk-{1}-lambda".format(profile, task)
-
+    print("Profile: {}".format(profile))
+    print("Payload: {}".format(payload))
+    print("Function: {}".format(function))
     try:
         response = lambda_client.invoke(FunctionName=function, InvocationType="Event", Payload=json.dumps(payload))
         print("Response: {}".format(response))
