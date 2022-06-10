@@ -106,7 +106,7 @@ def does_record_exist(db, row_dict):
             "Select symptom group by id failed - {0} => {1}".format(row_dict["csv_sgid"], str(e)),
         )
         raise e
-    log_for_audit("Record exists is {0} for record with id {1}".format(record_exists,row_dict["csv_sgid"]))
+    log_for_audit("Record exists is {0} for record with id {1}".format(record_exists, row_dict["csv_sgid"]))
     return record_exists
 
 
