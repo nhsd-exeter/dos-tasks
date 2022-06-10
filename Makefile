@@ -206,7 +206,7 @@ aws-lambda-create-alias: ### Creates an alias for a lambda version - Mandatory N
 			--function-version $(VERSION) \
 		"
 
-plan: # Provision environment - mandatory: PROFILE=[name], TASK=[hk task]
+plan: # Plan environment - mandatory: PROFILE=[name], TASK=[hk task]
 	eval "$$(make secret-fetch-and-export-variables)"
 	make terraform-plan STACK=$(STACKS) PROFILE=$(PROFILE)
 	if [ "$(TASK)" == "all" ]; then

@@ -38,7 +38,7 @@ def connect_to_database(env, event, start):
 
 def retrieve_file_from_bucket(bucket, filename, event, start):
     log_for_audit("Looking in {} for {} file".format(bucket, filename))
-    s3_bucket = s3.S3
+    s3_bucket = s3.S3()
     return s3_bucket.get_object(bucket, filename, event, start)
 
 
@@ -207,8 +207,9 @@ def cleanup(db_connection, bucket, filename, event, start):
     log_for_audit("Closing DB connection...")
     db_connection.close()
     # Archive file
-    s3.S3.copy_object(bucket, filename, event, start)
-    s3.S3.delete_object(bucket, filename, event, start)
+    s3_bucket = s3.S3()
+    s3_bucket.copy_object(bucket, filename, event, start)
+    s3_bucket.delete_object(bucket, filename, event, start)
     log_for_audit("Archived file {} to {}/archive/{}".format(filename, filename.split("/")[0], filename.split("/")[1]))
     # Send Slack Notification
     log_for_audit("Sending slack message...")
