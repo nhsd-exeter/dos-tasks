@@ -1,11 +1,9 @@
 import csv
 import psycopg2
 import psycopg2.extras
-import sys
 from utilities import s3, database, message
 from datetime import datetime
 
-sys.path.append(".")
 
 from utilities.logger import log_for_audit, log_for_error  # noqa
 
