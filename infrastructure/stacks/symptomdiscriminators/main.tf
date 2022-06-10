@@ -1,4 +1,4 @@
-module "referralroles_lambda" {
+module "symptomdiscriminators_lambda" {
   source             = "../../modules/lambda"
   name               = "hk-symptomdiscriminators"
   image_uri          = "${var.aws_lambda_ecr}/${var.project_group_short}/${var.project_name_short}/hk-symptomdiscriminators:${var.image_version}"

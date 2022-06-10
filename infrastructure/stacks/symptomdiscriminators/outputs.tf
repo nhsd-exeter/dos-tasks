@@ -1,4 +1,4 @@
-output "referralroles_lambda_arn" {
+output "symptomdiscriminators_lambda_arn" {
   description = "ARN value for the HK Symptom Discriminators Lambda function"
   value       = module.symptomdiscriminators_lambda.lambda_arn
 }
