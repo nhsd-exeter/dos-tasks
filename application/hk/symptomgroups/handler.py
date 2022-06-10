@@ -192,7 +192,9 @@ def execute_db_query(db_connection, query, data, line, values):
     try:
         cursor.execute(query, data)
         db_connection.commit()
-        log_for_audit("Action: {}, ID: {}, for symptomgroup {}".format(values["action"], values["csv_id"], values["csv_name"]))
+        log_for_audit(
+            "Action: {}, ID: {}, for symptomgroup {}".format(values["action"], values["csv_id"], values["csv_name"])
+        )
     except Exception as e:
         log_for_error("Line {} in transaction failed. Rolling back".format(line))
         log_for_error("Error: {}".format(e))
