@@ -148,3 +148,11 @@ resource "aws_cloudwatch_log_group" "lambda_log_group" {
   name              = "/aws/lambda/${var.service_prefix}-${var.name}-lambda"
   retention_in_days = var.log_retention
 }
+
+resource "aws_cloudwatch_log_subscription_filter" "splunk_firehose_subscription" {
+  name            = "${var.service_prefix}-${var.name}-log-subscription"
+  role_arn        = "arn:aws:iam::${var.aws_account_id}:role/${var.splunk_firehose_role}"
+  filter_pattern  = ""
+  log_group_name  = aws_cloudwatch_log_group.lambda_log_group.name
+  destination_arn = "arn:aws:firehose:${var.aws_region}:${var.aws_account_id}:deliverystream/${var.splunk_firehose_subscription}"
+}

@@ -29,3 +29,11 @@ variable "slack_webhook_url" {
 variable "deployment_secrets" {
   description = "Deployment secret store"
 }
+
+variable "splunk_firehose_subscription" {
+  description = "Name of splunk firehose subscription"
+}
+
+variable "splunk_firehose_role" {
+  description = "Name of splunk firehose IAM role"
+}
