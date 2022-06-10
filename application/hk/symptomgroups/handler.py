@@ -142,7 +142,7 @@ def extract_query_data_from_csv(line):
             csv_dict["action"] = csv_action
         except Exception as ex:
             log_for_audit("CSV data invalid " + ex)
-
+    log_for_audit("Extracted data " + " " + csv_dict["csv_sgid"] + " " +  csv_dict["csv_name"] + " " +  csv_dict["csv_zcode"] )
     return csv_dict
 
 
