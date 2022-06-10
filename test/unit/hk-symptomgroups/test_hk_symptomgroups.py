@@ -7,9 +7,9 @@ import string
 import psycopg2
 from datetime import datetime
 
-sys.path.append(".")
+# sys.path.append(".")
 from .. import handler
-from .. utilities import database, message, s3, secrets
+from utilities import database, message, s3, secrets
 
 file_path = "application.hk.symptomgroups.handler"
 

@@ -104,7 +104,7 @@ unit-test-utilities: # Run utilities unit tests
 		CMD="python3 -m pytest utilities/test/"
 	rm -rf $(APPLICATION_DIR)/utilities/test
 
-coverage: ## Run test coverage - mandatory: PROFILE=[profile] TASK=[task]
+coverage: ## Run test coverage - mandatory: PROFILE=[profile] TASK=[task] FORMAT=[xml/html]
 	if [ "$(TASK)" = "" ]; then
 		tasks=$(TASKS),filter
 	else
@@ -123,7 +123,7 @@ coverage: ## Run test coverage - mandatory: PROFILE=[profile] TASK=[task]
 	rm -rf $(APPLICATION_DIR)/utilities/test
 	mkdir $(APPLICATION_DIR)/utilities/test
 	cp $(APPLICATION_TEST_DIR)/unit/utilities/* $(APPLICATION_DIR)/utilities/test
-	make python-code-coverage IMAGE=$$(make _docker-get-reg)/tester:latest \
+	make python-code-coverage-format IMAGE=$$(make _docker-get-reg)/tester:latest \
 		EXCLUDE=*/test/*,hk/*/utilities/* \
 		ARGS="--env TASK=utilities --env SLACK_WEBHOOK_URL=https://slackmockurl.com/ --env PROFILE=local \
 			--env PYTHONPATH=$$pythonpath"
