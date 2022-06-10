@@ -138,7 +138,9 @@ def execute_db_query(db_connection, query, data, line, values):
         cursor.execute(query, data)
         db_connection.commit()
         logging.log_for_audit(
-            "Action: {}, ID: {}, for symptom discriminators {}".format(values["action"], values["id"], values["description"])
+            "Action: {}, ID: {}, for symptom discriminators {}".format(
+                values["action"], values["id"], values["description"]
+            )
         )
     except Exception as e:
         logging.log_for_error("Line {} in transaction failed. Rolling back".format(line))
