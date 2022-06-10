@@ -1,11 +1,11 @@
-import logging
+from logging import getLogger, INFO, DEBUG
 import os
 
 msg_prefix = os.environ.get("TASK")
-audit_logger = logging.getLogger("audit")
-diagnostic_logger = logging.getLogger("diagnostics")
-audit_logger.setLevel(logging.INFO)
-diagnostic_logger.setLevel(logging.DEBUG)
+audit_logger = getLogger("audit")
+diagnostic_logger = getLogger("diagnostics")
+audit_logger.setLevel(INFO)
+diagnostic_logger.setLevel(DEBUG)
 
 
 def log_for_audit(msg_log):

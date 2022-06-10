@@ -7,6 +7,9 @@ module "referralroles_lambda" {
   s3_bucket_arn      = data.terraform_remote_state.s3.outputs.s3_bucket_arn
   timeout            = "900"
 
+  splunk_firehose_subscription = var.splunk_firehose_subscription
+  splunk_firehose_role         = var.splunk_firehose_role
+
   aws_region     = var.aws_region
   aws_account_id = var.aws_account_id
   service_prefix = var.service_prefix

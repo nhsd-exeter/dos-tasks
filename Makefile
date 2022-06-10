@@ -20,8 +20,9 @@ build-image: # Builds images - mandatory: NAME=[hk name]
 	rm -rf $(DOCKER_DIR)/hk/Dockerfile.effective
 	rm -rf $(DOCKER_DIR)/hk/.version
 	mkdir $(DOCKER_DIR)/hk/assets/utilities
-	cp -r $(APPLICATION_DIR)/hk/$(NAME)/* $(DOCKER_DIR)/hk/assets/
-	cp -r $(APPLICATION_DIR)/utilities/* $(DOCKER_DIR)/hk/assets/utilities/
+	cp -r $(APPLICATION_DIR)/hk/$(NAME)/*.py $(DOCKER_DIR)/hk/assets/
+	cp -r $(APPLICATION_DIR)/hk/$(NAME)/requirements.txt $(DOCKER_DIR)/hk/assets/
+	cp -r $(APPLICATION_DIR)/utilities/*.py $(DOCKER_DIR)/hk/assets/utilities/
 	make docker-image NAME=hk-$(NAME)
 	rm -rf $(DOCKER_DIR)/hk/assets/*
 
@@ -79,6 +80,7 @@ build-tester: # Builds image used for testing - mandatory: PROFILE=[name]
 push-tester: # Pushes image used for testing - mandatory: PROFILE=[name]
 	make docker-push NAME=tester
 
+
 unit-test-task: # Run task unit tests - mandatory: TASK=[name of task]
 	rm -rf $(APPLICATION_DIR)/hk/$(TASK)/test
 	rm -rf $(APPLICATION_DIR)/hk/$(TASK)/utilities
@@ -87,21 +89,26 @@ unit-test-task: # Run task unit tests - mandatory: TASK=[name of task]
 	cp $(APPLICATION_TEST_DIR)/unit/hk-$(TASK)/* $(APPLICATION_DIR)/hk/$(TASK)/test
 	cp $(APPLICATION_DIR)/utilities/*.py $(APPLICATION_DIR)/hk/$(TASK)/utilities
 	make docker-run-tools IMAGE=$$(make _docker-get-reg)/tester:latest \
-		CMD="python3 -m pytest application/hk/$(TASK)/test/test_hk_$(TASK).py"
+		DIR=application/hk/$(TASK) \
+		CMD="python3 -m pytest test/test_hk_$(TASK).py"
 	rm -rf $(APPLICATION_DIR)/hk/$(TASK)/test
 	rm -rf $(APPLICATION_DIR)/hk/$(TASK)/utilities
+
 
 unit-test-utilities: # Run utilities unit tests
 	rm -rf $(APPLICATION_DIR)/utilities/test
 	mkdir $(APPLICATION_DIR)/utilities/test
 	cp $(APPLICATION_TEST_DIR)/unit/utilities/* $(APPLICATION_DIR)/utilities/test
 	make docker-run-tools IMAGE=$$(make _docker-get-reg)/tester:latest \
-		CMD="python3 -m pytest application/utilities/test/"
+		DIR=application \
+		CMD="python3 -m pytest utilities/test/"
 	rm -rf $(APPLICATION_DIR)/utilities/test
 
 coverage: ### Run test coverage - mandatory: PROFILE=[profile]
 	tasks=$(TASKS),filter
+	pythonpath=/tmp/.packages:/project/application/utilities
 	for task in $$(echo $$tasks | tr "," "\n"); do
+		pythonpath+=:/project/application/hk/
 		rm -rf $(APPLICATION_DIR)/hk/$$task/test
 		rm -rf $(APPLICATION_DIR)/hk/$$task/utilities
 		mkdir $(APPLICATION_DIR)/hk/$$task/test
@@ -114,7 +121,8 @@ coverage: ### Run test coverage - mandatory: PROFILE=[profile]
 	cp $(APPLICATION_TEST_DIR)/unit/utilities/* $(APPLICATION_DIR)/utilities/test
 	make python-code-coverage IMAGE=$$(make _docker-get-reg)/tester:latest \
 		EXCLUDE=*/test/*,hk/*/utilities/* \
-		ARGS="--env TASK=utilities --env SLACK_WEBHOOK_URL=https://slackmockurl.com/ --env PROFILE=local"
+		ARGS="--env TASK=utilities --env SLACK_WEBHOOK_URL=https://slackmockurl.com/ --env PROFILE=local \
+			--env PYTHONPATH=$$pythonpath"
 	for task in $$(echo $$tasks | tr "," "\n"); do
 		rm -rf $(APPLICATION_DIR)/hk/$$task/test
 		rm -rf $(APPLICATION_DIR)/hk/$$task/utilities

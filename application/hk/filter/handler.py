@@ -1,5 +1,5 @@
-from .utilities.logging import log_for_audit
-from .utilities.message import send_start_message, send_success_slack_message, send_failure_slack_message
+from utilities.logger import log_for_audit
+from utilities.message import send_start_message, send_success_slack_message, send_failure_slack_message
 from datetime import datetime
 import boto3
 import json
@@ -51,7 +51,6 @@ def invoke_hk_lambda(task, filename, env, bucket, start):
     # version = os.environ.get(task)
     payload = {"filename": filename, "env": env, "bucket": bucket}
     function = "uec-dos-tasks-{0}-hk-{1}-lambda".format(profile, task)
-
     try:
         response = lambda_client.invoke(FunctionName=function, InvocationType="Event", Payload=json.dumps(payload))
         print("Response: {}".format(response))
