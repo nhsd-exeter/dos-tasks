@@ -142,9 +142,6 @@ def extract_query_data_from_csv(line):
             csv_dict["action"] = csv_action
         except Exception as ex:
             log_for_audit("CSV data invalid " + ex)
-    log_for_audit(
-        "Extracted data " + " " + csv_dict["csv_sgid"] + " " + csv_dict["csv_name"] + " " + csv_dict["csv_zcode"]
-    )
     return csv_dict
 
 
@@ -195,7 +192,7 @@ def execute_db_query(db_connection, query, data, line, values):
     try:
         cursor.execute(query, data)
         db_connection.commit()
-        log_for_audit("Action: {}, ID: {}, for symptomgroup {}".format(values["action"], values["id"], values["name"]))
+        log_for_audit("Action: {}, ID: {}, for symptomgroup {}".format(values["action"], values["csv_id"], values["csv_name"]))
     except Exception as e:
         log_for_error("Line {} in transaction failed. Rolling back".format(line))
         log_for_error("Error: {}".format(e))
