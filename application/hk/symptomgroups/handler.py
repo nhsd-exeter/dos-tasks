@@ -99,7 +99,6 @@ def does_record_exist(db, row_dict):
     try:
         with db.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
             select_query = """select * from pathwaysdos.symptomgroups where id=%s"""
-            select_query = """select * from pathwaysdos.referralroles where id=%s"""
             cursor.execute(select_query, (row_dict["csv_sgid"],))
             if cursor.rowcount != 0:
                 record_exists = True
