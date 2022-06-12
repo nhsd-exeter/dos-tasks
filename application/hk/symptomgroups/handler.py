@@ -95,6 +95,7 @@ def does_record_exist(db, row_dict):
     Checks to see if symptom group already exists in db with the id
     """
     record_exists = False
+    log_for_audit("Checking if record exists for record with id {0}".format(row_dict["csv_sgid"]))
     try:
         with db.cursor(cursor_factory=psycopg2.extras.DictCursor) as symptom_group_cur:
             select_query = """select * from pathwaysdos.symptomgroups where id=%s"""
