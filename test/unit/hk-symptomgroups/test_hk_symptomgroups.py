@@ -245,7 +245,7 @@ def test_db_connect_succeeds(mock_db,mock_connection):
 
 def test_extract_data_from_file_valid_length():
     """Test one valid line of csv equals one row of extracted data"""
-    csv_file = """2001,"Automated insert SymptomGroup","INSERT"\n"""
+    csv_file = """2001,"Automated insert SymptomGroup","CREATE"\n"""
     start = datetime.utcnow()
     event = generate_event_payload()
     lines = handler.extract_data_from_file(csv_file, event, start)
@@ -254,7 +254,7 @@ def test_extract_data_from_file_valid_length():
 # @mock.patch(f"{file_path}.message.send_failure_slack_message", return_value = None)
 def test_extract_data_from_file_valid_length_multiline():
     """Test two valid lines of csv equals two rows of extracted data"""
-    csv_file = """2001,"Automated insert SymptomGroup","INSERT"\n2001,"Automated update SymptomGroup","UPDATE"\n"""
+    csv_file = """2001,"Automated insert SymptomGroup","CREATE"\n2001,"Automated update SymptomGroup","UPDATE"\n"""
     start = datetime.utcnow()
     event = generate_event_payload()
     lines = handler.extract_data_from_file(csv_file, event, start)
@@ -263,7 +263,7 @@ def test_extract_data_from_file_valid_length_multiline():
 # @mock.patch(f"{file_path}.message.send_start_message", return_value = None)
 def test_extract_data_from_file_empty_second_line():
     """Test data extraction ignores any empty line at end of file"""
-    csv_file = """2001,"Automated insert SymptomGroup","INSERT"\n\n"""
+    csv_file = """2001,"Automated insert SymptomGroup","CREATE"\n\n"""
     start = datetime.utcnow()
     event = generate_event_payload()
     lines = handler.extract_data_from_file(csv_file, event, start)
@@ -271,7 +271,7 @@ def test_extract_data_from_file_empty_second_line():
 
 def test_extract_data_from_file_empty_first_line():
     """Test data extraction ignores any empty line at start of file"""
-    csv_file = """\n2001,"Automated insert SymptomGroup","INSERT"\n"""
+    csv_file = """\n2001,"Automated insert SymptomGroup","CREATE"\n"""
     start = datetime.utcnow()
     event = generate_event_payload()
     lines = handler.extract_data_from_file(csv_file, event, start)
@@ -280,7 +280,7 @@ def test_extract_data_from_file_empty_first_line():
 @mock.patch(f"{file_path}.extract_query_data_from_csv", return_value={"csv_sgid": "2001", "csv_name": "Automated insert SymptomGroup","csv_zcode":"None", "action": "CREATE"})
 def test_extract_data_from_file_three_lines_empty_second_line(mock_extract):
     """Test data extraction ignores any empty line in middle of file"""
-    csv_file = """2001,"Automated insert SymptomGroup","INSERT"\n\n\n2001,"Automated update SymptomGroup","UPDATE"\n"""
+    csv_file = """2001,"Automated insert SymptomGroup","CREATE"\n\n\n2001,"Automated update SymptomGroup","UPDATE"\n"""
     start = datetime.utcnow()
     event = generate_event_payload()
     lines = handler.extract_data_from_file(csv_file, event, start)
@@ -290,7 +290,7 @@ def test_extract_data_from_file_three_lines_empty_second_line(mock_extract):
 @mock.patch(f"{file_path}.message.send_failure_slack_message", return_value = None)
 def test_extract_data_from_file_incomplete_second_line(mock_message):
     """Test data extraction raises error if any line is incomplete or invalid"""
-    csv_file = """2001,"Automated insert SymptomGroup","INSERT"\n2002,\n"""
+    csv_file = """2001,"Automated insert SymptomGroup","CREATE"\n2002,\n"""
     start = datetime.utcnow()
     event = generate_event_payload()
     with pytest.raises(IndexError, match="Unexpected data in csv file"):
@@ -299,7 +299,7 @@ def test_extract_data_from_file_incomplete_second_line(mock_message):
 @mock.patch(f"{file_path}.extract_query_data_from_csv", return_value={"csv_sgid": "2001", "csv_name": "Automated insert SymptomGroup","csv_zcode":"None", "action": "CREATE"})
 def test_extract_data_from_file_call_count(mock_extract):
     """Test data extraction calls code to extract data from csv one per non empty line"""
-    csv_file = """2001,"Automated insert SymptomGroup","INSERT"\n2001,"Automated update SymptomGroup","UPDATE"\n"""
+    csv_file = """2001,"Automated insert SymptomGroup","CREATE"\n2001,"Automated update SymptomGroup","UPDATE"\n"""
     start = datetime.utcnow()
     event = generate_event_payload()
     lines = handler.extract_data_from_file(csv_file, event, start)
@@ -309,7 +309,7 @@ def test_extract_data_from_file_call_count(mock_extract):
 @mock.patch(f"{file_path}.extract_query_data_from_csv", return_value={"csv_sgid": "2001", "csv_name": "Automated insert SymptomGroup","csv_zcode":"None", "action": "CREATE"})
 def test_extract_data_from_file_call_count_inc_empty_line(mock_extract):
     """Test data extraction calls code to extract data ignores empty line"""
-    csv_file = """2001,"Automated insert SymptomGroup","INSERT"\n\n2001,"Automated update SymptomGroup","UPDATE"\n"""
+    csv_file = """2001,"Automated insert SymptomGroup","CREATE"\n\n2001,"Automated update SymptomGroup","UPDATE"\n"""
     start = datetime.utcnow()
     event = generate_event_payload()
     lines = handler.extract_data_from_file(csv_file, event, start)
@@ -319,25 +319,33 @@ def test_extract_data_from_file_call_count_inc_empty_line(mock_extract):
 @mock.patch("psycopg2.connect")
 def test_execute_db_query_success(mock_db_connect):
     """Test code to execute query successfully"""
-    line = """2001,"New Symptom Group","INSERT"\n"""
+    line = """2001,"New Symptom Group","CREATE"\n"""
     data = ("New Symptom Group", "None", 2001)
     values = {}
-    values["action"] = "INSERT"
+    values["action"] = "CREATE"
     values['id'] = 2001
     values['name'] = "New Symptom Group"
     mock_db_connect.cursor.return_value.__enter__.return_value = "Success"
     query = """update pathwaysdos.symptomgroups set name = (%s), zcodeexists = (%s)
         where id = (%s);"""
+    #
+    handler.initialise_summary_count()
+    assert handler.summary_count_dict[handler.create_action] == 0
+    assert handler.summary_count_dict[handler.update_action] == 0
+    assert handler.summary_count_dict[handler.delete_action] == 0
     handler.execute_db_query(mock_db_connect, query, data, line, values)
     mock_db_connect.commit.assert_called_once()
     mock_db_connect.cursor().close.assert_called_once()
+    assert handler.summary_count_dict[handler.create_action] == 1
+    assert handler.summary_count_dict[handler.update_action] == 0
+    assert handler.summary_count_dict[handler.delete_action] == 0
 
 @mock.patch("psycopg2.connect")
 def test_execute_db_query_failure(mock_db_connect):
     """Test code to handle exception and rollback when executing query"""
-    line = """2001,"New Symptom Group","INSERT"\n"""
+    line = """2001,"New Symptom Group","CREATE"\n"""
     data = ("New Symptom Group", "None", 2001)
-    values = {"action":"INSERT","id":2001,"Name":"New Symptom Group"}
+    values = {"action":"CREATE","id":2001,"Name":"New Symptom Group"}
     mock_db_connect.cursor.return_value.__enter__.return_value = Exception
     query = """update pathwaysdos.symptomgroups set name = (%s), zcodeexists = (%s)
         where id = (%s);"""
@@ -530,6 +538,57 @@ mock_does_record_exist,mock_copy_object,mock_delete_object,mock_send_failure_sla
         mock_delete_object.assert_called_once()
         mock_send_success_slack_message.assert_not_called()
         mock_does_record_exist.assert_called_once()
+
+def test_initialise_summary_count():
+    handler.initialise_summary_count()
+    assert(len(handler.summary_count_dict) == 3)
+    assert handler.summary_count_dict[handler.create_action] == 0
+    assert handler.summary_count_dict[handler.update_action] == 0
+    assert handler.summary_count_dict[handler.delete_action] == 0
+
+def test_increment_summary_count_create():
+    handler.initialise_summary_count()
+    assert handler.summary_count_dict[handler.create_action] == 0
+    assert handler.summary_count_dict[handler.update_action] == 0
+    assert handler.summary_count_dict[handler.delete_action] == 0
+    values = {"action":"CREATE"}
+    handler.increment_summary_count(values)
+    assert handler.summary_count_dict[handler.create_action] == 1
+    assert handler.summary_count_dict[handler.update_action] == 0
+    assert handler.summary_count_dict[handler.delete_action] == 0
+
+def test_increment_summary_count_update():
+    handler.initialise_summary_count()
+    assert handler.summary_count_dict[handler.create_action] == 0
+    assert handler.summary_count_dict[handler.update_action] == 0
+    assert handler.summary_count_dict[handler.delete_action] == 0
+    values = {"action":"UPDATE"}
+    handler.increment_summary_count(values)
+    assert handler.summary_count_dict[handler.create_action] == 0
+    assert handler.summary_count_dict[handler.update_action] == 1
+    assert handler.summary_count_dict[handler.delete_action] == 0
+
+def test_increment_summary_count_delete():
+    handler.initialise_summary_count()
+    assert handler.summary_count_dict[handler.create_action] == 0
+    assert handler.summary_count_dict[handler.update_action] == 0
+    assert handler.summary_count_dict[handler.delete_action] == 0
+    values = {"action":"DELETE"}
+    handler.increment_summary_count(values)
+    assert handler.summary_count_dict[handler.create_action] == 0
+    assert handler.summary_count_dict[handler.update_action] == 0
+    assert handler.summary_count_dict[handler.delete_action] == 1
+
+def test_increment_summary_count_nosuch():
+    handler.initialise_summary_count()
+    assert handler.summary_count_dict[handler.create_action] == 0
+    assert handler.summary_count_dict[handler.update_action] == 0
+    assert handler.summary_count_dict[handler.delete_action] == 0
+    values = {"action":"NOSUCH"}
+    handler.increment_summary_count(values)
+    assert handler.summary_count_dict[handler.create_action] == 0
+    assert handler.summary_count_dict[handler.update_action] == 0
+    assert handler.summary_count_dict[handler.delete_action] == 0
 
 def generate_event_payload():
     """Utility function to generate dummy event data"""

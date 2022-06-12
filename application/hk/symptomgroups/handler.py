@@ -9,6 +9,11 @@ from utilities.logger import log_for_audit, log_for_error  # noqa
 
 csv_column_count = 3
 data_column_count = 4
+create_action = "CREATE"
+update_action = "UPDATE"
+delete_action = "DELETE"
+summary_count_dict = {}
+
 
 
 def request(event, context):
@@ -18,11 +23,18 @@ def request(event, context):
     env = event["env"]
     filename = event["filename"]
     bucket = event["bucket"]
+    initialise_summary_count()
     db_connection = connect_to_database(env, event, start)
 
     csv_file = retrieve_file_from_bucket(bucket, filename, event, start)
     extracted_data = extract_data_from_file(csv_file, filename, start)
     process_extracted_data(db_connection, extracted_data)
+    log_for_audit(
+        "Symptom groups updated: {0}, inserted: {1}, deleted: {2}".format(
+            summary_count_dict[update_action], summary_count_dict[create_action],
+            summary_count_dict[delete_action]
+        )
+    )
     cleanup(db_connection, bucket, filename, event, start)
 
 
@@ -156,7 +168,6 @@ def generate_db_query(row_values):
         return delete_query(row_values)
     else:
         log_for_error("Action {} not in approved list of actions".format(row_values["action"]))
-        # message.send_failure_slack_message(event, start)
         raise psycopg2.DatabaseError("Database Action {} is invalid".format(row_values["action"]))
 
 
@@ -194,6 +205,7 @@ def execute_db_query(db_connection, query, data, line, values):
     try:
         cursor.execute(query, data)
         db_connection.commit()
+        increment_summary_count(values)
         log_for_audit(
             "Action: {}, ID: {}, for symptomgroup {}".format(values["action"], values["csv_sgid"], values["csv_name"])
         )
@@ -217,3 +229,15 @@ def cleanup(db_connection, bucket, filename, event, start):
     # Send Slack Notification
     log_for_audit("Sending slack message...")
     message.send_success_slack_message(event, start)
+
+def initialise_summary_count():
+    summary_count_dict[create_action] = 0
+    summary_count_dict[update_action] = 0
+    summary_count_dict[delete_action] = 0
+
+def increment_summary_count(values):
+    if values["action"] in [create_action,update_action,delete_action]:
+        summary_count_dict[values["action"]] = summary_count_dict[values["action"]] + 1
+    else:
+        log_for_error("Can't increment count for action {0}. Valid actions are {1},{2},{3}".format(values["action"],
+            create_action, update_action, delete_action))
