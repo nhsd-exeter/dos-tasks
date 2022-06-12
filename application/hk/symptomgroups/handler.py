@@ -97,15 +97,12 @@ def does_record_exist(db, row_dict):
     record_exists = False
     log_for_audit("Checking if record exists for record with id {0}".format(row_dict["csv_sgid"]))
     try:
-        with db.cursor(cursor_factory=psycopg2.extras.DictCursor) as symptom_group_cur:
+        with db.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
             select_query = """select * from pathwaysdos.symptomgroups where id=%s"""
-            symptom_group_cur.execute(select_query, (str(row_dict["csv_sgid"]),))
-            persisted_sgs = symptom_group_cur.fetchall()
-            for row in persisted_sgs:
-                log_for_audit("Returned {0},{1},{2}".format(row[0], row[1], row[2]))
-            if len(persisted_sgs) > 0:
+            cursor.execute(select_query, (row_dict["csv_sgid"],))
+            if cursor.rowcount != 0:
                 record_exists = True
-    except Exception as e:
+    except (Exception, psycopg2.Error) as e:
         log_for_error(
             "Select symptom group by id failed - {0} => {1}".format(row_dict["csv_sgid"], str(e)),
         )
