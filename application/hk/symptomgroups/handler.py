@@ -99,6 +99,7 @@ def does_record_exist(db, row_dict):
     try:
         with db.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
             select_query = """select * from pathwaysdos.symptomgroups where id=%s"""
+            select_query = """select * from pathwaysdos.referralroles where id=%s"""
             cursor.execute(select_query, (row_dict["csv_sgid"],))
             if cursor.rowcount != 0:
                 record_exists = True
@@ -195,7 +196,7 @@ def execute_db_query(db_connection, query, data, line, values):
         cursor.execute(query, data)
         db_connection.commit()
         log_for_audit(
-            "Action: {}, ID: {}, for symptomgroup {}".format(values["action"], values["csv_id"], values["csv_name"])
+            "Action: {}, ID: {}, for symptomgroup {}".format(values["action"], values["csv_sgid"], values["csv_name"])
         )
     except Exception as e:
         log_for_error("Line {} in transaction failed. Rolling back".format(line))
