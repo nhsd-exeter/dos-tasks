@@ -15,7 +15,6 @@ delete_action = "DELETE"
 summary_count_dict = {}
 
 
-
 def request(event, context):
     start = datetime.utcnow()
     message.send_start_message(event, start)
@@ -31,8 +30,7 @@ def request(event, context):
     process_extracted_data(db_connection, extracted_data)
     log_for_audit(
         "Symptom groups updated: {0}, inserted: {1}, deleted: {2}".format(
-            summary_count_dict[update_action], summary_count_dict[create_action],
-            summary_count_dict[delete_action]
+            summary_count_dict[update_action], summary_count_dict[create_action], summary_count_dict[delete_action]
         )
     )
     cleanup(db_connection, bucket, filename, event, start)
@@ -230,14 +228,19 @@ def cleanup(db_connection, bucket, filename, event, start):
     log_for_audit("Sending slack message...")
     message.send_success_slack_message(event, start)
 
+
 def initialise_summary_count():
     summary_count_dict[create_action] = 0
     summary_count_dict[update_action] = 0
     summary_count_dict[delete_action] = 0
 
+
 def increment_summary_count(values):
-    if values["action"] in [create_action,update_action,delete_action]:
+    if values["action"] in [create_action, update_action, delete_action]:
         summary_count_dict[values["action"]] = summary_count_dict[values["action"]] + 1
     else:
-        log_for_error("Can't increment count for action {0}. Valid actions are {1},{2},{3}".format(values["action"],
-            create_action, update_action, delete_action))
+        log_for_error(
+            "Can't increment count for action {0}. Valid actions are {1},{2},{3}".format(
+                values["action"], create_action, update_action, delete_action
+            )
+        )
