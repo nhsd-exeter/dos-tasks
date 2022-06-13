@@ -540,6 +540,7 @@ mock_does_record_exist,mock_copy_object,mock_delete_object,mock_send_failure_sla
         mock_does_record_exist.assert_called_once()
 
 def test_initialise_summary_count():
+    """Test summary counts initialised correctly"""
     handler.initialise_summary_count()
     assert(len(handler.summary_count_dict) == 3)
     assert handler.summary_count_dict[handler.create_action] == 0
@@ -547,6 +548,7 @@ def test_initialise_summary_count():
     assert handler.summary_count_dict[handler.delete_action] == 0
 
 def test_increment_summary_count_create():
+    """Test only create count incremented for create action """
     handler.initialise_summary_count()
     assert handler.summary_count_dict[handler.create_action] == 0
     assert handler.summary_count_dict[handler.update_action] == 0
@@ -558,6 +560,7 @@ def test_increment_summary_count_create():
     assert handler.summary_count_dict[handler.delete_action] == 0
 
 def test_increment_summary_count_update():
+    """Test only update count incremented for update action """
     handler.initialise_summary_count()
     assert handler.summary_count_dict[handler.create_action] == 0
     assert handler.summary_count_dict[handler.update_action] == 0
@@ -569,6 +572,7 @@ def test_increment_summary_count_update():
     assert handler.summary_count_dict[handler.delete_action] == 0
 
 def test_increment_summary_count_delete():
+    """Test only delete count incremented for delete action """
     handler.initialise_summary_count()
     assert handler.summary_count_dict[handler.create_action] == 0
     assert handler.summary_count_dict[handler.update_action] == 0
@@ -580,6 +584,7 @@ def test_increment_summary_count_delete():
     assert handler.summary_count_dict[handler.delete_action] == 1
 
 def test_increment_summary_count_nosuch():
+    """Test NO count incremented for invalid action """
     handler.initialise_summary_count()
     assert handler.summary_count_dict[handler.create_action] == 0
     assert handler.summary_count_dict[handler.update_action] == 0
