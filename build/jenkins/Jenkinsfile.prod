@@ -39,14 +39,7 @@ pipeline {
         expression { env.PROFILE == "put" || env.PROFILE == "live" }
       }
       steps {
-        script { sh "make provision | tee /tmp/terraform_changes.txt" }
-      }
-    }
-
-    stage("Deployment Summary") {
-      when { expression { env.PROFILE == "put" || env.PROFILE == "live" } }
-      steps {
-        script { sh "make deployment-summary" }
+        script { sh "make provision TASK=${params.Task}" }
       }
     }
   }

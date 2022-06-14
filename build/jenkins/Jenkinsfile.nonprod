@@ -42,14 +42,7 @@ pipeline {
     stage("Deploy") {
       when { expression { params.Task != "none" } }
       steps {
-        script { sh "make provision TASK=${params.Task} | tee /tmp/terraform_changes.txt" }
-      }
-    }
-
-    stage("Deployment Summary") {
-      when { expression { params.Task != "none" } }
-      steps {
-        script { sh "make deployment-summary" }
+        script { sh "make provision TASK=${params.Task}" }
       }
     }
   }

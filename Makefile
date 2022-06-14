@@ -205,10 +205,14 @@ pipeline-send-notification: ## Send Slack notification with the pipeline status 
 
 propagate: # Propagate the image to production ecr - mandatory: BUILD_COMMIT_HASH=[image hash],GIT_TAG=[git tag],ARTEFACTS=[comma separated list]
 	eval "$$(make aws-assume-role-export-variables PROFILE=$(PROFILE))"
-	for image in $$(echo $(or $(ARTEFACTS), $(ARTEFACT)) | tr "," "\n"); do
-		make docker-image-find-and-version-as COMMIT=$(BUILD_COMMIT_HASH) NAME=$$image TAG=$(GIT_TAG) AWS_ECR=$(AWS_LAMBDA_ECR)
-	done
-
+	make docker-image-find-and-version-as COMMIT=$(BUILD_COMMIT_HASH) NAME=hk-filter TAG=$(GIT_TAG) AWS_ECR=$(AWS_LAMBDA_ECR)
+	if [ "$(ARTEFACTS)" == "all" ]; then
+		for image in $$(echo $(TASKS) | tr "," "\n"); do
+			make docker-image-find-and-version-as COMMIT=$(BUILD_COMMIT_HASH) NAME=hk-$$image TAG=$(GIT_TAG) AWS_ECR=$(AWS_LAMBDA_ECR)
+		done
+	else
+		make docker-image-find-and-version-as COMMIT=$(BUILD_COMMIT_HASH) NAME=hk-$(ARTEFACTS) TAG=$(GIT_TAG) AWS_ECR=$(AWS_LAMBDA_ECR)
+	fi
 parse-profile-from-tag: # Return profile based off of git tag - Mandatory GIT_TAG=[git tag]
 	echo $(GIT_TAG) | cut -d "-" -f2
 
