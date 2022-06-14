@@ -87,6 +87,7 @@ def process_extracted_data(db_connection, row_data):
             )
             raise e
 
+
 # TODO move to util with parameterised query or table name
 def does_record_exist(db, row_dict):
     """
@@ -106,12 +107,13 @@ def does_record_exist(db, row_dict):
         raise e
     return record_exists
 
+
 def extract_query_data_from_csv(line):
     """
     Checks  maps data to db cols if correct
     """
     csv_dict = {}
-    if check_csv_format(line,csv_column_count):
+    if check_csv_format(line, csv_column_count):
         try:
             id = line[0]
             if id == "":
@@ -132,6 +134,7 @@ def extract_query_data_from_csv(line):
         except Exception as ex:
             log_for_audit("CSV data invalid " + ex)
     return csv_dict
+
 
 # TODO move to util but call back to here for query content
 def generate_db_query(row_values):
@@ -181,9 +184,7 @@ def execute_db_query(db_connection, query, data, line, values):
         cursor.execute(query, data)
         db_connection.commit()
         increment_summary_count(values)
-        log_for_audit(
-            "Action: {}, ID: {}, for symptomgroup {}".format(values["action"], values["id"], values["name"])
-        )
+        log_for_audit("Action: {}, ID: {}, for symptomgroup {}".format(values["action"], values["id"], values["name"]))
     except Exception as e:
         log_for_error("Line {} in transaction failed. Rolling back".format(line))
         log_for_error("Error: {}".format(e))
@@ -205,11 +206,13 @@ def cleanup(db_connection, bucket, filename, event, start):
     log_for_audit("Sending slack message...")
     message.send_success_slack_message(event, start)
 
+
 # TODO move to util if other jobs report counts
 def initialise_summary_count():
     summary_count_dict[create_action] = 0
     summary_count_dict[update_action] = 0
     summary_count_dict[delete_action] = 0
+
 
 #  TODO move to util if other jobs report counts
 def increment_summary_count(values):
