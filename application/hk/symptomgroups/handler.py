@@ -4,7 +4,7 @@ import psycopg2.extras
 from utilities import s3, database, message
 from datetime import datetime
 
-
+from utilities.common_task import check_csv_format, valid_action
 from utilities.logger import log_for_audit, log_for_error  # noqa
 
 csv_column_count = 3
@@ -82,24 +82,12 @@ def process_extracted_data(db_connection, row_data):
         except Exception as e:
             log_for_error(
                 "Processing symptom group data failed with |{0}|{1}|{2}| => {3}".format(
-                    row_values["csv_sgid"], row_values["csv_name"], row_values["csv_zcode"], str(e)
+                    row_values["id"], row_values["name"], row_values["zcode"], str(e)
                 ),
             )
             raise e
 
-
-def valid_action(record_exists, row_data):
-    valid_action = False
-    if record_exists and row_data["action"] in ("UPDATE", "DELETE"):
-        valid_action = True
-    if not record_exists and row_data["action"] in ("CREATE"):
-        valid_action = True
-
-    if not valid_action:
-        log_for_error("Invalid action {} for the record with ID {}".format(row_data["action"], row_data["csv_sgid"]))
-    return valid_action
-
-
+# TODO move to util with parameterised query or table name
 def does_record_exist(db, row_dict):
     """
     Checks to see if symptom group already exists in db with the id
@@ -108,53 +96,44 @@ def does_record_exist(db, row_dict):
     try:
         with db.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
             select_query = """select * from pathwaysdos.symptomgroups where id=%s"""
-            cursor.execute(select_query, (row_dict["csv_sgid"],))
+            cursor.execute(select_query, (row_dict["id"],))
             if cursor.rowcount != 0:
                 record_exists = True
     except (Exception, psycopg2.Error) as e:
         log_for_error(
-            "Select symptom group by id failed - {0} => {1}".format(row_dict["csv_sgid"], str(e)),
+            "Select symptom group by id failed - {0} => {1}".format(row_dict["id"], str(e)),
         )
         raise e
     return record_exists
-
-
-def check_csv_format(csv_row):
-    if len(csv_row) == csv_column_count:
-        return True
-    else:
-        log_for_audit("CSV format invalid - invalid length")
-        return False
-
 
 def extract_query_data_from_csv(line):
     """
     Checks  maps data to db cols if correct
     """
     csv_dict = {}
-    if check_csv_format(line):
+    if check_csv_format(line,csv_column_count):
         try:
-            csv_sgid = line[0]
-            if csv_sgid == "":
-                csv_sgid = None
+            id = line[0]
+            if id == "":
+                id = None
             else:
-                csv_sgid = int(csv_sgid)
-            csv_name = line[1]
-            if csv_name == "":
-                csv_name = None
-                csv_zcode = False
+                id = int(id)
+            name = line[1]
+            if name == "":
+                name = None
+                zcode = False
             else:
-                csv_zcode = csv_name.startswith("z2.0 - ")
+                zcode = name.startswith("z2.0 - ")
             csv_action = line[2].upper()
-            csv_dict["csv_sgid"] = csv_sgid
-            csv_dict["csv_name"] = csv_name
-            csv_dict["csv_zcode"] = csv_zcode
+            csv_dict["id"] = id
+            csv_dict["name"] = name
+            csv_dict["zcode"] = zcode
             csv_dict["action"] = csv_action
         except Exception as ex:
             log_for_audit("CSV data invalid " + ex)
     return csv_dict
 
-
+# TODO move to util but call back to here for query content
 def generate_db_query(row_values):
     if row_values["action"] in ("CREATE"):
         return create_query(row_values)
@@ -176,7 +155,7 @@ def create_query(row_values):
         name,
         zcodeexists;
     """
-    data = (row_values["csv_sgid"], row_values["csv_name"], row_values["csv_zcode"])
+    data = (row_values["id"], row_values["name"], row_values["zcode"])
     return query, data
 
 
@@ -184,7 +163,7 @@ def update_query(row_values):
     query = """
         update pathwaysdos.symptomgroups set name = (%s), zcodeexists = (%s) where id = (%s);
     """
-    data = (row_values["csv_name"], row_values["csv_zcode"], row_values["csv_sgid"])
+    data = (row_values["name"], row_values["zcode"], row_values["id"])
     return query, data
 
 
@@ -192,7 +171,7 @@ def delete_query(row_values):
     query = """
         delete from pathwaysdos.symptomgroups where id = (%s)
     """
-    data = (row_values["csv_sgid"],)
+    data = (row_values["id"],)
     return query, data
 
 
@@ -203,7 +182,7 @@ def execute_db_query(db_connection, query, data, line, values):
         db_connection.commit()
         increment_summary_count(values)
         log_for_audit(
-            "Action: {}, ID: {}, for symptomgroup {}".format(values["action"], values["csv_sgid"], values["csv_name"])
+            "Action: {}, ID: {}, for symptomgroup {}".format(values["action"], values["id"], values["name"])
         )
     except Exception as e:
         log_for_error("Line {} in transaction failed. Rolling back".format(line))
@@ -226,13 +205,13 @@ def cleanup(db_connection, bucket, filename, event, start):
     log_for_audit("Sending slack message...")
     message.send_success_slack_message(event, start)
 
-
+# TODO move to util if other jobs report counts
 def initialise_summary_count():
     summary_count_dict[create_action] = 0
     summary_count_dict[update_action] = 0
     summary_count_dict[delete_action] = 0
 
-
+#  TODO move to util if other jobs report counts
 def increment_summary_count(values):
     if values["action"] in [create_action, update_action, delete_action]:
         summary_count_dict[values["action"]] = summary_count_dict[values["action"]] + 1

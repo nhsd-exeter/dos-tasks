@@ -31,10 +31,10 @@ def test_csv_line():
     csv_row = [str(csv_sg_id), csv_sg_desc, csv_sg_action]
     csv_dict = handler.extract_query_data_from_csv(csv_row)
     assert len(csv_dict) == 4
-    assert str(csv_dict["csv_sgid"]) == str(csv_sg_id)
-    assert csv_dict["csv_name"] == str(csv_sg_desc)
+    assert str(csv_dict["id"]) == str(csv_sg_id)
+    assert csv_dict["name"] == str(csv_sg_desc)
     assert csv_dict["action"] == str(csv_sg_action).upper()
-    assert csv_dict["csv_zcode"] is False
+    assert csv_dict["zcode"] is False
 
 
 def test_csv_line_lc():
@@ -43,10 +43,10 @@ def test_csv_line_lc():
     csv_row = [str(csv_sg_id), csv_sg_desc, csv_sg_action]
     csv_dict = handler.extract_query_data_from_csv(csv_row)
     assert len(csv_dict) == 4
-    assert str(csv_dict["csv_sgid"]) == str(csv_sg_id)
-    assert csv_dict["csv_name"] == str(csv_sg_desc)
+    assert str(csv_dict["id"]) == str(csv_sg_id)
+    assert csv_dict["name"] == str(csv_sg_desc)
     assert csv_dict["action"] == str(csv_sg_action).upper()
-    assert csv_dict["csv_zcode"] is False
+    assert csv_dict["zcode"] is False
 
 
 def test_invalid_csv_line():
@@ -61,7 +61,7 @@ def test_no_sgid_csv_line():
     csv_row = ["", csv_sg_desc, csv_sg_action]
     csv_dict = handler.extract_query_data_from_csv(csv_row)
     assert len(csv_dict) == 4
-    assert str(csv_dict["csv_sgid"]) == "None"
+    assert str(csv_dict["id"]) == "None"
 
 
 def test_no_sgdesc_csv_line():
@@ -69,8 +69,8 @@ def test_no_sgdesc_csv_line():
     csv_row = [str(csv_sg_id), "", csv_sg_action]
     csv_dict = handler.extract_query_data_from_csv(csv_row)
     assert len(csv_dict) == 4
-    assert str(csv_dict["csv_name"]) == "None"
-    assert csv_dict["csv_zcode"] is False
+    assert str(csv_dict["name"]) == "None"
+    assert csv_dict["zcode"] is False
 
 
 def test_zcode_sgdesc_csv_line():
@@ -78,7 +78,7 @@ def test_zcode_sgdesc_csv_line():
     csv_row = [str(csv_sg_id), "z2.0 - test", csv_sg_action]
     csv_dict = handler.extract_query_data_from_csv(csv_row)
     assert len(csv_dict) == 4
-    assert csv_dict["csv_zcode"] is True
+    assert csv_dict["zcode"] is True
 
 
 def test_csv_line_exception():
@@ -86,69 +86,6 @@ def test_csv_line_exception():
     csv_row = [str(csv_sg_id), csv_sg_desc, 1]
     with pytest.raises(Exception):
         handler.extract_query_data_from_csv(csv_row)
-
-def test_valid_create_action():
-    """Test valid condition for create action"""
-    csv_dict = {}
-    csv_dict["csv_sgid"] = csv_sg_id
-    csv_dict["csv_name"] = csv_sg_desc
-    csv_dict["csv_zcode"] = False
-    csv_dict["action"] = "CREATE"
-    assert handler.valid_action(False,csv_dict)
-
-def test_invalid_create_action():
-    """Test invalid condition for create action"""
-    csv_dict = {}
-    csv_dict["csv_sgid"] = csv_sg_id
-    csv_dict["csv_name"] = csv_sg_desc
-    csv_dict["csv_zcode"] = False
-    csv_dict["action"] = "CREATE"
-    assert not handler.valid_action(True,csv_dict)
-
-def test_valid_update_action():
-    """Test valid condition for update action"""
-    csv_dict = {}
-    csv_dict["csv_sgid"] = csv_sg_id
-    csv_dict["csv_name"] = csv_sg_desc
-    csv_dict["csv_zcode"] = False
-    csv_dict["action"] = "UPDATE"
-    assert handler.valid_action(True,csv_dict)
-
-def test_invalid_update_action():
-    """Test invalid condition for update action"""
-    csv_dict = {}
-    csv_dict["csv_sgid"] = csv_sg_id
-    csv_dict["csv_name"] = csv_sg_desc
-    csv_dict["csv_zcode"] = False
-    csv_dict["action"] = "UPDATE"
-    assert not handler.valid_action(False,csv_dict)
-
-def test_valid_delete_action():
-    """Test valid condition for delete action"""
-    csv_dict = {}
-    csv_dict["csv_sgid"] = csv_sg_id
-    csv_dict["csv_name"] = csv_sg_desc
-    csv_dict["csv_zcode"] = False
-    csv_dict["action"] = "DELETE"
-    assert handler.valid_action(True,csv_dict)
-
-def test_invalid_delete_action():
-    """Test invalid condition for delete action"""
-    csv_dict = {}
-    csv_dict["csv_sgid"] = csv_sg_id
-    csv_dict["csv_name"] = csv_sg_desc
-    csv_dict["csv_zcode"] = False
-    csv_dict["action"] = "DELETE"
-    assert not handler.valid_action(False,csv_dict)
-
-def test_invalid_action():
-    """Test validation of unrecognized action"""
-    csv_dict = {}
-    csv_dict["csv_sgid"] = csv_sg_id
-    csv_dict["csv_name"] = csv_sg_desc
-    csv_dict["csv_zcode"] = False
-    csv_dict["action"] = "NOSUCH"
-    assert not handler.valid_action(True,csv_dict)
 
 def test_generating_create_query():
     """Test creation of insert query and data arguments"""
@@ -161,15 +98,15 @@ def test_generating_create_query():
     remove = string.punctuation + string.whitespace
 
     csv_dict = {}
-    csv_dict["csv_sgid"] = csv_sg_id
-    csv_dict["csv_name"] = csv_sg_desc
-    csv_dict["csv_zcode"] = False
+    csv_dict["id"] = csv_sg_id
+    csv_dict["name"] = csv_sg_desc
+    csv_dict["zcode"] = False
     csv_dict["action"] = "CREATE"
     query, data = handler.generate_db_query(csv_dict)
     mapping = {ord(c): None for c in remove}
     assert query.translate(mapping) == create_query_string.translate(mapping),"Query syntax mismatched"
-    assert data[0] == csv_dict["csv_sgid"]
-    assert data[1] == csv_dict["csv_name"]
+    assert data[0] == csv_dict["id"]
+    assert data[1] == csv_dict["name"]
 
 def test_generating_update_query():
     """Test creation of update query and data arguments"""
@@ -178,37 +115,37 @@ def test_generating_update_query():
     remove = string.punctuation + string.whitespace
 
     csv_dict = {}
-    csv_dict["csv_sgid"] = csv_sg_id
-    csv_dict["csv_name"] = csv_sg_desc
-    csv_dict["csv_zcode"] = False
+    csv_dict["id"] = csv_sg_id
+    csv_dict["name"] = csv_sg_desc
+    csv_dict["zcode"] = False
     csv_dict["action"] = "UPDATE"
     query, data = handler.generate_db_query(csv_dict)
     mapping = {ord(c): None for c in remove}
     assert query.translate(mapping) == update_query_string.translate(mapping),"Query syntax mismatched"
-    assert data[0] == csv_dict["csv_name"]
-    assert data[1] == csv_dict["csv_zcode"]
-    assert data[2] == csv_dict["csv_sgid"]
+    assert data[0] == csv_dict["name"]
+    assert data[1] == csv_dict["zcode"]
+    assert data[2] == csv_dict["id"]
 
 def test_generating_delete_query():
     """Test creation of delete query and data argument"""
     delete_query_string = """delete from pathwaysdos.symptomgroups where id = (%s)"""
     remove = string.punctuation + string.whitespace
     csv_dict = {}
-    csv_dict["csv_sgid"] = csv_sg_id
-    csv_dict["csv_name"] = csv_sg_desc
-    csv_dict["csv_zcode"] = False
+    csv_dict["id"] = csv_sg_id
+    csv_dict["name"] = csv_sg_desc
+    csv_dict["zcode"] = False
     csv_dict["action"] = "DELETE"
     query, data = handler.generate_db_query(csv_dict)
     mapping = {ord(c): None for c in remove}
     assert query.translate(mapping) == delete_query_string.translate(mapping),"Query syntax mismatched"
-    assert data[0] == csv_dict["csv_sgid"]
+    assert data[0] == csv_dict["id"]
 
 def test_generating_query_with_invalid_action():
     """Test creation of query and data arguments for unrecognized action"""
     csv_dict = {}
-    csv_dict["csv_sgid"] = csv_sg_id
-    csv_dict["csv_name"] = csv_sg_desc
-    csv_dict["csv_zcode"] = False
+    csv_dict["id"] = csv_sg_id
+    csv_dict["name"] = csv_sg_desc
+    csv_dict["zcode"] = False
     csv_dict["action"] = "REMOVE"
     with pytest.raises(psycopg2.DatabaseError):
         query, data = handler.generate_db_query(csv_dict)
@@ -277,7 +214,7 @@ def test_extract_data_from_file_empty_first_line():
     lines = handler.extract_data_from_file(csv_file, event, start)
     assert len(lines) == 1
 
-@mock.patch(f"{file_path}.extract_query_data_from_csv", return_value={"csv_sgid": "2001", "csv_name": "Automated insert SymptomGroup","csv_zcode":"None", "action": "CREATE"})
+@mock.patch(f"{file_path}.extract_query_data_from_csv", return_value={"id": "2001", "name": "Automated insert SymptomGroup","zcode":"None", "action": "CREATE"})
 def test_extract_data_from_file_three_lines_empty_second_line(mock_extract):
     """Test data extraction ignores any empty line in middle of file"""
     csv_file = """2001,"Automated insert SymptomGroup","CREATE"\n\n\n2001,"Automated update SymptomGroup","UPDATE"\n"""
@@ -296,7 +233,7 @@ def test_extract_data_from_file_incomplete_second_line(mock_message):
     with pytest.raises(IndexError, match="Unexpected data in csv file"):
         handler.extract_data_from_file(csv_file, event, start)
 
-@mock.patch(f"{file_path}.extract_query_data_from_csv", return_value={"csv_sgid": "2001", "csv_name": "Automated insert SymptomGroup","csv_zcode":"None", "action": "CREATE"})
+@mock.patch(f"{file_path}.extract_query_data_from_csv", return_value={"id": "2001", "name": "Automated insert SymptomGroup","zcode":"None", "action": "CREATE"})
 def test_extract_data_from_file_call_count(mock_extract):
     """Test data extraction calls code to extract data from csv one per non empty line"""
     csv_file = """2001,"Automated insert SymptomGroup","CREATE"\n2001,"Automated update SymptomGroup","UPDATE"\n"""
@@ -306,7 +243,7 @@ def test_extract_data_from_file_call_count(mock_extract):
     assert len(lines) == 2
     assert mock_extract.call_count == len(lines)
 
-@mock.patch(f"{file_path}.extract_query_data_from_csv", return_value={"csv_sgid": "2001", "csv_name": "Automated insert SymptomGroup","csv_zcode":"None", "action": "CREATE"})
+@mock.patch(f"{file_path}.extract_query_data_from_csv", return_value={"id": "2001", "name": "Automated insert SymptomGroup","zcode":"None", "action": "CREATE"})
 def test_extract_data_from_file_call_count_inc_empty_line(mock_extract):
     """Test data extraction calls code to extract data ignores empty line"""
     csv_file = """2001,"Automated insert SymptomGroup","CREATE"\n\n2001,"Automated update SymptomGroup","UPDATE"\n"""
@@ -362,9 +299,9 @@ def test_process_extracted_data_single_record(mock_exist,mock_valid_action,mock_
     """Test extracting data calls each downstream functions once for one record"""
     row_data = {}
     csv_dict={}
-    csv_dict["csv_sgid"] = csv_sg_id
-    csv_dict["csv_name"] = csv_sg_desc
-    csv_dict["csv_zcode"] = False
+    csv_dict["id"] = csv_sg_id
+    csv_dict["name"] = csv_sg_desc
+    csv_dict["zcode"] = False
     csv_dict["action"] = "DELETE"
     row_data[0]=csv_dict
     handler.process_extracted_data(mock_db_connect, row_data)
@@ -382,9 +319,9 @@ def test_process_extracted_data_multiple_records(mock_exist,mock_valid_action,mo
     """Test extracting data calls each downstream functions once for each record"""
     row_data = {}
     csv_dict={}
-    csv_dict["csv_sgid"] = csv_sg_id
-    csv_dict["csv_name"] = csv_sg_desc
-    csv_dict["csv_zcode"] = False
+    csv_dict["id"] = csv_sg_id
+    csv_dict["name"] = csv_sg_desc
+    csv_dict["zcode"] = False
     csv_dict["action"] = "DELETE"
     row_data[0]=csv_dict
     row_data[1]=csv_dict
@@ -399,9 +336,9 @@ def test_process_extracted_data_error_check_exists_fails(mock_db_connect):
     """Test error handling when extracting data and record exist check fails"""
     row_data = {}
     csv_dict = {}
-    csv_dict["csv_sgid"] = csv_sg_id
-    csv_dict["csv_name"] = csv_sg_desc
-    csv_dict["csv_zcode"] = False
+    csv_dict["id"] = csv_sg_id
+    csv_dict["name"] = csv_sg_desc
+    csv_dict["zcode"] = False
     csv_dict["action"] = "DELETE"
     row_data[0]=csv_dict
     mock_db_connect = ""
@@ -414,9 +351,9 @@ def test_process_extracted_data_error_check_exists_passes(mock_exists,mock_db_co
     """Test error handling when extracting data and record exist check passes"""
     row_data = {}
     csv_dict = {}
-    csv_dict["csv_sgid"] = csv_sg_id
-    csv_dict["csv_name"] = csv_sg_desc
-    csv_dict["csv_zcode"] = False
+    csv_dict["id"] = csv_sg_id
+    csv_dict["name"] = csv_sg_desc
+    csv_dict["zcode"] = False
     csv_dict["action"] = "DELETE"
     row_data[0]=csv_dict
     mock_db_connect = ""
@@ -436,10 +373,10 @@ def test_get_csv_from_s3(mock_s3):
 def test_record_exists_true(mock_db_connect):
     """Test correct data passed to check record exists - returning true"""
     csv_dict = {}
-    csv_dict["csv_sgid"] = str(csv_sg_id)
-    csv_dict["csv_name"] = csv_sg_desc
+    csv_dict["id"] = str(csv_sg_id)
+    csv_dict["name"] = csv_sg_desc
     csv_dict["action"] = "DELETE"
-    csv_dict["csv_zcode"] = None
+    csv_dict["zcode"] = None
     mock_db_connect.cursor.return_value.__enter__.return_value.rowcount = 1
     assert handler.does_record_exist(mock_db_connect,csv_dict)
 
@@ -447,10 +384,10 @@ def test_record_exists_true(mock_db_connect):
 def test_does_record_exist_false(mock_db_connect):
     """Test correct data passed to check record exists - returning false"""
     csv_dict = {}
-    csv_dict["csv_sgid"] = str(csv_sg_id)
-    csv_dict["csv_name"] = csv_sg_desc
+    csv_dict["id"] = str(csv_sg_id)
+    csv_dict["name"] = csv_sg_desc
     csv_dict["action"] = "DELETE"
-    csv_dict["csv_zcode"] = None
+    csv_dict["zcode"] = None
     mock_db_connect.cursor.return_value.__enter__.return_value.rowcount = 0
     assert not handler.does_record_exist(mock_db_connect,csv_dict)
 
@@ -458,10 +395,10 @@ def test_does_record_exist_false(mock_db_connect):
 def test_does_record_exist_exception(mock_db_connect):
     """Test throwing of exception """
     csv_dict = {}
-    csv_dict["csv_sgid"] = str(csv_sg_id)
-    csv_dict["csv_name"] = csv_sg_desc
+    csv_dict["id"] = str(csv_sg_id)
+    csv_dict["name"] = csv_sg_desc
     csv_dict["action"] = "DELETE"
-    csv_dict["csv_zcode"] = None
+    csv_dict["zcode"] = None
     mock_db_connect = ""
     with pytest.raises(Exception):
         handler.does_record_exist(mock_db_connect,csv_dict)
