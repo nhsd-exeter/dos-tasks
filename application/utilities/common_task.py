@@ -1,12 +1,14 @@
 from utilities.logger import log_for_audit, log_for_error  # noqa
 
-def check_csv_format(csv_row,csv_column_count):
+
+def check_csv_format(csv_row, csv_column_count):
     """Checks length of csv data"""
     if len(csv_row) == csv_column_count:
         return True
     else:
         log_for_audit("CSV format invalid - invalid length")
         return False
+
 
 def valid_action(record_exists, row_data):
     """Returns True if action is valid; otherwise returns False"""
