@@ -113,7 +113,7 @@ def extract_query_data_from_csv(line):
     Checks  maps data to db cols if correct
     """
     csv_dict = {}
-    if check_csv_format(line, csv_column_count) and check_csv_values(line) :
+    if check_csv_format(line, csv_column_count) and check_csv_values(line):
         try:
             csv_dict["id"] = int(line[0])
             csv_dict["name"] = line[1]
@@ -123,12 +123,13 @@ def extract_query_data_from_csv(line):
             log_for_audit("CSV data invalid " + ex)
     return csv_dict
 
+
 def check_csv_values(line):
     """Returns false if either id or name are null or empty string"""
     valid_values = True
     try:
         int(line[0])
-    except ValueError :
+    except ValueError:
         log_for_audit("Id {} must be a integer".format(line[0]))
         valid_values = False
     if not str(line[0]):
@@ -138,7 +139,6 @@ def check_csv_values(line):
         log_for_audit("Name/Description {} can not be null or empty".format(line[1]))
         valid_values = False
     return valid_values
-
 
 
 # TODO move to util but call back to here for query content
