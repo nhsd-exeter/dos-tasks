@@ -10,6 +10,7 @@ diagnostic_logger.setLevel(DEBUG)
 
 log_structure = "{} | {} | {}"
 
+
 def log_for_audit(msg_log):
     audit_logger.info(log_structure.format(housekeeping_prefix, msg_prefix, msg_log))
 
