@@ -61,14 +61,13 @@ def extract_data_from_file(csv_file, event, start):
         if len(line) > 0:
             query_data = extract_query_data_from_csv(line)
             if len(query_data) != data_column_count:
-                log_for_error(
-                    "Problem constructing data from csv expecting {} items but have {}".format(
-                        str(csv_column_count), str(len(line))
+                log_for_audit(
+                    "Problem constructing data from line {} of csv expecting {} items but have {}".format(
+                        str(count), str(csv_column_count), str(len(line))
                     ),
                 )
-                message.send_failure_slack_message(event, start)
-                raise IndexError("Unexpected data in csv file")
-            lines[str(count)] = query_data
+            else:
+                lines[str(count)] = query_data
     return lines
 
 

@@ -219,14 +219,23 @@ def test_extract_data_from_file_three_lines_empty_second_line(mock_extract):
     assert len(lines) == 2
     assert mock_extract.call_count == 2
 
-@mock.patch(f"{file_path}.message.send_failure_slack_message", return_value = None)
-def test_extract_data_from_file_incomplete_second_line(mock_message):
-    """Test data extraction raises error if any line is incomplete or invalid"""
+def test_extract_data_from_file_incomplete_second_line():
+    """Test data extraction ignores a line itf it is incomplete"""
     csv_file = """2001,"Automated insert SymptomGroup","CREATE"\n2002,\n"""
     start = datetime.utcnow()
     event = generate_event_payload()
-    with pytest.raises(IndexError, match="Unexpected data in csv file"):
-        handler.extract_data_from_file(csv_file, event, start)
+    lines = handler.extract_data_from_file(csv_file, event, start)
+    assert len(lines)==1
+    assert lines["1"]["id"] == 2001
+
+def test_extract_data_from_file_incomplete_first_line():
+    """Test data extraction ingores first line if it is incomplete"""
+    csv_file = """2002,\n2001,"Automated insert SymptomGroup","CREATE"\n"""
+    start = datetime.utcnow()
+    event = generate_event_payload()
+    lines = handler.extract_data_from_file(csv_file, event, start)
+    assert len(lines)==1
+    assert lines["2"]["id"] == 2001
 
 @mock.patch(f"{file_path}.extract_query_data_from_csv", return_value={"id": "2001", "name": "Automated insert SymptomGroup","zcode":"None", "action": "CREATE"})
 def test_extract_data_from_file_call_count(mock_extract):
