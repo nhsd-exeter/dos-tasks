@@ -108,7 +108,7 @@ def test_db_set_connection_details_secrets_not_set(mock_get_secrets_value):
     mock_get_secrets_value.assert_called_once()
 
 
-@patch(f"{file_path}.secrets.SECRETS.get_secret_value", return_value="{\"DB_HOST\": \"mock_host\", \"DB_USER\": \"mock_user\", \"DB_USER_PASSWORD\": \"mock_password\"}")
+@patch(f"{file_path}.secrets.SECRETS.get_secret_value", return_value="{\"DB_HOST\": \"mock_host\", \"DB_USER\": \"mock_user\", \"DB_USER_PASSWORD\": \"mock_password\", \"DB_PERFORMANCE_PASSWORD\": \"mock_performance_password\", \"DB_PERFORMANCE_HOST\": \"mock_performance_host\"}")
 def test_db_set_connection_details_name_set_correctly_with_performance_env(mock_get_secrets_value):
     mock_event = {"filename": "mock_filename", "env": "mock_env", "bucket": "mock_bucket"}
     start = ""
@@ -116,8 +116,23 @@ def test_db_set_connection_details_name_set_correctly_with_performance_env(mock_
     db = database.DB()
     connection_details_set = db.db_set_connection_details(mock_env, mock_event, start)
     assert connection_details_set == True
-    assert db.db_host == "mock_host"
+    assert db.db_host == "mock_performance_host"
     assert db.db_name == "pathwaysdos"
+    assert db.db_user == "mock_user"
+    assert db.db_password == "mock_performance_password"
+    mock_get_secrets_value.assert_called_once()
+
+
+@patch(f"{file_path}.secrets.SECRETS.get_secret_value", return_value="{\"DB_HOST\": \"mock_host\", \"DB_USER\": \"mock_user\", \"DB_USER_PASSWORD\": \"mock_password\", \"DB_REGRESSION_HOST\": \"mock_regression_host\"}")
+def test_db_set_connection_details_name_set_correctly_with_regression_env(mock_get_secrets_value):
+    mock_event = {"filename": "mock_filename", "env": "mock_env", "bucket": "mock_bucket"}
+    start = ""
+    mock_env = "regression"
+    db = database.DB()
+    connection_details_set = db.db_set_connection_details(mock_env, mock_event, start)
+    assert connection_details_set == True
+    assert db.db_host == "mock_regression_host"
+    assert db.db_name == "pathwaysdos_regression"
     assert db.db_user == "mock_user"
     assert db.db_password == "mock_password"
     mock_get_secrets_value.assert_called_once()
