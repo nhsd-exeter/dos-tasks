@@ -63,7 +63,7 @@ def extract_data_from_file(csv_file, event, start):
             if len(query_data) != data_column_count:
                 log_for_error(
                     "Problem constructing data from csv expecting {} items but have {}".format(
-                        str(data_column_count), str(len(query_data))
+                        str(csv_column_count), str(len(line))
                     ),
                 )
                 message.send_failure_slack_message(event, start)
@@ -113,27 +113,32 @@ def extract_query_data_from_csv(line):
     Checks  maps data to db cols if correct
     """
     csv_dict = {}
-    if check_csv_format(line, csv_column_count):
+    if check_csv_format(line, csv_column_count) and check_csv_values(line) :
         try:
-            id = line[0]
-            if id == "":
-                id = None
-            else:
-                id = int(id)
-            name = line[1]
-            if name == "":
-                name = None
-                zcode = False
-            else:
-                zcode = name.startswith("z2.0 - ")
-            csv_action = line[2].upper()
-            csv_dict["id"] = id
-            csv_dict["name"] = name
-            csv_dict["zcode"] = zcode
-            csv_dict["action"] = csv_action
+            csv_dict["id"] = int(line[0])
+            csv_dict["name"] = line[1]
+            csv_dict["zcode"] = line[1].startswith("z2.0 - ")
+            csv_dict["action"] = line[2].upper()
         except Exception as ex:
             log_for_audit("CSV data invalid " + ex)
     return csv_dict
+
+def check_csv_values(line):
+    """Returns false if either id or name are null or empty string"""
+    valid_values = True
+    try:
+        int(line[0])
+    except ValueError :
+        log_for_audit("Id {} must be a integer".format(line[0]))
+        valid_values = False
+    if not str(line[0]):
+        log_for_audit("Id {} can not be null or empty".format(line[0]))
+        valid_values = False
+    if not line[1]:
+        log_for_audit("Name/Description {} can not be null or empty".format(line[1]))
+        valid_values = False
+    return valid_values
+
 
 
 # TODO move to util but call back to here for query content

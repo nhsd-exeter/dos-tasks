@@ -5,9 +5,9 @@ import sys
 import json
 import string
 import psycopg2
+import csv
 from datetime import datetime
 
-# sys.path.append(".")
 from .. import handler
 from utilities import database, message, s3, secrets
 
@@ -28,10 +28,10 @@ csv_sg_action = "REMOVE"
 
 def test_csv_line():
     """Test data extracted from valid csv"""
-    csv_row = [str(csv_sg_id), csv_sg_desc, csv_sg_action]
+    csv_row = [csv_sg_id, csv_sg_desc, csv_sg_action]
     csv_dict = handler.extract_query_data_from_csv(csv_row)
     assert len(csv_dict) == 4
-    assert str(csv_dict["id"]) == str(csv_sg_id)
+    assert csv_dict["id"] == csv_sg_id
     assert csv_dict["name"] == str(csv_sg_desc)
     assert csv_dict["action"] == str(csv_sg_action).upper()
     assert csv_dict["zcode"] is False
@@ -40,10 +40,10 @@ def test_csv_line():
 def test_csv_line_lc():
     """Test lower case action in csv is converted to u/c"""
     csv_sg_action = "remove"
-    csv_row = [str(csv_sg_id), csv_sg_desc, csv_sg_action]
+    csv_row = [csv_sg_id, csv_sg_desc, csv_sg_action]
     csv_dict = handler.extract_query_data_from_csv(csv_row)
     assert len(csv_dict) == 4
-    assert str(csv_dict["id"]) == str(csv_sg_id)
+    assert csv_dict["id"] == csv_sg_id
     assert csv_dict["name"] == str(csv_sg_desc)
     assert csv_dict["action"] == str(csv_sg_action).upper()
     assert csv_dict["zcode"] is False
@@ -51,7 +51,7 @@ def test_csv_line_lc():
 
 def test_invalid_csv_line():
     """Test invalid csv results in no data extracted"""
-    csv_row = [str(csv_sg_id), csv_sg_desc]
+    csv_row = [csv_sg_id, csv_sg_desc]
     csv_dict = handler.extract_query_data_from_csv(csv_row)
     assert len(csv_dict) == 0
 
@@ -60,22 +60,19 @@ def test_no_sgid_csv_line():
     """Test no id in csv extract sets id to None"""
     csv_row = ["", csv_sg_desc, csv_sg_action]
     csv_dict = handler.extract_query_data_from_csv(csv_row)
-    assert len(csv_dict) == 4
-    assert str(csv_dict["id"]) == "None"
+    assert len(csv_dict) == 0
 
 
 def test_no_sgdesc_csv_line():
     """Test if no name in csv extract sets name to None and zcode to False"""
-    csv_row = [str(csv_sg_id), "", csv_sg_action]
+    csv_row = [csv_sg_id, "", csv_sg_action]
     csv_dict = handler.extract_query_data_from_csv(csv_row)
-    assert len(csv_dict) == 4
-    assert str(csv_dict["name"]) == "None"
-    assert csv_dict["zcode"] is False
+    assert len(csv_dict) == 0
 
 
 def test_zcode_sgdesc_csv_line():
     """Test extract correctly recognises zcodes"""
-    csv_row = [str(csv_sg_id), "z2.0 - test", csv_sg_action]
+    csv_row = [csv_sg_id, "z2.0 - test", csv_sg_action]
     csv_dict = handler.extract_query_data_from_csv(csv_row)
     assert len(csv_dict) == 4
     assert csv_dict["zcode"] is True
@@ -83,7 +80,7 @@ def test_zcode_sgdesc_csv_line():
 
 def test_csv_line_exception():
     """Test exception handling by deliberately setting action to NOT a string"""
-    csv_row = [str(csv_sg_id), csv_sg_desc, 1]
+    csv_row = [csv_sg_id, csv_sg_desc, 1]
     with pytest.raises(Exception):
         handler.extract_query_data_from_csv(csv_row)
 
@@ -188,7 +185,6 @@ def test_extract_data_from_file_valid_length():
     lines = handler.extract_data_from_file(csv_file, event, start)
     assert len(lines) == 1
 
-# @mock.patch(f"{file_path}.message.send_failure_slack_message", return_value = None)
 def test_extract_data_from_file_valid_length_multiline():
     """Test two valid lines of csv equals two rows of extracted data"""
     csv_file = """2001,"Automated insert SymptomGroup","CREATE"\n2001,"Automated update SymptomGroup","UPDATE"\n"""
@@ -197,7 +193,6 @@ def test_extract_data_from_file_valid_length_multiline():
     lines = handler.extract_data_from_file(csv_file, event, start)
     assert len(lines) == 2
 
-# @mock.patch(f"{file_path}.message.send_start_message", return_value = None)
 def test_extract_data_from_file_empty_second_line():
     """Test data extraction ignores any empty line at end of file"""
     csv_file = """2001,"Automated insert SymptomGroup","CREATE"\n\n"""
@@ -265,7 +260,7 @@ def test_execute_db_query_success(mock_db_connect):
     mock_db_connect.cursor.return_value.__enter__.return_value = "Success"
     query = """update pathwaysdos.symptomgroups set name = (%s), zcodeexists = (%s)
         where id = (%s);"""
-    #
+
     handler.initialise_summary_count()
     assert handler.summary_count_dict[handler.create_action] == 0
     assert handler.summary_count_dict[handler.update_action] == 0
@@ -373,7 +368,7 @@ def test_get_csv_from_s3(mock_s3):
 def test_record_exists_true(mock_db_connect):
     """Test correct data passed to check record exists - returning true"""
     csv_dict = {}
-    csv_dict["id"] = str(csv_sg_id)
+    csv_dict["id"] = csv_sg_id
     csv_dict["name"] = csv_sg_desc
     csv_dict["action"] = "DELETE"
     csv_dict["zcode"] = None
@@ -384,7 +379,7 @@ def test_record_exists_true(mock_db_connect):
 def test_does_record_exist_false(mock_db_connect):
     """Test correct data passed to check record exists - returning false"""
     csv_dict = {}
-    csv_dict["id"] = str(csv_sg_id)
+    csv_dict["id"] = csv_sg_id
     csv_dict["name"] = csv_sg_desc
     csv_dict["action"] = "DELETE"
     csv_dict["zcode"] = None
@@ -395,7 +390,7 @@ def test_does_record_exist_false(mock_db_connect):
 def test_does_record_exist_exception(mock_db_connect):
     """Test throwing of exception """
     csv_dict = {}
-    csv_dict["id"] = str(csv_sg_id)
+    csv_dict["id"] = csv_sg_id
     csv_dict["name"] = csv_sg_desc
     csv_dict["action"] = "DELETE"
     csv_dict["zcode"] = None
@@ -531,6 +526,26 @@ def test_increment_summary_count_nosuch():
     assert handler.summary_count_dict[handler.create_action] == 0
     assert handler.summary_count_dict[handler.update_action] == 0
     assert handler.summary_count_dict[handler.delete_action] == 0
+
+def test_check_for_not_null_values():
+    """Checks key values not null"""
+    csv_line = [2001,"Not null Id","UPDATE"]
+    assert handler.check_csv_values(csv_line)
+
+def test_check_for_null_id():
+    """Checks if id is null/empty string"""
+    csv_line = ["","Null Id","UPDATE"]
+    assert not handler.check_csv_values(csv_line)
+
+def test_check_for_null_name():
+    """Checks is name/description is null/empty string"""
+    csv_line = [2001,"","UPDATE"]
+    assert not handler.check_csv_values(csv_line)
+
+def test_check_for_alpha_id():
+    """Checks is name/description is null/empty string"""
+    csv_line = ["abc","","UPDATE"]
+    assert not handler.check_csv_values(csv_line)
 
 def generate_event_payload():
     """Utility function to generate dummy event data"""
