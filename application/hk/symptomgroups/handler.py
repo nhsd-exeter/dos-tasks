@@ -26,7 +26,7 @@ def request(event, context):
     db_connection = connect_to_database(env, event, start)
 
     csv_file = retrieve_file_from_bucket(bucket, filename, event, start)
-    extracted_data = extract_data_from_file(csv_file, filename, start)
+    extracted_data = extract_data_from_file(csv_file)
     process_extracted_data(db_connection, extracted_data)
     log_for_audit(
         "Symptom groups updated: {0}, inserted: {1}, deleted: {2}".format(
@@ -52,7 +52,7 @@ def retrieve_file_from_bucket(bucket, filename, event, start):
     return s3_bucket.get_object(bucket, filename, event, start)
 
 
-def extract_data_from_file(csv_file, event, start):
+def extract_data_from_file(csv_file):
     lines = {}
     count = 0
     csv_reader = csv.reader(csv_file.split("\n"))

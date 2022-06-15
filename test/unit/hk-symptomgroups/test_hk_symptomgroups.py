@@ -180,60 +180,48 @@ def test_db_connect_succeeds(mock_db,mock_connection):
 def test_extract_data_from_file_valid_length():
     """Test one valid line of csv equals one row of extracted data"""
     csv_file = """2001,"Automated insert SymptomGroup","CREATE"\n"""
-    start = datetime.utcnow()
-    event = generate_event_payload()
-    lines = handler.extract_data_from_file(csv_file, event, start)
+    # start = datetime.utcnow()
+    # event = generate_event_payload()
+    lines = handler.extract_data_from_file(csv_file) #, event, start)
     assert len(lines) == 1
 
 def test_extract_data_from_file_valid_length_multiline():
     """Test two valid lines of csv equals two rows of extracted data"""
     csv_file = """2001,"Automated insert SymptomGroup","CREATE"\n2001,"Automated update SymptomGroup","UPDATE"\n"""
-    start = datetime.utcnow()
-    event = generate_event_payload()
-    lines = handler.extract_data_from_file(csv_file, event, start)
+    lines = handler.extract_data_from_file(csv_file) #, event, start)
     assert len(lines) == 2
 
 def test_extract_data_from_file_empty_second_line():
     """Test data extraction ignores any empty line at end of file"""
     csv_file = """2001,"Automated insert SymptomGroup","CREATE"\n\n"""
-    start = datetime.utcnow()
-    event = generate_event_payload()
-    lines = handler.extract_data_from_file(csv_file, event, start)
+    lines = handler.extract_data_from_file(csv_file) #, event, start
     assert len(lines) == 1
 
 def test_extract_data_from_file_empty_first_line():
     """Test data extraction ignores any empty line at start of file"""
     csv_file = """\n2001,"Automated insert SymptomGroup","CREATE"\n"""
-    start = datetime.utcnow()
-    event = generate_event_payload()
-    lines = handler.extract_data_from_file(csv_file, event, start)
+    lines = handler.extract_data_from_file(csv_file) #, event, start
     assert len(lines) == 1
 
 @mock.patch(f"{file_path}.extract_query_data_from_csv", return_value={"id": "2001", "name": "Automated insert SymptomGroup","zcode":"None", "action": "CREATE"})
 def test_extract_data_from_file_three_lines_empty_second_line(mock_extract):
     """Test data extraction ignores any empty line in middle of file"""
     csv_file = """2001,"Automated insert SymptomGroup","CREATE"\n\n\n2001,"Automated update SymptomGroup","UPDATE"\n"""
-    start = datetime.utcnow()
-    event = generate_event_payload()
-    lines = handler.extract_data_from_file(csv_file, event, start)
+    lines = handler.extract_data_from_file(csv_file) #, event, start
     assert len(lines) == 2
     assert mock_extract.call_count == 2
 
 def test_extract_data_from_file_incomplete_second_line():
     """Test data extraction ignores a line itf it is incomplete"""
     csv_file = """2001,"Automated insert SymptomGroup","CREATE"\n2002,\n"""
-    start = datetime.utcnow()
-    event = generate_event_payload()
-    lines = handler.extract_data_from_file(csv_file, event, start)
+    lines = handler.extract_data_from_file(csv_file) #, event, start
     assert len(lines)==1
     assert lines["1"]["id"] == 2001
 
 def test_extract_data_from_file_incomplete_first_line():
     """Test data extraction ingores first line if it is incomplete"""
     csv_file = """2002,\n2001,"Automated insert SymptomGroup","CREATE"\n"""
-    start = datetime.utcnow()
-    event = generate_event_payload()
-    lines = handler.extract_data_from_file(csv_file, event, start)
+    lines = handler.extract_data_from_file(csv_file) #, event, start
     assert len(lines)==1
     assert lines["2"]["id"] == 2001
 
@@ -241,9 +229,7 @@ def test_extract_data_from_file_incomplete_first_line():
 def test_extract_data_from_file_call_count(mock_extract):
     """Test data extraction calls code to extract data from csv one per non empty line"""
     csv_file = """2001,"Automated insert SymptomGroup","CREATE"\n2001,"Automated update SymptomGroup","UPDATE"\n"""
-    start = datetime.utcnow()
-    event = generate_event_payload()
-    lines = handler.extract_data_from_file(csv_file, event, start)
+    lines = handler.extract_data_from_file(csv_file) #, event, start
     assert len(lines) == 2
     assert mock_extract.call_count == len(lines)
 
@@ -251,9 +237,7 @@ def test_extract_data_from_file_call_count(mock_extract):
 def test_extract_data_from_file_call_count_inc_empty_line(mock_extract):
     """Test data extraction calls code to extract data ignores empty line"""
     csv_file = """2001,"Automated insert SymptomGroup","CREATE"\n\n2001,"Automated update SymptomGroup","UPDATE"\n"""
-    start = datetime.utcnow()
-    event = generate_event_payload()
-    lines = handler.extract_data_from_file(csv_file, event, start)
+    lines = handler.extract_data_from_file(csv_file) #, event, start
     assert len(lines) == 2
     assert mock_extract.call_count == len(lines)
 
