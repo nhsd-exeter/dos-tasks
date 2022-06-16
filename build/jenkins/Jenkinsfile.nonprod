@@ -1,7 +1,7 @@
 pipeline {
   agent any
   parameters {
-    choice(name: 'Task', choices: ['none', 'all', 'referralroles','symptomgroups'], description: 'Select which HK task to deploy')
+    choice(name: 'Task', choices: ['none', 'all', 'filter', 'referralroles','symptomgroups'], description: 'Select which HK task to deploy')
   }
   options {
     buildDiscarder(logRotator(daysToKeepStr: "7", numToKeepStr: "13"))
@@ -47,7 +47,7 @@ pipeline {
     }
   }
   post {
-    always { sh "make pipeline-send-notification PIPELINE_NAME='UEC DoS Tasks HK (NonProd)' BUILD_STATUS=${currentBuild.currentResult}" }
+    always { sh "make pipeline-send-notification PIPELINE_NAME='UEC DoS Tasks (NonProd)' BUILD_STATUS=${currentBuild.currentResult}" }
     cleanup { sh "make clean" }
   }
 }
