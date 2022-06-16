@@ -161,6 +161,68 @@ python-code-coverage-format: ### Test Python code with 'coverage' - mandatory: C
 
 # --------------------------------------
 
+lambda-alias: ### Updates new lambda version with alias based on commit hash - Mandatory PROFILE=[profile], TASK=[hk task]
+	eval "$$(make aws-assume-role-export-variables)"
+	if [ "$(TASK)" == "all" ]; then
+		for task in $$(echo $(TASKS) | tr "," "\n"); do
+			function=$(SERVICE_PREFIX)-hk-$$task-lambda
+			versions=$$(make -s aws-lambda-get-latest-version NAME=$$function)
+			version=$$(echo $$versions | make -s docker-run-tools CMD="jq '.Versions[-1].Version'" | tr -d '"')
+			make aws-lambda-create-alias NAME=$$function VERSION=$$version
+		done
+	else
+		function=$(SERVICE_PREFIX)-hk-$(TASK)-lambda
+		versions=$$(make -s aws-lambda-get-latest-version NAME=$$function)
+		version=$$(echo $$versions | make -s docker-run-tools CMD="jq '.Versions[-1].Version'" | tr -d '"')
+		make aws-lambda-create-alias NAME=$$function VERSION=$$version
+	fi
+
+aws-lambda-get-latest-version: ### Fetches the latest function version for a lambda function - Mandatory NAME=[lambda function name]
+	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
+		$(AWSCLI) lambda list-versions-by-function \
+			--function-name $(NAME) \
+			--output json \
+		"
+
+aws-lambda-create-alias: ### Creates an alias for a lambda version - Mandatory NAME=[lambda function name], VERSION=[lambda version]
+	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
+		$(AWSCLI) lambda create-alias \
+			--name $(VERSION)-$(BUILD_COMMIT_HASH) \
+			--function-name $(NAME) \
+			--function-version $(VERSION) \
+		"
+
+plan: # Plan environment - mandatory: PROFILE=[name], TASK=[hk task]
+	eval "$$(make secret-fetch-and-export-variables)"
+	make terraform-plan STACK=$(STACKS) PROFILE=$(PROFILE)
+	if [ "$(TASK)" == "all" ]; then
+		make terraform-plan STACK=$(TASKS) PROFILE=$(PROFILE)
+	else
+		make terraform-plan STACK=$(TASK) PROFILE=$(PROFILE)
+	fi
+aws-lambda-get-versions: ## Fetches all versions for a lambda function - Mandatory NAME=[lambda function name]
+	versions="$$(make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
+		$(AWSCLI) lambda list-versions-by-function \
+			--function-name $(NAME) \
+			--output text --query 'Versions[*].Version'  \
+		")"
+		echo $$versions
+		echo ----
+		echo $${versions[*]}
+		echo ----
+		echo $${versions[0]}
+		echo ----
+		IFS=' ' read -a arr <<< "$$versions"
+		echo -----
+		echo $${#versions[*]}
+		echo ----
+		for version in $$arr
+		do
+			echo $$version
+		done
+# vlist=$(aws lambda list-versions-by-function --function-name=uec-dos-tasks-nonprod-hk-symptomgroups-lambda --output json --query 'Versions[*].Version')
+# --------------------------------------
+
 deployment-summary: # Returns a deployment summary
 	echo Terraform Changes
 	cat /tmp/terraform_changes.txt | grep -E 'Apply...'
