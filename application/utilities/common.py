@@ -4,6 +4,7 @@ from utilities.logger import log_for_audit, log_for_error  # noqa
 from utilities.message import send_success_slack_message, send_failure_slack_message
 
 
+# TODO rename as common
 def check_csv_format(csv_row, csv_column_count):
     """Checks length of csv data"""
     if len(csv_row) == csv_column_count:

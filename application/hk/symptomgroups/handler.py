@@ -36,6 +36,7 @@ def request(event, context):
     cleanup(db_connection, bucket, filename, event, start)
 
 
+# TODO move to common database
 def connect_to_database(env, event, start):
     db = database.DB()
     log_for_audit("Setting DB connection details")
@@ -46,12 +47,14 @@ def connect_to_database(env, event, start):
     return db.db_connect(event, start)
 
 
+# TODO move to common S3
 def retrieve_file_from_bucket(bucket, filename, event, start):
     log_for_audit("Looking in {} for {} file".format(bucket, filename))
     s3_bucket = s3.S3()
     return s3_bucket.get_object(bucket, filename, event, start)
 
 
+# TODO consider moving to common ultimately
 def extract_data_from_file(csv_file):
     lines = {}
     count = 0
@@ -71,6 +74,7 @@ def extract_data_from_file(csv_file):
     return lines
 
 
+# TODO move to common
 def process_extracted_data(db_connection, row_data):
     for row_number, row_values in row_data.items():
         try:
@@ -87,7 +91,7 @@ def process_extracted_data(db_connection, row_data):
             raise e
 
 
-# TODO move to util with parameterised query or table name
+# TODO move to database with parameterised query or table name
 def does_record_exist(db, row_dict):
     """
     Checks to see if symptom group already exists in db with the id
@@ -123,6 +127,7 @@ def extract_query_data_from_csv(line):
     return csv_dict
 
 
+# TODO move to common maybe
 def check_csv_values(line):
     """Returns false if either id or name are null or empty string"""
     valid_values = True
@@ -174,6 +179,7 @@ def update_query(row_values):
     return query, data
 
 
+# TODO move to util
 def delete_query(row_values):
     query = """
         delete from pathwaysdos.symptomgroups where id = (%s)
@@ -182,6 +188,7 @@ def delete_query(row_values):
     return query, data
 
 
+# TODO move to database
 def execute_db_query(db_connection, query, data, line, values):
     cursor = db_connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
     try:
@@ -197,6 +204,7 @@ def execute_db_query(db_connection, query, data, line, values):
         cursor.close()
 
 
+# TODO move to common
 def cleanup(db_connection, bucket, filename, event, start):
     # Close DB connection
     log_for_audit("Closing DB connection...")
