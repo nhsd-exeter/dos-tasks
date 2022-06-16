@@ -45,6 +45,13 @@ pipeline {
         script { sh "make provision TASK=${params.Task}" }
       }
     }
+
+    stage("Check and remove older versions") {
+      when { expression { params.Task != "none" } }
+      steps {
+        script { sh "make remove-old-versions-for-task TASK=${params.Task}" }
+      }
+    }
   }
   post {
     always { sh "make pipeline-send-notification PIPELINE_NAME='UEC DoS Tasks (NonProd)' BUILD_STATUS=${currentBuild.currentResult}" }
