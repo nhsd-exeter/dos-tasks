@@ -104,8 +104,12 @@ unit-test-utilities: # Run utilities unit tests
 		CMD="python3 -m pytest utilities/test/"
 	rm -rf $(APPLICATION_DIR)/utilities/test
 
-coverage: ### Run test coverage - mandatory: PROFILE=[profile]
-	tasks=$(TASKS),filter
+coverage: ## Run test coverage - mandatory: PROFILE=[profile] TASK=[task] FORMAT=[xml/html]
+	if [ "$(TASK)" = "" ]; then
+		tasks=$(TASKS),filter
+	else
+		tasks=$(TASK)
+	fi
 	pythonpath=/tmp/.packages:/project/application/utilities
 	for task in $$(echo $$tasks | tr "," "\n"); do
 		pythonpath+=:/project/application/hk/
@@ -119,7 +123,7 @@ coverage: ### Run test coverage - mandatory: PROFILE=[profile]
 	rm -rf $(APPLICATION_DIR)/utilities/test
 	mkdir $(APPLICATION_DIR)/utilities/test
 	cp $(APPLICATION_TEST_DIR)/unit/utilities/* $(APPLICATION_DIR)/utilities/test
-	make python-code-coverage IMAGE=$$(make _docker-get-reg)/tester:latest \
+	make python-code-coverage-format IMAGE=$$(make _docker-get-reg)/tester:latest \
 		EXCLUDE=*/test/*,hk/*/utilities/* \
 		ARGS="--env TASK=utilities --env SLACK_WEBHOOK_URL=https://slackmockurl.com/ --env PROFILE=local \
 			--env PYTHONPATH=$$pythonpath"
@@ -129,9 +133,19 @@ coverage: ### Run test coverage - mandatory: PROFILE=[profile]
 	done
 	rm -rf $(APPLICATION_DIR)/utilities/test
 
-
-# --------------------------------------
-
+python-code-coverage-format: ### Test Python code with 'coverage' - mandatory: CMD=[test program]; optional: DIR,FILES=[file or pattern],EXCLUDE=[comma-separated list],FORMAT=[xml,html]
+	if [ "$(FORMAT)" = "" ]; then
+		format=xml
+	else
+		format=$(FORMAT)
+	fi
+	make docker-run-tools SH=y DIR=$(or $(DIR), $(APPLICATION_DIR_REL)) ARGS="$(ARGS)" CMD=" \
+		python -m coverage run \
+			--source=$(or $(FILES), '.') \
+			--omit=*/tests/*,$(EXCLUDE) \
+			$(or $(CMD), -m pytest) && \
+		python -m coverage $$(echo $$format | tr "," "\n") \
+	"
 security-scan: ### Fetches container scan report and returns findings - Mandatory PROFILE=[profile], TASK=[hk task], TAG=[image tag]
 	eval "$$(make aws-assume-role-export-variables)"
 	scan=$$(make -s aws-describe-image-scan TASK=$(TASK) TAG=$(TAG))
@@ -192,6 +206,14 @@ aws-lambda-create-alias: ### Creates an alias for a lambda version - Mandatory N
 			--function-version $(VERSION) \
 		"
 
+plan: # Plan environment - mandatory: PROFILE=[name], TASK=[hk task]
+	eval "$$(make secret-fetch-and-export-variables)"
+	make terraform-plan STACK=$(STACKS) PROFILE=$(PROFILE)
+	if [ "$(TASK)" == "all" ]; then
+		make terraform-plan STACK=$(TASKS) PROFILE=$(PROFILE)
+	else
+		make terraform-plan STACK=$(TASK) PROFILE=$(PROFILE)
+	fi
 # --------------------------------------
 
 deployment-summary: # Returns a deployment summary

@@ -14,7 +14,8 @@ VULNERABILITY_LEVEL := CRITICAL,HIGH
 # Infrastructure variables
 
 STACKS := secrets,s3,security-groups,filter
-TASKS := referralroles
+# TODO restore  referralroles - temp out to avoid cross-cutting other work
+TASKS := referralroles,symptomgroups
 ENVIRONMENT_LIST := ["test","test1","test2","test3","test4","fix","performance","regression","teamb"]
 TF_VAR_environment_list := $(ENVIRONMENT_LIST)
 
