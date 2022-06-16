@@ -12,7 +12,7 @@ AWS_LAMBDA_ECR = $(or $(AWS_ACCOUNT_ID), 000000000000).dkr.ecr.$(AWS_DEFAULT_REG
 # Infrastructure variables
 
 STACKS := secrets,s3,filter
-TASKS := referralroles
+TASKS := filter,referralroles
 ENVIRONMENT_LIST := ["live"]
 TF_VAR_environment_list := $(ENVIRONMENT_LIST)
 

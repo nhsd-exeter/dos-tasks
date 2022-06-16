@@ -80,8 +80,8 @@ docker-build docker-image: ### Build Docker image - mandatory: NAME; optional: V
 	elif [ -d $(DOCKER_DIR)/$(NAME) ] && [ -z "$(__DOCKER_BUILD)" ]; then
 		cd $(DOCKER_DIR)/$(NAME)
 		make build __DOCKER_BUILD=true && exit || cd $(PROJECT_DIR)
-	elif [ -d $(DOCKER_DIR)/hk ] && [ -z "$(__DOCKER_BUILD)" ]; then
-		cd $(DOCKER_DIR)/hk
+	elif [ -d $(DOCKER_DIR)/task ] && [ -z "$(__DOCKER_BUILD)" ]; then
+		cd $(DOCKER_DIR)/task
 		make build __DOCKER_BUILD=true && exit || cd $(PROJECT_DIR)
 	fi
 	# Dockerfile
@@ -797,7 +797,7 @@ _docker-get-dir:
 	elif [ -d $(DOCKER_DIR)/$(NAME) ]; then
 		echo $(DOCKER_DIR)/$(NAME)
 	else
-		echo $(DOCKER_DIR)/hk
+		echo $(DOCKER_DIR)/task
 	fi
 
 _docker-get-reg:
