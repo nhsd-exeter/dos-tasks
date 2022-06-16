@@ -2,7 +2,7 @@
 PROJECT_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 include $(abspath $(PROJECT_DIR)/build/automation/init.mk)
 
-LAMBDA_VERSIONS_TO_RETAIN = 5
+LAMBDA_VERSIONS_TO_RETAIN = 110
 # ==============================================================================
 # Development workflow targets
 
@@ -193,7 +193,7 @@ aws-lambda-create-alias: ### Creates an alias for a lambda version - Mandatory N
 			--function-version $(VERSION) \
 		"
 
-plan: # Plan environment - mandatory: PROFILE=[name], TASK=[hk task]
+plan: # Plan environment - Mandatory: PROFILE=[name], TASK=[hk task]
 	eval "$$(make secret-fetch-and-export-variables)"
 	make terraform-plan STACK=$(STACKS) PROFILE=$(PROFILE)
 	if [ "$(TASK)" == "all" ]; then
@@ -201,6 +201,20 @@ plan: # Plan environment - mandatory: PROFILE=[name], TASK=[hk task]
 	else
 		make terraform-plan STACK=$(TASK) PROFILE=$(PROFILE)
 	fi
+
+remove-old-versions-for-task: ## Prune old versions of hk task lambdas - Mandatory; [PROFILE] - Optional [TASK]
+	if [ "$(TASK)" == "all" ]; then
+		for task in $$(echo $(TASKS) | tr "," "\n"); do
+			lambda_name="${SERVICE_PREFIX}-hk-$$task-lambda"
+			echo "Checking for oklder versions of lambda function $$lambda_name"
+			make aws-lambda-remove-old-versions NAME=$$lambda_name
+			done
+	else
+			lambda_name="${SERVICE_PREFIX}-hk-$(TASK)-lambda"
+			echo "Checking for older versions of lambda function $$lambda_name"
+			make aws-lambda-remove-old-versions NAME=$$lambda_name
+	fi
+
 
 aws-lambda-remove-old-versions: ## Remove older versions Mandatory NAME=[lambda function] Optional LAMBDA_VERSIONS_TO_RETAIN (default 5)
 	older_versions_to_remove="$$(make aws-lambda-get-versions-to-remove NAME=$(NAME))"
