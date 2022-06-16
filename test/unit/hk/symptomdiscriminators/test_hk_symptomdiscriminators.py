@@ -146,18 +146,24 @@ def test_process_file_success_with_empty_line():
                     "5": {"id": "00003", "description": "Mock Delete SD", "action": "DELETE"}}
 
 
-@patch(f"{file_path}.message.send_failure_slack_message")
-def test_process_file_raises_error_with_incorrect_line_format(mock_send_failure_slack_message):
-    mock_csv_file = """
-00001,"Mock Create SD","CREATE","Unexpected Data"
+# @patch(f"{file_path}.message.send_failure_slack_message")
+def test_process_file_success_with_incorrect_line_format():
+    mock_csv_file = """00001,"Mock Create SD","CREATE","Unexpected Data"
 00002,"Mock Update SD","UPDATE"
-00003,"Mock Delete SD","DELETE"
-    """
-    with pytest.raises(IndexError) as assertion:
-        lines = handler.process_file(mock_csv_file, mock_event, start)
-    assert str(assertion.value) == "Unexpected data in csv file"
-    mock_send_failure_slack_message.assert_called_once()
+00003,"Mock Delete SD","DELETE"""
+    lines = handler.process_file(mock_csv_file, mock_event, start)
+    assert lines == {"2": {"id": "00002", "description": "Mock Update SD", "action": "UPDATE"},
+                    "3": {"id": "00003", "description": "Mock Delete SD", "action": "DELETE"}}
 
+
+@patch(f"{file_path}.message.send_failure_slack_message")
+def test_process_file_raises_error_with_no_valid_length_lines(mock_send_failure_slack_message):
+    mock_csv_file = """00001,"Mock Create SD","CREATE","Unexpected Data"
+
+00003,"Mock Delete SD","UPDATE","EXTRA"""
+    lines = handler.process_file(mock_csv_file, mock_event, start)
+    assert lines == {}
+    mock_send_failure_slack_message.assert_called_once()
 
 @patch(f"{file_path}.create_query", return_value="Create Query")
 @patch(f"{file_path}.update_query", return_value="Update Query")

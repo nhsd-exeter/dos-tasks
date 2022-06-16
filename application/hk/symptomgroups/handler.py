@@ -4,7 +4,7 @@ import psycopg2.extras
 from utilities import s3, database, message
 from datetime import datetime
 
-from utilities.common_task import check_csv_format, valid_action
+from utilities.common import check_csv_format, valid_action
 from utilities.logger import log_for_audit, log_for_error  # noqa
 
 csv_column_count = 3

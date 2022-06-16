@@ -1,4 +1,4 @@
-from application.utilities.common_task import check_csv_format, valid_action
+from application.utilities.common import check_csv_format, valid_action
 from .. import common_task
 
 csv_id = 2001
@@ -60,4 +60,3 @@ def test_invalid_action():
     csv_dict["id"] = csv_id
     csv_dict["action"] = "NOSUCH"
     assert not valid_action(True,csv_dict)
-
