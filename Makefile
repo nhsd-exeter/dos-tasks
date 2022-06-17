@@ -161,6 +161,73 @@ python-code-coverage-format: ### Test Python code with 'coverage' - mandatory: C
 
 # --------------------------------------
 
+remove-old-versions-for-task: ## Prune old versions of hk task lambdas - Mandatory; [PROFILE] - Optional [TASK]
+	eval "$$(make aws-assume-role-export-variables)"
+	if [ "$(TASK)" == "all" ]; then
+		for task in $$(echo $(TASKS) | tr "," "\n"); do
+			task_type=$$(make task-type NAME=$$task)
+			lambda_name="${SERVICE_PREFIX}-$$task_type-$$task-lambda"
+			echo "Checking for older versions of lambda function $$lambda_name"
+			make aws-lambda-remove-old-versions NAME=$$lambda_name
+			done
+	else
+			task_type=$$(make task-type NAME=$(TASK))
+			lambda_name="${SERVICE_PREFIX}-$$task_type-$(TASK)-lambda"
+			echo "Checking for older versions of lambda function $$lambda_name"
+			make aws-lambda-remove-old-versions NAME=$$lambda_name
+	fi
+
+
+aws-lambda-remove-old-versions: ## Remove older versions Mandatory NAME=[lambda function] Optional LAMBDA_VERSIONS_TO_RETAIN (default 5)
+	older_versions_to_remove="$$(make aws-lambda-get-versions-to-remove NAME=$(NAME))"
+	# convert space separated string into array
+	version_array=($$older_versions_to_remove)
+	echo "There are $${#version_array[*]} versions to be removed for $(NAME)"
+	for version in $${older_versions_to_remove}
+		do
+			make aws-lamba-function-delete NAME=$(NAME) VERSION=$$version
+		done
+
+aws-lamba-function-delete: ## Delete version of lambda function - Mandatory NAME=[lambda function] VERSION=[version number]
+	echo "Removing version $(VERSION) for $(NAME)"
+	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
+		$(AWSCLI) lambda delete-function \
+			--function-name $(NAME) \
+			--qualifier $(VERSION) \
+		"
+
+aws-lambda-get-versions-to-remove: ## Returns list of version ids for a lambda function that can be removed - Mandatory NAME=[lambda function name] - Optional LAMBDA_VERSIONS_TO_RETAIN (default 5)
+	versions="$$(make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
+		$(AWSCLI) lambda list-versions-by-function \
+			--function-name $(NAME) \
+			--output text --query 'Versions[*].Version'  \
+		")"
+		if [ $(LAMBDA_VERSIONS_TO_RETAIN) -lt 5 ]; then
+				retain_number=5
+		else
+				retain_number=$(LAMBDA_VERSIONS_TO_RETAIN)
+		fi
+		version_array=($$versions)
+		# Latest is included in array but protected so need to reduce size of array by 1
+		number_to_remove=$$(($${#version_array[*]}-1-$$retain_number))
+		versions_to_remove=()
+		count=0
+		if [ $$number_to_remove -gt 0 ] ; then
+			for version in $${version_array[*]}
+				do
+					if [[ $$version != *"LATEST" ]]; then
+						count=$$((count + 1))
+						versions_to_remove+=("$$version")
+					fi
+					if [ $$count -eq $$number_to_remove ]; then
+						break
+					fi
+				done
+		fi
+		echo $${versions_to_remove[*]}
+
+# --------------------------------------
+
 deployment-summary: # Returns a deployment summary
 	echo Terraform Changes
 	cat /tmp/terraform_changes.txt | grep -E 'Apply...'
@@ -212,4 +279,5 @@ create-tester-repository: # Create ECR repositories to store the artefacts
 # ==============================================================================
 
 .SILENT: \
+	aws-lambda-get-versions-to-remove \
 	task-type
