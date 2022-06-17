@@ -2,7 +2,6 @@
 PROJECT_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 include $(abspath $(PROJECT_DIR)/build/automation/init.mk)
 
-LAMBDA_VERSIONS_TO_RETAIN = 5
 # ==============================================================================
 # Development workflow targets
 
@@ -162,42 +161,12 @@ python-code-coverage-format: ### Test Python code with 'coverage' - mandatory: C
 
 # --------------------------------------
 
-lambda-alias: ### Updates new lambda version with alias based on commit hash - Mandatory PROFILE=[profile], TASK=[hk task]
-	eval "$$(make aws-assume-role-export-variables)"
-	if [ "$(TASK)" == "all" ]; then
-		for task in $$(echo $(TASKS) | tr "," "\n"); do
-			function=$(SERVICE_PREFIX)-hk-$$task-lambda
-			versions=$$(make -s aws-lambda-get-latest-version NAME=$$function)
-			version=$$(echo $$versions | make -s docker-run-tools CMD="jq '.Versions[-1].Version'" | tr -d '"')
-			make aws-lambda-create-alias NAME=$$function VERSION=$$version
-		done
-	else
-		function=$(SERVICE_PREFIX)-hk-$(TASK)-lambda
-		versions=$$(make -s aws-lambda-get-latest-version NAME=$$function)
-		version=$$(echo $$versions | make -s docker-run-tools CMD="jq '.Versions[-1].Version'" | tr -d '"')
-		make aws-lambda-create-alias NAME=$$function VERSION=$$version
-	fi
-
-aws-lambda-get-latest-version: ### Fetches the latest function version for a lambda function - Mandatory NAME=[lambda function name]
-	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
-		$(AWSCLI) lambda list-versions-by-function \
-			--function-name $(NAME) \
-			--output json \
-		"
-
-aws-lambda-create-alias: ### Creates an alias for a lambda version - Mandatory NAME=[lambda function name], VERSION=[lambda version]
-	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
-		$(AWSCLI) lambda create-alias \
-			--name $(VERSION)-$(BUILD_COMMIT_HASH) \
-			--function-name $(NAME) \
-			--function-version $(VERSION) \
-		"
-
 remove-old-versions-for-task: ## Prune old versions of hk task lambdas - Mandatory; [PROFILE] - Optional [TASK]
 	eval "$$(make aws-assume-role-export-variables)"
+	task_type=$$(make task-type NAME=$$task)
 	if [ "$(TASK)" == "all" ]; then
 		for task in $$(echo $(TASKS) | tr "," "\n"); do
-			lambda_name="${SERVICE_PREFIX}-hk-$$task-lambda"
+			lambda_name="${SERVICE_PREFIX}-$$task_type-$$task-lambda"
 			echo "Checking for older versions of lambda function $$lambda_name"
 			make aws-lambda-remove-old-versions NAME=$$lambda_name
 			done
@@ -215,16 +184,16 @@ aws-lambda-remove-old-versions: ## Remove older versions Mandatory NAME=[lambda 
 	echo "There are $${#version_array[*]} versions to be removed for $(NAME)"
 	for version in $${older_versions_to_remove}
 		do
-			make aws-lamba-function-delete NAME=$(NAME) VERSION=$$version LAMBDA_VERSIONS_TO_RETAIN=$(LAMBDA_VERSIONS_TO_RETAIN)
+			make aws-lamba-function-delete NAME=$(NAME) VERSION=$$version
 		done
 
 aws-lamba-function-delete: ## Delete version of lambda function - Mandatory NAME=[lambda function] VERSION=[version number]
 	echo "Removing version $(VERSION) for $(NAME)"
-	$$(make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
+	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
 		$(AWSCLI) lambda delete-function \
 			--function-name $(NAME) \
 			--qualifier $(VERSION) \
-		")
+		"
 
 aws-lambda-get-versions-to-remove: ## Returns list of version ids for a lambda function that can be removed - Mandatory NAME=[lambda function name] - Optional LAMBDA_VERSIONS_TO_RETAIN (default 5)
 	versions="$$(make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
