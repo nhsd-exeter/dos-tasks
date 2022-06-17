@@ -163,15 +163,16 @@ python-code-coverage-format: ### Test Python code with 'coverage' - mandatory: C
 
 remove-old-versions-for-task: ## Prune old versions of hk task lambdas - Mandatory; [PROFILE] - Optional [TASK]
 	eval "$$(make aws-assume-role-export-variables)"
-	task_type=$$(make task-type NAME=$$task)
 	if [ "$(TASK)" == "all" ]; then
 		for task in $$(echo $(TASKS) | tr "," "\n"); do
+			task_type=$$(make task-type NAME=$$task)
 			lambda_name="${SERVICE_PREFIX}-$$task_type-$$task-lambda"
 			echo "Checking for older versions of lambda function $$lambda_name"
 			make aws-lambda-remove-old-versions NAME=$$lambda_name
 			done
 	else
-			lambda_name="${SERVICE_PREFIX}-hk-$(TASK)-lambda"
+			task_type=$$(make task-type NAME=$(TASK))
+			lambda_name="${SERVICE_PREFIX}-$$task_type-$(TASK)-lambda"
 			echo "Checking for older versions of lambda function $$lambda_name"
 			make aws-lambda-remove-old-versions NAME=$$lambda_name
 	fi
