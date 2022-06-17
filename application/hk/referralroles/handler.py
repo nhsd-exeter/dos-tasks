@@ -1,7 +1,7 @@
 import csv
 import psycopg2
 import psycopg2.extras
-from utilities import s3, logger, database, message
+from utilities import logger, message, common
 from datetime import datetime
 
 
@@ -12,31 +12,15 @@ def request(event, context):
     env = event["env"]
     filename = event["filename"]
     bucket = event["bucket"]
-    db_connection = connect_to_database(env, event, start)
-    csv_file = retrieve_file_from_bucket(bucket, filename, event, start)
+    db_connection = common.connect_to_database(env, event, start)
+    csv_file = common.retrieve_file_from_bucket(bucket, filename, event, start)
     lines = process_file(csv_file, event, start)
     for row, values in lines.items():
         if check_table_for_id(db_connection, row, values, filename, event, start):
             query, data = generate_db_query(values, event, start)
             execute_db_query(db_connection, query, data, row, values)
-    cleanup(db_connection, bucket, filename, event, start)
+    common.cleanup(db_connection, bucket, filename, event, start)
     return "Referral Roles execution successful"
-
-
-def connect_to_database(env, event, start):
-    db = database.DB()
-    logger.log_for_audit("Setting DB connection details")
-    if not db.db_set_connection_details(env, event, start):
-        logger.log_for_error("Error DB Parameter(s) not found in secrets store.")
-        message.send_failure_slack_message(event, start)
-        raise ValueError("DB Parameter(s) not found in secrets store")
-    return db.db_connect(event, start)
-
-
-def retrieve_file_from_bucket(bucket, filename, event, start):
-    logger.log_for_audit("Looking in {} for {} file".format(bucket, filename))
-    s3_bucket = s3.S3()
-    return s3_bucket.get_object(bucket, filename, event, start)
 
 
 def process_file(csv_file, event, start):
@@ -146,20 +130,3 @@ def execute_db_query(db_connection, query, data, line, values):
         db_connection.rollback()
     finally:
         cursor.close()
-
-
-def cleanup(db_connection, bucket, filename, event, start):
-    # Close DB connection
-    logger.log_for_audit("Closing DB connection...")
-    db_connection.close()
-    # Archive file
-    s3_class = s3.S3()
-    s3_class.copy_object(bucket, filename, event, start)
-    s3_class.delete_object(bucket, filename, event, start)
-    logger.log_for_audit(
-        "Archived file {} to {}/archive/{}".format(filename, filename.split("/")[0], filename.split("/")[1])
-    )
-    # Send Slack Notification
-    logger.log_for_audit("Sending slack message...")
-    message.send_success_slack_message(event, start)
-    return "Cleanup Successful"

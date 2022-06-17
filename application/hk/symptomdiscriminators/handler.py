@@ -1,7 +1,7 @@
 import csv
 import psycopg2
 import psycopg2.extras
-from utilities import s3, logger, database, message, common
+from utilities import logger, message, common
 from datetime import datetime
 
 csv_column_count = 3
@@ -20,8 +20,8 @@ def request(event, context):
     filename = event["filename"]
     bucket = event["bucket"]
     initialise_summary_count()
-    db_connection = connect_to_database(env, event, start)
-    csv_file = retrieve_file_from_bucket(bucket, filename, event, start)
+    db_connection = common.connect_to_database(env, event, start)
+    csv_file = common.retrieve_file_from_bucket(bucket, filename, event, start)
     lines = process_file(csv_file, event, start)
     for row, values in lines.items():
         if check_table_for_id(db_connection, row, values, filename, event, start):
@@ -32,24 +32,8 @@ def request(event, context):
             summary_count_dict[update_action], summary_count_dict[create_action], summary_count_dict[delete_action]
         )
     )
-    cleanup(db_connection, bucket, filename, event, start)
+    common.cleanup(db_connection, bucket, filename, event, start)
     return "Symptom discriminators execution successful"
-
-
-def connect_to_database(env, event, start):
-    db = database.DB()
-    logger.log_for_audit("Setting DB connection details")
-    if not db.db_set_connection_details(env, event, start):
-        logger.log_for_error("Error DB Parameter(s) not found in secrets store.")
-        message.send_failure_slack_message(event, start)
-        raise ValueError("DB Parameter(s) not found in secrets store")
-    return db.db_connect(event, start)
-
-
-def retrieve_file_from_bucket(bucket, filename, event, start):
-    logger.log_for_audit("Looking in {} for {} file".format(bucket, filename))
-    s3_bucket = s3.S3()
-    return s3_bucket.get_object(bucket, filename, event, start)
 
 
 def process_file(csv_file, event, start):
@@ -167,31 +151,12 @@ def execute_db_query(db_connection, query, data, line, values):
         cursor.close()
 
 
-def cleanup(db_connection, bucket, filename, event, start):
-    # Close DB connection
-    logger.log_for_audit("Closing DB connection...")
-    db_connection.close()
-    # Archive file
-    s3_class = s3.S3()
-    s3_class.copy_object(bucket, filename, event, start)
-    s3_class.delete_object(bucket, filename, event, start)
-    logger.log_for_audit(
-        "Archived file {} to {}/archive/{}".format(filename, filename.split("/")[0], filename.split("/")[1])
-    )
-    # Send Slack Notification
-    logger.log_for_audit("Sending slack message...")
-    message.send_success_slack_message(event, start)
-    return "Cleanup Successful"
-
-
-# TODO move to util if other jobs report counts
 def initialise_summary_count():
     summary_count_dict[create_action] = 0
     summary_count_dict[update_action] = 0
     summary_count_dict[delete_action] = 0
 
 
-#  TODO move to util if other jobs report counts
 def increment_summary_count(values):
     if values["action"] in [create_action, update_action, delete_action]:
         summary_count_dict[values["action"]] = summary_count_dict[values["action"]] + 1
