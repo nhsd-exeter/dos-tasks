@@ -60,3 +60,10 @@ def test_invalid_action():
     csv_dict["id"] = csv_id
     csv_dict["action"] = "NOSUCH"
     assert not valid_action(True,csv_dict)
+
+def test_invalid_action_lower_case():
+    """Test validation of lower case action"""
+    csv_dict = {}
+    csv_dict["id"] = csv_id
+    csv_dict["action"] = "delete"
+    assert not valid_action(True,csv_dict)
