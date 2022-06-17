@@ -81,3 +81,13 @@ def test_invoke_hk_lambda_error(mock_send_failure_slack_message):
     with pytest.raises(Exception):
         _ = handler.invoke_hk_lambda(mock_task, mock_filename, mock_env, mock_bucket, mock_start)
     mock_send_failure_slack_message.assert_called_once()
+
+
+@patch(f"{file_path}.send_failure_slack_message")
+def test_incorrect_file_name_separator_returns_error(mock_send_failure_slack_message):
+    mock_event = {'Records': [{'s3': {'bucket': {'name': 'uec-dos-tasks-mock-bucket'}, 'object': {'key': 'unittest/DPTS-001-referralroles.csv'}}}]}
+    with pytest.raises(Exception) as assertion:
+        error_message = "list index out of range"
+        handler.process_event(mock_event, start)
+    assert str(assertion.value) == error_message
+    mock_send_failure_slack_message.assert_called_once()
