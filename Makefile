@@ -194,10 +194,11 @@ aws-lambda-create-alias: ### Creates an alias for a lambda version - Mandatory N
 		"
 
 remove-old-versions-for-task: ## Prune old versions of hk task lambdas - Mandatory; [PROFILE] - Optional [TASK]
+	eval "$$(make aws-assume-role-export-variables)"
 	if [ "$(TASK)" == "all" ]; then
 		for task in $$(echo $(TASKS) | tr "," "\n"); do
 			lambda_name="${SERVICE_PREFIX}-hk-$$task-lambda"
-			echo "Checking for oklder versions of lambda function $$lambda_name"
+			echo "Checking for older versions of lambda function $$lambda_name"
 			make aws-lambda-remove-old-versions NAME=$$lambda_name
 			done
 	else
