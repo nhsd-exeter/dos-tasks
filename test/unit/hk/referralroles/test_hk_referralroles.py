@@ -10,13 +10,13 @@ mock_env = "mock_env"
 start = ""
 
 
-@patch(f"{file_path}.connect_to_database", return_value="db_connection")
-@patch(f"{file_path}.retrieve_file_from_bucket", return_value="csv_file")
+@patch(f"{file_path}.common.connect_to_database", return_value="db_connection")
+@patch(f"{file_path}.common.retrieve_file_from_bucket", return_value="csv_file")
 @patch(f"{file_path}.process_file", return_value={"1": {"id": "001", "name": "Mock Create Role", "action": "CREATE"}, "2": {"id": "002", "name": "Mock Update Role", "action": "UPDATE"}, "3": {"id": "003", "name": "Mock Delete Role", "action": "DELETE"}})
 @patch(f"{file_path}.check_table_for_id", return_value=True)
 @patch(f"{file_path}.generate_db_query", return_value=("query", "data"))
 @patch(f"{file_path}.execute_db_query")
-@patch(f"{file_path}.cleanup")
+@patch(f"{file_path}.common.cleanup")
 @patch(f"{file_path}.message.send_start_message")
 def test_request_success_with_check_table_for_id_is_true(mock_send_start_message, mock_cleanup, mock_execute_db_query, mock_generate_db_query, mock_check_table_for_id, mock_process_file, mock_retrieve_file_from_bucket, mock_db_connection):
     result = handler.request(mock_event, mock_context)
@@ -31,13 +31,13 @@ def test_request_success_with_check_table_for_id_is_true(mock_send_start_message
     mock_db_connection.assert_called_once()
 
 
-@patch(f"{file_path}.connect_to_database", return_value="db_connection")
-@patch(f"{file_path}.retrieve_file_from_bucket", return_value="csv_file")
+@patch(f"{file_path}.common.connect_to_database", return_value="db_connection")
+@patch(f"{file_path}.common.retrieve_file_from_bucket", return_value="csv_file")
 @patch(f"{file_path}.process_file", return_value={"1": {"id": "001", "name": "Mock Create Role", "action": "CREATE"}, "2": {"id": "002", "name": "Mock Update Role", "action": "UPDATE"}, "3": {"id": "003", "name": "Mock Delete Role", "action": "DELETE"}})
 @patch(f"{file_path}.check_table_for_id", return_value=False)
 @patch(f"{file_path}.generate_db_query", return_value=("query", "data"))
 @patch(f"{file_path}.execute_db_query")
-@patch(f"{file_path}.cleanup")
+@patch(f"{file_path}.common.cleanup")
 @patch(f"{file_path}.message.send_start_message")
 def test_request_success_with_check_table_for_id_is_false(mock_send_start_message, mock_cleanup, mock_execute_db_query, mock_generate_db_query, mock_check_table_for_id, mock_process_file, mock_retrieve_file_from_bucket, mock_db_connection):
     result = handler.request(mock_event, mock_context)
@@ -91,36 +91,6 @@ def test_delete_query():
     """
     assert data == (10,)
 
-
-@patch(f"{file_path}.database.DB")
-def test_connect_to_database_success(mock_db_object):
-    mock_db_object().db_set_connection_details = Mock(return_value=True)
-    mock_db_object().db_connect = Mock(return_value="Connection Established")
-    result = handler.connect_to_database(mock_env, mock_event, start)
-    assert result == "Connection Established"
-    mock_db_object().db_set_connection_details.assert_called_once()
-    mock_db_object().db_connect.assert_called_once()
-
-
-@patch(f"{file_path}.message.send_failure_slack_message")
-@patch(f"{file_path}.database.DB")
-def test_connect_to_database_returns_error(mock_db_object, mock_send_failure_slack_message):
-    mock_db_object().db_set_connection_details = Mock(return_value=False)
-    with pytest.raises(ValueError) as assertion:
-        result = handler.connect_to_database(mock_env, mock_event, start)
-    assert str(assertion.value) == "DB Parameter(s) not found in secrets store"
-    mock_db_object().db_set_connection_details.assert_called_once()
-    mock_send_failure_slack_message.assert_called_once()
-
-
-@patch(f"{file_path}.s3.S3")
-def test_retrieve_file_from_bucket(mock_s3_object):
-    mock_s3_object().get_object = Mock(return_value="Object returned")
-    mock_bucket = ""
-    mock_filename = ""
-    result = handler.retrieve_file_from_bucket(mock_bucket, mock_filename, mock_event, start)
-    assert result == "Object returned"
-    mock_s3_object().get_object.assert_called_once()
 
 
 def test_process_file_success():
@@ -298,20 +268,3 @@ def test_execute_db_query_rollback(mock_db_connect):
     result = handler.execute_db_query(mock_db_connect, mock_query, mock_data, mock_line, mock_values)
     mock_db_connect.rollback.assert_called_once()
     mock_db_connect.cursor().close.assert_called_once()
-
-
-@patch("psycopg2.connect")
-@patch(f"{file_path}.s3.S3")
-@patch(f"{file_path}.message.send_success_slack_message")
-def test_cleanup_success(mock_send_success_slack_message, mock_s3_object, mock_db_connect):
-    mock_db_connect.close.return_value = "Closed connection"
-    mock_s3_object().copy_object = Mock(return_value="Object copied")
-    mock_s3_object().delete_object = Mock(return_value="Object deleted")
-    mock_bucket = ""
-    mock_filename = "local/DPTS-001_referralroles.csv"
-    result = handler.cleanup(mock_db_connect, mock_bucket, mock_filename, mock_event, start)
-    assert result == "Cleanup Successful"
-    mock_db_connect.close.assert_called_once()
-    mock_s3_object().copy_object.assert_called_once_with(mock_bucket, mock_filename, mock_event, start)
-    mock_s3_object().delete_object.assert_called_once_with(mock_bucket, mock_filename, mock_event, start)
-    mock_send_success_slack_message.assert_called_once_with(mock_event, start)
