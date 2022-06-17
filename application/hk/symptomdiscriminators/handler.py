@@ -128,7 +128,7 @@ def check_table_for_id(db_connection, line, values, filename, event, start):
         logger.log_for_error("Error checking table symptomdiscriminators for ID {}. Error: {}".format(values["id"], e))
         message.send_failure_slack_message(event, start)
         raise e
-    if record_exists and values["action"] in ("UPDATE",  "DELETE"):
+    if record_exists and values["action"] in ("UPDATE", "DELETE"):
         return True
     elif not record_exists and values["action"] in ("CREATE"):
         return True
