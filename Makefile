@@ -2,7 +2,7 @@
 PROJECT_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 include $(abspath $(PROJECT_DIR)/build/automation/init.mk)
 
-LAMBDA_VERSIONS_TO_RETAIN = 110
+LAMBDA_VERSIONS_TO_RETAIN = 5
 # ==============================================================================
 # Development workflow targets
 
