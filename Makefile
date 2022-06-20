@@ -272,6 +272,7 @@ trust-certificate: ssl-trust-certificate-project ## Trust the SSL development ce
 create-artefact-repositories: # Create ECR repositories to store the artefacts - mandatory: AWS_ACCOUNT=[account]
 	make docker-create-repository NAME=hk-filter
 	make docker-create-repository NAME=hk-referralroles
+	make docker-create-repository NAME=hk-symptomdiscriminators
 
 create-tester-repository: # Create ECR repositories to store the artefacts
 	make docker-create-repository NAME=tester
