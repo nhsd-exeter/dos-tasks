@@ -32,6 +32,7 @@ def request(event, context):
     common.cleanup(db_connection, bucket, filename, event, start)
     return "Symptom groups execution successful"
 
+
 # TODO consider moving to common ultimately
 def extract_data_from_file(csv_file):
     lines = {}
@@ -173,13 +174,16 @@ def execute_db_query(db_connection, query, data, line, values):
         cursor.execute(query, data)
         db_connection.commit()
         increment_summary_count(values)
-        logger.log_for_audit("Action: {}, ID: {}, for symptomgroup {}".format(values["action"], values["id"], values["name"]))
+        logger.log_for_audit(
+            "Action: {}, ID: {}, for symptomgroup {}".format(values["action"], values["id"], values["name"])
+        )
     except Exception as e:
         logger.log_for_error("Line {} in transaction failed. Rolling back".format(line))
         logger.log_for_error("Error: {}".format(e))
         db_connection.rollback()
     finally:
         cursor.close()
+
 
 # TODO move to util if other jobs report counts
 def initialise_summary_count():
