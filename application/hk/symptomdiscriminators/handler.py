@@ -28,7 +28,7 @@ def request(event, context):
             query, data = generate_db_query(values, event, start)
             execute_db_query(db_connection, query, data, row, values)
     logger.log_for_audit(
-        "Symptom groups updated: {0}, inserted: {1}, deleted: {2}".format(
+        "Symptom discriminators updated: {0}, inserted: {1}, deleted: {2}".format(
             summary_count_dict[update_action], summary_count_dict[create_action], summary_count_dict[delete_action]
         )
     )
@@ -43,13 +43,9 @@ def process_file(csv_file, event, start):
     for line in csv_reader:
         count += 1
         if not common.check_csv_format(line, csv_column_count):
-            print(count)
             logger.log_for_error("Incorrect line format, should be 3 but is {}".format(len(line)))
-            # logger.log_for_error("Error: {}".format(e))
-
         else:
             lines[str(count)] = {"id": line[0], "description": line[1], "action": line[2]}
-            print(lines)
     if lines == {}:
         message.send_failure_slack_message(event, start)
     return lines
