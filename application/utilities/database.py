@@ -57,6 +57,7 @@ def execute_db_query(db_connection, query, data, line, values, summary_count_dic
     finally:
         cursor.close()
 
+
 class DB:
     def __init__(self) -> None:
         print("Initialising DB Class")

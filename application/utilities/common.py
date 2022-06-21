@@ -106,4 +106,3 @@ def process_file(csv_file, event, start, expected_col_count):
     if lines == {}:
         send_failure_slack_message(event, start)
     return lines
-
