@@ -7,6 +7,38 @@ secret_store = os.environ.get("SECRET_STORE")
 profile = os.environ.get("PROFILE")
 
 
+# TODO move inside class later
+def connect_to_database(env, event, start):
+    db = DB()
+    logger.log_for_audit("Setting DB connection details")
+    if not db.db_set_connection_details(env, event, start):
+        logger.log_for_error("Error DB Parameter(s) not found in secrets store.")
+        message.send_failure_slack_message(event, start)
+        raise ValueError("DB Parameter(s) not found in secrets store")
+    return db.db_connect(event, start)
+
+
+# TODO move inside class later
+def does_record_exist(db, row_dict, table_name):
+    """
+    Checks to see if record already exists in db table with the id
+    """
+    record_exists = False
+    full_table_name = "pathwaysdos." + table_name
+    try:
+        with db.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+            select_query = """select * from """ + full_table_name + """ where id=%s"""
+            cursor.execute(select_query, (row_dict["id"],))
+            if cursor.rowcount != 0:
+                record_exists = True
+    except (Exception, psycopg2.Error) as e:
+        logger.log_for_error(
+            "Select from table {0} by id failed - {1} => {2}".format(full_table_name, row_dict["id"], str(e)),
+        )
+        raise e
+    return record_exists
+
+
 class DB:
     def __init__(self) -> None:
         print("Initialising DB Class")

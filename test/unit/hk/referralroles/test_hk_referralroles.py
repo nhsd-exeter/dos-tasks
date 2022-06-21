@@ -10,9 +10,9 @@ mock_env = "mock_env"
 start = ""
 
 
-@patch(f"{file_path}.common.connect_to_database", return_value="db_connection")
+@patch(f"{file_path}.database.connect_to_database", return_value="db_connection")
 @patch(f"{file_path}.common.retrieve_file_from_bucket", return_value="csv_file")
-@patch(f"{file_path}.process_file", return_value={"1": {"id": "001", "name": "Mock Create Role", "action": "CREATE"}, "2": {"id": "002", "name": "Mock Update Role", "action": "UPDATE"}, "3": {"id": "003", "name": "Mock Delete Role", "action": "DELETE"}})
+@patch(f"{file_path}.common.process_file", return_value={"1": {"id": "001", "name": "Mock Create Role", "action": "CREATE"}, "2": {"id": "002", "name": "Mock Update Role", "action": "UPDATE"}, "3": {"id": "003", "name": "Mock Delete Role", "action": "DELETE"}})
 @patch(f"{file_path}.check_table_for_id", return_value=True)
 @patch(f"{file_path}.generate_db_query", return_value=("query", "data"))
 @patch(f"{file_path}.execute_db_query")
@@ -31,9 +31,9 @@ def test_request_success_with_check_table_for_id_is_true(mock_send_start_message
     mock_db_connection.assert_called_once()
 
 
-@patch(f"{file_path}.common.connect_to_database", return_value="db_connection")
+@patch(f"{file_path}.database.connect_to_database", return_value="db_connection")
 @patch(f"{file_path}.common.retrieve_file_from_bucket", return_value="csv_file")
-@patch(f"{file_path}.process_file", return_value={"1": {"id": "001", "name": "Mock Create Role", "action": "CREATE"}, "2": {"id": "002", "name": "Mock Update Role", "action": "UPDATE"}, "3": {"id": "003", "name": "Mock Delete Role", "action": "DELETE"}})
+@patch(f"{file_path}.common.process_file", return_value={"1": {"id": "001", "name": "Mock Create Role", "action": "CREATE"}, "2": {"id": "002", "name": "Mock Update Role", "action": "UPDATE"}, "3": {"id": "003", "name": "Mock Delete Role", "action": "DELETE"}})
 @patch(f"{file_path}.check_table_for_id", return_value=False)
 @patch(f"{file_path}.generate_db_query", return_value=("query", "data"))
 @patch(f"{file_path}.execute_db_query")
@@ -92,41 +92,41 @@ def test_delete_query():
     assert data == (10,)
 
 
+# Replaced by test in common
+# def test_process_file_success():
+#     mock_csv_file = """001,"Mock Create Role","CREATE"
+# 002,"Mock Update Role","UPDATE"
+# 003,"Mock Delete Role","DELETE"""
+#     lines = handler.process_file(mock_csv_file, mock_event, start)
+#     assert lines == {"1": {"id": "001", "name": "Mock Create Role", "action": "CREATE"},
+#                     "2": {"id": "002", "name": "Mock Update Role", "action": "UPDATE"},
+#                     "3": {"id": "003", "name": "Mock Delete Role", "action": "DELETE"}}
 
-def test_process_file_success():
-    mock_csv_file = """001,"Mock Create Role","CREATE"
-002,"Mock Update Role","UPDATE"
-003,"Mock Delete Role","DELETE"""
-    lines = handler.process_file(mock_csv_file, mock_event, start)
-    assert lines == {"1": {"id": "001", "name": "Mock Create Role", "action": "CREATE"},
-                    "2": {"id": "002", "name": "Mock Update Role", "action": "UPDATE"},
-                    "3": {"id": "003", "name": "Mock Delete Role", "action": "DELETE"}}
+# Replaced by test in common
+# def test_process_file_success_with_empty_line():
+#     mock_csv_file = """
+# 001,"Mock Create Role","CREATE"
 
+# 002,"Mock Update Role","UPDATE"
+# 003,"Mock Delete Role","DELETE"
+# """
+#     lines = handler.process_file(mock_csv_file, mock_event, start)
+#     assert lines == {"2": {"id": "001", "name": "Mock Create Role", "action": "CREATE"},
+#                     "4": {"id": "002", "name": "Mock Update Role", "action": "UPDATE"},
+#                     "5": {"id": "003", "name": "Mock Delete Role", "action": "DELETE"}}
 
-def test_process_file_success_with_empty_line():
-    mock_csv_file = """
-001,"Mock Create Role","CREATE"
-
-002,"Mock Update Role","UPDATE"
-003,"Mock Delete Role","DELETE"
-"""
-    lines = handler.process_file(mock_csv_file, mock_event, start)
-    assert lines == {"2": {"id": "001", "name": "Mock Create Role", "action": "CREATE"},
-                    "4": {"id": "002", "name": "Mock Update Role", "action": "UPDATE"},
-                    "5": {"id": "003", "name": "Mock Delete Role", "action": "DELETE"}}
-
-
-@patch(f"{file_path}.message.send_failure_slack_message")
-def test_process_file_raises_error_with_incorrect_line_format(mock_send_failure_slack_message):
-    mock_csv_file = """
-001,"Mock Create Role","CREATE","Unexpected Data"
-002,"Mock Update Role","UPDATE"
-003,"Mock Delete Role","DELETE"
-    """
-    with pytest.raises(IndexError) as assertion:
-        lines = handler.process_file(mock_csv_file, mock_event, start)
-    assert str(assertion.value) == "Unexpected data in csv file"
-    mock_send_failure_slack_message.assert_called_once()
+#  Replaced by test in common
+# @patch(f"{file_path}.message.send_failure_slack_message")
+# def test_process_file_raises_error_with_incorrect_line_format(mock_send_failure_slack_message):
+#     mock_csv_file = """
+# 001,"Mock Create Role","CREATE","Unexpected Data"
+# 002,"Mock Update Role","UPDATE"
+# 003,"Mock Delete Role","DELETE"
+#     """
+#     with pytest.raises(IndexError) as assertion:
+#         lines = handler.process_file(mock_csv_file, mock_event, start)
+#     assert str(assertion.value) == "Unexpected data in csv file"
+#     mock_send_failure_slack_message.assert_called_once()
 
 
 @patch(f"{file_path}.create_query", return_value="Create Query")

@@ -1,7 +1,6 @@
-import csv
 import psycopg2
 import psycopg2.extras
-from utilities import logger, message, common
+from utilities import logger, message, common, database
 from datetime import datetime
 
 
@@ -12,9 +11,9 @@ def request(event, context):
     env = event["env"]
     filename = event["filename"]
     bucket = event["bucket"]
-    db_connection = common.connect_to_database(env, event, start)
+    db_connection = database.connect_to_database(env, event, start)
     csv_file = common.retrieve_file_from_bucket(bucket, filename, event, start)
-    lines = process_file(csv_file, event, start)
+    lines = common.process_file(csv_file, event, start, 3)
     for row, values in lines.items():
         if check_table_for_id(db_connection, row, values, filename, event, start):
             query, data = generate_db_query(values, event, start)
@@ -23,20 +22,21 @@ def request(event, context):
     return "Referral Roles execution successful"
 
 
-def process_file(csv_file, event, start):
-    lines = {}
-    count = 0
-    csv_reader = csv.reader(csv_file.split("\n"))
-    for line in csv_reader:
-        count += 1
-        if len(line) == 0:
-            continue
-        if len(line) != 3:
-            logger.log_for_error("Incorrect line format, should be 3 but is {}".format(len(line)))
-            message.send_failure_slack_message(event, start)
-            raise IndexError("Unexpected data in csv file")
-        lines[str(count)] = {"id": line[0], "name": line[1], "action": line[2]}
-    return lines
+# Moved to common
+# def process_file(csv_file, event, start):
+#     lines = {}
+#     count = 0
+#     csv_reader = csv.reader(csv_file.split("\n"))
+#     for line in csv_reader:
+#         count += 1
+#         if len(line) == 0:
+#             continue
+#         if len(line) != 3:
+#             logger.log_for_error("Incorrect line format, should be 3 but is {}".format(len(line)))
+#             message.send_failure_slack_message(event, start)
+#             raise IndexError("Unexpected data in csv file")
+#         lines[str(count)] = {"id": line[0], "name": line[1], "action": line[2]}
+#     return lines
 
 
 def generate_db_query(row_values, event, start):
