@@ -1,6 +1,7 @@
 import os
 import json
 import psycopg2
+import psycopg2.extras
 from utilities import secrets, logger, message
 
 secret_store = os.environ.get("SECRET_STORE")
