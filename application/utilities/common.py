@@ -80,10 +80,7 @@ def increment_summary_count(summary_count_dict, values):
         try:
             summary_count_dict[values["action"]] = summary_count_dict[values["action"]] + 1
         except (KeyError) as e:
-            log_for_error(
-            "Summary count does not have the key {0}".format(
-                values["action"])
-            )
+            log_for_error("Summary count does not have the key {0}".format(values["action"]))
             raise e
     else:
         log_for_error(
