@@ -18,7 +18,6 @@ csv_sg_action = "REMOVE"
 
 def test_csv_line():
     """Test data extracted from valid csv"""
-    # lines[str(count)] = {"id": line[0], "description": line[1], "action": line[2]}
     csv_rows = {}
     csv_rows["1"]={"id": csv_sg_id, "description": csv_sg_desc, "action": csv_sg_action}
     csv_dict = handler.extract_query_data_from_csv(csv_rows)
@@ -34,7 +33,6 @@ def test_csv_line_lc():
     """Test lower case action in csv is converted to u/c"""
     csv_rows = {}
     csv_sg_action = "remove"
-    # csv_row = [csv_sg_id, csv_sg_desc, csv_sg_action]
     csv_rows["1"]={"id": csv_sg_id, "description": csv_sg_desc, "action": csv_sg_action}
     csv_dict = handler.extract_query_data_from_csv(csv_rows)
     assert len(csv_dict) == 1
@@ -44,35 +42,10 @@ def test_csv_line_lc():
     assert csv_dict["1"]["action"] == str(csv_sg_action).upper()
     assert csv_dict["1"]["zcode"] is False
 
-# no longer needed
-# def test_invalid_csv_line():
-#     """Test invalid csv results in no data extracted"""
-#     csv_rows = {}
-#     csv_row = [csv_sg_id, csv_sg_desc]
-#     csv_dict = handler.extract_query_data_from_csv(csv_row)
-#     assert len(csv_dict) == 0
-
-
-# def test_no_sgid_csv_line():
-#     """Test no id in csv extract sets id to None"""
-#     csv_rows = {}
-#     # csv_row = ["", csv_sg_desc, csv_sg_action]
-#     csv_rows["1"]={"id": "", "description": csv_sg_desc, "action": csv_sg_action}
-#     csv_dict = handler.extract_query_data_from_csv(csv_row)
-#     assert len(csv_dict) == 0
-
-
-# def test_no_sgdesc_csv_line():
-#     """Test if no name in csv extract sets name to None and zcode to False"""
-#     csv_row = [csv_sg_id, "", csv_sg_action]
-#     csv_dict = handler.extract_query_data_from_csv(csv_row)
-#     assert len(csv_dict) == 0
-
 
 def test_zcode_sgdesc_csv_line():
     """Test extract correctly recognises zcodes"""
     csv_rows = {}
-    # csv_row = [csv_sg_id, "z2.0 - test", csv_sg_action]
     csv_rows["1"]={"id": csv_sg_id, "description": "z2.0 - test", "action": csv_sg_action}
     csv_dict = handler.extract_query_data_from_csv(csv_rows)
     assert len(csv_dict) == 1
@@ -85,7 +58,6 @@ def test_csv_line_exception():
     """Test exception handling by deliberately setting action to NOT a string"""
     csv_rows = {}
     csv_rows["1"]={"id": csv_sg_id, "description": "z2.0 - test", "action": 1}
-    # csv_row = [csv_sg_id, csv_sg_desc, 1]
     with pytest.raises(Exception):
         handler.extract_query_data_from_csv(csv_rows)
 
@@ -152,102 +124,9 @@ def test_generating_query_with_invalid_action():
     with pytest.raises(psycopg2.DatabaseError):
         query, data = handler.generate_db_query(csv_dict)
 
-# def test_process_file_valid_length():
-#     """Test one valid line of csv equals one row of extracted data"""
-#     csv_file = """2001,"Automated insert SymptomGroup","CREATE"\n"""
-#     lines = handler.process_file(csv_file) #, event, start)
-#     assert len(lines) == 1
-
-# def test_process_file_valid_length_multiline():
-#     """Test two valid lines of csv equals two rows of extracted data"""
-#     csv_file = """2001,"Automated insert SymptomGroup","CREATE"\n2001,"Automated update SymptomGroup","UPDATE"\n"""
-#     lines = handler.process_file(csv_file) #, event, start)
-#     assert len(lines) == 2
-
-# def test_process_file_empty_second_line():
-#     """Test data extraction ignores any empty line at end of file"""
-#     csv_file = """2001,"Automated insert SymptomGroup","CREATE"\n\n"""
-#     lines = handler.process_file(csv_file) #, event, start
-#     assert len(lines) == 1
-
-# def test_process_file_empty_first_line():
-#     """Test data extraction ignores any empty line at start of file"""
-#     csv_file = """\n2001,"Automated insert SymptomGroup","CREATE"\n"""
-#     lines = handler.process_file(csv_file) #, event, start
-#     assert len(lines) == 1
-
-# # @patch(f"{file_path}.extract_query_data_from_csv", return_value={"id": "2001", "name": "Automated insert SymptomGroup","zcode":"None", "action": "CREATE"})
-# def test_process_file_three_lines_empty_second_line():
-#     """Test data extraction ignores any empty line in middle of file"""
-#     csv_file = """2001,"Automated insert SymptomGroup","CREATE"\n\n\n2001,"Automated update SymptomGroup","UPDATE"\n"""
-#     lines = handler.process_file(csv_file) #, event, start
-#     assert len(lines) == 2
-#     # assert mock_extract.call_count == 2
-
-# def test_process_file_incomplete_second_line():
-#     """Test data extraction ignores a line itf it is incomplete"""
-#     csv_file = """2001,"Automated insert SymptomGroup","CREATE"\n2002,\n"""
-#     lines = handler.process_file(csv_file) #, event, start
-#     assert len(lines)==1
-#     assert lines["1"]["id"] == 2001
-
-# def test_process_file_incomplete_first_line():
-#     """Test data extraction ingores first line if it is incomplete"""
-#     csv_file = """2002,\n2001,"Automated insert SymptomGroup","CREATE"\n"""
-#     lines = handler.process_file(csv_file) #, event, start
-#     assert len(lines)==1
-#     assert lines["2"]["id"] == 2001
-
-# # @patch(f"{file_path}.extract_query_data_from_csv", return_value={"id": "2001", "name": "Automated insert SymptomGroup","zcode":"None", "action": "CREATE"})
-# def test_process_file_call_count():
-#     """Test data extraction calls code to extract data from csv one per non empty line"""
-#     csv_file = """2001,"Automated insert SymptomGroup","CREATE"\n2001,"Automated update SymptomGroup","UPDATE"\n"""
-#     lines = handler.process_file(csv_file) #, event, start
-#     assert len(lines) == 2
-#     # assert mock_extract.call_count == len(lines)
-
-# # @patch(f"{file_path}.extract_query_data_from_csv", return_value={"id": "2001", "name": "Automated insert SymptomGroup","zcode":"None", "action": "CREATE"})
-# def test_process_file_call_count_inc_empty_line():
-#     """Test data extraction calls code to extract data ignores empty line"""
-#     csv_file = """2001,"Automated insert SymptomGroup","CREATE"\n\n2001,"Automated update SymptomGroup","UPDATE"\n"""
-#     lines = handler.process_file(csv_file) #, event, start
-#     assert len(lines) == 2
-#     # assert mock_extract.call_count == len(lines)
-
-@patch(f"{file_path}.common.increment_summary_count")
-@patch("psycopg2.connect")
-def test_execute_db_query_success(mock_db_connect,mock_summary):
-    """Test code to execute query successfully"""
-    line = """2001,"New Symptom Group","CREATE"\n"""
-    data = ("New Symptom Group", "None", 2001)
-    values = {}
-    values["action"] = "CREATE"
-    values['id'] = 2001
-    values['name'] = "New Symptom Group"
-    mock_db_connect.cursor.return_value.__enter__.return_value = "Success"
-    query = """update pathwaysdos.symptomgroups set name = (%s), zcodeexists = (%s)
-        where id = (%s);"""
-    handler.execute_db_query(mock_db_connect, query, data, line, values)
-    mock_db_connect.commit.assert_called_once()
-    mock_summary.assert_called_once()
-    mock_db_connect.cursor().close.assert_called_once()
-
 
 @patch("psycopg2.connect")
-def test_execute_db_query_failure(mock_db_connect):
-    """Test code to handle exception and rollback when executing query"""
-    line = """2001,"New Symptom Group","CREATE"\n"""
-    data = ("New Symptom Group", "None", 2001)
-    values = {"action":"CREATE","id":2001,"Name":"New Symptom Group"}
-    mock_db_connect.cursor.return_value.__enter__.return_value = Exception
-    query = """update pathwaysdos.symptomgroups set name = (%s), zcodeexists = (%s)
-        where id = (%s);"""
-    handler.execute_db_query(mock_db_connect, query, data, line, values)
-    mock_db_connect.rollback.assert_called_once()
-    mock_db_connect.cursor().close.assert_called_once()
-
-@patch("psycopg2.connect")
-@patch(f"{file_path}.execute_db_query")
+@patch(f"{file_path}.database.execute_db_query")
 @patch(f"{file_path}.generate_db_query",return_value=("query", "data"))
 @patch(f"{file_path}.common.valid_action", return_value=True)
 @patch(f"{file_path}.database.does_record_exist", return_value=True)
@@ -267,7 +146,7 @@ def test_process_extracted_data_single_record(mock_exist,mock_valid_action,mock_
     mock_execute.assert_called_once()
 
 @patch("psycopg2.connect")
-@patch(f"{file_path}.execute_db_query")
+@patch(f"{file_path}.database.execute_db_query")
 @patch(f"{file_path}.generate_db_query",return_value=("query", "data"))
 @patch(f"{file_path}.common.valid_action", return_value=True)
 @patch(f"{file_path}.database.does_record_exist", return_value=True)
@@ -330,7 +209,7 @@ def test_handler_exception(mock_db,mock_failure_message,mock_message_start,mock_
 
 @patch("psycopg2.connect")
 @patch(f"{file_path}.common.cleanup")
-@patch(f"{file_path}.execute_db_query")
+@patch(f"{file_path}.database.execute_db_query")
 @patch(f"{file_path}.database.does_record_exist", return_value=True)
 @patch(f"{file_path}.common.retrieve_file_from_bucket", return_value="""2001,"New Symptom Group","UPDATE"\n""")
 @patch(f"{file_path}.database.connect_to_database", return_value="db_connection")
@@ -361,62 +240,6 @@ mock_does_record_exist,mock_cleanup,mock_db_connect):
     mock_get_object.assert_called_once()
     mock_cleanup.assert_called_once()
     mock_does_record_exist.assert_called_once()
-
-# def test_initialise_summary_count():
-#     """Test summary counts initialised correctly"""
-#     handler.initialise_summary_count()
-#     assert(len(handler.summary_count_dict) == 3)
-#     assert handler.summary_count_dict[handler.create_action] == 0
-#     assert handler.summary_count_dict[handler.update_action] == 0
-#     assert handler.summary_count_dict[handler.delete_action] == 0
-
-# def test_increment_summary_count_create():
-#     """Test only create count incremented for create action """
-#     handler.initialise_summary_count()
-#     assert handler.summary_count_dict[handler.create_action] == 0
-#     assert handler.summary_count_dict[handler.update_action] == 0
-#     assert handler.summary_count_dict[handler.delete_action] == 0
-#     values = {"action":"CREATE"}
-#     handler.increment_summary_count(values)
-#     assert handler.summary_count_dict[handler.create_action] == 1
-#     assert handler.summary_count_dict[handler.update_action] == 0
-#     assert handler.summary_count_dict[handler.delete_action] == 0
-
-# def test_increment_summary_count_update():
-#     """Test only update count incremented for update action """
-#     handler.initialise_summary_count()
-#     assert handler.summary_count_dict[handler.create_action] == 0
-#     assert handler.summary_count_dict[handler.update_action] == 0
-#     assert handler.summary_count_dict[handler.delete_action] == 0
-#     values = {"action":"UPDATE"}
-#     handler.increment_summary_count(values)
-#     assert handler.summary_count_dict[handler.create_action] == 0
-#     assert handler.summary_count_dict[handler.update_action] == 1
-#     assert handler.summary_count_dict[handler.delete_action] == 0
-
-# def test_increment_summary_count_delete():
-#     """Test only delete count incremented for delete action """
-#     handler.initialise_summary_count()
-#     assert handler.summary_count_dict[handler.create_action] == 0
-#     assert handler.summary_count_dict[handler.update_action] == 0
-#     assert handler.summary_count_dict[handler.delete_action] == 0
-#     values = {"action":"DELETE"}
-#     handler.increment_summary_count(values)
-#     assert handler.summary_count_dict[handler.create_action] == 0
-#     assert handler.summary_count_dict[handler.update_action] == 0
-#     assert handler.summary_count_dict[handler.delete_action] == 1
-
-# def test_increment_summary_count_nosuch():
-#     """Test NO count incremented for invalid action """
-#     handler.initialise_summary_count()
-#     assert handler.summary_count_dict[handler.create_action] == 0
-#     assert handler.summary_count_dict[handler.update_action] == 0
-#     assert handler.summary_count_dict[handler.delete_action] == 0
-#     values = {"action":"NOSUCH"}
-#     handler.increment_summary_count(values)
-#     assert handler.summary_count_dict[handler.create_action] == 0
-#     assert handler.summary_count_dict[handler.update_action] == 0
-#     assert handler.summary_count_dict[handler.delete_action] == 0
 
 
 def generate_event_payload():

@@ -2,7 +2,7 @@ import os
 import json
 import psycopg2
 import psycopg2.extras
-from utilities import secrets, logger, message
+from utilities import secrets, logger, message, common
 
 secret_store = os.environ.get("SECRET_STORE")
 profile = os.environ.get("PROFILE")
@@ -39,6 +39,23 @@ def does_record_exist(db, row_dict, table_name):
         raise e
     return record_exists
 
+
+# TODO move inside class later
+def execute_db_query(db_connection, query, data, line, values, summary_count_dict):
+    cursor = db_connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    try:
+        cursor.execute(query, data)
+        db_connection.commit()
+        common.increment_summary_count(summary_count_dict, values)
+        logger.log_for_audit(
+            "Action: {}, ID: {}, for symptomgroup {}".format(values["action"], values["id"], values["name"])
+        )
+    except Exception as e:
+        logger.log_for_error("Line {} in transaction failed. Rolling back".format(line))
+        logger.log_for_error("Error: {}".format(e))
+        db_connection.rollback()
+    finally:
+        cursor.close()
 
 class DB:
     def __init__(self) -> None:

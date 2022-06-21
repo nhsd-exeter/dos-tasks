@@ -33,26 +33,6 @@ def request(event, context):
     return "Symptom groups execution successful"
 
 
-# TODO consider moving to common ultimately
-# def process_file(csv_file):
-#     lines = {}
-#     count = 0
-#     csv_reader = csv.reader(csv_file.split("\n"))
-#     for line in csv_reader:
-#         count += 1
-#         if len(line) > 0:
-#             query_data = extract_query_data_from_csv(line)
-#             if len(query_data) != data_column_count:
-#                 logger.log_for_audit(
-#                     "Problem constructing data from line {} of csv expecting {} items but have {}".format(
-#                         str(count), str(csv_column_count), str(len(line))
-#                     ),
-#                 )
-#             else:
-#                 lines[str(count)] = query_data
-#     return lines
-
-
 # TODO move to common
 def process_extracted_data(db_connection, row_data):
     for row_number, row_values in row_data.items():
@@ -60,7 +40,7 @@ def process_extracted_data(db_connection, row_data):
             record_exists = database.does_record_exist(db_connection, row_values, "symptomgroups")
             if common.valid_action(record_exists, row_values):
                 query, data = generate_db_query(row_values)
-                execute_db_query(db_connection, query, data, row_number, row_values)
+                database.execute_db_query(db_connection, query, data, row_number, row_values, summary_count_dict)
         except Exception as e:
             logger.log_for_error(
                 "Processing symptom group data failed with |{0}|{1}|{2}| => {3}".format(
@@ -72,7 +52,7 @@ def process_extracted_data(db_connection, row_data):
 
 def extract_query_data_from_csv(lines):
     """
-    Checks  maps data to db cols if correct
+    Maps data from csv and derives zcode data NOT in the csv
     """
     query_data = {}
     for row_number, row_data in lines.items():
@@ -130,21 +110,3 @@ def delete_query(row_values):
     """
     data = (row_values["id"],)
     return query, data
-
-
-# TODO move to database
-def execute_db_query(db_connection, query, data, line, values):
-    cursor = db_connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    try:
-        cursor.execute(query, data)
-        db_connection.commit()
-        common.increment_summary_count(summary_count_dict, values)
-        logger.log_for_audit(
-            "Action: {}, ID: {}, for symptomgroup {}".format(values["action"], values["id"], values["name"])
-        )
-    except Exception as e:
-        logger.log_for_error("Line {} in transaction failed. Rolling back".format(line))
-        logger.log_for_error("Error: {}".format(e))
-        db_connection.rollback()
-    finally:
-        cursor.close()

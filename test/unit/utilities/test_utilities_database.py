@@ -217,3 +217,40 @@ def test_connect_to_database_success(mock_db_object):
     assert result == "Connection Established"
     mock_db_object().db_set_connection_details.assert_called_once()
     mock_db_object().db_connect.assert_called_once()
+
+
+# TODO move inside class later
+@patch(f"{file_path}.common.increment_summary_count")
+@patch("psycopg2.connect")
+def test_execute_db_query_success(mock_db_connect,mock_summary):
+    """Test code to execute query successfully"""
+    line = """2001,"New Symptom Group","CREATE"\n"""
+    data = ("New Symptom Group", "None", 2001)
+    values = {}
+    values["action"] = "CREATE"
+    values['id'] = 2001
+    values['name'] = "New Symptom Group"
+    summary_count = {}
+    mock_db_connect.cursor.return_value.__enter__.return_value = "Success"
+    query = """update pathwaysdos.symptomgroups set name = (%s), zcodeexists = (%s)
+        where id = (%s);"""
+    database.execute_db_query(mock_db_connect, query, data, line, values, summary_count)
+    mock_db_connect.commit.assert_called_once()
+    mock_summary.assert_called_once()
+    mock_db_connect.cursor().close.assert_called_once()
+
+
+# TODO move inside class later
+@patch("psycopg2.connect")
+def test_execute_db_query_failure(mock_db_connect):
+    """Test code to handle exception and rollback when executing query"""
+    line = """2001,"New Symptom Group","CREATE"\n"""
+    data = ("New Symptom Group", "None", 2001)
+    values = {"action":"CREATE","id":2001,"Name":"New Symptom Group"}
+    summary_count = {}
+    mock_db_connect.cursor.return_value.__enter__.return_value = Exception
+    query = """update pathwaysdos.symptomgroups set name = (%s), zcodeexists = (%s)
+        where id = (%s);"""
+    database.execute_db_query(mock_db_connect, query, data, line, values, summary_count)
+    mock_db_connect.rollback.assert_called_once()
+    mock_db_connect.cursor().close.assert_called_once()
