@@ -77,7 +77,14 @@ def initialise_summary_count():
 
 def increment_summary_count(summary_count_dict, values):
     if values["action"] in [create_action, update_action, delete_action]:
-        summary_count_dict[values["action"]] = summary_count_dict[values["action"]] + 1
+        try:
+            summary_count_dict[values["action"]] = summary_count_dict[values["action"]] + 1
+        except (KeyError) as e:
+            log_for_error(
+            "Summary count does not have the key {0}".format(
+                values["action"])
+            )
+            raise e
     else:
         log_for_error(
             "Can't increment count for action {0}. Valid actions are {1},{2},{3}".format(

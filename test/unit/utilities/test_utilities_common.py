@@ -148,44 +148,16 @@ def test_check_for_alpha_id():
     csv_line = ["abc","","UPDATE"]
     assert not common.check_csv_values(csv_line)
 
-
-# @patch("psycopg2.connect")
-# def test_record_exists_true(mock_db_connect):
-#     """Test correct data passed to check record exists - returning true"""
-#     csv_dict = {}
-#     csv_dict["id"] = csv_id
-#     csv_dict["name"] = csv_desc
-#     csv_dict["action"] = csv_action
-#     csv_dict["zcode"] = None
-#     mock_db_connect.cursor.return_value.__enter__.return_value.rowcount = 1
-#     assert common.does_record_exist(mock_db_connect,csv_dict,table_name)
-
-# @patch("psycopg2.connect")
-# def test_does_record_exist_false(mock_db_connect):
-#     """Test correct data passed to check record exists - returning false"""
-#     csv_dict = {}
-#     csv_dict["id"] = csv_id
-#     csv_dict["name"] = csv_desc
-#     csv_dict["action"] = "DELETE"
-#     csv_dict["zcode"] = None
-#     mock_db_connect.cursor.return_value.__enter__.return_value.rowcount = 0
-#     assert not common.does_record_exist(mock_db_connect,csv_dict,table_name)
-
-# @patch("psycopg2.connect")
-# def test_does_record_exist_exception(mock_db_connect):
-#     """Test throwing of exception """
-#     csv_dict = {}
-#     csv_dict["id"] = csv_id
-#     csv_dict["name"] = csv_desc
-#     csv_dict["action"] = csv_action
-#     csv_dict["zcode"] = None
-#     mock_db_connect = ""
-#     with pytest.raises(Exception):
-#         common.does_record_exist(mock_db_connect,csv_dict,table_name)
-
+def test_uninitialized_summary_count():
+    """Test summary counts uninitialized correctly"""
+    summary_count = {}
+    assert(len(summary_count) == 0)
+    values = {"action":"UPDATE"}
+    with pytest.raises(KeyError):
+        common.increment_summary_count(summary_count,values)
 
 def test_initialise_summary_count():
-    """Test summary counts initialised correctly"""
+    """Test summary counts initialized correctly"""
     summary_count = common.initialise_summary_count()
     assert(len(summary_count) == 3)
     assert summary_count[common.create_action] == 0
@@ -263,7 +235,6 @@ def test_process_file_success_with_empty_line():
                     "5": {"id": "00003", "description": "Mock Delete SD", "action": "DELETE"}}
 
 
-# @patch(f"{file_path}.message.send_failure_slack_message")
 def test_process_file_success_with_incorrect_line_format():
     mock_csv_file = """00001,"Mock Create SD","CREATE","Unexpected Data"
 00002,"Mock Update SD","UPDATE"

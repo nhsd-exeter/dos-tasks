@@ -8,7 +8,6 @@ data_column_count = 4
 create_action = "CREATE"
 update_action = "UPDATE"
 delete_action = "DELETE"
-summary_count_dict = {}
 
 
 def request(event, context):
@@ -23,7 +22,7 @@ def request(event, context):
     csv_file = common.retrieve_file_from_bucket(bucket, filename, event, start)
     csv_data = common.process_file(csv_file, event, start, 3)
     extracted_data = extract_query_data_from_csv(csv_data)
-    process_extracted_data(db_connection, extracted_data)
+    process_extracted_data(db_connection, extracted_data, summary_count_dict)
     logger.log_for_audit(
         "Symptom groups updated: {0}, inserted: {1}, deleted: {2}".format(
             summary_count_dict[update_action], summary_count_dict[create_action], summary_count_dict[delete_action]
@@ -34,7 +33,7 @@ def request(event, context):
 
 
 # TODO move to common
-def process_extracted_data(db_connection, row_data):
+def process_extracted_data(db_connection, row_data, summary_count_dict):
     for row_number, row_values in row_data.items():
         try:
             record_exists = database.does_record_exist(db_connection, row_values, "symptomgroups")

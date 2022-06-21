@@ -139,7 +139,8 @@ def test_process_extracted_data_single_record(mock_exist,mock_valid_action,mock_
     csv_dict["zcode"] = False
     csv_dict["action"] = "DELETE"
     row_data[0]=csv_dict
-    handler.process_extracted_data(mock_db_connect, row_data)
+    summary_count = {}
+    handler.process_extracted_data(mock_db_connect, row_data, summary_count)
     mock_valid_action.assert_called_once()
     mock_exist.assert_called_once()
     mock_generate.assert_called_once()
@@ -160,7 +161,8 @@ def test_process_extracted_data_multiple_records(mock_exist,mock_valid_action,mo
     csv_dict["action"] = "DELETE"
     row_data[0]=csv_dict
     row_data[1]=csv_dict
-    handler.process_extracted_data(mock_db_connect, row_data)
+    summary_count = {}
+    handler.process_extracted_data(mock_db_connect, row_data, summary_count)
     assert mock_valid_action.call_count == 2
     assert mock_exist.call_count == 2
     assert mock_generate.call_count == 2
@@ -177,8 +179,9 @@ def test_process_extracted_data_error_check_exists_fails(mock_db_connect):
     csv_dict["action"] = "DELETE"
     row_data[0]=csv_dict
     mock_db_connect = ""
+    summary_count = {}
     with pytest.raises(Exception):
-        handler.process_extracted_data(mock_db_connect, row_data)
+        handler.process_extracted_data(mock_db_connect, row_data, summary_count)
 
 @patch("psycopg2.connect")
 @patch(f"{file_path}.database.does_record_exist", return_value=True)
@@ -192,8 +195,9 @@ def test_process_extracted_data_error_check_exists_passes(mock_exists,mock_db_co
     csv_dict["action"] = "DELETE"
     row_data[0]=csv_dict
     mock_db_connect = ""
+    summary_count = {}
     with pytest.raises(Exception):
-        handler.process_extracted_data(mock_db_connect, row_data)
+        handler.process_extracted_data(mock_db_connect, row_data, summary_count)
     assert mock_exists.call_count == 1
 
 
