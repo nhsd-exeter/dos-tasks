@@ -8,6 +8,7 @@ data_column_count = 4
 create_action = "CREATE"
 update_action = "UPDATE"
 delete_action = "DELETE"
+task_description = "Symptom Groups"
 
 
 def request(event, context):
@@ -23,16 +24,17 @@ def request(event, context):
     csv_data = common.process_file(csv_file, event, start, 3)
     extracted_data = extract_query_data_from_csv(csv_data)
     process_extracted_data(db_connection, extracted_data, summary_count_dict)
-    logger.log_for_audit(
-        "Symptom groups updated: {0}, inserted: {1}, deleted: {2}".format(
-            summary_count_dict[update_action], summary_count_dict[create_action], summary_count_dict[delete_action]
-        )
-    )
+    common.report_summary_counts(task_description, summary_count_dict)
+    # logger.log_for_audit(
+    #     "Symptom groups updated: {0}, inserted: {1}, deleted: {2}".format(
+    #         summary_count_dict[update_action], summary_count_dict[create_action], summary_count_dict[delete_action]
+    #     )
+    # )
     common.cleanup(db_connection, bucket, filename, event, start)
-    return "Symptom groups execution successful"
+    return task_description + " execution successful"
 
 
-# TODO move to common
+# TODO consider moving to common or refactoring
 def process_extracted_data(db_connection, row_data, summary_count_dict):
     for row_number, row_values in row_data.items():
         try:
@@ -42,8 +44,8 @@ def process_extracted_data(db_connection, row_data, summary_count_dict):
                 database.execute_db_query(db_connection, query, data, row_number, row_values, summary_count_dict)
         except Exception as e:
             logger.log_for_error(
-                "Processing symptom group data failed with |{0}|{1}|{2}| => {3}".format(
-                    row_values["id"], row_values["name"], row_values["zcode"], str(e)
+                "Processing {0} data failed with |{1}|{2}|{3}| => {4}".format(
+                    task_description, row_values["id"], row_values["name"], row_values["zcode"], str(e)
                 ),
             )
             raise e
@@ -68,7 +70,7 @@ def extract_query_data_from_csv(lines):
     return query_data
 
 
-# TODO move to util but call back to here for query content
+# TODO consider moving to common or refactoring
 def generate_db_query(row_values):
     if row_values["action"] in ("CREATE"):
         return create_query(row_values)

@@ -110,3 +110,11 @@ def process_file(csv_file, event, start, expected_col_count):
     if lines == {}:
         send_failure_slack_message(event, start)
     return lines
+
+
+def report_summary_counts(task_description, summary_count_dict):
+    log_for_audit(
+        "{0} updated: {1}, inserted: {2}, deleted: {3}".format(
+            task_description, summary_count_dict[update_action], summary_count_dict[create_action], summary_count_dict[delete_action]
+        )
+    )

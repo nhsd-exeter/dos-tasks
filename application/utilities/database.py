@@ -48,7 +48,8 @@ def execute_db_query(db_connection, query, data, line, values, summary_count_dic
         db_connection.commit()
         common.increment_summary_count(summary_count_dict, values)
         logger.log_for_audit(
-            "Action: {}, ID: {}, for symptomgroup {}".format(values["action"], values["id"], values["name"])
+            "action: Process row | operation: {0} | id: {1} | description: {2} | line number: {3}".format(
+                values["action"], values["id"], values["name"], line)
         )
     except Exception as e:
         logger.log_for_error("Line {} in transaction failed. Rolling back".format(line))
