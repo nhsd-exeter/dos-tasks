@@ -57,7 +57,7 @@ def request(event, context):
 def process_extracted_data(db_connection, row_data):
     for row_number, row_values in row_data.items():
         try:
-            record_exists = database.does_record_exist(db_connection, row_values)
+            record_exists = database.does_record_exist(db_connection, row_values, "symptomgroups")
             if common.valid_action(record_exists, row_values):
                 query, data = generate_db_query(row_values)
                 execute_db_query(db_connection, query, data, row_number, row_values)
