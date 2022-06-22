@@ -60,7 +60,7 @@ def test_request_success_with_check_table_for_id_is_false(mock_send_start_messag
 def test_create_query():
     test_values = {
                 "id": 10,
-                "description": "Test Data",
+                "name": "Test Data",
                 "action": "CREATE"
     }
     query, data = handler.create_query(test_values)
@@ -74,7 +74,7 @@ def test_create_query():
 def test_update_query():
     test_values = {
         "id": 10,
-        "description": "Test Data",
+        "name": "Test Data",
         "action": "UPDATE"
     }
     query, data = handler.update_query(test_values)
@@ -87,7 +87,7 @@ def test_update_query():
 def test_delete_query():
     test_values = {
         "id": 10,
-        "description": "Test Data",
+        "name": "Test Data",
         "action": "DELETE"
     }
     query, data = handler.delete_query(test_values)

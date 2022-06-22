@@ -41,7 +41,7 @@ def extract_query_data_from_csv(csv_data):
         data_dict = {}
         try:
             data_dict["id"] = row_data["id"]
-            data_dict["description"] = row_data["description"]
+            data_dict["name"] = row_data["name"]
             data_dict["action"] = row_data["action"].upper()
         except Exception as ex:
             logger.log_for_audit("CSV data invalid " + ex)
@@ -69,7 +69,7 @@ def create_query(row_values):
     """
     data = (
         row_values["id"],
-        row_values["description"],
+        row_values["name"],
     )
     return query, data
 
@@ -79,7 +79,7 @@ def update_query(row_values):
         update pathwaysdos.symptomdiscriminators set description = (%s) where id = (%s);
     """
     data = (
-        row_values["description"],
+        row_values["name"],
         row_values["id"],
     )
     return query, data
