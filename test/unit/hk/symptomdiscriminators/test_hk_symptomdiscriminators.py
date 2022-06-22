@@ -211,3 +211,35 @@ def test_process_extracted_data_multiple_records(mock_exist,mock_valid_action,mo
     assert mock_exist.call_count == 2
     assert mock_generate.call_count == 2
     assert mock_execute.call_count == 2
+
+def test_csv_line():
+    """Test data extracted from valid csv"""
+    csv_rows = {}
+    csv_rows["1"]={"id": csv_sd_id, "description": csv_sd_desc, "action": csv_sd_action}
+    csv_dict = handler.extract_query_data_from_csv(csv_rows)
+    assert len(csv_dict) == 1
+    assert len(csv_dict["1"]) == 3
+    assert csv_dict["1"]["id"] == csv_sd_id
+    assert csv_dict["1"]["name"] == str(csv_sd_desc)
+    assert csv_dict["1"]["action"] == str(csv_sd_action).upper()
+
+
+def test_csv_line_lc():
+    """Test lower case action in csv is converted to u/c"""
+    csv_rows = {}
+    csv_sg_action = "remove"
+    csv_rows["1"]={"id": csv_sd_id, "description": csv_sd_desc, "action": csv_sd_action}
+    csv_dict = handler.extract_query_data_from_csv(csv_rows)
+    assert len(csv_dict) == 1
+    assert len(csv_dict["1"]) == 3
+    assert csv_dict["1"]["id"] == csv_sd_id
+    assert csv_dict["1"]["name"] == str(csv_sd_desc)
+    assert csv_dict["1"]["action"] == str(csv_sd_action).upper()
+
+
+def test_csv_line_exception():
+    """Test exception handling by deliberately setting action to NOT a string"""
+    csv_rows = {}
+    csv_rows["1"]={"id": csv_sd_id, "description": "new SD", "action": 1}
+    with pytest.raises(Exception):
+        handler.extract_query_data_from_csv(csv_rows)

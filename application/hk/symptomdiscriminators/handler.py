@@ -33,7 +33,7 @@ def request(event, context):
 
 def extract_query_data_from_csv(csv_data):
     """
-    Maps data from csv and derives zcode data NOT in the csv
+    Maps data from csv
     """
     query_data = {}
     for row_number, row_data in csv_data.items():
@@ -41,7 +41,7 @@ def extract_query_data_from_csv(csv_data):
         data_dict = {}
         try:
             data_dict["id"] = row_data["id"]
-            data_dict["name"] = row_data["name"]
+            data_dict["name"] = row_data["description"]
             data_dict["action"] = row_data["action"].upper()
         except Exception as ex:
             logger.log_for_audit("CSV data invalid " + ex)
@@ -103,7 +103,7 @@ def process_extracted_data(db_connection, row_data, summary_count_dict, event, s
         except Exception as e:
             logger.log_for_error(
                 "Processing {0} data failed with |{1}|{2}| => {3}".format(
-                    task_description, row_values["id"], row_values["description"], str(e)
+                    task_description, row_values["id"], row_values["name"], str(e)
                 ),
             )
             raise e
