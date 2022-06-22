@@ -9,16 +9,21 @@ mock_context = ""
 mock_env = "mock_env"
 start = ""
 
+# example 2001,"Symptom discriminator description","DELETE"
+csv_sd_id = 2001
+csv_sd_desc = "SD Automated Test"
+csv_sd_action = "INSERT"
+
 
 @patch(f"{file_path}.database.connect_to_database", return_value="db_connection")
 @patch(f"{file_path}.common.retrieve_file_from_bucket", return_value="csv_file")
 @patch(f"{file_path}.common.process_file", return_value={"1": {"id": "00001", "description": "Mock Create SD", "action": "CREATE"}, "2": {"id": "00002", "description": "Mock Update SD", "action": "UPDATE"}, "3": {"id": "00003", "description": "Mock Delete SD", "action": "DELETE"}})
 @patch(f"{file_path}.extract_query_data_from_csv", return_value=("query", "data"))
 @patch(f"{file_path}.process_extracted_data")
-@patch(f"{file_path}.common.report_summary_counts")
+@patch(f"{file_path}.common.report_summary_counts", return_value="Symptom discriminators updated: 1, inserted: 1, deleted: 1")
 @patch(f"{file_path}.common.cleanup")
 @patch(f"{file_path}.message.send_start_message")
-def test_request_success_with_check_table_for_id_is_true(mock_send_start_message, mock_cleanup, mock_report_summary_count ,mock_process_extracted_data, mock_extract_query_data_from_csv, mock_process_file, mock_retrieve_file_from_bucket, mock_db_connection):
+def test_request_success_with_check_table_for_id_is_true(mock_send_start_message, mock_cleanup,  mock_report_summary_count , mock_process_extracted_data, mock_extract_query_data_from_csv, mock_process_file, mock_retrieve_file_from_bucket, mock_db_connection):
     result = handler.request(mock_event, mock_context)
     assert result == "Symptom discriminators execution successful"
     mock_send_start_message.assert_called_once()
@@ -142,68 +147,55 @@ def test_generate_db_query_raises_error(mock_send_failure_slack_message, mock_de
     mock_create_query.assert_not_called()
 
 
-# # @patch(f"{file_path}.database.DB")
-# @patch("psycopg2.connect")
-# def test_check_table_for_id_create_success(mock_db_connect):
-#     mock_db_connect.cursor.return_value.__enter__.return_value.rowcount = 0
-#     mock_line = "1"
-#     mock_values = {"id": "00001", "description": "Mock Create SD", "action": "CREATE"}
-#     mock_filename = ""
-#     result = handler.check_table_for_id(mock_db_connect, mock_line, mock_values, mock_filename, mock_event, start)
-#     assert result == True
-#     mock_db_connect.cursor().__enter__().execute.assert_called_once()
+@patch("psycopg2.connect")
+def test_process_extracted_data_error_check_exists_fails(mock_db_connect):
+    """Test error handling when extracting data and record exist check fails"""
+    row_data = {}
+    csv_dict={csv_sd_id,csv_sd_desc,"DELETE"}
+    row_data[0]=csv_dict
+    mock_db_connect = ""
+    summary_count = {}
+    with pytest.raises(Exception):
+        handler.process_extracted_data(mock_db_connect, row_data, summary_count)
 
 
-# @patch("psycopg2.connect")
-# def test_check_table_for_id_update_success(mock_db_connect):
-#     mock_db_connect.cursor.return_value.__enter__.return_value.rowcount = 1
-#     mock_line = "2"
-#     mock_values = {"id": "00002", "description": "Mock Update SD", "action": "UPDATE"}
-#     mock_filename = ""
-#     result = handler.check_table_for_id(mock_db_connect, mock_line, mock_values, mock_filename, mock_event, start)
-#     assert result == True
-#     mock_db_connect.cursor().__enter__().execute.assert_called_once()
+@patch("psycopg2.connect")
+@patch(f"{file_path}.database.execute_db_query")
+@patch(f"{file_path}.generate_db_query",return_value=("query", "data"))
+@patch(f"{file_path}.common.valid_action", return_value=True)
+@patch(f"{file_path}.database.does_record_exist", return_value=True)
+def test_process_extracted_data_single_record(mock_exist,mock_valid_action,mock_generate,mock_execute, mock_db_connect):
+    """Test extracting data calls each downstream functions once for one record"""
+    row_data = {}
+    csv_dict={csv_sd_id,csv_sd_desc,"DELETE"}
+    row_data[0]=csv_dict
+    summary_count = {}
+    summary_count = {}
+    handler.process_extracted_data(mock_db_connect, row_data, summary_count)
+    mock_valid_action.assert_called_once()
+    mock_exist.assert_called_once()
+    mock_generate.assert_called_once()
+    mock_execute.assert_called_once()
+
+@patch("psycopg2.connect")
+@patch(f"{file_path}.database.execute_db_query")
+@patch(f"{file_path}.generate_db_query",return_value=("query", "data"))
+@patch(f"{file_path}.common.valid_action", return_value=True)
+@patch(f"{file_path}.database.does_record_exist", return_value=True)
+def test_process_extracted_data_multiple_records(mock_exist,mock_valid_action,mock_generate,mock_execute, mock_db_connect):
+    """Test extracting data calls each downstream functions once for each record"""
+    row_data = {}
+    csv_dict={}
+    csv_dict={csv_sd_id,csv_sd_desc,"DELETE"}
+    row_data[0]=csv_dict
+    csv_dict={csv_sd_id,csv_sd_desc,"CREATE"}
+    row_data[1]=csv_dict
+    print(row_data[1])
+    summary_count = {}
+    handler.process_extracted_data(mock_db_connect, row_data, summary_count)
+    assert mock_valid_action.call_count == 2
+    assert mock_exist.call_count == 2
+    assert mock_generate.call_count == 2
+    assert mock_execute.call_count == 2
 
 
-# @patch("psycopg2.connect")
-# def test_check_table_for_id_delete_success(mock_db_connect):
-#     mock_db_connect.cursor.return_value.__enter__.return_value.rowcount = 1
-#     mock_line = "3"
-#     mock_values = {"id": "00003", "description": "Mock Delete SD", "action": "DELETE"}
-#     mock_filename = ""
-#     result = handler.check_table_for_id(mock_db_connect, mock_line, mock_values, mock_filename, mock_event, start)
-#     assert result == True
-#     mock_db_connect.cursor().__enter__().execute.assert_called_once()
-
-
-# @patch("psycopg2.connect")
-# def test_check_table_for_id_record_exists_returns_false_when_action_create(mock_db_connect):
-#     mock_db_connect.cursor.return_value.__enter__.return_value.rowcount = 1
-#     mock_line = "1"
-#     mock_values = {"id": "00001", "description": "Mock Create SD", "action": "CREATE"}
-#     mock_filename = ""
-#     result = handler.check_table_for_id(mock_db_connect, mock_line, mock_values, mock_filename, mock_event, start)
-#     assert result == False
-#     mock_db_connect.cursor().__enter__().execute.assert_called_once()
-
-
-# @patch("psycopg2.connect")
-# def test_check_table_for_id_not_record_exists_returns_false_when_action_delete(mock_db_connect):
-#     mock_db_connect.cursor.return_value.__enter__.return_value.rowcount = 0
-#     mock_line = "3"
-#     mock_values = {"id": "00003", "description": "Mock Delete SD", "action": "DELETE"}
-#     mock_filename = ""
-#     result = handler.check_table_for_id(mock_db_connect, mock_line, mock_values, mock_filename, mock_event, start)
-#     assert result == False
-#     mock_db_connect.cursor().__enter__().execute.assert_called_once()
-
-
-# @patch(f"{file_path}.message.send_failure_slack_message")
-# def test_check_table_for_id_raises_error(mock_send_failure_slack_message):
-#     mock_db_connect = "mock connection"
-#     mock_line = "1"
-#     mock_values = {"id": "00001", "description": "Mock Create SD", "action": "CREATE"}
-#     mock_filename = ""
-#     with pytest.raises(Exception):
-#         result = handler.check_table_for_id(mock_db_connect, mock_line, mock_values, mock_filename, mock_event, start)
-#     mock_send_failure_slack_message.assert_called_once_with(mock_event, start)

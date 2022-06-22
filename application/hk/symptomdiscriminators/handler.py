@@ -22,7 +22,7 @@ def request(event, context):
     summary_count_dict = common.initialise_summary_count()
     db_connection = database.connect_to_database(env, event, start)
     csv_file = common.retrieve_file_from_bucket(bucket, filename, event, start)
-    csv_data = common.process_file(csv_file, event, start, 3)
+    csv_data = common.process_file(csv_file, event, start, data_column_count)
     # lines = common.process_file(csv_file, event, start, 3)
     extracted_data = extract_query_data_from_csv(csv_data)
     process_extracted_data(db_connection, extracted_data, summary_count_dict)
@@ -30,12 +30,13 @@ def request(event, context):
     common.cleanup(db_connection, bucket, filename, event, start)
     return task_description + " execution successful"
 
-def extract_query_data_from_csv(lines):
+
+def extract_query_data_from_csv(csv_data):
     """
     Maps data from csv and derives zcode data NOT in the csv
     """
     query_data = {}
-    for row_number, row_data in lines.items():
+    for row_number, row_data in csv_data.items():
 
         data_dict = {}
         try:
@@ -46,6 +47,7 @@ def extract_query_data_from_csv(lines):
             logger.log_for_audit("CSV data invalid " + ex)
         query_data[str(row_number)] = data_dict
     return query_data
+
 
 def generate_db_query(row_values, event, start):
     if row_values["action"] == ("CREATE"):
@@ -100,8 +102,8 @@ def process_extracted_data(db_connection, row_data, summary_count_dict):
                 database.execute_db_query(db_connection, query, data, row_number, row_values, summary_count_dict)
         except Exception as e:
             logger.log_for_error(
-                "Processing {0} data failed with |{1}|{2}|{3}| => {4}".format(
-                    task_description, row_values["id"], row_values["name"], row_values["zcode"], str(e)
+                "Processing {0} data failed with |{1}|{2}| => {3}".format(
+                    task_description, row_values["id"], row_values["name"], str(e)
                 ),
             )
             raise e
