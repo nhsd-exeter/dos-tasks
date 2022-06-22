@@ -8,7 +8,8 @@ data_column_count = 3
 create_action = "CREATE"
 update_action = "UPDATE"
 delete_action = "DELETE"
-summary_count_dict = {}
+
+task_description = "Symptom discriminators"
 
 
 def request(event, context):
@@ -18,37 +19,33 @@ def request(event, context):
     env = event["env"]
     filename = event["filename"]
     bucket = event["bucket"]
-    initialise_summary_count()
+    summary_count_dict = common.initialise_summary_count()
     db_connection = database.connect_to_database(env, event, start)
     csv_file = common.retrieve_file_from_bucket(bucket, filename, event, start)
-    lines = common.process_file(csv_file, event, start, 3)
-    for row, values in lines.items():
-        if check_table_for_id(db_connection, row, values, filename, event, start):
-            query, data = generate_db_query(values, event, start)
-            execute_db_query(db_connection, query, data, row, values)
-    logger.log_for_audit(
-        "Symptom discriminators updated: {0}, inserted: {1}, deleted: {2}".format(
-            summary_count_dict[update_action], summary_count_dict[create_action], summary_count_dict[delete_action]
-        )
-    )
+    csv_data = common.process_file(csv_file, event, start, 3)
+    # lines = common.process_file(csv_file, event, start, 3)
+    extracted_data = extract_query_data_from_csv(csv_data)
+    process_extracted_data(db_connection, extracted_data, summary_count_dict)
+    common.report_summary_counts(task_description, summary_count_dict)
     common.cleanup(db_connection, bucket, filename, event, start)
-    return "Symptom discriminators execution successful"
+    return task_description + " execution successful"
 
+def extract_query_data_from_csv(lines):
+    """
+    Maps data from csv and derives zcode data NOT in the csv
+    """
+    query_data = {}
+    for row_number, row_data in lines.items():
 
-# def process_file(csv_file, event, start):
-#     lines = {}
-#     count = 0
-#     csv_reader = csv.reader(csv_file.split("\n"))
-#     for line in csv_reader:
-#         count += 1
-#         if not common.check_csv_format(line, csv_column_count):
-#             logger.log_for_error("Incorrect line format, should be 3 but is {}".format(len(line)))
-#         else:
-#             lines[str(count)] = {"id": line[0], "description": line[1], "action": line[2]}
-#     if lines == {}:
-#         message.send_failure_slack_message(event, start)
-#     return lines
-
+        data_dict = {}
+        try:
+            data_dict["id"] = row_data["id"]
+            data_dict["description"] = row_data["description"]
+            data_dict["action"] = row_data["action"].upper()
+        except Exception as ex:
+            logger.log_for_audit("CSV data invalid " + ex)
+        query_data[str(row_number)] = data_dict
+    return query_data
 
 def generate_db_query(row_values, event, start):
     if row_values["action"] == ("CREATE"):
@@ -94,70 +91,17 @@ def delete_query(row_values):
     return query, data
 
 
-def check_table_for_id(db_connection, line, values, filename, event, start):
-    try:
-        with db_connection.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
-            select_query = """select * from pathwaysdos.symptomdiscriminators where id=%s"""
-            cursor.execute(select_query, (values["id"],))
-            if cursor.rowcount != 0:
-                record_exists = True
-            else:
-                record_exists = False
-    except Exception as e:
-        logger.log_for_error("Error checking table symptomdiscriminators for ID {}. Error: {}".format(values["id"], e))
-        message.send_failure_slack_message(event, start)
-        raise e
-    if record_exists and values["action"] in ("UPDATE", "DELETE"):
-        return True
-    elif not record_exists and values["action"] in ("CREATE"):
-        return True
-    else:
-        if record_exists:
+def process_extracted_data(db_connection, row_data, summary_count_dict):
+    for row_number, row_values in row_data.items():
+        try:
+            record_exists = database.does_record_exist(db_connection, row_values, "symptomdiscriminators")
+            if common.valid_action(record_exists, row_values):
+                query, data = generate_db_query(row_values)
+                database.execute_db_query(db_connection, query, data, row_number, row_values, summary_count_dict)
+        except Exception as e:
             logger.log_for_error(
-                "Action {} but the record with ID {} already exists. File: {} | Line: {} | Description: {}".format(
-                    values["action"], values["id"], filename, line, values["description"]
-                )
+                "Processing {0} data failed with |{1}|{2}|{3}| => {4}".format(
+                    task_description, row_values["id"], row_values["name"], row_values["zcode"], str(e)
+                ),
             )
-        elif not record_exists:
-            logger.log_for_error(
-                "Action {} but the record with ID {} does not exist. File: {} | Line: {} | Description: {}".format(
-                    values["action"], values["id"], filename, line, values["description"]
-                )
-            )
-        return False
-
-
-def execute_db_query(db_connection, query, data, line, values):
-    cursor = db_connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    try:
-        cursor.execute(query, data)
-        db_connection.commit()
-        increment_summary_count(values)
-        logger.log_for_audit(
-            "Action: {}, ID: {}, for symptom discriminators {}".format(
-                values["action"], values["id"], values["description"]
-            )
-        )
-    except Exception as e:
-        logger.log_for_error("Line {} in transaction failed. Rolling back".format(line))
-        logger.log_for_error("Error: {}".format(e))
-        db_connection.rollback()
-    finally:
-        cursor.close()
-
-
-def initialise_summary_count():
-    summary_count_dict[create_action] = 0
-    summary_count_dict[update_action] = 0
-    summary_count_dict[delete_action] = 0
-
-
-def increment_summary_count(values):
-    if values["action"] in [create_action, update_action, delete_action]:
-        summary_count_dict[values["action"]] = summary_count_dict[values["action"]] + 1
-    else:
-        logger.log_for_error(
-            "Can't increment count for action {0}. Valid actions are {1},{2},{3}".format(
-                values["action"], create_action, update_action, delete_action
-            )
-        )
+            raise e
