@@ -25,7 +25,7 @@ def request(event, context):
     csv_data = common.process_file(csv_file, event, start, data_column_count)
     # lines = common.process_file(csv_file, event, start, 3)
     extracted_data = extract_query_data_from_csv(csv_data)
-    process_extracted_data(db_connection, extracted_data, summary_count_dict)
+    process_extracted_data(db_connection, extracted_data, summary_count_dict, event, start)
     common.report_summary_counts(task_description, summary_count_dict)
     common.cleanup(db_connection, bucket, filename, event, start)
     return task_description + " execution successful"
@@ -49,7 +49,7 @@ def extract_query_data_from_csv(csv_data):
     return query_data
 
 
-def generate_db_query(row_values, event, start):
+def generate_db_query(row_values,event,start):
     if row_values["action"] == ("CREATE"):
         return create_query(row_values)
     elif row_values["action"] == ("UPDATE"):
@@ -93,12 +93,12 @@ def delete_query(row_values):
     return query, data
 
 
-def process_extracted_data(db_connection, row_data, summary_count_dict):
+def process_extracted_data(db_connection, row_data, summary_count_dict, event, start):
     for row_number, row_values in row_data.items():
         try:
             record_exists = database.does_record_exist(db_connection, row_values, "symptomdiscriminators")
             if common.valid_action(record_exists, row_values):
-                query, data = generate_db_query(row_values)
+                query, data = generate_db_query(row_values,event, start)
                 database.execute_db_query(db_connection, query, data, row_number, row_values, summary_count_dict)
         except Exception as e:
             logger.log_for_error(
