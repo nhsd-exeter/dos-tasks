@@ -25,11 +25,6 @@ def request(event, context):
     extracted_data = extract_query_data_from_csv(csv_data)
     process_extracted_data(db_connection, extracted_data, summary_count_dict)
     common.report_summary_counts(task_description, summary_count_dict)
-    # logger.log_for_audit(
-    #     "Symptom groups updated: {0}, inserted: {1}, deleted: {2}".format(
-    #         summary_count_dict[update_action], summary_count_dict[create_action], summary_count_dict[delete_action]
-    #     )
-    # )
     common.cleanup(db_connection, bucket, filename, event, start)
     return task_description + " execution successful"
 
