@@ -103,7 +103,7 @@ def process_extracted_data(db_connection, row_data, summary_count_dict):
         except Exception as e:
             logger.log_for_error(
                 "Processing {0} data failed with |{1}|{2}| => {3}".format(
-                    task_description, row_values["id"], row_values["name"], str(e)
+                    task_description, row_values["id"], row_values["description"], str(e)
                 ),
             )
             raise e
