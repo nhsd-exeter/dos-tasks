@@ -5,9 +5,6 @@ from datetime import datetime
 
 csv_column_count = 3
 data_column_count = 3
-create_action = "CREATE"
-update_action = "UPDATE"
-delete_action = "DELETE"
 
 task_description = "Referral roles"
 

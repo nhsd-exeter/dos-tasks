@@ -1,7 +1,6 @@
 from unittest.mock import Mock, patch
 import psycopg2
 import pytest
-# from application.utilities.common import check_csv_format, valid_action, cleanup, retrieve_file_from_bucket, connect_to_database
 from .. import common, message
 
 file_path = "application.utilities.common"
@@ -97,17 +96,6 @@ def test_cleanup_success(mock_send_success_slack_message, mock_s3_object, mock_d
     mock_s3_object().delete_object.assert_called_once_with(mock_bucket, mock_filename, mock_event, start)
     mock_send_success_slack_message.assert_called_once_with(mock_event, start)
 
-# TODO moved to database test
-# @patch(f"{file_path}.send_failure_slack_message")
-# @patch(f"{file_path}.DB")
-# def test_connect_to_database_returns_error(mock_db_object, mock_send_failure_slack_message):
-#     mock_db_object().db_set_connection_details = Mock(return_value=False)
-#     with pytest.raises(ValueError) as assertion:
-#         result = common.connect_to_database(mock_env, mock_event, start)
-#     assert str(assertion.value) == "DB Parameter(s) not found in secrets store"
-#     mock_db_object().db_set_connection_details.assert_called_once()
-#     mock_send_failure_slack_message.assert_called_once()
-
 
 @patch(f"{file_path}.S3")
 def test_retrieve_file_from_bucket(mock_s3_object):
@@ -118,15 +106,6 @@ def test_retrieve_file_from_bucket(mock_s3_object):
     assert result == "Object returned"
     mock_s3_object().get_object.assert_called_once()
 
-#  Moved to database test
-# @patch(f"{file_path}.DB")
-# def test_connect_to_database_success(mock_db_object):
-#     mock_db_object().db_set_connection_details = Mock(return_value=True)
-#     mock_db_object().db_connect = Mock(return_value="Connection Established")
-#     result = common.connect_to_database(mock_env, mock_event, start)
-#     assert result == "Connection Established"
-#     mock_db_object().db_set_connection_details.assert_called_once()
-#     mock_db_object().db_connect.assert_called_once()
 
 def test_check_for_not_null_values():
     """Checks key values not null"""
