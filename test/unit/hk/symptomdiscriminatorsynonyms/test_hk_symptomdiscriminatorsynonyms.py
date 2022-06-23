@@ -43,7 +43,7 @@ def test_create_query():
     query, data = handler.create_query(test_values)
     assert query == """
         insert into pathwaysdos.symptomdiscriminatorsynonyms (id, name) values (%s, %s)
-        returning id, description;
+        returning id, name;
     """
     assert data == (10, "Test Data")
 
