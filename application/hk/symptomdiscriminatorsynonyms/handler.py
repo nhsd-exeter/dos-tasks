@@ -41,8 +41,8 @@ def generate_db_query(row_values, event, start):
 
 def create_query(row_values):
     query = """
-        insert into pathwaysdos.symptomdiscriminatorsynonyms (id, description) values (%s, %s)
-        returning id, description;
+        insert into pathwaysdos.symptomdiscriminatorsynonyms (id, name) values (%s, %s)
+        returning id, name;
     """
     data = (
         row_values["id"],
@@ -53,7 +53,7 @@ def create_query(row_values):
 
 def update_query(row_values):
     query = """
-        update pathwaysdos.symptomdiscriminatorsynonyms set description = (%s) where id = (%s);
+        update pathwaysdos.symptomdiscriminatorsynonyms set name = (%s) where id = (%s);
     """
     data = (
         row_values["name"],
