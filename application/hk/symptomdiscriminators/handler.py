@@ -29,7 +29,6 @@ def request(event, context):
     return task_description + " execution successful"
 
 
-
 def generate_db_query(row_values, event, start):
     if row_values["action"] == ("CREATE"):
         return create_query(row_values)

@@ -36,3 +36,4 @@ jobs:
             -Dsonar.coverage.exclusions=test/**
             -Dsonar.python.coverage.reportPaths=coverage.xml
             -Dsonar.python.version=3.10
+            -Dsonar.cpd.exclusions=application/**/handler.py
