@@ -19,7 +19,7 @@ csv_sg_action = "REMOVE"
 def test_csv_line():
     """Test data extracted from valid csv"""
     csv_rows = {}
-    csv_rows["1"]={"id": csv_sg_id, "description": csv_sg_desc, "action": csv_sg_action}
+    csv_rows["1"]={"id": csv_sg_id, "name": csv_sg_desc, "action": csv_sg_action}
     csv_dict = handler.extract_query_data_from_csv(csv_rows)
     assert len(csv_dict) == 1
     assert len(csv_dict["1"]) == 4
@@ -33,7 +33,7 @@ def test_csv_line_lc():
     """Test lower case action in csv is converted to u/c"""
     csv_rows = {}
     csv_sg_action = "remove"
-    csv_rows["1"]={"id": csv_sg_id, "description": csv_sg_desc, "action": csv_sg_action}
+    csv_rows["1"]={"id": csv_sg_id, "name": csv_sg_desc, "action": csv_sg_action}
     csv_dict = handler.extract_query_data_from_csv(csv_rows)
     assert len(csv_dict) == 1
     assert len(csv_dict["1"]) == 4
@@ -46,7 +46,7 @@ def test_csv_line_lc():
 def test_zcode_sgdesc_csv_line():
     """Test extract correctly recognises zcodes"""
     csv_rows = {}
-    csv_rows["1"]={"id": csv_sg_id, "description": "z2.0 - test", "action": csv_sg_action}
+    csv_rows["1"]={"id": csv_sg_id, "name": "z2.0 - test", "action": csv_sg_action}
     csv_dict = handler.extract_query_data_from_csv(csv_rows)
     assert len(csv_dict) == 1
     assert len(csv_dict["1"]) == 4
@@ -57,7 +57,7 @@ def test_zcode_sgdesc_csv_line():
 def test_csv_line_exception():
     """Test exception handling by deliberately setting action to NOT a string"""
     csv_rows = {}
-    csv_rows["1"]={"id": csv_sg_id, "description": "z2.0 - test", "action": 1}
+    csv_rows["1"]={"id": csv_sg_id, "name": "z2.0 - test", "action": 1}
     with pytest.raises(Exception):
         handler.extract_query_data_from_csv(csv_rows)
 

@@ -54,8 +54,8 @@ def extract_query_data_from_csv(lines):
         data_dict = {}
         try:
             data_dict["id"] = row_data["id"]
-            data_dict["name"] = row_data["description"]
-            data_dict["zcode"] = row_data["description"].startswith("z2.0 - ")
+            data_dict["name"] = row_data["name"]
+            data_dict["zcode"] = row_data["name"].startswith("z2.0 - ")
             data_dict["action"] = row_data["action"].upper()
         except Exception as ex:
             logger.log_for_audit("CSV data invalid " + ex)

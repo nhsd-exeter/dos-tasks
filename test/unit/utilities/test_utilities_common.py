@@ -196,9 +196,9 @@ def test_process_file_success():
 00002,"Mock Update SD","UPDATE"
 00003,"Mock Delete SD","DELETE"""
     lines = common.process_file(mock_csv_file, mock_event, start, 3)
-    assert lines == {"1": {"id": "00001", "description": "Mock Create SD", "action": "CREATE"},
-                    "2": {"id": "00002", "description": "Mock Update SD", "action": "UPDATE"},
-                    "3": {"id": "00003", "description": "Mock Delete SD", "action": "DELETE"}}
+    assert lines == {"1": {"id": "00001", "name": "Mock Create SD", "action": "CREATE"},
+                    "2": {"id": "00002", "name": "Mock Update SD", "action": "UPDATE"},
+                    "3": {"id": "00003", "name": "Mock Delete SD", "action": "DELETE"}}
 
 
 def test_process_file_success_with_empty_line():
@@ -209,9 +209,9 @@ def test_process_file_success_with_empty_line():
 00003,"Mock Delete SD","DELETE"
 """
     lines = common.process_file(mock_csv_file, mock_event, start, 3)
-    assert lines == {"2": {"id": "00001", "description": "Mock Create SD", "action": "CREATE"},
-                    "4": {"id": "00002", "description": "Mock Update SD", "action": "UPDATE"},
-                    "5": {"id": "00003", "description": "Mock Delete SD", "action": "DELETE"}}
+    assert lines == {"2": {"id": "00001", "name": "Mock Create SD", "action": "CREATE"},
+                    "4": {"id": "00002", "name": "Mock Update SD", "action": "UPDATE"},
+                    "5": {"id": "00003", "name": "Mock Delete SD", "action": "DELETE"}}
 
 
 def test_process_file_success_with_incorrect_line_format():
@@ -219,8 +219,8 @@ def test_process_file_success_with_incorrect_line_format():
 00002,"Mock Update SD","UPDATE"
 00003,"Mock Delete SD","DELETE"""
     lines = common.process_file(mock_csv_file, mock_event, start, 3)
-    assert lines == {"2": {"id": "00002", "description": "Mock Update SD", "action": "UPDATE"},
-                    "3": {"id": "00003", "description": "Mock Delete SD", "action": "DELETE"}}
+    assert lines == {"2": {"id": "00002", "name": "Mock Update SD", "action": "UPDATE"},
+                    "3": {"id": "00003", "name": "Mock Delete SD", "action": "DELETE"}}
 
 
 @patch(f"{file_path}.send_failure_slack_message")

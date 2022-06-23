@@ -100,7 +100,7 @@ def process_file(csv_file, event, start, expected_col_count):
         if len(line) == 0:
             continue
         if check_csv_format(line, expected_col_count) and check_csv_values(line):
-            lines[str(count)] = {"id": line[0], "description": line[1], "action": line[2]}
+            lines[str(count)] = {"id": line[0], "name": line[1], "action": line[2]}
         else:
             log_for_audit(
                 "Incorrect line format on line {0}, should be {1} but is {2}".format(
