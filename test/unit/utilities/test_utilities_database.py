@@ -1,9 +1,18 @@
 import psycopg2
 import pytest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 from .. import database
 
 file_path = "application.utilities.database"
+table_name = "referralroles"
+csv_id = 2001
+csv_desc = "Unit Test"
+csv_action = "DELETE"
+mock_event = {"filename": "mock_filename", "env": "mock_env", "bucket": "mock_bucket"}
+mock_context = ""
+mock_env = "mock_env"
+start = ""
+
 
 @patch("psycopg2.connect")
 def test_db_connect(mock_connect):
@@ -151,3 +160,97 @@ def test_db_set_connection_details_all_keys_incorrect(mock_get_secrets_value):
     assert db.db_user == ""
     assert db.db_password == ""
     mock_get_secrets_value.assert_called_once()
+
+@patch("psycopg2.connect")
+def test_record_exists_true(mock_db_connect):
+    """Test correct data passed to check record exists - returning true"""
+    csv_dict = {}
+    csv_dict["id"] = csv_id
+    csv_dict["name"] = csv_desc
+    csv_dict["action"] = csv_action
+    csv_dict["zcode"] = None
+    mock_db_connect.cursor.return_value.__enter__.return_value.rowcount = 1
+    assert database.does_record_exist(mock_db_connect,csv_dict,table_name)
+
+@patch("psycopg2.connect")
+def test_does_record_exist_false(mock_db_connect):
+    """Test correct data passed to check record exists - returning false"""
+    csv_dict = {}
+    csv_dict["id"] = csv_id
+    csv_dict["name"] = csv_desc
+    csv_dict["action"] = "DELETE"
+    csv_dict["zcode"] = None
+    mock_db_connect.cursor.return_value.__enter__.return_value.rowcount = 0
+    assert not database.does_record_exist(mock_db_connect,csv_dict,table_name)
+
+@patch("psycopg2.connect")
+def test_does_record_exist_exception(mock_db_connect):
+    """Test throwing of exception """
+    csv_dict = {}
+    csv_dict["id"] = csv_id
+    csv_dict["name"] = csv_desc
+    csv_dict["action"] = csv_action
+    csv_dict["zcode"] = None
+    mock_db_connect = ""
+    with pytest.raises(Exception):
+        database.does_record_exist(mock_db_connect,csv_dict,table_name)
+
+
+# TODO move inside class later
+@patch(f"{file_path}.message.send_failure_slack_message")
+@patch(f"{file_path}.DB")
+def test_connect_to_database_returns_error(mock_db_object, mock_send_failure_slack_message):
+    mock_db_object().db_set_connection_details = Mock(return_value=False)
+    with pytest.raises(ValueError) as assertion:
+        database.connect_to_database(mock_env, mock_event, start)
+    assert str(assertion.value) == "DB Parameter(s) not found in secrets store"
+    mock_db_object().db_set_connection_details.assert_called_once()
+    mock_send_failure_slack_message.assert_called_once()
+
+
+# TODO move inside class later
+@patch(f"{file_path}.DB")
+def test_connect_to_database_success(mock_db_object):
+    mock_db_object().db_set_connection_details = Mock(return_value=True)
+    mock_db_object().db_connect = Mock(return_value="Connection Established")
+    result = database.connect_to_database(mock_env, mock_event, start)
+    assert result == "Connection Established"
+    mock_db_object().db_set_connection_details.assert_called_once()
+    mock_db_object().db_connect.assert_called_once()
+
+
+# TODO move inside class later
+@patch(f"{file_path}.common.increment_summary_count")
+@patch("psycopg2.connect")
+def test_execute_db_query_success(mock_db_connect,mock_summary):
+    """Test code to execute query successfully"""
+    line = """2001,"New Symptom Group","CREATE"\n"""
+    data = ("New Symptom Group", "None", 2001)
+    values = {}
+    values["action"] = "CREATE"
+    values['id'] = 2001
+    values['name'] = "New Symptom Group"
+    summary_count = {}
+    mock_db_connect.cursor.return_value.__enter__.return_value = "Success"
+    query = """update pathwaysdos.symptomgroups set name = (%s), zcodeexists = (%s)
+        where id = (%s);"""
+    database.execute_db_query(mock_db_connect, query, data, line, values, summary_count)
+    mock_db_connect.commit.assert_called_once()
+    mock_summary.assert_called_once()
+    mock_db_connect.cursor().close.assert_called_once()
+
+
+# TODO move inside class later
+@patch("psycopg2.connect")
+def test_execute_db_query_failure(mock_db_connect):
+    """Test code to handle exception and rollback when executing query"""
+    line = """2001,"New Symptom Group","CREATE"\n"""
+    data = ("New Symptom Group", "None", 2001)
+    values = {"action":"CREATE","id":2001,"Name":"New Symptom Group"}
+    summary_count = {}
+    mock_db_connect.cursor.return_value.__enter__.return_value = Exception
+    query = """update pathwaysdos.symptomgroups set name = (%s), zcodeexists = (%s)
+        where id = (%s);"""
+    database.execute_db_query(mock_db_connect, query, data, line, values, summary_count)
+    mock_db_connect.rollback.assert_called_once()
+    mock_db_connect.cursor().close.assert_called_once()
