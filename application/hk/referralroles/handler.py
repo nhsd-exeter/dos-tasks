@@ -11,6 +11,7 @@ delete_action = "DELETE"
 
 task_description = "Referral roles"
 
+
 def request(event, context):
     start = datetime.utcnow()
     message.send_start_message(event, start)
@@ -22,28 +23,13 @@ def request(event, context):
     db_connection = database.connect_to_database(env, event, start)
     csv_file = common.retrieve_file_from_bucket(bucket, filename, event, start)
     csv_data = common.process_file(csv_file, event, start, data_column_count)
-    extracted_data = extract_query_data_from_csv(csv_data)
-    process_extracted_data(db_connection, extracted_data, summary_count_dict, event, start)
+    process_extracted_data(db_connection, csv_data, summary_count_dict, event, start)
     common.report_summary_counts(task_description, summary_count_dict)
     common.cleanup(db_connection, bucket, filename, event, start)
     return task_description + " execution successful"
 
-def extract_query_data_from_csv(csv_data):
-    """
-    Maps data from csv
-    """
-    query_data = {}
-    for row_number, row_data in csv_data.items():
 
-        data_dict = {}
-        try:
-            data_dict["id"] = row_data["id"]
-            data_dict["name"] = row_data["description"]
-            data_dict["action"] = row_data["action"].upper()
-        except Exception as ex:
-            logger.log_for_audit("CSV data invalid " + ex)
-        query_data[str(row_number)] = data_dict
-    return query_data
+
 
 def generate_db_query(row_values, event, start):
     if row_values["action"] in ("CREATE", "INSERT"):
@@ -87,6 +73,7 @@ def delete_query(row_values):
     """
     data = (row_values["id"],)
     return query, data
+
 
 def process_extracted_data(db_connection, row_data, summary_count_dict, event, start):
     for row_number, row_values in row_data.items():

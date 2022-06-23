@@ -18,18 +18,16 @@ csv_sd_action = "INSERT"
 @patch(f"{file_path}.database.connect_to_database", return_value="db_connection")
 @patch(f"{file_path}.common.retrieve_file_from_bucket", return_value="csv_file")
 @patch(f"{file_path}.common.process_file", return_value={"1": {"id": "00001", "description": "Mock Create SD", "action": "CREATE"}, "2": {"id": "00002", "description": "Mock Update SD", "action": "UPDATE"}, "3": {"id": "00003", "description": "Mock Delete SD", "action": "DELETE"}})
-@patch(f"{file_path}.extract_query_data_from_csv", return_value=("query", "data"))
 @patch(f"{file_path}.process_extracted_data")
 @patch(f"{file_path}.common.report_summary_counts", return_value="Symptom discriminators updated: 1, inserted: 1, deleted: 1")
 @patch(f"{file_path}.common.cleanup")
 @patch(f"{file_path}.message.send_start_message")
-def test_request_success_with_check_table_for_id_is_true(mock_send_start_message, mock_cleanup,  mock_report_summary_count , mock_process_extracted_data, mock_extract_query_data_from_csv, mock_process_file, mock_retrieve_file_from_bucket, mock_db_connection):
+def test_request_success_with_check_table_for_id_is_true(mock_send_start_message, mock_cleanup,  mock_report_summary_count , mock_process_extracted_data, mock_process_file, mock_retrieve_file_from_bucket, mock_db_connection):
     result = handler.request(mock_event, mock_context)
     assert result == "Symptom discriminators execution successful"
     mock_send_start_message.assert_called_once()
     mock_cleanup.assert_called_once()
     mock_process_extracted_data.assert_called_once()
-    mock_extract_query_data_from_csv.assert_called_once()
     mock_report_summary_count.assert_called_once()
     mock_process_file.assert_called_once()
     mock_retrieve_file_from_bucket.assert_called_once()
@@ -211,35 +209,3 @@ def test_process_extracted_data_multiple_records(mock_exist,mock_valid_action,mo
     assert mock_exist.call_count == 2
     assert mock_generate.call_count == 2
     assert mock_execute.call_count == 2
-
-def test_csv_line():
-    """Test data extracted from valid csv"""
-    csv_rows = {}
-    csv_rows["1"]={"id": csv_sd_id, "description": csv_sd_desc, "action": csv_sd_action}
-    csv_dict = handler.extract_query_data_from_csv(csv_rows)
-    assert len(csv_dict) == 1
-    assert len(csv_dict["1"]) == 3
-    assert csv_dict["1"]["id"] == csv_sd_id
-    assert csv_dict["1"]["name"] == str(csv_sd_desc)
-    assert csv_dict["1"]["action"] == str(csv_sd_action).upper()
-
-
-def test_csv_line_lc():
-    """Test lower case action in csv is converted to u/c"""
-    csv_rows = {}
-    csv_sg_action = "remove"
-    csv_rows["1"]={"id": csv_sd_id, "description": csv_sd_desc, "action": csv_sd_action}
-    csv_dict = handler.extract_query_data_from_csv(csv_rows)
-    assert len(csv_dict) == 1
-    assert len(csv_dict["1"]) == 3
-    assert csv_dict["1"]["id"] == csv_sd_id
-    assert csv_dict["1"]["name"] == str(csv_sd_desc)
-    assert csv_dict["1"]["action"] == str(csv_sd_action).upper()
-
-
-def test_csv_line_exception():
-    """Test exception handling by deliberately setting action to NOT a string"""
-    csv_rows = {}
-    csv_rows["1"]={"id": csv_sd_id, "description": "new SD", "action": 1}
-    with pytest.raises(Exception):
-        handler.extract_query_data_from_csv(csv_rows)
