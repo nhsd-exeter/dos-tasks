@@ -273,6 +273,7 @@ create-artefact-repositories: # Create ECR repositories to store the artefacts -
 	make docker-create-repository NAME=hk-filter
 	make docker-create-repository NAME=hk-referralroles
 	make docker-create-repository NAME=hk-symptomdiscriminators
+	make docker-create-repository NAME=cron-ragreset
 
 create-tester-repository: # Create ECR repositories to store the artefacts
 	make docker-create-repository NAME=tester

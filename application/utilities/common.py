@@ -121,3 +121,12 @@ def report_summary_counts(task_description, summary_count_dict):
             summary_count_dict[delete_action],
         )
     )
+
+
+# --------- cron common functions
+# TODO more to add maybe
+def cron_cleanup(db_connection):
+    # Close DB connection
+    log_for_audit("Closing DB connection...")
+    db_connection.close()
+    return "Cleanup Successful"
