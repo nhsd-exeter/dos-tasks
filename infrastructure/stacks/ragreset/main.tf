@@ -14,9 +14,10 @@ module "ragreset_lambda" {
   aws_account_id = var.aws_account_id
   service_prefix = var.service_prefix
   tags           = local.standard_tags
-
+# TODO make ENVIRONMENT var dynamic from jenkins ?
   env_vars = {
     "TASK"              = "ragreset"
+    "ENVIRONMENT"       = "teamb"
     "PROFILE"           = var.profile,
     "SERVICE"           = var.service_tag_common,
     "SECRET_STORE"      = var.deployment_secrets,
