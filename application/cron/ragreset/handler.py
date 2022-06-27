@@ -15,8 +15,10 @@ def request(event, context):
     env = os.getenv("ENVIRONMENT")
     event_id = event["id"]
     event_time = event["time"]
-    logger.log_for_audit(event_id + " " + event_time)
-    db_connection = database.connect_to_database(env, event, start)
+    logger.log_for_audit("Event id: {0}, event time: {1} , environment: {2}".format(event_id, event_time, env))
+    # temporarily not needed except for messaging
+    payload = {"filename": "NA", "env": env, "bucket": "NA"}
+    db_connection = database.connect_to_database(env, payload, start)
     reset_rag_status()
     common.cron_cleanup(db_connection)
     return task_description + " execution successful"
