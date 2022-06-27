@@ -40,5 +40,5 @@ variable "splunk_firehose_role" {
 
 variable "schedule_ragreset" {
   description = "Schedule for reset rag status job"
-  default     = "rate(5 minute)"
+  default     = "rate(5 minutes)"
 }
