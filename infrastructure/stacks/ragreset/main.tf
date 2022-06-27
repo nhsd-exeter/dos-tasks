@@ -37,5 +37,13 @@ resource "aws_cloudwatch_event_target" "check_frequency" {
   arn       = module.ragreset_lambda.lambda_arn
 }
 
+resource "aws_lambda_permission" "allow_cloudwatch" {
+  action        = "lambda:InvokeFunction"
+  function_name = module.ragreset_lambda.lambda_function_name
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.scheduled_event_rule.arn
+}
+
+
 
 
