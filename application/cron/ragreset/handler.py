@@ -13,7 +13,6 @@ modified_by = "ROBOT"
 modified_by_id = 9
 notes = ""
 
-
 def request(event, context):
     print("Event: {}".format(event))
     env = os.getenv("DB_NAME")
