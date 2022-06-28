@@ -1,6 +1,5 @@
 # import psycopg2
 # import psycopg2.extras
-from application.utilities.logger import log_for_audit, log_for_error
 from utilities import logger, common, database
 from datetime import datetime
 import os
@@ -13,6 +12,7 @@ new_status = 1
 modified_by = "ROBOT"
 modified_by_id = 9
 notes = ""
+
 
 def request(event, context):
     start = datetime.utcnow()
@@ -33,7 +33,7 @@ def request(event, context):
 
 def reset_rag_status(db_connection):
     logger.log_for_audit("Start ragreset process")
-    update_query, data  = generate_update_query()
+    update_query, data = generate_update_query()
     updated_services = database.execute_cron_query(db_connection, update_query, data)
     log_updated_services(updated_services)
 
@@ -70,10 +70,11 @@ def generate_update_query():
 def log_updated_services(updated_services):
     for service in updated_services:
         try:
-            log_for_audit(service["serviceid"])
+            logger.log_for_audit(service["serviceid"])
         except KeyError as e:
-            log_for_error("Data returned from db does not include serviceid column ")
+            logger.log_for_error("Data returned from db does not include serviceid column ")
             raise e
+
 
 def generate_service_query(service_id):
     query = """select uid, name, typeid, parentid
@@ -82,6 +83,7 @@ def generate_service_query(service_id):
     """
     data = (service_id,)
     return query, data
+
 
 def generate_parent_uid_query(service_id):
     query = """select
@@ -108,5 +110,5 @@ def generate_region_name_query(service_id):
         from services s
         where s.id = %s
     """
-    data = (service_id,service_id)
+    data = (service_id, service_id)
     return query, data

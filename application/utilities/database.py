@@ -59,6 +59,7 @@ def execute_db_query(db_connection, query, data, line, values, summary_count_dic
     finally:
         cursor.close()
 
+
 def execute_cron_query(db_connection, query, data):
     cursor = db_connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
     try:
@@ -70,6 +71,7 @@ def execute_cron_query(db_connection, query, data):
         db_connection.rollback()
     finally:
         cursor.close()
+
 
 class DB:
     def __init__(self) -> None:
