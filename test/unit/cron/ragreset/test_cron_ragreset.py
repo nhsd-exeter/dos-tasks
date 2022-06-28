@@ -27,7 +27,7 @@ expected_update_query = """
                 sercap.capacitystatusid <> (%s)
                 and st.capacityreset = (%s)
                 and now() >= sercap.resetdatetime
-                and s.typeid not in ((%s))
+                and s.typeid not in (%s,%s)
                 )
         returning
         *
@@ -71,14 +71,15 @@ def test_handler_pass(mock_db_details, mock_update_query, mock_cleanup, mock_db_
 def test_generate_update_query():
     update_query, data  = handler.generate_update_query()
     assert update_query == expected_update_query
-    assert len(data) == 7
+    assert len(data) == 8
     assert data[0] == ""
     assert data[1] == handler.modified_by
     assert data[2] == handler.modified_by_id
     assert data[3] == handler.new_status
     assert data[4] == handler.new_status
     assert data[5] == handler.interval_type
-    assert data[6] == handler.ignore_org_types
+    assert data[6] == handler.ignore_org_types[0]
+    assert data[7] == handler.ignore_org_types[1]
 
 
 def test_generate_service_query():

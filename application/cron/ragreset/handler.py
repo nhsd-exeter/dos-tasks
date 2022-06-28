@@ -6,7 +6,7 @@ import os
 
 task_description = "Reset RAG"
 reset_interval_in_seconds = 14400
-ignore_org_types = "1,2"
+ignore_org_types = [1,2]
 interval_type = "interval"
 new_status = 1
 modified_by = "ROBOT"
@@ -58,12 +58,12 @@ def generate_update_query():
                 sercap.capacitystatusid <> (%s)
                 and st.capacityreset = (%s)
                 and now() >= sercap.resetdatetime
-                and s.typeid not in ((%s))
+                and s.typeid not in (%s,%s)
                 )
         returning
         *
     """
-    data = (notes, modified_by, modified_by_id, new_status, new_status, interval_type, ignore_org_types)
+    data = (notes, modified_by, modified_by_id, new_status, new_status, interval_type, ignore_org_types[0],ignore_org_types[1])
     return query, data
 
 
