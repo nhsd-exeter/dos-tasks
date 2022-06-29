@@ -16,7 +16,7 @@ notes = ""
 
 def request(event, context):
     start = datetime.utcnow()
-    # message.send_start_message(event, start)
+    logger.log_for_audit("operation:start")
     print("Event: {}".format(event))
     # TODO env from env vars
     env = os.getenv("ENVIRONMENT")
@@ -28,11 +28,12 @@ def request(event, context):
     db_connection = database.connect_to_database(env, payload, start)
     reset_rag_status(db_connection)
     common.cron_cleanup(db_connection)
+    logger.log_for_audit("operation:end")
     return task_description + " execution successful"
 
 
 def reset_rag_status(db_connection):
-    logger.log_for_audit("Start ragreset process")
+
     try:
         update_query, data = generate_update_query()
         updated_services = database.execute_cron_query(db_connection, update_query, data)
@@ -84,8 +85,7 @@ def get_log_data(db_connection, service_id):
     parent_data = get_parent_uid(db_connection, service_id)
     region_data = get_region_name(db_connection, service_id)
     log_info = {}
-    log_info["operation"] = "capacity reset"
-    log_info["message"] = "autoSaveCapacityStatus"
+    log_info["operation"] = "update"
     log_info["capacity_status"] = "GREEN"
     log_info["modified_by"] = modified_by
     log_info["org_id"] = service_data[0]["uid"]
@@ -112,11 +112,13 @@ def log_updated_services(db_connection, updated_services):
             log_info = get_log_data(db_connection, service_id)
             log_text = get_log_entry(log_info)
             logger.log_for_audit(log_text)
-            # service["serviceid"]
         except KeyError as e:
             logger.log_for_error("Data returned from db does not include serviceid column ")
             raise e
-
+    format_data = "%b %d %Y %H:%M:%S"
+    end_at = datetime.utcnow()
+    logger.log_for_audit("operation:AutoUpdateCapacityStatus|records updated:{0}|updated at:{1}".format(
+        str(len(updated_services)), end_at.strftime(format_data)))
 
 def get_service_data(db_connection, service_id):
     query, data = generate_service_query(service_id)
