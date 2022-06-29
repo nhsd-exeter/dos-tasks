@@ -5,6 +5,29 @@ include $(abspath $(PROJECT_DIR)/build/automation/init.mk)
 # ==============================================================================
 # Development workflow targets
 
+edit-environment-variable: ## update placeholder value for cron job target database Mandatory [DB_NAME] [TASK]
+	echo "Updating environment variable to $(DB_NAME) for $(TASK)"
+	sed "s/DB_NAME_TO_REPLACE/$(DB_NAME)/g" $(TERRAFORM_DIR)/$(STACK)/$(TASK)/template/main.tf  > \
+			$(TERRAFORM_DIR)/$(STACK)/$(TASK)/main.tf
+
+
+set-database-for-cron-jobs: ## update db-name for cron tasks only mandatory: TASK=[task] DB_NAME=[db name minus prefix eg test not pathwaysdos-test]
+	is_cron_task=$$(make cron-task-check TASK=$(TASK))
+	if [ "$$is_cron_task" == true ]; then
+		make edit-environment-variable DB_NAME=$(DB_NAME)
+	else
+		echo "$(TASK) is not a recognised cron job. Nothing to do"
+	fi
+
+cron-task-check: ## is task a cron job task : TASK=[task]
+	case $(TASK) in
+		"ragreset") cronjob=true ;;
+		"another_cron") cronjob=true ;;
+		*) cronjob=false;;
+	esac
+	echo $$cronjob
+
+#==========================
 build: # Build project - mandatory: TASK=[task]
 	if [ "$(TASK)" == "all" ]; then
 		for task in $$(echo $(TASKS) | tr "," "\n"); do
@@ -65,6 +88,17 @@ plan: # Plan environment - mandatory: PROFILE=[name], TASK=[hk task]
 		make terraform-plan STACK=$(TASKS) PROFILE=$(PROFILE)
 	else
 		make terraform-plan STACK=$(TASK) PROFILE=$(PROFILE)
+	fi
+
+# TODO to keep ? - useful to clear down eg cron lambdas during dev so they are not running all the time
+# eg make destroy PROFILE=nonprod TASK=ragreset
+destroy: # Plan environment - mandatory: PROFILE=[name], TASK=[hk task]
+	eval "$$(make secret-fetch-and-export-variables)"
+	if [ "$(TASK)" == "all" ]; then
+		echo do nothing
+		# make terraform-plan STACK=$(TASKS) PROFILE=$(PROFILE)
+	else
+		make terraform-destroy STACK=$(TASK) PROFILE=$(PROFILE)
 	fi
 
 unit-test: # Runs unit tests for task - mandatory: TASK=[task]
@@ -282,4 +316,5 @@ create-tester-repository: # Create ECR repositories to store the artefacts
 .SILENT: \
 	aws-lambda-get-versions-to-remove \
 	parse-profile-from-tag \
+	cron-task-check \
 	task-type
