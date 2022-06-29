@@ -105,24 +105,31 @@ def test_generate_region_name_query():
     assert data[0] == service_id
     assert data[1] == service_id
 
-def test_example():
-    sql = """select  from here with   tab and
-    carriage return """
-    compare_to_sql = """select
-    from here with  tab and  carriagereturn"""
-    assert ''.join(sql.split()) == ''.join(compare_to_sql.split())
-
 # TODO may need to revisit
-def test_log_updated_services():
+@patch("psycopg2.connect")
+def test_log_updated_services(mock_db_connect):
     row_one = {"serviceid": 1,"service_name": "Mustang"}
     row_two = {"serviceid": 2,"service_name": "Mustang"}
     updated_services = [row_one,row_two]
-    handler.log_updated_services(updated_services)
+    handler.log_updated_services(mock_db_connect,updated_services)
 
-# TODO may need to revisit
-def test_log_updated_services_keyerror():
+@patch("psycopg2.connect")
+def test_log_updated_services_keyerror(mock_db_connect):
     row_one = {"service_name": "Mustang"}
     row_two = {"service_name": "Mustang"}
     updated_services = [row_one,row_two]
     with pytest.raises(KeyError):
-        handler.log_updated_services(updated_services)
+        handler.log_updated_services(mock_db_connect,updated_services)
+
+@patch("psycopg2.connect")
+@patch(f"{file_path}.log_updated_services", return_value="" )
+@patch(f"{file_path}.database.execute_cron_query", return_value="" )
+@patch(f"{file_path}.generate_update_query", return_value="" )
+def test_reset_rag_status(mock_db_connect, mock_update_query, mock_execute, mock_log):
+    row_one = {"service_name": "Mustang"}
+    row_two = {"service_name": "Mustang"}
+    updated_services = [row_one,row_two]
+    with pytest.raises(Exception):
+        handler.reset_rag_status(mock_db_connect,updated_services)
+
+

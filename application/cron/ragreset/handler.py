@@ -33,11 +33,11 @@ def request(event, context):
 
 def reset_rag_status(db_connection):
     logger.log_for_audit("Start ragreset process")
-    try :
+    try:
         update_query, data = generate_update_query()
         updated_services = database.execute_cron_query(db_connection, update_query, data)
         log_updated_services(db_connection, updated_services)
-    except Exception as e:
+    except KeyError as e:
         logger.log_for_error("Exception raised running rag reset job {}".format(e))
 
 
@@ -78,21 +78,23 @@ def generate_update_query():
     )
     return query, data
 
+
 def get_log_data(db_connection, service_id):
     service_data = get_service_data(db_connection, service_id)
     parent_data = get_parent_uid(db_connection, service_id)
     region_data = get_region_name(db_connection, service_id)
     log_info = {}
-    log_info["operation"]="capacity reset"
-    log_info["message"]="autoSaveCapacityStatus"
-    log_info["capacity_status"]="GREEN"
-    log_info["modified_by"]=modified_by
-    log_info["org_id"]=service_data[0]["uid"]
-    log_info["org_name"]=service_data[0]["name"]
-    log_info["org_type_id"]=service_data[0]["typeid"]
-    log_info["parent_org_id"]=parent_data[0]["parentuid"]
-    log_info["region"]=region_data[0]["name"]
+    log_info["operation"] = "capacity reset"
+    log_info["message"] = "autoSaveCapacityStatus"
+    log_info["capacity_status"] = "GREEN"
+    log_info["modified_by"] = modified_by
+    log_info["org_id"] = service_data[0]["uid"]
+    log_info["org_name"] = service_data[0]["name"]
+    log_info["org_type_id"] = service_data[0]["typeid"]
+    log_info["parent_org_id"] = parent_data[0]["parentuid"]
+    log_info["region"] = region_data[0]["name"]
     return log_info
+
 
 def get_log_entry(log_info):
     log_text = ""
@@ -115,10 +117,12 @@ def log_updated_services(db_connection, updated_services):
             logger.log_for_error("Data returned from db does not include serviceid column ")
             raise e
 
+
 def get_service_data(db_connection, service_id):
     query, data = generate_service_query(service_id)
     result_set = database.execute_cron_query(db_connection, query, data)
     return result_set
+
 
 def generate_service_query(service_id):
     query = """select uid, name, typeid, parentid
