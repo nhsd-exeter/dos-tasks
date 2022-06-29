@@ -144,7 +144,7 @@ def generate_parent_uid_query(service_id):
             ser.id as parentid,
             ser.uid as parentuid
             from services as ser
-            where ser.id = (select parentid from services where id = %s)';
+            where ser.id = (select parentid from services where id = %s);
     """
     data = (service_id,)
     return query, data

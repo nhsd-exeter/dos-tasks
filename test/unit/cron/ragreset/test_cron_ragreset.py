@@ -40,7 +40,7 @@ expected_service_query = """select uid, name, typeid, parentid
 
 expected_parent_uid_query = """select ser.id as parentid, ser.uid as parentuid
             from services as ser
-            where ser.id = (select parentid from services where id = %s)';
+            where ser.id = (select parentid from services where id = %s);
     """
 
 expected_region_name_query = """select s.uid, s.name,
