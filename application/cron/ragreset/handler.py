@@ -19,7 +19,7 @@ def request(event, context):
     logger.log_for_audit("operation:start")
     print("Event: {}".format(event))
     # TODO env from env vars
-    env = os.getenv("ENVIRONMENT")
+    env = os.getenv("DB_NAME")
     event_id = event["id"]
     event_time = event["time"]
     logger.log_for_audit("Event id: {0}, event time: {1} , environment: {2}".format(event_id, event_time, env))
