@@ -82,8 +82,7 @@ def get_log_data(db_connection, service_id):
     parent_data = get_parent_uid(db_connection, service_id)
     region_data = get_region_name(db_connection, service_id)
     log_info = {}
-    log_info["operation"] = "capacity reset"
-    log_info["message"] = "autoSaveCapacityStatus"
+    log_info["operation"] = "update"
     log_info["capacity_status"] = "GREEN"
     log_info["modified_by"] = modified_by
     log_info["org_id"] = service_data[0]["uid"]
@@ -136,7 +135,6 @@ def log_updated_services(env, db_connection, updated_services):
             str(len(updated_services)), end_at.strftime(format_data)
         ),
     )
-
 
 def get_service_data(db_connection, service_id):
     query, data = generate_service_query(service_id)
