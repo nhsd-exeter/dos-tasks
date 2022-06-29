@@ -76,6 +76,21 @@ def generate_update_query():
     )
     return query, data
 
+def get_log_data(db_connection, service_id):
+    service_data = get_service_data(db_connection, service_id)
+    parent_data = get_parent_uid(db_connection, service_id)
+    region_data = get_region_name(db_connection, service_id)
+    log_info = {}
+    log_info["operation"]="capacity reset"
+    log_info["message"]="autoSaveCapacityStatus"
+    log_info["capacity_status"]="GREEN"
+    log_info["modified_by"]=modified_by
+    log_info["org_id"]=service_data[0]["uid"]
+    log_info["org_name"]=service_data[0]["name"]
+    log_info["org_type_id"]=service_data[0]["typeid"]
+    log_info["parent_org_id"]=parent_data[0]["parentuid"]
+    log_info["region"]=region_data[0]["name"]
+    return log_info
 
 def get_log_data(db_connection, service_id):
     service_data = get_service_data(db_connection, service_id)
@@ -121,6 +136,10 @@ def log_updated_services(env, db_connection, updated_services):
         ),
     )
 
+def get_service_data(db_connection, service_id):
+    query, data = generate_service_query(service_id)
+    result_set = database.execute_cron_query(db_connection, query, data)
+    return result_set
 
 def get_service_data(db_connection, service_id):
     query, data = generate_service_query(service_id)
