@@ -33,9 +33,12 @@ def request(event, context):
 
 def reset_rag_status(db_connection):
     logger.log_for_audit("Start ragreset process")
-    update_query, data = generate_update_query()
-    updated_services = database.execute_cron_query(db_connection, update_query, data)
-    log_updated_services(updated_services)
+    try :
+        update_query, data = generate_update_query()
+        updated_services = database.execute_cron_query(db_connection, update_query, data)
+        log_updated_services(db_connection, updated_services)
+    except Exception as e:
+        logger.log_for_error("Exception raised running rag reset job {}".format(e))
 
 
 def generate_update_query():
@@ -75,15 +78,47 @@ def generate_update_query():
     )
     return query, data
 
+def get_log_data(db_connection, service_id):
+    service_data = get_service_data(db_connection, service_id)
+    parent_data = get_parent_uid(db_connection, service_id)
+    region_data = get_region_name(db_connection, service_id)
+    log_info = {}
+    log_info["operation"]="capacity reset"
+    log_info["message"]="autoSaveCapacityStatus"
+    log_info["capacity_status"]="GREEN"
+    log_info["modified_by"]=modified_by
+    log_info["org_id"]=service_data[0]["uid"]
+    log_info["org_name"]=service_data[0]["name"]
+    log_info["org_type_id"]=service_data[0]["typeid"]
+    log_info["parent_org_id"]=parent_data[0]["parentuid"]
+    log_info["region"]=region_data[0]["name"]
+    return log_info
 
-def log_updated_services(updated_services):
+def get_log_entry(log_info):
+    log_text = ""
+    for key, value in log_info.items():
+        kv_pair = key + ":" + str(value)
+        log_text = log_text + "|" + kv_pair
+    log_text = log_text + "|"
+    return log_text
+
+
+def log_updated_services(db_connection, updated_services):
     for service in updated_services:
         try:
-            logger.log_for_audit(service["serviceid"])
+            service_id = service["serviceid"]
+            log_info = get_log_data(db_connection, service_id)
+            log_text = get_log_entry(log_info)
+            logger.log_for_audit(log_text)
+            # service["serviceid"]
         except KeyError as e:
             logger.log_for_error("Data returned from db does not include serviceid column ")
             raise e
 
+def get_service_data(db_connection, service_id):
+    query, data = generate_service_query(service_id)
+    result_set = database.execute_cron_query(db_connection, query, data)
+    return result_set
 
 def generate_service_query(service_id):
     query = """select uid, name, typeid, parentid
@@ -92,6 +127,12 @@ def generate_service_query(service_id):
     """
     data = (service_id,)
     return query, data
+
+
+def get_parent_uid(db_connection, service_id):
+    query, data = generate_parent_uid_query(service_id)
+    result_set = database.execute_cron_query(db_connection, query, data)
+    return result_set
 
 
 def generate_parent_uid_query(service_id):
@@ -103,6 +144,12 @@ def generate_parent_uid_query(service_id):
     """
     data = (service_id,)
     return query, data
+
+
+def get_region_name(db_connection, service_id):
+    query, data = generate_region_name_query(service_id)
+    result_set = database.execute_cron_query(db_connection, query, data)
+    return result_set
 
 
 def generate_region_name_query(service_id):
