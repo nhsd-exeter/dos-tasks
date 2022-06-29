@@ -136,6 +136,7 @@ def log_updated_services(env, db_connection, updated_services):
         ),
     )
 
+
 def get_service_data(db_connection, service_id):
     query, data = generate_service_query(service_id)
     result_set = database.execute_cron_query(db_connection, query, data)
