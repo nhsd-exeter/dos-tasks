@@ -117,8 +117,12 @@ def log_updated_services(db_connection, updated_services):
             raise e
     format_data = "%b %d %Y %H:%M:%S"
     end_at = datetime.utcnow()
-    logger.log_for_audit("operation:AutoUpdateCapacityStatus|records updated:{0}|updated at:{1}".format(
-        str(len(updated_services)), end_at.strftime(format_data)))
+    logger.log_for_audit(
+        "operation:AutoUpdateCapacityStatus|records updated:{0}|updated at:{1}".format(
+            str(len(updated_services)), end_at.strftime(format_data)
+        )
+    )
+
 
 def get_service_data(db_connection, service_id):
     query, data = generate_service_query(service_id)
