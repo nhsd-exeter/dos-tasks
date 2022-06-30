@@ -18,7 +18,6 @@ def request(event, context):
     start = datetime.utcnow()
     logger.log_for_audit("operation:start")
     print("Event: {}".format(event))
-    # TODO env from env vars
     env = os.getenv("DB_NAME")
     event_id = event["id"]
     event_time = event["time"]
@@ -40,6 +39,7 @@ def reset_rag_status(db_connection):
         log_updated_services(db_connection, updated_services)
     except KeyError as e:
         logger.log_for_error("Exception raised running rag reset job {}".format(e))
+        raise e
 
 
 def generate_update_query():
