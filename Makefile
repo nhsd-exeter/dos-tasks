@@ -237,7 +237,7 @@ remove-old-versions-for-hk-task: ## Prune old versions of hk task lambdas - Mand
 
 remove-old-versions-for-cron-task: ## Prune old versions of cron lambdas - Mandatory; [PROFILE] [TASK] [DB_NAME]
 	eval "$$(make aws-assume-role-export-variables)"
-	task_type=$$(make task-type NAME=$$task)
+	task_type=$$(make task-type NAME=$(TASK))
 	lambda_name="${SERVICE_PREFIX}-$$task_type-$(TASK)-$(DB_NAME)-lambda"
 	echo "Checking for older versions of cron lambda function $$lambda_name"
 	make aws-lambda-remove-old-versions NAME=$$lambda_name
