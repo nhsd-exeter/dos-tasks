@@ -2,10 +2,9 @@ pipeline {
   agent any
   parameters {
     choice(name: 'Task', choices: ['none', 'all', 'filter', 'referralroles','symptomgroups','symptomdiscriminators','ragreset'], description: 'Select which task to deploy')
-  }
-  parameters {
     choice(name: 'Database', choices: ['none', 'fix', 'teamb', 'test1', 'performance'], description: 'Select target database (cron jobs ONLY)')
   }
+
   options {
     buildDiscarder(logRotator(daysToKeepStr: "7", numToKeepStr: "13"))
     disableConcurrentBuilds()
