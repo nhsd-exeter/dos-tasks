@@ -10,22 +10,13 @@ edit-environment-variable: ## update placeholder value for cron job target datab
 	sed "s/DB_NAME_TO_REPLACE/$(DB_NAME)/g" $(TERRAFORM_DIR)/$(STACK)/$(TASK)/template/main.tf  > \
 			$(TERRAFORM_DIR)/$(STACK)/$(TASK)/main.tf
 
-
 set-database-for-cron-jobs: ## update db-name for cron tasks only mandatory: TASK=[task] DB_NAME=[db name minus prefix eg test not pathwaysdos-test]
-	is_cron_task=$$(make cron-task-check TASK=$(TASK))
-	if [ "$$is_cron_task" == true ]; then
+	task_type=$$(make task-type NAME=$(TASK))
+	if [ "$$task_type" == 'cron' ]; then
 		make edit-environment-variable DB_NAME=$(DB_NAME)
 	else
 		echo "$(TASK) is not a recognised cron job. Nothing to do"
 	fi
-
-cron-task-check: ## is task a cron job task : TASK=[task]
-	case $(TASK) in
-		"ragreset") cronjob=true ;;
-		"another_cron") cronjob=true ;;
-		*) cronjob=false;;
-	esac
-	echo $$cronjob
 
 #==========================
 build: # Build project - mandatory: TASK=[task]
@@ -90,15 +81,36 @@ plan: # Plan environment - mandatory: PROFILE=[name], TASK=[hk task]
 		make terraform-plan STACK=$(TASK) PROFILE=$(PROFILE)
 	fi
 
-# TODO to keep ? - useful to clear down eg cron lambdas during dev so they are not running all the time
-# eg make destroy PROFILE=nonprod TASK=ragreset
-destroy: # Plan environment - mandatory: PROFILE=[name], TASK=[hk task]
-	eval "$$(make secret-fetch-and-export-variables)"
-	if [ "$(TASK)" == "all" ]; then
-		echo do nothing
-		# make terraform-plan STACK=$(TASKS) PROFILE=$(PROFILE)
+
+# eg make destroy PROFILE=nonprod TASK=symptomgroups
+destroy-hk: # Plan environment - mandatory: PROFILE=[name], TASK=[hk task]
+	task_type=$$(make task-type NAME=$(TASK))
+	if [ "$$task_type" == 'hk' ]; then
+		eval "$$(make secret-fetch-and-export-variables)"
+		if [ "$(TASK)" == "all" ]; then
+			echo do nothing for now
+			# make terraform-plan STACK=$(TASKS) PROFILE=$(PROFILE)
+		else
+			make terraform-destroy STACK=$(TASK) PROFILE=$(PROFILE)
+		fi
 	else
-		make terraform-destroy STACK=$(TASK) PROFILE=$(PROFILE)
+		echo $(TASK) is not an hk job
+	fi
+
+# eg make destroy-cron PROFILE=nonprod TASK=ragreset DB_NAME=teamb
+destroy-cron: # Plan environment - mandatory: PROFILE=[name], TASK=[hk task] [DB_NAME]
+	task_type=$$(make task-type NAME=$(TASK))
+	if [ "$$task_type" == 'cron' ]; then
+		eval "$$(make secret-fetch-and-export-variables)"
+		make set-database-for-cron-jobs TASK=$(TASK) DB_NAME=$(DB_NAME)
+		if [ "$(TASK)" == "all" ]; then
+			echo do nothing
+			# make terraform-plan STACK=$(TASKS) PROFILE=$(PROFILE)
+		else
+			make terraform-destroy STACK=$(TASK) PROFILE=$(PROFILE)
+		fi
+	else
+		echo $(TASK) is not a cron job
 	fi
 
 unit-test: # Runs unit tests for task - mandatory: TASK=[task]
@@ -193,23 +205,41 @@ python-code-coverage-format: ### Test Python code with 'coverage' - mandatory: C
 	"
 
 # --------------------------------------
-
-remove-old-versions-for-task: ## Prune old versions of hk task lambdas - Mandatory; [PROFILE] - Optional [TASK]
-	eval "$$(make aws-assume-role-export-variables)"
+remove-old-versions-for-task: ## Prune old versions of hk and/or cron lambdas - Mandatory; [PROFILE] - Optional [TASK] [DB_NAME]
 	if [ "$(TASK)" == "all" ]; then
 		for task in $$(echo $(TASKS) | tr "," "\n"); do
 			task_type=$$(make task-type NAME=$$task)
-			lambda_name="${SERVICE_PREFIX}-$$task_type-$$task-lambda"
-			echo "Checking for older versions of lambda function $$lambda_name"
-			make aws-lambda-remove-old-versions NAME=$$lambda_name
-			done
+			if [ $$task_type == "hk" ]; then
+				make remove-old-versions-for-hk-task PROFILE=$(PROFILE) TASK=$$task
+			fi
+			if [ $$task_type == "cron" ]; then
+				make remove-old-versions-for-cron-task PROFILE=$(PROFILE) TASK=$$task DB_NAME=$(DB_NAME)
+			fi
+		done
 	else
 			task_type=$$(make task-type NAME=$(TASK))
-			lambda_name="${SERVICE_PREFIX}-$$task_type-$(TASK)-lambda"
-			echo "Checking for older versions of lambda function $$lambda_name"
-			make aws-lambda-remove-old-versions NAME=$$lambda_name
+			if [ $$task_type == "hk" ]; then
+				make remove-old-versions-for-hk-task PROFILE=$(PROFILE) TASK=$(TASK)
+			fi
+			if [ $$task_type == "cron" ]; then
+				make remove-old-versions-for-cron-task PROFILE=$(PROFILE) TASK=$(TASK) DB_NAME=$(DB_NAME)
+			fi
 	fi
 
+
+remove-old-versions-for-hk-task: ## Prune old versions of hk task lambdas - Mandatory; [PROFILE] [TASK]
+	eval "$$(make aws-assume-role-export-variables)"
+	task_type=$$(make task-type NAME=$(TASK))
+	lambda_name="${SERVICE_PREFIX}-$$task_type-$(TASK)-lambda"
+	echo "Checking for older versions of hk lambda function $$lambda_name"
+	make aws-lambda-remove-old-versions NAME=$$lambda_name
+
+remove-old-versions-for-cron-task: ## Prune old versions of cron lambdas - Mandatory; [PROFILE] [TASK] [DB_NAME]
+	eval "$$(make aws-assume-role-export-variables)"
+	task_type=$$(make task-type NAME=$$task)
+	lambda_name="${SERVICE_PREFIX}-$$task_type-$(TASK)-$(DB_NAME)-lambda"
+	echo "Checking for older versions of cron lambda function $$lambda_name"
+	make aws-lambda-remove-old-versions NAME=$$lambda_name
 
 aws-lambda-remove-old-versions: ## Remove older versions Mandatory NAME=[lambda function] Optional LAMBDA_VERSIONS_TO_RETAIN (default 5)
 	older_versions_to_remove="$$(make aws-lambda-get-versions-to-remove NAME=$(NAME))"

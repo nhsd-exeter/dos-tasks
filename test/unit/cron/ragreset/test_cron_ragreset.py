@@ -121,12 +121,12 @@ def test_log_updated_services_keyerror(mock_db_connect):
     with pytest.raises(KeyError):
         handler.log_updated_services(mock_db_connect,updated_services)
 
-# @patch("psycopg2.connect")
-# @patch(f"{file_path}.log_updated_services", return_value="" )
-# @patch(f"{file_path}.database.execute_cron_query", side_effect=KeyError)
-# @patch(f"{file_path}.generate_update_query", side_effect=[{1:'',2:''}])
-# def test_reset_rag_status(mock_db_connect, mock_update_query, mock_execute, mock_log):
-#     with pytest.raises(KeyError):
-#         handler.reset_rag_status(mock_db_connect)
+@patch("psycopg2.connect")
+@patch(f"{file_path}.log_updated_services", return_value="" )
+@patch(f"{file_path}.database.execute_cron_query", side_effect=KeyError)
+@patch(f"{file_path}.generate_update_query", side_effect=[{1:'',2:''}])
+def test_reset_rag_status(mock_update_query, mock_execute, mock_log, mock_db_connect):
+    with pytest.raises(KeyError):
+        handler.reset_rag_status(mock_db_connect)
 
 

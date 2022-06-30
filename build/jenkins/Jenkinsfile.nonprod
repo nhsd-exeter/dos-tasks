@@ -53,7 +53,7 @@ pipeline {
     stage("Check and remove older versions") {
       when { expression { params.Task != "none" } }
       steps {
-        script { sh "make remove-old-versions-for-task TASK=${params.Task}" }
+        script { sh "make remove-old-versions-for-task TASK=${params.Task} DB_NAME=${params.Database}" }
       }
     }
   }
