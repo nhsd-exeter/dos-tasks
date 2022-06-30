@@ -77,9 +77,9 @@ def process_extracted_data(db_connection, row_data, summary_count_dict, event, s
                 query, data = generate_db_query(row_values, event, start)
                 database.execute_db_query(db_connection, query, data, row_number, row_values, summary_count_dict)
             else:
-                common.increment_error_count
+                common.increment_summary_count(summary_count_dict, {"action": "ERROR"})
         except Exception as e:
-            common.increment_error_count
+            common.increment_summary_count(summary_count_dict, {"action": "ERROR"})
             logger.log_for_error(
                 "Processing {0} data failed with |{1}|{2}| => {3}".format(
                     task_description, row_values["id"], row_values["name"], str(e)

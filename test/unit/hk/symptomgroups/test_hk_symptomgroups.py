@@ -169,7 +169,8 @@ def test_process_extracted_data_multiple_records(mock_exist,mock_valid_action,mo
     assert mock_execute.call_count == 2
 
 @patch("psycopg2.connect")
-def test_process_extracted_data_error_check_exists_fails(mock_db_connect):
+@patch(f"{file_path}.common.increment_summary_count")
+def test_process_extracted_data_error_check_exists_fails(mock_increment_count,mock_db_connect):
     """Test error handling when extracting data and record exist check fails"""
     row_data = {}
     csv_dict = {}
@@ -182,6 +183,7 @@ def test_process_extracted_data_error_check_exists_fails(mock_db_connect):
     summary_count = {}
     with pytest.raises(Exception):
         handler.process_extracted_data(mock_db_connect, row_data, summary_count)
+    mock_increment_count.called_once()
 
 @patch("psycopg2.connect")
 @patch(f"{file_path}.database.does_record_exist", return_value=True)
