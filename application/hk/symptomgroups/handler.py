@@ -19,7 +19,7 @@ def request(event, context):
     summary_count_dict = common.initialise_summary_count()
     db_connection = database.connect_to_database(env, event, start)
     csv_file = common.retrieve_file_from_bucket(bucket, filename, event, start)
-    csv_data = common.process_file(csv_file, event, start, 3)
+    csv_data = common.process_file(csv_file, event, start, 3, summary_count_dict)
     extracted_data = extract_query_data_from_csv(csv_data)
     process_extracted_data(db_connection, extracted_data, summary_count_dict)
     common.report_summary_counts(task_description, summary_count_dict)

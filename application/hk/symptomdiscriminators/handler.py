@@ -12,14 +12,13 @@ task_description = "Symptom discriminators"
 def request(event, context):
     start = datetime.utcnow()
     message.send_start_message(event, start)
-    print("Event: {}".format(event))
     env = event["env"]
     filename = event["filename"]
     bucket = event["bucket"]
     summary_count_dict = common.initialise_summary_count()
     db_connection = database.connect_to_database(env, event, start)
     csv_file = common.retrieve_file_from_bucket(bucket, filename, event, start)
-    csv_data = common.process_file(csv_file, event, start, data_column_count)
+    csv_data = common.process_file(csv_file, event, start, data_column_count, summary_count_dict)
     process_extracted_data(db_connection, csv_data, summary_count_dict, event, start)
     common.report_summary_counts(task_description, summary_count_dict)
     common.cleanup(db_connection, bucket, filename, event, start)
@@ -77,7 +76,10 @@ def process_extracted_data(db_connection, row_data, summary_count_dict, event, s
             if common.valid_action(record_exists, row_values):
                 query, data = generate_db_query(row_values, event, start)
                 database.execute_db_query(db_connection, query, data, row_number, row_values, summary_count_dict)
+            else:
+                common.increment_error_count
         except Exception as e:
+            common.increment_error_count
             logger.log_for_error(
                 "Processing {0} data failed with |{1}|{2}| => {3}".format(
                     task_description, row_values["id"], row_values["name"], str(e)

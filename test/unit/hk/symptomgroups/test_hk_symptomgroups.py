@@ -218,7 +218,9 @@ def test_handler_exception(mock_db,mock_failure_message,mock_message_start,mock_
 @patch(f"{file_path}.common.retrieve_file_from_bucket", return_value="""2001,"New Symptom Group","UPDATE"\n""")
 @patch(f"{file_path}.database.connect_to_database", return_value="db_connection")
 @patch(f"{file_path}.message.send_start_message")
-def test_handler_pass(mock_send_start_message,mock_db_details,mock_get_object,
+@patch(f"{file_path}.common.initialise_summary_count")
+@patch(f"{file_path}.common.process_file", return_value={"1": {"id": "00001", "name": "Mock Create SG", "action": "CREATE"}})
+def test_handler_pass(mock_process_file,mock_inititalise_summary,mock_send_start_message,mock_db_details,mock_get_object,
 mock_does_record_exist,mock_execute_db_query,mock_cleanup,mock_db_connect):
     """Test top level request calls downstream functions - success"""
     payload = generate_event_payload()

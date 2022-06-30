@@ -18,7 +18,7 @@ csv_rr_action = "INSERT"
 
 @patch(f"{file_path}.database.connect_to_database", return_value="db_connection")
 @patch(f"{file_path}.common.retrieve_file_from_bucket", return_value="csv_file")
-@patch(f"{file_path}.common.process_file", return_value={"1": {"id": "00001", "description": "Mock Create SD", "action": "CREATE"}, "2": {"id": "00002", "description": "Mock Update SD", "action": "UPDATE"}, "3": {"id": "00003", "description": "Mock Delete SD", "action": "DELETE"}})
+@patch(f"{file_path}.common.process_file", return_value={"1": {"id": "00001", "name": "Mock Create SD", "action": "CREATE"}, "2": {"id": "00002", "name": "Mock Update SD", "action": "UPDATE"}, "3": {"id": "00003", "name": "Mock Delete SD", "action": "DELETE"}})
 @patch(f"{file_path}.process_extracted_data")
 @patch(f"{file_path}.common.report_summary_counts", return_value="Referral roles updated: 1, inserted: 1, deleted: 1")
 @patch(f"{file_path}.common.cleanup")

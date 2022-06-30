@@ -17,7 +17,7 @@ csv_sd_action = "INSERT"
 
 @patch(f"{file_path}.database.connect_to_database", return_value="db_connection")
 @patch(f"{file_path}.common.retrieve_file_from_bucket", return_value="csv_file")
-@patch(f"{file_path}.common.process_file", return_value={"1": {"id": "00001", "description": "Mock Create SD", "action": "CREATE"}, "2": {"id": "00002", "description": "Mock Update SD", "action": "UPDATE"}, "3": {"id": "00003", "description": "Mock Delete SD", "action": "DELETE"}})
+@patch(f"{file_path}.common.process_file", return_value={"1": {"id": "00001", "name": "Mock Create SD", "action": "CREATE"}, "2": {"id": "00002", "name": "Mock Update SD", "action": "UPDATE"}, "3": {"id": "00003", "name": "Mock Delete SD", "action": "DELETE"}})
 @patch(f"{file_path}.process_extracted_data")
 @patch(f"{file_path}.common.report_summary_counts", return_value="Symptom discriminators updated: 1, inserted: 1, deleted: 1")
 @patch(f"{file_path}.common.cleanup")
@@ -32,6 +32,7 @@ def test_request_success(mock_send_start_message, mock_cleanup,  mock_report_sum
     mock_process_file.assert_called_once()
     mock_retrieve_file_from_bucket.assert_called_once()
     mock_db_connection.assert_called_once()
+
 
 
 def test_create_query():
@@ -158,9 +159,8 @@ def test_process_extracted_data_error_check_exists_passes(mock_exists,mock_db_co
 def test_process_extracted_data_single_record(mock_exist,mock_valid_action,mock_generate,mock_execute, mock_db_connect):
     """Test extracting data calls each downstream functions once for one record"""
     row_data = {}
-    csv_dict={csv_sd_id,csv_sd_desc,"DELETE"}
+    csv_dict={csv_sd_id,csv_sd_desc,"DELETE","WEWE"}
     row_data[0]=csv_dict
-    summary_count = {}
     summary_count = {}
     handler.process_extracted_data(mock_db_connect, row_data, summary_count, mock_event, start)
     mock_valid_action.assert_called_once()
