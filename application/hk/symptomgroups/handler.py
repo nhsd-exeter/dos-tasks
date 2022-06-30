@@ -36,7 +36,7 @@ def process_extracted_data(db_connection, row_data, summary_count_dict):
                 query, data = generate_db_query(row_values)
                 database.execute_db_query(db_connection, query, data, row_number, row_values, summary_count_dict)
             else:
-               common.increment_summary_count(summary_count_dict, {"action": "ERROR"})
+                common.increment_summary_count(summary_count_dict, {"action": "ERROR"})
         except Exception as e:
             common.increment_summary_count(summary_count_dict, {"action": "ERROR"})
             logger.log_for_error(
