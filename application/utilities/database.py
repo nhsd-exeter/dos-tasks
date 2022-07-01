@@ -51,7 +51,8 @@ def execute_db_query(db_connection, query, data, line, values, summary_count_dic
         print("connect to db")
         print(summary_count_dict)
         print(values["action"])
-        common.increment_summary_count(summary_count_dict, values["action"])
+        print( "action: ", values["action"])
+        common.increment_summary_count(summary_count_dict, ("action: ", values["action"]))
         print("incremented")
         logger.log_for_audit(
             "action: Process row | operation: {0} | id: {1} | description: {2} | line number: {3}".format(
