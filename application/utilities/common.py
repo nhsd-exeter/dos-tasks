@@ -82,7 +82,7 @@ def initialise_summary_count():
 
 
 def increment_summary_count(summary_count_dict, values):
-    print("''incrementing SC")
+    print("incrementing SC")
     print(summary_count_dict)
     print(values)
     if values["action"] in [create_action, update_action, delete_action, blank_lines, error_lines]:
