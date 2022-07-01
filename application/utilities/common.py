@@ -28,6 +28,8 @@ def valid_action(record_exists, row_data):
         valid_action = True
     if not valid_action:
         log_for_error("Invalid action {} for the record with ID {}".format(row_data["action"], row_data["id"]))
+    print("valid_action")
+    print(valid_action)
     return valid_action
 
 
