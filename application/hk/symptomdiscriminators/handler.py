@@ -12,6 +12,7 @@ task_description = "Symptom discriminators"
 def request(event, context):
     start = datetime.utcnow()
     message.send_start_message(event, start)
+    print("Event: {}".format(event))
     env = event["env"]
     filename = event["filename"]
     bucket = event["bucket"]

@@ -37,8 +37,6 @@ def does_record_exist(db, row_dict, table_name):
             "Select from table {0} by id failed - {1} => {2}".format(full_table_name, row_dict["id"], str(e)),
         )
         raise e
-    print("record_exists")
-    print(record_exists)
     return record_exists
 
 
@@ -48,13 +46,9 @@ def execute_db_query(db_connection, query, data, line, values, summary_count_dic
     try:
         cursor.execute(query, data)
         db_connection.commit()
-        print(values["action"])
-        print("action: ", values["action"])
         action = {}
         action["action"] = values["action"]
-        print(action)
         common.increment_summary_count(summary_count_dict, action)
-        print("incremented")
         logger.log_for_audit(
             "action: Process row | operation: {0} | id: {1} | description: {2} | line number: {3}".format(
                 values["action"], values["id"], values["name"], line
