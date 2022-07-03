@@ -96,6 +96,12 @@ def test_cleanup_success(mock_send_success_slack_message, mock_s3_object, mock_d
     mock_s3_object().delete_object.assert_called_once_with(mock_bucket, mock_filename, mock_event, start)
     mock_send_success_slack_message.assert_called_once_with(mock_event, start)
 
+@patch("psycopg2.connect")
+def test_cron_cleanup(mock_db_connect):
+    mock_db_connect.close.return_value = "Closed connection"
+    result = common.cron_cleanup(mock_db_connect)
+    mock_db_connect.close.assert_called_once()
+    assert result == "Cleanup Successful"
 
 @patch(f"{file_path}.S3")
 def test_retrieve_file_from_bucket(mock_s3_object):

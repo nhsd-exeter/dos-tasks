@@ -1,6 +1,5 @@
 from .. import logger
 
-
 def test_log_for_audit(caplog):
     mock_msg = "Test log for audit function"
     logger.log_for_audit(mock_msg)
