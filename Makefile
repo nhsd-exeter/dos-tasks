@@ -82,9 +82,8 @@ plan: # Plan environment - mandatory: PROFILE=[name], TASK=[hk task]
 		make terraform-plan STACK=$(TASK) PROFILE=$(PROFILE)
 	fi
 
-
 # eg make destroy PROFILE=nonprod TASK=symptomgroups
-destroy-hk: # Plan environment - mandatory: PROFILE=[name], TASK=[hk task]
+destroy-hk: # Destroy housekeeping lambda - mandatory: PROFILE=[name], TASK=[hk task]
 	task_type=$$(make task-type NAME=$(TASK))
 	if [ "$$task_type" == 'hk' ]; then
 		eval "$$(make secret-fetch-and-export-variables)"
@@ -98,18 +97,30 @@ destroy-hk: # Plan environment - mandatory: PROFILE=[name], TASK=[hk task]
 		echo $(TASK) is not an hk job
 	fi
 
+# make destroy-all-cron PROFILE=nonprod
+destroy-all-cron: ## Clear down every cron for every db - mandatory [PROFILE]
+	for task in $$(echo $(TASKS) | tr "," "\n"); do
+		task_type=$$(make task-type NAME=$$task)
+		if [ "$$task_type" == 'cron' ]; then
+			make destroy-cron-for_database PROFILE=$(PROFILE) TASK=$$task
+		else
+			echo "Only clearing down cron jobs and $$task is not a cron job"
+		fi
+	done
+
+destroy-cron-for_database: ## iterate over all dbs for cron task - mandatory [PROFILE] [TASK]
+	for db_name in $$(echo $(ENVIRONMENT_LIST) | tr "," "\n" | tr -d []); do
+		make destroy-cron PROFILE=$(PROFILE) TASK=$(TASK) DB_NAME=$$db_name
+	done
+
 # eg make destroy-cron PROFILE=nonprod TASK=ragreset DB_NAME=teamb
-destroy-cron: # Plan environment - mandatory: PROFILE=[name], TASK=[hk task] [DB_NAME]
+destroy-cron: # Destroy environment - mandatory: PROFILE=[name], TASK=[hk task] [DB_NAME]
 	task_type=$$(make task-type NAME=$(TASK))
 	if [ "$$task_type" == 'cron' ]; then
+		echo "Clearing down the $(PROFILE) $(TASK) lambda for the $(DB_NAME) database"
 		eval "$$(make secret-fetch-and-export-variables)"
 		make set-database-for-cron-jobs TASK=$(TASK) DB_NAME=$(DB_NAME)
-		if [ "$(TASK)" == "all" ]; then
-			echo do nothing
-			# make terraform-plan STACK=$(TASKS) PROFILE=$(PROFILE)
-		else
-			make terraform-destroy STACK=$(TASK) PROFILE=$(PROFILE)
-		fi
+		make terraform-destroy STACK=$(TASK) PROFILE=$(PROFILE)
 	else
 		echo $(TASK) is not a cron job
 	fi
