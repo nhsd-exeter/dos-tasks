@@ -17,6 +17,7 @@ module "ragreset_lambda" {
   env_vars = {
     "TASK"              = "ragreset"
     "DB_NAME"           = "DB_NAME_TO_REPLACE"
+    "TASK_TYPE"         = "cron"
     "PROFILE"           = var.profile,
     "SERVICE"           = var.service_tag_common,
     "SECRET_STORE"      = var.deployment_secrets,
