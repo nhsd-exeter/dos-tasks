@@ -91,7 +91,14 @@ def test_archive_file_success(mock_logger,mock_s3_object):
     result = common.archive_file(mock_bucket, mock_filename, mock_event, start)
     assert result == "File Archive Successful"
 
-@patch(f"{file_path}.utilities.s3.S3")
+@patch("psycopg2.connect")
+def test_cron_cleanup(mock_db_connect):
+    mock_db_connect.close.return_value = "Closed connection"
+    result = common.cron_cleanup(mock_db_connect)
+    mock_db_connect.close.assert_called_once()
+    assert result == "Cleanup Successful"
+
+@patch(f"{file_path}.S3")
 def test_retrieve_file_from_bucket(mock_s3_object):
     mock_s3_object().get_object = Mock(return_value="Object returned")
     mock_bucket = ""
