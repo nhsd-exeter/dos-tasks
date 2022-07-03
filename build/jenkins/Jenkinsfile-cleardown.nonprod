@@ -1,0 +1,35 @@
+pipeline {
+  agent any
+
+
+  options {
+    buildDiscarder(logRotator(daysToKeepStr: "7", numToKeepStr: "13"))
+    disableConcurrentBuilds()
+    parallelsAlwaysFailFast()
+    timeout(time: 25, unit: "MINUTES")
+  }
+  environment {
+    BUILD_DATE = sh(returnStdout: true, script: "date -u +'%Y-%m-%dT%H:%M:%S%z'").trim()
+    PROFILE = "nonprod"
+    ENVIRONMENT = "nonprod"
+
+  }
+  triggers { pollSCM("* * * * *") }
+  stages {
+    stage("Show Configuration") {
+      steps {
+        script { sh "make show-configuration" }
+      }
+    }
+
+    stage("Teardown cron jobs ") {
+      steps {
+        script { sh "make destroy-all-cron PROFILE=nonprod" }
+      }
+    }
+  }
+  post {
+    always { sh "make pipeline-send-notification PIPELINE_NAME='UEC DoS Tasks Cleardown (NonProd)' BUILD_STATUS=${currentBuild.currentResult}" }
+    cleanup { sh "make clean" }
+  }
+}
