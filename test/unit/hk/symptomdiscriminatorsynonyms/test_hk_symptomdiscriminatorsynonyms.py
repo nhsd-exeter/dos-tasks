@@ -42,7 +42,7 @@ def test_create_query():
     }
     query, data = handler.create_query(test_values)
     assert query == """
-        insert into pathwaysdos.symptomdiscriminatorsynonyms (id, name) values (%s, %s)
+        insert into pathwaysdos.symptomdiscriminatorsynonyms (symptomdiscriminatorid, name) values (%s, %s)
         returning id, name;
     """
     assert data == (10, "Test Data")
@@ -56,7 +56,7 @@ def test_update_query():
     }
     query, data = handler.update_query(test_values)
     assert query == """
-        update pathwaysdos.symptomdiscriminatorsynonyms set name = (%s) where id = (%s);
+        update pathwaysdos.symptomdiscriminatorsynonyms set name = (%s) where symptomdiscriminatorid = (%s);
     """
     assert data == ("Test Data", 10)
 
@@ -69,7 +69,7 @@ def test_delete_query():
     }
     query, data = handler.delete_query(test_values)
     assert query == """
-        delete from pathwaysdos.symptomdiscriminatorsynonyms where id = (%s)
+        delete from pathwaysdos.symptomdiscriminatorsynonyms where symptomdiscriminatorid = (%s)
     """
     assert data == (10,)
 
