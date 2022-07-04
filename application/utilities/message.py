@@ -24,7 +24,7 @@ def send_success_slack_message(event, start, summary_count_dict):
     bucket = event["bucket"]
     finish, duration = calculate_execution_time(start)
     start = start.strftime("%Y-%m-%d %H:%M:%S")
-    summarycount = slack_summary_counts
+    summarycount = slack_summary_counts(summary_count_dict)
     success_payload = {
         "attachments": [
             {
@@ -148,7 +148,7 @@ def calculate_execution_time(start):
     return finish, duration
 
 
-def slack_summary_counts( summary_count_dict):
+def slack_summary_counts(summary_count_dict):
     report = ""
     report = "updated: {0}, inserted: {1}, deleted: {2}, blank: {3}, errored: {4}".format(
         summary_count_dict[update_action],

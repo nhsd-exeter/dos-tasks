@@ -7,14 +7,17 @@ file_path = 'application.utilities.message'
 
 @patch("requests.post", return_value="Success 200")
 @patch(f"{file_path}.datetime", wraps=datetime.datetime)
-@patch(f"{file_path}.slack_summary_counts", return_value="""BLANK": 1, "CREATE": 2,"DELETE": 3, "ERROR":4,"UPDATE": 5""")
-def test_send_success_slack_message(mock_summary_count,mock_datetime, mock_post):
+# @patch(f"{file_path}.slack_summary_counts", return_value="""BLANK": 1, "CREATE": 2,"DELETE": 3, "ERROR":4,"UPDATE": 5""")
+def test_send_success_slack_message(mock_datetime, mock_post):
     mock_event = {"filename": "mock_filename", "env": "mock_env", "bucket": "mock_bucket"}
     mock_datetime.utcnow.return_value = datetime.datetime(2022, 4, 26, hour=19, minute=9, second=6)
     start = datetime.datetime(2022, 4, 26, hour=19, minute=4, second=40)
     finish = datetime.datetime(2022, 4, 26, hour=19, minute=9, second=6)
     duration = "0:04:26"
-    result = message.send_success_slack_message(mock_event, start, mock_summary_count)
+    mock_summary_dict = ""
+    mock_summary_dict = {"BLANK": 4, "CREATE": 3,"DELETE": 2, "ERROR": 1,"UPDATE": 0}
+
+    result = message.send_success_slack_message(mock_event, start, mock_summary_dict)
     assert result == "Success 200"
     mock_post.assert_called_once_with("https://slackmockurl.com/", json.dumps({
         "attachments": [
@@ -29,9 +32,8 @@ def test_send_success_slack_message(mock_summary_count,mock_datetime, mock_post)
                             "text": """Status: Success :woohoo:
 Project: *uec-dos-tasks* | Environment: *mock_env* | Profile: *local*
 Task: *utilities* | File: *mock_filename* | Bucket: *mock_bucket*
-Summary: *{mock_summary_count}*
+Summary: *updated: 0, inserted: 3, deleted: 2, blank: 4, errored: 1*
 Start Time: *{start}* | Finish Time: *{finish}* | Duration: *{duration}*""".format(
-                                mock_summary_count=mock_summary_count,
                                 start=start.strftime("%Y-%m-%d %H:%M:%S"),
                                 finish=finish.strftime("%Y-%m-%d %H:%M:%S"),
                                 duration=duration,
