@@ -131,7 +131,7 @@ def test_uninitialized_summary_count():
     """Test summary counts uninitialized correctly"""
     summary_count = {}
     assert(len(summary_count) == 0)
-    values = {"action":"UPDATE"}
+    values = "UPDATE"
     with pytest.raises(KeyError):
         common.increment_summary_count(summary_count,values)
 
@@ -153,7 +153,7 @@ def test_increment_summary_count_create():
     assert summary_count[common.delete_action] == 0
     assert summary_count[common.blank_lines] == 0
     assert summary_count[common.error_lines] == 0
-    values = {"action":"CREATE"}
+    values = "CREATE"
     common.increment_summary_count(summary_count,values)
     assert summary_count[common.create_action] == 1
     assert summary_count[common.update_action] == 0
@@ -169,7 +169,7 @@ def test_increment_summary_count_update():
     assert summary_count[common.delete_action] == 0
     assert summary_count[common.blank_lines] == 0
     assert summary_count[common.error_lines] == 0
-    values = {"action":"UPDATE"}
+    values = "UPDATE"
     common.increment_summary_count(summary_count,values)
     assert summary_count[common.create_action] == 0
     assert summary_count[common.update_action] == 1
@@ -185,7 +185,7 @@ def test_increment_summary_count_delete():
     assert summary_count[common.delete_action] == 0
     assert summary_count[common.blank_lines] == 0
     assert summary_count[common.error_lines] == 0
-    values = {"action":"DELETE"}
+    values = "DELETE"
     common.increment_summary_count(summary_count, values)
     assert summary_count[common.create_action] == 0
     assert summary_count[common.update_action] == 0
@@ -201,7 +201,7 @@ def test_increment_summary_count_blank():
     assert summary_count[common.delete_action] == 0
     assert summary_count[common.blank_lines] == 0
     assert summary_count[common.error_lines] == 0
-    values = {"action":"BLANK"}
+    values = "BLANK"
     common.increment_summary_count(summary_count, values)
     assert summary_count[common.create_action] == 0
     assert summary_count[common.update_action] == 0
@@ -217,7 +217,7 @@ def test_increment_summary_count_error():
     assert summary_count[common.delete_action] == 0
     assert summary_count[common.blank_lines] == 0
     assert summary_count[common.error_lines] == 0
-    values = {"action":"ERROR"}
+    values = "ERROR"
     common.increment_summary_count(summary_count, values)
     assert summary_count[common.create_action] == 0
     assert summary_count[common.update_action] == 0
@@ -233,7 +233,7 @@ def test_increment_summary_count_nosuch():
     assert summary_count[common.delete_action] == 0
     assert summary_count[common.blank_lines] == 0
     assert summary_count[common.error_lines] == 0
-    values = {"action":"NOSUCH"}
+    values = "NOSUCH"
     common.increment_summary_count(summary_count, values)
     assert summary_count[common.create_action] == 0
     assert summary_count[common.update_action] == 0

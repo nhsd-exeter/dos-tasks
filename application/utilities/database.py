@@ -46,9 +46,7 @@ def execute_db_query(db_connection, query, data, line, values, summary_count_dic
     try:
         cursor.execute(query, data)
         db_connection.commit()
-        action = {}
-        action["action"] = values["action"]
-        common.increment_summary_count(summary_count_dict, action)
+        common.increment_summary_count(summary_count_dict,  values["action"])
         logger.log_for_audit(
             "action: Process row | operation: {0} | id: {1} | description: {2} | line number: {3}".format(
                 values["action"], values["id"], values["name"], line

@@ -79,17 +79,17 @@ def initialise_summary_count():
     return summary_count_dict
 
 
-def increment_summary_count(summary_count_dict, values):
-    if values["action"] in [create_action, update_action, delete_action, blank_lines, error_lines]:
+def increment_summary_count(summary_count_dict, action):
+    if action in [create_action, update_action, delete_action, blank_lines, error_lines]:
         try:
-            summary_count_dict[values["action"]] = summary_count_dict[values["action"]] + 1
+            summary_count_dict[action] = summary_count_dict[action] + 1
         except (KeyError) as e:
-            log_for_error("Summary count does not have the key {0}".format(values["action"]))
+            log_for_error("Summary count does not have the key {0}".format(action))
             raise e
     else:
         log_for_error(
             "Can't increment count for action {0}. Valid actions are {1},{2},{3},{4},{5}".format(
-                values["action"], create_action, update_action, delete_action, blank_lines, error_lines
+                action, create_action, update_action, delete_action, blank_lines, error_lines
             )
         )
 
@@ -102,12 +102,12 @@ def process_file(csv_file, event, start, expected_col_count, summary_count_dict)
     for line in csv_reader:
         count += 1
         if len(line) == 0:
-            increment_summary_count(summary_count_dict, {"action": "BLANK"})
+            increment_summary_count(summary_count_dict, {"BLANK"})
             continue
         if check_csv_format(line, expected_col_count) and check_csv_values(line):
             lines[str(count)] = {"id": line[0], "name": line[1], "action": line[2]}
         else:
-            increment_summary_count(summary_count_dict, {"action": "ERROR"})
+            increment_summary_count(summary_count_dict, {"ERROR"})
             log_for_audit(
                 "Incorrect line format on line {0}, should be {1} but is {2}".format(
                     count, expected_col_count, len(line)
