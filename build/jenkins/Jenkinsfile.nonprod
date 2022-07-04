@@ -1,7 +1,7 @@
 pipeline {
   agent any
   parameters {
-    choice(name: 'Task', choices: ['none', 'all', 'filter', 'referralroles','symptomgroups','symptomdiscriminators'], description: 'Select which task to deploy')
+    choice(name: 'Task', choices: ['none', 'all', 'filter', 'referralroles','symptomgroups','symptomdiscriminators','symptomdiscriminatorsynonyms'], description: 'Select which task to deploy')
   }
   options {
     buildDiscarder(logRotator(daysToKeepStr: "7", numToKeepStr: "13"))
