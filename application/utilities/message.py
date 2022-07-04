@@ -18,7 +18,7 @@ headers = {"Content-type": "application/json"}
 # Slack Function
 
 
-def send_success_slack_message(event, start,summary_count_dict):
+def send_success_slack_message(event, start, summary_count_dict):
     env = event["env"]
     file = event["filename"]
     bucket = event["bucket"]
@@ -148,14 +148,13 @@ def calculate_execution_time(start):
     return finish, duration
 
 
-def slack_summary_counts(task_description, summary_count_dict):
+def slack_summary_counts( summary_count_dict):
     report = ""
-    report = "{0} updated: {1}, inserted: {2}, deleted: {3}, blank: {4}, errored: {5}".format(
-            task_description,
-            summary_count_dict[update_action],
-            summary_count_dict[create_action],
-            summary_count_dict[delete_action],
-            summary_count_dict[blank_lines],
-            summary_count_dict[error_lines],
-        )
+    report = "updated: {0}, inserted: {1}, deleted: {2}, blank: {3}, errored: {4}".format(
+        summary_count_dict[update_action],
+        summary_count_dict[create_action],
+        summary_count_dict[delete_action],
+        summary_count_dict[blank_lines],
+        summary_count_dict[error_lines],
+    )
     return report
