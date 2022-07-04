@@ -89,12 +89,13 @@ def test_cleanup_success(mock_send_success_slack_message, mock_s3_object, mock_d
     mock_s3_object().delete_object = Mock(return_value="Object deleted")
     mock_bucket = ""
     mock_filename = "local/DPTS-001_symptomdiscriminators.csv"
-    result = common.cleanup(mock_db_connect, mock_bucket, mock_filename, mock_event, start)
+    mock_summary_count = {"BLANK": 1, "CREATE": 2,"DELETE": 3, "ERROR":4,"UPDATE": 5}
+    result = common.cleanup(mock_db_connect, mock_bucket, mock_filename, mock_event, start, mock_summary_count)
     assert result == "Cleanup Successful"
     mock_db_connect.close.assert_called_once()
     mock_s3_object().copy_object.assert_called_once_with(mock_bucket, mock_filename, mock_event, start)
     mock_s3_object().delete_object.assert_called_once_with(mock_bucket, mock_filename, mock_event, start)
-    mock_send_success_slack_message.assert_called_once_with(mock_event, start)
+    mock_send_success_slack_message.assert_called_once_with(mock_event, start, mock_summary_count)
 
 
 @patch(f"{file_path}.S3")

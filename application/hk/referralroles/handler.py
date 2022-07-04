@@ -80,7 +80,7 @@ def process_extracted_data(db_connection, row_data, summary_count_dict, event, s
             else:
                 common.increment_summary_count(summary_count_dict, "ERROR")
         except Exception as e:
-            common.increment_summary_count(summary_count_dict,  "ERROR")
+            common.increment_summary_count(summary_count_dict, "ERROR")
             logger.log_for_error(
                 "Processing {0} data failed with |{1}|{2}| => {3}".format(
                     task_description, row_values["id"], row_values["name"], str(e)

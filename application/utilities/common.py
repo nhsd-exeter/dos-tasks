@@ -31,7 +31,7 @@ def valid_action(record_exists, row_data):
     return valid_action
 
 
-def cleanup(db_connection, bucket, filename, event, start):
+def cleanup(db_connection, bucket, filename, event, start, summary_count_dict):
     # Close DB connection
     log_for_audit("Closing DB connection...")
     db_connection.close()
@@ -42,7 +42,7 @@ def cleanup(db_connection, bucket, filename, event, start):
     log_for_audit("Archived file {} to {}/archive/{}".format(filename, filename.split("/")[0], filename.split("/")[1]))
     # Send Slack Notification
     log_for_audit("Sending slack message...")
-    send_success_slack_message(event, start)
+    send_success_slack_message(event, start,summary_count_dict)
     return "Cleanup Successful"
 
 
