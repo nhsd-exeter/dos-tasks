@@ -30,7 +30,6 @@ pipeline {
       when { expression { params.Task != "none" } }
       steps {
         script { sh "make unit-test TASK=${params.Task}" }
-        script { sh "make set-database-for-cron-jobs TASK=${params.Task} DB_NAME=${params.Database}"  }
         script { sh "make build TASK=${params.Task}" }
         script { sh "make push TASK=${params.Task}" }
       }
