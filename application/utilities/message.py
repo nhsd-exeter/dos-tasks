@@ -62,12 +62,13 @@ Start Time: *{start}* | Finish Time: *{finish}* | Duration: *{duration}*""".form
     return requests.post(slack_webhook_url, json.dumps(success_payload), headers=headers)
 
 
-def send_failure_slack_message(event, start):
+def send_failure_slack_message(event, start,summary_count_dict={"BLANK": 0, "CREATE": 0,"DELETE": 0, "ERROR": 0,"UPDATE": 0}):
     env = event["env"]
     file = event["filename"]
     bucket = event["bucket"]
     finish, duration = calculate_execution_time(start)
     start = start.strftime("%Y-%m-%d %H:%M:%S")
+    summarycount = slack_summary_counts(summary_count_dict)
     failure_payload = {
         "attachments": [
             {
@@ -84,12 +85,14 @@ def send_failure_slack_message(event, start):
                             "text": """Status: Failure :fire:
 Project: *uec-dos-tasks* | Environment: *{env}* | Profile: *{profile}*
 Task: *{task}* | File: *{file}* | Bucket: *{bucket}*
+Summary: *{summarycount}*
 Start Time: *{start}* | Finish Time: *{finish}* | Duration: *{duration}*""".format(
                                 env=env,
                                 profile=profile,
                                 task=task,
                                 file=file,
                                 bucket=bucket,
+                                summarycount=summarycount,
                                 start=start,
                                 finish=finish,
                                 duration=duration,
