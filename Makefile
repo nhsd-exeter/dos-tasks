@@ -106,7 +106,7 @@ provision-cron: ## cron specific version of provision PROFILE TASK DB_NAME
 	eval "$$(make secret-fetch-and-export-variables)"
 	make terraform-apply-auto-approve STACK=$(STACKS) PROFILE=$(PROFILE)
 	make terraform-apply-auto-approve STACK=$(TASK)-$(DB_NAME) PROFILE=$(PROFILE)
-	delete-stack-for-cron-job TASK=$(TASK) DB_NAME=$(DB_NAME)
+	make delete-stack-for-cron-job TASK=$(TASK) DB_NAME=$(DB_NAME)
 
 # Plan targets
 plan: # Plan cron and hk lambdas - mandatory: PROFILE=[name], TASK=[hk task] DB_NAME
