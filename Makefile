@@ -7,6 +7,7 @@ include $(abspath $(PROJECT_DIR)/build/automation/init.mk)
 
 copy-cron-template-stack: ## update placeholder value for cron job target database Mandatory [DB_NAME] [TASK]
 	echo "Updating environment variable to $(DB_NAME) for $(TASK)"
+	rm -rf  $(TERRAFORM_DIR)/$(STACK)/$(TASK)-$(DB_NAME)
 	mkdir $(TERRAFORM_DIR)/$(STACK)/$(TASK)-$(DB_NAME)
 	sed "s/DB_NAME_TO_REPLACE/$(DB_NAME)/g" $(TERRAFORM_DIR)/$(STACK)/cron-template/$(TASK)/template/main.tf  > \
 			$(TERRAFORM_DIR)/$(STACK)/cron-template/$(TASK)/main.tf
