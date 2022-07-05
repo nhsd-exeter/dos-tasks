@@ -181,7 +181,7 @@ destroy-hk: # Destroy housekeeping lambda - mandatory: PROFILE=[name], TASK=[hk 
 	task_type=$$(make task-type NAME=$(TASK))
 	if [ "$$task_type" == 'hk' ]; then
 		eval "$$(make secret-fetch-and-export-variables)"
-		make terraform-destroy STACK=$(TASK) PROFILE=$(PROFILE)
+		make terraform-destroy-auto-approve STACK=$(TASK) PROFILE=$(PROFILE)
 	else
 		echo $(TASK) is not an hk job
 	fi
@@ -209,7 +209,7 @@ destroy-cron: # Destroy environment - mandatory: PROFILE=[name], TASK=[hk task] 
 		echo "Clearing down the $(PROFILE) $(TASK) lambda for the $(DB_NAME) database"
 		eval "$$(make secret-fetch-and-export-variables)"
 		make build-stack-for-cron-job TASK=$(TASK) DB_NAME=$(DB_NAME)
-		make terraform-destroy STACK=$(TASK) PROFILE=$(PROFILE)
+		make terraform-destroy-auto-approve STACK=$(TASK)-$(DB_NAME) PROFILE=$(PROFILE)
 		make delete-stack-for-cron-job TASK=$(TASK) DB_NAME=$(DB_NAME)
 	else
 		echo $(TASK) is not a cron job

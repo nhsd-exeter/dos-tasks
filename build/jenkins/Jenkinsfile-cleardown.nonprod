@@ -24,12 +24,12 @@ pipeline {
 
     stage("Teardown cron jobs ") {
       steps {
-        script { sh "make destroy-all-cron PROFILE=nonprod" }
+        script { sh "make destroy-all-cron" }
       }
     }
   }
   post {
-    always { sh "make pipeline-send-notification PIPELINE_NAME='UEC DoS Tasks Cleardown (NonProd)' BUILD_STATUS=${currentBuild.currentResult}" }
+    always { sh "make pipeline-send-notification PIPELINE_NAME='UEC DoS Tasks Clear down (NonProd)' BUILD_STATUS=${currentBuild.currentResult}" }
     cleanup { sh "make clean" }
   }
 }
