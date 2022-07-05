@@ -45,7 +45,7 @@ pipeline {
     stage("Deploy") {
       when { expression { params.Task != "none" } }
       steps {
-        script { sh "make provision TASK=${params.Task}" }
+        script { sh "make provision TASK=${params.Task} DB_NAME=${params.Database}" }
       }
     }
 

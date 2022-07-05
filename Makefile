@@ -94,15 +94,15 @@ provision: ## provision resources for hk and cron - mandatory PROFILE TASK  and 
 	fi
 
 provision-hk: ## Provision environment - mandatory: PROFILE=[name], TASK=[task]
-	echo "Provisioning $(PROFILE) lamda for hk task $(TASK)"
+	echo "Provisioning $(PROFILE) lambda for hk task $(TASK)"
 	eval "$$(make secret-fetch-and-export-variables)"
 	make terraform-apply-auto-approve STACK=$(STACKS) PROFILE=$(PROFILE)
 	make terraform-apply-auto-approve STACK=$(TASK) PROFILE=$(PROFILE)
 
 
 provision-cron: ## cron specific version of provision PROFILE TASK DB_NAME
-	echo "Provisioning $(PROFILE) lamda for cron job $(TASK)"
-	build-stack-for-cron-job TASK=$(TASK) DB_NAME=$(DB_NAME)
+	echo "Provisioning $(PROFILE) lambda $(TASK)-$(DB_NAME) for cron job"
+	make build-stack-for-cron-job TASK=$(TASK) DB_NAME=$(DB_NAME)
 	eval "$$(make secret-fetch-and-export-variables)"
 	make terraform-apply-auto-approve STACK=$(STACKS) PROFILE=$(PROFILE)
 	make terraform-apply-auto-approve STACK=$(TASK)-$(DB_NAME) PROFILE=$(PROFILE)
