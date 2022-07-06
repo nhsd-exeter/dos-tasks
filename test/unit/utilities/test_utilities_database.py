@@ -234,7 +234,7 @@ def test_execute_db_query_success(mock_db_connect,mock_summary):
     mock_db_connect.cursor.return_value.__enter__.return_value = "Success"
     query = """update pathwaysdos.symptomgroups set name = (%s), zcodeexists = (%s)
         where id = (%s);"""
-    database.execute_db_query(mock_db_connect, query, data, line, values, summary_count)
+    database.execute_db_query(mock_db_connect, query, data, line, values, summary_count, 'env')
     mock_db_connect.commit.assert_called_once()
     mock_summary.assert_called_once()
     mock_db_connect.cursor().close.assert_called_once()
@@ -251,6 +251,6 @@ def test_execute_db_query_failure(mock_db_connect):
     mock_db_connect.cursor.return_value.__enter__.return_value = Exception
     query = """update pathwaysdos.symptomgroups set name = (%s), zcodeexists = (%s)
         where id = (%s);"""
-    database.execute_db_query(mock_db_connect, query, data, line, values, summary_count)
+    database.execute_db_query(mock_db_connect, query, data, line, values, summary_count, 'env')
     mock_db_connect.rollback.assert_called_once()
     mock_db_connect.cursor().close.assert_called_once()

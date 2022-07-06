@@ -20,13 +20,13 @@ def request(event, context):
     db_connection = database.connect_to_database(env, event, start)
     csv_file = common.retrieve_file_from_bucket(bucket, filename, event, start)
     csv_data = common.process_file(csv_file, event, start, data_column_count, summary_count_dict)
-    process_extracted_data(db_connection, csv_data, summary_count_dict, event, start)
-    common.report_summary_counts(summary_count_dict)
+    process_extracted_data(db_connection, csv_data, summary_count_dict, event)
+    common.report_summary_counts(summary_count_dict, env)
     common.cleanup(db_connection, bucket, filename, event, start, summary_count_dict)
     return task_description + " execution successful"
 
 
-def generate_db_query(row_values, event, start):
+def generate_db_query(row_values):
     if row_values["action"] in ("CREATE", "INSERT"):
         return create_query(row_values)
     elif row_values["action"] in ("UPDATE", "MODIFY"):
@@ -35,7 +35,6 @@ def generate_db_query(row_values, event, start):
         return delete_query(row_values)
     else:
         logger.log_for_error("Action {} not in approved list of actions".format(row_values["action"]))
-        message.send_failure_slack_message(event, start)
         raise psycopg2.DatabaseError("Database Action {} is invalid".format(row_values["action"]))
 
 
@@ -70,13 +69,13 @@ def delete_query(row_values):
     return query, data
 
 
-def process_extracted_data(db_connection, row_data, summary_count_dict, event, start):
+def process_extracted_data(db_connection, row_data, summary_count_dict, event):
     for row_number, row_values in row_data.items():
         try:
             record_exists = database.does_record_exist(db_connection, row_values, "referralroles")
             if common.valid_action(record_exists, row_values):
-                query, data = generate_db_query(row_values, event, start)
-                database.execute_db_query(db_connection, query, data, row_number, row_values, summary_count_dict)
+                query, data = generate_db_query(row_values)
+                database.execute_db_query(db_connection, query, data, row_number, row_values, summary_count_dict, event["env"])
             else:
                 common.increment_summary_count(summary_count_dict, "ERROR")
         except Exception as e:

@@ -20,7 +20,7 @@ def test_csv_line():
     """Test data extracted from valid csv"""
     csv_rows = {}
     csv_rows["1"]={"id": csv_sg_id, "name": csv_sg_desc, "action": csv_sg_action}
-    csv_dict = handler.extract_query_data_from_csv(csv_rows)
+    csv_dict = handler.extract_query_data_from_csv(csv_rows, 'env')
     assert len(csv_dict) == 1
     assert len(csv_dict["1"]) == 4
     assert csv_dict["1"]["id"] == csv_sg_id
@@ -34,7 +34,7 @@ def test_csv_line_lc():
     csv_rows = {}
     csv_sg_action = "remove"
     csv_rows["1"]={"id": csv_sg_id, "name": csv_sg_desc, "action": csv_sg_action}
-    csv_dict = handler.extract_query_data_from_csv(csv_rows)
+    csv_dict = handler.extract_query_data_from_csv(csv_rows, 'env')
     assert len(csv_dict) == 1
     assert len(csv_dict["1"]) == 4
     assert csv_dict["1"]["id"] == csv_sg_id
@@ -47,7 +47,7 @@ def test_zcode_sgdesc_csv_line():
     """Test extract correctly recognises zcodes"""
     csv_rows = {}
     csv_rows["1"]={"id": csv_sg_id, "name": "z2.0 - test", "action": csv_sg_action}
-    csv_dict = handler.extract_query_data_from_csv(csv_rows)
+    csv_dict = handler.extract_query_data_from_csv(csv_rows, 'env')
     assert len(csv_dict) == 1
     assert len(csv_dict["1"]) == 4
     assert csv_dict["1"]["zcode"] is True
@@ -59,7 +59,7 @@ def test_csv_line_exception():
     csv_rows = {}
     csv_rows["1"]={"id": csv_sg_id, "name": "z2.0 - test", "action": 1}
     with pytest.raises(Exception):
-        handler.extract_query_data_from_csv(csv_rows)
+        handler.extract_query_data_from_csv(csv_rows, 'env')
 
 def test_generating_create_query():
     """Test creation of insert query and data arguments"""
@@ -140,7 +140,8 @@ def test_process_extracted_data_single_record(mock_exist,mock_valid_action,mock_
     csv_dict["action"] = "DELETE"
     row_data[0]=csv_dict
     summary_count = {}
-    handler.process_extracted_data(mock_db_connect, row_data, summary_count)
+    event = generate_event_payload()
+    handler.process_extracted_data(mock_db_connect, row_data, summary_count, event)
     mock_valid_action.assert_called_once()
     mock_exist.assert_called_once()
     mock_generate.assert_called_once()
@@ -162,7 +163,8 @@ def test_process_extracted_data_multiple_records(mock_exist,mock_valid_action,mo
     row_data[0]=csv_dict
     row_data[1]=csv_dict
     summary_count = {}
-    handler.process_extracted_data(mock_db_connect, row_data, summary_count)
+    event = generate_event_payload()
+    handler.process_extracted_data(mock_db_connect, row_data, summary_count, event)
     assert mock_valid_action.call_count == 2
     assert mock_exist.call_count == 2
     assert mock_generate.call_count == 2
@@ -198,8 +200,9 @@ def test_process_extracted_data_error_check_exists_passes(mock_exists,mock_db_co
     row_data[0]=csv_dict
     mock_db_connect = ""
     summary_count = {}
+    event = generate_event_payload()
     with pytest.raises(Exception):
-        handler.process_extracted_data(mock_db_connect, row_data, summary_count)
+        handler.process_extracted_data(mock_db_connect, row_data, summary_count, event)
     assert mock_exists.call_count == 1
 
 

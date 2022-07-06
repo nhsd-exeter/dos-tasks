@@ -18,11 +18,11 @@ csv_action = "DELETE"
 
 def test_check_csv():
     csv_line = "col1,col2,col3"
-    assert common.check_csv_format(csv_line,3)
+    assert common.check_csv_format(csv_line,3, 'env')
 
 def test_check_csv():
     csv_line = "col1,col2,col3"
-    assert not common.check_csv_format(csv_line,4)
+    assert not common.check_csv_format(csv_line,4, 'env')
 
 def test_valid_create_action():
     """Test valid condition for create action"""
@@ -111,22 +111,22 @@ def test_retrieve_file_from_bucket(mock_s3_object):
 def test_check_for_not_null_values():
     """Checks key values not null"""
     csv_line = [2001,"Not null Id","UPDATE"]
-    assert common.check_csv_values(csv_line)
+    assert common.check_csv_values(csv_line,'env')
 
 def test_check_for_null_id():
     """Checks if id is null/empty string"""
     csv_line = ["","Null Id","UPDATE"]
-    assert not common.check_csv_values(csv_line)
+    assert not common.check_csv_values(csv_line,'env')
 
 def test_check_for_null_name():
     """Checks is name/description is null/empty string"""
     csv_line = [2001,"","UPDATE"]
-    assert not common.check_csv_values(csv_line)
+    assert not common.check_csv_values(csv_line,'env')
 
 def test_check_for_alpha_id():
     """Checks is name/description is null/empty string"""
     csv_line = ["abc","","UPDATE"]
-    assert not common.check_csv_values(csv_line)
+    assert not common.check_csv_values(csv_line,'env')
 
 def test_uninitialized_summary_count():
     """Test summary counts uninitialized correctly"""

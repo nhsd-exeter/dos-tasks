@@ -11,7 +11,7 @@ profile = os.environ.get("PROFILE")
 # TODO move inside class later
 def connect_to_database(env, event, start):
     db = DB()
-    logger.log_for_audit("Setting DB connection details")
+    logger.log_for_audit(env, "Setting DB connection details")
     if not db.db_set_connection_details(env, event, start):
         logger.log_for_error("Error DB Parameter(s) not found in secrets store.")
         message.send_failure_slack_message(event, start)
@@ -41,13 +41,13 @@ def does_record_exist(db, row_dict, table_name):
 
 
 # TODO move inside class later
-def execute_db_query(db_connection, query, data, line, values, summary_count_dict):
+def execute_db_query(db_connection, query, data, line, values, summary_count_dict, env):
     cursor = db_connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
     try:
         cursor.execute(query, data)
         db_connection.commit()
         common.increment_summary_count(summary_count_dict, values["action"])
-        logger.log_for_audit(
+        logger.log_for_audit(env,
             "action: Process row | operation: {0} | id: {1} | description: {2} | line number: {3}".format(
                 values["action"], values["id"], values["name"], line
             )
