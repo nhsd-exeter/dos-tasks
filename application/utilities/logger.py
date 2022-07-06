@@ -11,6 +11,7 @@ diagnostic_logger.setLevel(DEBUG)
 log_structure_old = "| task-type: {} | task-name: {} | {}"
 log_structure = "| task-type: {} | task-name: {} | env: {} | {}"
 
+
 def log_for_audit(env, msg_log):
     audit_logger.info(log_structure.format(housekeeping_prefix, msg_prefix, env, msg_log))
 

@@ -39,7 +39,10 @@ def cleanup(db_connection, bucket, filename, event, start, summary_count_dict):
     s3_class = utilities.s3.S3()
     s3_class.copy_object(bucket, filename, event, start)
     s3_class.delete_object(bucket, filename, event, start)
-    log_for_audit(event["env"], "Archived file {} to {}/archive/{}".format(filename, filename.split("/")[0], filename.split("/")[1]))
+    log_for_audit(
+        event["env"],
+        "Archived file {} to {}/archive/{}".format(filename, filename.split("/")[0], filename.split("/")[1]),
+    )
     # Send Slack Notification
     log_for_audit(event["env"], "Sending slack message...")
     utilities.message.send_success_slack_message(event, start, summary_count_dict)
@@ -108,10 +111,11 @@ def process_file(csv_file, event, start, expected_col_count, summary_count_dict)
             lines[str(count)] = {"id": line[0], "name": line[1], "action": line[2]}
         else:
             increment_summary_count(summary_count_dict, "ERROR")
-            log_for_audit(event["env"],
+            log_for_audit(
+                event["env"],
                 "Incorrect line format on line {0}, should be {1} but is {2}".format(
                     count, expected_col_count, len(line)
-                )
+                ),
             )
     if lines == {}:
         utilities.message.send_failure_slack_message(event, start, summary_count_dict)

@@ -34,7 +34,9 @@ def process_extracted_data(db_connection, row_data, summary_count_dict, event):
             record_exists = database.does_record_exist(db_connection, row_values, "symptomgroups")
             if common.valid_action(record_exists, row_values):
                 query, data = generate_db_query(row_values)
-                database.execute_db_query(db_connection, query, data, row_number, row_values, summary_count_dict, event["env"])
+                database.execute_db_query(
+                    db_connection, query, data, row_number, row_values, summary_count_dict, event["env"]
+                )
             else:
                 common.increment_summary_count(summary_count_dict, "ERROR")
         except Exception as e:
