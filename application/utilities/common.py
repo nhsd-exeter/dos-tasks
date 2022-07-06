@@ -90,10 +90,11 @@ def increment_summary_count(summary_count_dict, action, env):
             log_for_error(env, "Summary count does not have the key {0}".format(action))
             raise e
     else:
-        log_for_error(env,
+        log_for_error(
+            env,
             "Can't increment count for action {0}. Valid actions are {1},{2},{3},{4},{5}".format(
                 action, create_action, update_action, delete_action, blank_lines, error_lines
-            )
+            ),
         )
 
 

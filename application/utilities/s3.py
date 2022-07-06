@@ -16,11 +16,11 @@ class S3:
             file = response["Body"].read().decode("utf-8")
             return file
         except ClientError as e:
-            logger.log_for_error(event['env'], "Error retrieving object from bucket: {}".format(e))
+            logger.log_for_error(event["env"], "Error retrieving object from bucket: {}".format(e))
             message.send_failure_slack_message(event, start)
             raise e
         except Exception as e:
-            logger.log_for_error(event['env'],"Error retrieving object from bucket: {}".format(e))
+            logger.log_for_error(event["env"], "Error retrieving object from bucket: {}".format(e))
             message.send_failure_slack_message(event, start)
             raise e
 
@@ -33,11 +33,11 @@ class S3:
             )
             return response
         except ClientError as e:
-            logger.log_for_error(event['env'],"Error copying object to bucket: {}".format(e))
+            logger.log_for_error(event["env"], "Error copying object to bucket: {}".format(e))
             message.send_failure_slack_message(event, start)
             raise e
         except Exception as e:
-            logger.log_for_error(event['env'],"Error copying object to bucket: {}".format(e))
+            logger.log_for_error(event["env"], "Error copying object to bucket: {}".format(e))
             message.send_failure_slack_message(event, start)
             raise e
 
@@ -46,10 +46,10 @@ class S3:
             response = self.s3_client.delete_object(Bucket=bucket, Key=filename)
             return response
         except ClientError as e:
-            logger.log_for_error(event['env'],"Error deleting object from bucket: {}".format(e))
+            logger.log_for_error(event["env"], "Error deleting object from bucket: {}".format(e))
             message.send_failure_slack_message(event, start)
             raise e
         except Exception as e:
-            logger.log_for_error(event['env'],"Error deleting object from bucket: {}".format(e))
+            logger.log_for_error(event["env"], "Error deleting object from bucket: {}".format(e))
             message.send_failure_slack_message(event, start)
             raise e

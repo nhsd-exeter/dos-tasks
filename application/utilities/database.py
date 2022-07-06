@@ -33,7 +33,8 @@ def does_record_exist(db, row_dict, table_name, env):
             if cursor.rowcount != 0:
                 record_exists = True
     except (Exception, psycopg2.Error) as e:
-        logger.log_for_error(env,
+        logger.log_for_error(
+            env,
             "Select from table {0} by id failed - {1} => {2}".format(full_table_name, row_dict["id"], str(e)),
         )
         raise e
@@ -116,6 +117,6 @@ class DB:
                 host=self.db_host, dbname=self.db_name, user=self.db_user, password=self.db_password
             )
         except Exception:
-            logger.log_for_error(event['env'],"Connection parameters not set correctly")
+            logger.log_for_error(event["env"], "Connection parameters not set correctly")
             message.send_failure_slack_message(event, start)
             raise psycopg2.InterfaceError()
