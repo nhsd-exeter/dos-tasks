@@ -76,7 +76,7 @@ def test_generating_create_query():
     csv_dict["name"] = csv_sg_desc
     csv_dict["zcode"] = False
     csv_dict["action"] = "CREATE"
-    query, data = handler.generate_db_query(csv_dict)
+    query, data = handler.generate_db_query(csv_dict, 'test')
     mapping = {ord(c): None for c in remove}
     assert query.translate(mapping) == create_query_string.translate(mapping),"Query syntax mismatched"
     assert data[0] == csv_dict["id"]
@@ -93,7 +93,7 @@ def test_generating_update_query():
     csv_dict["name"] = csv_sg_desc
     csv_dict["zcode"] = False
     csv_dict["action"] = "UPDATE"
-    query, data = handler.generate_db_query(csv_dict)
+    query, data = handler.generate_db_query(csv_dict, 'test')
     mapping = {ord(c): None for c in remove}
     assert query.translate(mapping) == update_query_string.translate(mapping),"Query syntax mismatched"
     assert data[0] == csv_dict["name"]
@@ -109,7 +109,7 @@ def test_generating_delete_query():
     csv_dict["name"] = csv_sg_desc
     csv_dict["zcode"] = False
     csv_dict["action"] = "DELETE"
-    query, data = handler.generate_db_query(csv_dict)
+    query, data = handler.generate_db_query(csv_dict, 'test')
     mapping = {ord(c): None for c in remove}
     assert query.translate(mapping) == delete_query_string.translate(mapping),"Query syntax mismatched"
     assert data[0] == csv_dict["id"]
@@ -122,7 +122,7 @@ def test_generating_query_with_invalid_action():
     csv_dict["zcode"] = False
     csv_dict["action"] = "REMOVE"
     with pytest.raises(psycopg2.DatabaseError):
-        query, data = handler.generate_db_query(csv_dict)
+        query, data = handler.generate_db_query(csv_dict, 'test')
 
 
 @patch("psycopg2.connect")

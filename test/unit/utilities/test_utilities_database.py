@@ -170,7 +170,7 @@ def test_record_exists_true(mock_db_connect):
     csv_dict["action"] = csv_action
     csv_dict["zcode"] = None
     mock_db_connect.cursor.return_value.__enter__.return_value.rowcount = 1
-    assert database.does_record_exist(mock_db_connect,csv_dict,table_name)
+    assert database.does_record_exist(mock_db_connect,csv_dict,table_name,'test')
 
 @patch("psycopg2.connect")
 def test_does_record_exist_false(mock_db_connect):
@@ -181,7 +181,7 @@ def test_does_record_exist_false(mock_db_connect):
     csv_dict["action"] = "DELETE"
     csv_dict["zcode"] = None
     mock_db_connect.cursor.return_value.__enter__.return_value.rowcount = 0
-    assert not database.does_record_exist(mock_db_connect,csv_dict,table_name)
+    assert not database.does_record_exist(mock_db_connect,csv_dict,table_name,'test')
 
 @patch("psycopg2.connect")
 def test_does_record_exist_exception(mock_db_connect):
@@ -193,7 +193,7 @@ def test_does_record_exist_exception(mock_db_connect):
     csv_dict["zcode"] = None
     mock_db_connect = ""
     with pytest.raises(Exception):
-        database.does_record_exist(mock_db_connect,csv_dict,table_name)
+        database.does_record_exist(mock_db_connect,csv_dict,table_name,'test')
 
 
 # TODO move inside class later

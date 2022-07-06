@@ -19,7 +19,7 @@ def check_csv_format(csv_row, csv_column_count, env):
         return False
 
 
-def valid_action(record_exists, row_data):
+def valid_action(record_exists, row_data, env):
     """Returns True if action is valid; otherwise returns False"""
     valid_action = False
     if record_exists and row_data["action"] in ("UPDATE", "DELETE"):
@@ -27,7 +27,7 @@ def valid_action(record_exists, row_data):
     if not record_exists and row_data["action"] in ("CREATE"):
         valid_action = True
     if not valid_action:
-        log_for_error("Invalid action {} for the record with ID {}".format(row_data["action"], row_data["id"]))
+        log_for_error(env, "Invalid action {} for the record with ID {}".format(row_data["action"], row_data["id"]))
     return valid_action
 
 
@@ -82,15 +82,15 @@ def initialise_summary_count():
     return summary_count_dict
 
 
-def increment_summary_count(summary_count_dict, action):
+def increment_summary_count(summary_count_dict, action, env):
     if action in [create_action, update_action, delete_action, blank_lines, error_lines]:
         try:
             summary_count_dict[action] = summary_count_dict[action] + 1
         except (KeyError) as e:
-            log_for_error("Summary count does not have the key {0}".format(action))
+            log_for_error(env, "Summary count does not have the key {0}".format(action))
             raise e
     else:
-        log_for_error(
+        log_for_error(env,
             "Can't increment count for action {0}. Valid actions are {1},{2},{3},{4},{5}".format(
                 action, create_action, update_action, delete_action, blank_lines, error_lines
             )
@@ -105,12 +105,12 @@ def process_file(csv_file, event, start, expected_col_count, summary_count_dict)
     for line in csv_reader:
         count += 1
         if len(line) == 0:
-            increment_summary_count(summary_count_dict, "BLANK")
+            increment_summary_count(summary_count_dict, "BLANK", event["env"])
             continue
         if check_csv_format(line, expected_col_count, event["env"]) and check_csv_values(line, event["env"]):
             lines[str(count)] = {"id": line[0], "name": line[1], "action": line[2]}
         else:
-            increment_summary_count(summary_count_dict, "ERROR")
+            increment_summary_count(summary_count_dict, "ERROR", event["env"])
             log_for_audit(
                 event["env"],
                 "Incorrect line format on line {0}, should be {1} but is {2}".format(

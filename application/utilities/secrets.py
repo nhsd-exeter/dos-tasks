@@ -13,11 +13,11 @@ class SECRETS:
             print(secret_store_name)
             response = self.secrets_client.get_secret_value(SecretId=secret_store_name)
         except ClientError as e:
-            logger.log_for_error("Error retrieving secrets: {}".format(e))
+            logger.log_for_error(event['env'],"Error retrieving secrets: {}".format(e))
             message.send_failure_slack_message(event, start)
             raise e
         except Exception as e:
-            logger.log_for_error("Error retrieving secrets: {}".format(e))
+            logger.log_for_error(event['env'],"Error retrieving secrets: {}".format(e))
             message.send_failure_slack_message(event, start)
             raise e
         else:

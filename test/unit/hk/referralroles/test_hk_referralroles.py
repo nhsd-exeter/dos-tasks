@@ -79,7 +79,7 @@ def test_delete_query():
 @patch(f"{file_path}.delete_query", return_value="Delete Query")
 def test_generate_db_query_create(mock_delete_query, mock_update_query, mock_create_query):
     mock_row_values = {"id": "00001", "description": "Mock Create SD", "action": "CREATE"}
-    result = handler.generate_db_query(mock_row_values)
+    result = handler.generate_db_query(mock_row_values, 'test')
     assert result == "Create Query"
     mock_delete_query.assert_not_called()
     mock_update_query.assert_not_called()
@@ -90,7 +90,7 @@ def test_generate_db_query_create(mock_delete_query, mock_update_query, mock_cre
 @patch(f"{file_path}.delete_query", return_value="Delete Query")
 def test_generate_db_query_update(mock_delete_query, mock_update_query, mock_create_query):
     mock_row_values = {"id": "00002", "description": "Mock Update SD", "action": "UPDATE"}
-    result = handler.generate_db_query(mock_row_values)
+    result = handler.generate_db_query(mock_row_values, 'test')
     assert result == "Update Query"
     mock_delete_query.assert_not_called()
     mock_update_query.assert_called_once_with(mock_row_values)
@@ -102,7 +102,7 @@ def test_generate_db_query_update(mock_delete_query, mock_update_query, mock_cre
 @patch(f"{file_path}.delete_query", return_value="Delete Query")
 def test_generate_db_query_delete(mock_delete_query, mock_update_query, mock_create_query):
     mock_row_values = {"id": "00003", "description": "Mock Delete SD", "action": "DELETE"}
-    result = handler.generate_db_query(mock_row_values)
+    result = handler.generate_db_query(mock_row_values, 'test')
     assert result == "Delete Query"
     mock_delete_query.assert_called_once_with(mock_row_values)
     mock_update_query.assert_not_called()
@@ -115,7 +115,7 @@ def test_generate_db_query_delete(mock_delete_query, mock_update_query, mock_cre
 def test_generate_db_query_raises_error(mock_delete_query, mock_update_query, mock_create_query):
     mock_row_values = {"id": "00001", "description": "Mock Create SD", "action": "UNKNOWN"}
     with pytest.raises(psycopg2.DatabaseError) as assertion:
-        result = handler.generate_db_query(mock_row_values)
+        result = handler.generate_db_query(mock_row_values, 'test')
     assert str(assertion.value) == "Database Action UNKNOWN is invalid"
     mock_delete_query.assert_not_called()
     mock_update_query.assert_not_called()

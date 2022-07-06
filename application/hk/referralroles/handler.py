@@ -26,7 +26,7 @@ def request(event, context):
     return task_description + " execution successful"
 
 
-def generate_db_query(row_values):
+def generate_db_query(row_values, env):
     if row_values["action"] in ("CREATE", "INSERT"):
         return create_query(row_values)
     elif row_values["action"] in ("UPDATE", "MODIFY"):
@@ -34,7 +34,7 @@ def generate_db_query(row_values):
     elif row_values["action"] in ("DELETE", "REMOVE"):
         return delete_query(row_values)
     else:
-        logger.log_for_error("Action {} not in approved list of actions".format(row_values["action"]))
+        logger.log_for_error(env, "Action {} not in approved list of actions".format(row_values["action"]))
         raise psycopg2.DatabaseError("Database Action {} is invalid".format(row_values["action"]))
 
 
@@ -72,9 +72,9 @@ def delete_query(row_values):
 def process_extracted_data(db_connection, row_data, summary_count_dict, event):
     for row_number, row_values in row_data.items():
         try:
-            record_exists = database.does_record_exist(db_connection, row_values, "referralroles")
-            if common.valid_action(record_exists, row_values):
-                query, data = generate_db_query(row_values)
+            record_exists = database.does_record_exist(db_connection, row_values, "referralroles", event["env"])
+            if common.valid_action(record_exists, row_values, event["env"]):
+                query, data = generate_db_query(row_values, event["env"])
                 database.execute_db_query(
                     db_connection, query, data, row_number, row_values, summary_count_dict, event["env"]
                 )
