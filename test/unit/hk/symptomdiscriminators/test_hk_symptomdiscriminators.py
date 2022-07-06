@@ -17,7 +17,7 @@ csv_sd_action = "INSERT"
 
 @patch(f"{file_path}.database.connect_to_database", return_value="db_connection")
 @patch(f"{file_path}.common.retrieve_file_from_bucket", return_value="csv_file")
-@patch(f"{file_path}.common.process_file", return_value={"1": {"id": "00001", "description": "Mock Create SD", "action": "CREATE"}, "2": {"id": "00002", "description": "Mock Update SD", "action": "UPDATE"}, "3": {"id": "00003", "description": "Mock Delete SD", "action": "DELETE"}})
+@patch(f"{file_path}.common.process_file", return_value={"1": {"id": "00001", "name": "Mock Create SD", "action": "CREATE"}, "2": {"id": "00002", "name": "Mock Update SD", "action": "UPDATE"}, "3": {"id": "00003", "name": "Mock Delete SD", "action": "DELETE"}})
 @patch(f"{file_path}.process_extracted_data")
 @patch(f"{file_path}.common.report_summary_counts", return_value="Symptom discriminators updated: 1, inserted: 1, deleted: 1")
 @patch(f"{file_path}.common.cleanup")
@@ -32,6 +32,7 @@ def test_request_success(mock_send_start_message, mock_cleanup,  mock_report_sum
     mock_process_file.assert_called_once()
     mock_retrieve_file_from_bucket.assert_called_once()
     mock_db_connection.assert_called_once()
+
 
 
 def test_create_query():
@@ -137,32 +138,53 @@ def test_process_extracted_data_error_check_exists_fails(mock_db_connect):
         handler.process_extracted_data(mock_db_connect, row_data, summary_count)
 
 @patch("psycopg2.connect")
-@patch(f"{file_path}.database.does_record_exist", return_value=True)
-def test_process_extracted_data_error_check_exists_passes(mock_exists,mock_db_connect):
+@patch(f"{file_path}.database.does_record_exist", return_value=False)
+@patch(f"{file_path}.common.increment_summary_count")
+def test_process_extracted_data_error_check_exists_passes(mock_increment_count,mock_exists,mock_db_connect):
     """Test error handling when extracting data and record exist check passes"""
     row_data = {}
     csv_dict = {}
     csv_dict={csv_sd_id,csv_sd_desc,"DELETE"}
     row_data[0]=csv_dict
-    mock_db_connect = ""
     summary_count = {}
+    mock_db_connect=""
     with pytest.raises(Exception):
         handler.process_extracted_data(mock_db_connect, row_data, summary_count, mock_event, start)
     assert mock_exists.call_count == 1
+    mock_increment_count.called_once()
+
+@patch("psycopg2.connect")
+@patch(f"{file_path}.database.execute_db_query")
+@patch(f"{file_path}.generate_db_query",return_value=("query", "data"))
+@patch(f"{file_path}.common.valid_action", return_value=False)
+@patch(f"{file_path}.database.does_record_exist", return_value=True)
+@patch(f"{file_path}.common.increment_summary_count")
+def test_process_extracted_data_error_check_invalid_action(mock_increment_count,mock_exist,mock_valid_action,mock_generate,mock_execute, mock_db_connect):
+    """Test error handling when extracting data and valid action check fails"""
+    row_data = {}
+    csv_dict = {}
+    csv_dict={csv_sd_id,csv_sd_desc,"DELETE"}
+    row_data[0]=csv_dict
+    summary_count = {}
+    handler.process_extracted_data(mock_db_connect, row_data, summary_count, mock_event, start)
+    assert mock_valid_action.call_count == 1
+    mock_increment_count.called_once()
+
 
 @patch("psycopg2.connect")
 @patch(f"{file_path}.database.execute_db_query")
 @patch(f"{file_path}.generate_db_query",return_value=("query", "data"))
 @patch(f"{file_path}.common.valid_action", return_value=True)
 @patch(f"{file_path}.database.does_record_exist", return_value=True)
-def test_process_extracted_data_single_record(mock_exist,mock_valid_action,mock_generate,mock_execute, mock_db_connect):
+@patch(f"{file_path}.common.increment_summary_count")
+def test_process_extracted_data_single_record(mock_increment_count,mock_exist,mock_valid_action,mock_generate,mock_execute, mock_db_connect):
     """Test extracting data calls each downstream functions once for one record"""
     row_data = {}
-    csv_dict={csv_sd_id,csv_sd_desc,"DELETE"}
+    csv_dict={csv_sd_id,csv_sd_desc,"DELETE","WEWE"}
     row_data[0]=csv_dict
     summary_count = {}
-    summary_count = {}
     handler.process_extracted_data(mock_db_connect, row_data, summary_count, mock_event, start)
+    mock_increment_count.assert_not_called()
     mock_valid_action.assert_called_once()
     mock_exist.assert_called_once()
     mock_generate.assert_called_once()

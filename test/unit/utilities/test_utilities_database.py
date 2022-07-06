@@ -247,7 +247,7 @@ def test_execute_db_query_failure(mock_db_connect):
     line = """2001,"New Symptom Group","CREATE"\n"""
     data = ("New Symptom Group", "None", 2001)
     values = {"action":"CREATE","id":2001,"Name":"New Symptom Group"}
-    summary_count = {}
+    summary_count = {"BLANK": 0, "CREATE": 0,"DELETE": 0, "ERROR": 0,"UPDATE": 0}
     mock_db_connect.cursor.return_value.__enter__.return_value = Exception
     query = """update pathwaysdos.symptomgroups set name = (%s), zcodeexists = (%s)
         where id = (%s);"""
