@@ -123,9 +123,3 @@ def test_calculate_execution_time(mock_datetime):
     assert finish == "2022-04-26 19:09:06"
     assert str(duration) == "0:04:26"
 
-def test_slack_summary_count():
-    """Test slack report log output """
-    summary_count = {}
-    summary_count={"BLANK": 3, "CREATE": 2,"DELETE": 8, "ERROR": 1,"UPDATE": 4}
-    report=message.slack_summary_counts(summary_count)
-    assert report ==  "updated: 4, inserted: 2, deleted: 8, blank: 3, errored: 1"

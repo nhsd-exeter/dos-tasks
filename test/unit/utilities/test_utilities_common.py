@@ -81,8 +81,8 @@ def test_invalid_action_lower_case():
     assert not common.valid_action(True,csv_dict)
 
 @patch("psycopg2.connect")
-@patch(f"{file_path}.S3")
-@patch(f"{file_path}.send_success_slack_message")
+@patch(f"{file_path}.utilities.s3.S3")
+@patch(f"{file_path}.utilities.message.send_success_slack_message")
 def test_cleanup_success(mock_send_success_slack_message, mock_s3_object, mock_db_connect):
     mock_db_connect.close.return_value = "Closed connection"
     mock_s3_object().copy_object = Mock(return_value="Object copied")
@@ -98,7 +98,7 @@ def test_cleanup_success(mock_send_success_slack_message, mock_s3_object, mock_d
     mock_send_success_slack_message.assert_called_once_with(mock_event, start, mock_summary_count)
 
 
-@patch(f"{file_path}.S3")
+@patch(f"{file_path}.utilities.s3.S3")
 def test_retrieve_file_from_bucket(mock_s3_object):
     mock_s3_object().get_object = Mock(return_value="Object returned")
     mock_bucket = ""
@@ -291,7 +291,7 @@ def test_process_file_success_with_incorrect_line_format():
                     "3": {"id": "00003", "name": "Mock Delete SD", "action": "DELETE"}}
 
 
-@patch(f"{file_path}.send_failure_slack_message")
+@patch(f"{file_path}.utilities.message.send_failure_slack_message")
 def test_process_file_raises_error_with_no_valid_length_lines(mock_send_failure_slack_message):
     summary_count_dict = {}
     summary_count_dict["CREATE"] = 0
@@ -425,3 +425,11 @@ def test_process_file_call_count_inc_empty_line():
     csv_file = """2001,"Automated insert SymptomGroup","CREATE"\n\n2001,"Automated update SymptomGroup","UPDATE"\n"""
     lines = common.process_file(csv_file, mock_event, start, 3 , summary_count_dict)
     assert len(lines) == 2
+
+
+def test_slack_summary_count():
+    """Test slack report log output """
+    summary_count = {}
+    summary_count={"BLANK": 3, "CREATE": 2,"DELETE": 8, "ERROR": 1,"UPDATE": 4}
+    report=common.slack_summary_counts(summary_count)
+    assert report ==  "updated: 4, inserted: 2, deleted: 8, blank: 3, errored: 1"

@@ -22,7 +22,7 @@ def request(event, context):
     csv_data = common.process_file(csv_file, event, start, 3, summary_count_dict)
     extracted_data = extract_query_data_from_csv(csv_data)
     process_extracted_data(db_connection, extracted_data, summary_count_dict)
-    common.report_summary_counts(task_description, summary_count_dict)
+    common.report_summary_counts(summary_count_dict)
     common.cleanup(db_connection, bucket, filename, event, start, summary_count_dict)
     return task_description + " execution successful"
 

@@ -2,6 +2,7 @@ import os
 from datetime import datetime
 import requests
 import json
+from utilities.common import slack_summary_counts
 
 create_action = "CREATE"
 update_action = "UPDATE"
@@ -151,13 +152,4 @@ def calculate_execution_time(start):
     return finish, duration
 
 
-def slack_summary_counts(summary_count_dict):
-    report = ""
-    report = "updated: {0}, inserted: {1}, deleted: {2}, blank: {3}, errored: {4}".format(
-        summary_count_dict[update_action],
-        summary_count_dict[create_action],
-        summary_count_dict[delete_action],
-        summary_count_dict[blank_lines],
-        summary_count_dict[error_lines],
-    )
-    return report
+

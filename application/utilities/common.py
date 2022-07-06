@@ -1,6 +1,6 @@
-from utilities.s3 import S3
+import utilities.s3
 from utilities.logger import log_for_audit, log_for_error  # noqa
-from utilities.message import send_success_slack_message, send_failure_slack_message
+import utilities.message
 import csv
 
 create_action = "CREATE"
@@ -36,19 +36,19 @@ def cleanup(db_connection, bucket, filename, event, start, summary_count_dict):
     log_for_audit("Closing DB connection...")
     db_connection.close()
     # Archive file
-    s3_class = S3()
+    s3_class = utilities.s3.S3()
     s3_class.copy_object(bucket, filename, event, start)
     s3_class.delete_object(bucket, filename, event, start)
     log_for_audit("Archived file {} to {}/archive/{}".format(filename, filename.split("/")[0], filename.split("/")[1]))
     # Send Slack Notification
     log_for_audit("Sending slack message...")
-    send_success_slack_message(event, start, summary_count_dict)
+    utilities.message.send_success_slack_message(event, start, summary_count_dict)
     return "Cleanup Successful"
 
 
 def retrieve_file_from_bucket(bucket, filename, event, start):
     log_for_audit("Looking in {} for {} file".format(bucket, filename))
-    s3_bucket = S3()
+    s3_bucket = utilities.s3.S3()
     return s3_bucket.get_object(bucket, filename, event, start)
 
 
@@ -114,18 +114,19 @@ def process_file(csv_file, event, start, expected_col_count, summary_count_dict)
                 )
             )
     if lines == {}:
-        send_failure_slack_message(event, start, summary_count_dict)
+        utilities.message.send_failure_slack_message(event, start, summary_count_dict)
     return lines
 
 
-def report_summary_counts(task_description, summary_count_dict):
-    log_for_audit(
-        "{0} updated: {1}, inserted: {2}, deleted: {3}, blank: {4}, errored: {5}".format(
-            task_description,
-            summary_count_dict[update_action],
-            summary_count_dict[create_action],
-            summary_count_dict[delete_action],
-            summary_count_dict[blank_lines],
-            summary_count_dict[error_lines],
-        )
+def report_summary_counts(summary_count_dict):
+    log_for_audit(slack_summary_counts(summary_count_dict))
+
+def slack_summary_counts(summary_count_dict):
+    report = "updated: {0}, inserted: {1}, deleted: {2}, blank: {3}, errored: {4}".format(
+        summary_count_dict[update_action],
+        summary_count_dict[create_action],
+        summary_count_dict[delete_action],
+        summary_count_dict[blank_lines],
+        summary_count_dict[error_lines],
     )
+    return report
