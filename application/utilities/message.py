@@ -63,7 +63,9 @@ Start Time: *{start}* | Finish Time: *{finish}* | Duration: *{duration}*""".form
     return requests.post(slack_webhook_url, json.dumps(success_payload), headers=headers)
 
 
-def send_failure_slack_message(event, start,summary_count_dict={"BLANK": 0, "CREATE": 0,"DELETE": 0, "ERROR": 0,"UPDATE": 0}):
+def send_failure_slack_message(
+    event, start, summary_count_dict={"BLANK": 0, "CREATE": 0, "DELETE": 0, "ERROR": 0, "UPDATE": 0}
+):
     env = event["env"]
     file = event["filename"]
     bucket = event["bucket"]
@@ -150,6 +152,3 @@ def calculate_execution_time(start):
     finish = now.strftime("%Y-%m-%d %H:%M:%S")
     duration = str(now - start).split(".")[0]
     return finish, duration
-
-
-

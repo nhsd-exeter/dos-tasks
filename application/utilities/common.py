@@ -121,6 +121,7 @@ def process_file(csv_file, event, start, expected_col_count, summary_count_dict)
 def report_summary_counts(summary_count_dict):
     log_for_audit(slack_summary_counts(summary_count_dict))
 
+
 def slack_summary_counts(summary_count_dict):
     report = "updated: {0}, inserted: {1}, deleted: {2}, blank: {3}, errored: {4}".format(
         summary_count_dict[update_action],
