@@ -4,12 +4,6 @@ import requests
 import json
 from utilities.common import slack_summary_counts
 
-create_action = "CREATE"
-update_action = "UPDATE"
-delete_action = "DELETE"
-blank_lines = "BLANK"
-error_lines = "ERROR"
-
 slack_webhook_url = os.environ.get("SLACK_WEBHOOK_URL")
 profile = os.environ.get("PROFILE")
 task = os.environ.get("TASK")
