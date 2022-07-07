@@ -41,7 +41,9 @@ def cleanup(db_connection, bucket, filename, event, start, summary_count_dict):
     s3_class.delete_object(bucket, filename, event, start)
     log_for_audit(
         event["env"],
-        "action:archive file:{} | bucket:{}/archive/{}".format(filename, filename.split("/")[0], filename.split("/")[1]),
+        "action:archive file:{} | bucket:{}/archive/{}".format(
+            filename, filename.split("/")[0], filename.split("/")[1]
+        ),
     )
     # Send Slack Notification
     log_for_audit(event["env"], "action:task complete")
