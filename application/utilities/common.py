@@ -94,7 +94,7 @@ def increment_summary_count(summary_count_dict, action, env):
             env,
             "Can't increment count for action {0}. Valid actions are {1},{2},{3},{4},{5}".format(
                 action, create_action, update_action, delete_action, blank_lines, error_lines
-            ),
+            )
         )
 
 
@@ -116,7 +116,7 @@ def process_file(csv_file, event, start, expected_col_count, summary_count_dict)
                 event["env"],
                 "Incorrect line format on line {0}, should be {1} but is {2}".format(
                     count, expected_col_count, len(line)
-                ),
+                )
             )
     if lines == {}:
         utilities.message.send_failure_slack_message(event, start, summary_count_dict)
