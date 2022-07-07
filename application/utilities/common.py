@@ -10,16 +10,16 @@ blank_lines = "BLANK"
 error_lines = "ERROR"
 
 
-def check_csv_format(csv_row, csv_column_count):
+def check_csv_format(csv_row, csv_column_count, env):
     """Checks length of csv data"""
     if len(csv_row) == csv_column_count:
         return True
     else:
-        log_for_audit("CSV format invalid - invalid length")
+        log_for_audit(env, "CSV format invalid - invalid length")
         return False
 
 
-def valid_action(record_exists, row_data):
+def valid_action(record_exists, row_data, env):
     """Returns True if action is valid; otherwise returns False"""
     valid_action = False
     if record_exists and row_data["action"] in ("UPDATE", "DELETE"):
@@ -27,44 +27,47 @@ def valid_action(record_exists, row_data):
     if not record_exists and row_data["action"] in ("CREATE"):
         valid_action = True
     if not valid_action:
-        log_for_error("Invalid action {} for the record with ID {}".format(row_data["action"], row_data["id"]))
+        log_for_error(env, "Invalid action {} for the record with ID {}".format(row_data["action"], row_data["id"]))
     return valid_action
 
 
 def cleanup(db_connection, bucket, filename, event, start, summary_count_dict):
     # Close DB connection
-    log_for_audit("Closing DB connection...")
+    log_for_audit(event["env"], "Closing DB connection...")
     db_connection.close()
     # Archive file
     s3_class = utilities.s3.S3()
     s3_class.copy_object(bucket, filename, event, start)
     s3_class.delete_object(bucket, filename, event, start)
-    log_for_audit("Archived file {} to {}/archive/{}".format(filename, filename.split("/")[0], filename.split("/")[1]))
+    log_for_audit(
+        event["env"],
+        "Archived file {} to {}/archive/{}".format(filename, filename.split("/")[0], filename.split("/")[1]),
+    )
     # Send Slack Notification
-    log_for_audit("Sending slack message...")
+    log_for_audit(event["env"], "Sending slack message...")
     utilities.message.send_success_slack_message(event, start, summary_count_dict)
     return "Cleanup Successful"
 
 
 def retrieve_file_from_bucket(bucket, filename, event, start):
-    log_for_audit("Looking in {} for {} file".format(bucket, filename))
+    log_for_audit(event["env"], "Looking in {} for {} file".format(bucket, filename))
     s3_bucket = utilities.s3.S3()
     return s3_bucket.get_object(bucket, filename, event, start)
 
 
-def check_csv_values(line):
+def check_csv_values(line, env):
     """Returns false if either id or name are null or empty string"""
     valid_values = True
     try:
         int(line[0])
     except ValueError:
-        log_for_audit("Id {} must be a integer".format(line[0]))
+        log_for_audit(env, "Id {} must be a integer".format(line[0]))
         valid_values = False
     if not str(line[0]):
-        log_for_audit("Id {} can not be null or empty".format(line[0]))
+        log_for_audit(env, "Id {} can not be null or empty".format(line[0]))
         valid_values = False
     if not line[1]:
-        log_for_audit("Name/Description {} can not be null or empty".format(line[1]))
+        log_for_audit(env, "Name/Description {} can not be null or empty".format(line[1]))
         valid_values = False
     return valid_values
 
@@ -79,18 +82,19 @@ def initialise_summary_count():
     return summary_count_dict
 
 
-def increment_summary_count(summary_count_dict, action):
+def increment_summary_count(summary_count_dict, action, env):
     if action in [create_action, update_action, delete_action, blank_lines, error_lines]:
         try:
             summary_count_dict[action] = summary_count_dict[action] + 1
         except (KeyError) as e:
-            log_for_error("Summary count does not have the key {0}".format(action))
+            log_for_error(env, "Summary count does not have the key {0}".format(action))
             raise e
     else:
         log_for_error(
+            env,
             "Can't increment count for action {0}. Valid actions are {1},{2},{3},{4},{5}".format(
                 action, create_action, update_action, delete_action, blank_lines, error_lines
-            )
+            ),
         )
 
 
@@ -102,24 +106,25 @@ def process_file(csv_file, event, start, expected_col_count, summary_count_dict)
     for line in csv_reader:
         count += 1
         if len(line) == 0:
-            increment_summary_count(summary_count_dict, "BLANK")
+            increment_summary_count(summary_count_dict, "BLANK", event["env"])
             continue
-        if check_csv_format(line, expected_col_count) and check_csv_values(line):
+        if check_csv_format(line, expected_col_count, event["env"]) and check_csv_values(line, event["env"]):
             lines[str(count)] = {"id": line[0], "name": line[1], "action": line[2]}
         else:
-            increment_summary_count(summary_count_dict, "ERROR")
+            increment_summary_count(summary_count_dict, "ERROR", event["env"])
             log_for_audit(
+                event["env"],
                 "Incorrect line format on line {0}, should be {1} but is {2}".format(
                     count, expected_col_count, len(line)
-                )
+                ),
             )
     if lines == {}:
         utilities.message.send_failure_slack_message(event, start, summary_count_dict)
     return lines
 
 
-def report_summary_counts(summary_count_dict):
-    log_for_audit(slack_summary_counts(summary_count_dict))
+def report_summary_counts(summary_count_dict, env):
+    log_for_audit(env, slack_summary_counts(summary_count_dict))
 
 
 def slack_summary_counts(summary_count_dict):

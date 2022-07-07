@@ -18,67 +18,67 @@ csv_action = "DELETE"
 
 def test_check_csv():
     csv_line = "col1,col2,col3"
-    assert common.check_csv_format(csv_line,3)
+    assert common.check_csv_format(csv_line,3, 'env')
 
 def test_check_csv():
     csv_line = "col1,col2,col3"
-    assert not common.check_csv_format(csv_line,4)
+    assert not common.check_csv_format(csv_line,4, 'env')
 
 def test_valid_create_action():
     """Test valid condition for create action"""
     csv_dict = {}
     csv_dict["id"] = csv_id
     csv_dict["action"] = "CREATE"
-    assert common.valid_action(False,csv_dict)
+    assert common.valid_action(False,csv_dict, 'test')
 
 def test_invalid_create_action():
     """Test invalid condition for create action"""
     csv_dict = {}
     csv_dict["id"] = csv_id
     csv_dict["action"] = "CREATE"
-    assert not common.valid_action(True,csv_dict)
+    assert not common.valid_action(True,csv_dict, 'test')
 
 def test_valid_update_action():
     """Test valid condition for update action"""
     csv_dict = {}
     csv_dict["id"] = csv_id
     csv_dict["action"] = "UPDATE"
-    assert common.valid_action(True,csv_dict)
+    assert common.valid_action(True,csv_dict, 'test')
 
 def test_invalid_update_action():
     """Test invalid condition for update action"""
     csv_dict = {}
     csv_dict["id"] = csv_id
     csv_dict["action"] = "UPDATE"
-    assert not common.valid_action(False,csv_dict)
+    assert not common.valid_action(False,csv_dict, 'test')
 
 def test_valid_delete_action():
     """Test valid condition for delete action"""
     csv_dict = {}
     csv_dict["id"] = csv_id
     csv_dict["action"] = "DELETE"
-    assert common.valid_action(True,csv_dict)
+    assert common.valid_action(True,csv_dict, 'test')
 
 def test_invalid_delete_action():
     """Test invalid condition for delete action"""
     csv_dict = {}
     csv_dict["id"] = csv_id
     csv_dict["action"] = "DELETE"
-    assert not common.valid_action(False,csv_dict)
+    assert not common.valid_action(False,csv_dict, 'test')
 
 def test_invalid_action():
     """Test validation of unrecognized action"""
     csv_dict = {}
     csv_dict["id"] = csv_id
     csv_dict["action"] = "NOSUCH"
-    assert not common.valid_action(True,csv_dict)
+    assert not common.valid_action(True,csv_dict, 'test')
 
 def test_invalid_action_lower_case():
     """Test validation of lower case action"""
     csv_dict = {}
     csv_dict["id"] = csv_id
     csv_dict["action"] = "delete"
-    assert not common.valid_action(True,csv_dict)
+    assert not common.valid_action(True,csv_dict, 'test')
 
 @patch("psycopg2.connect")
 @patch(f"{file_path}.utilities.s3.S3")
@@ -111,22 +111,22 @@ def test_retrieve_file_from_bucket(mock_s3_object):
 def test_check_for_not_null_values():
     """Checks key values not null"""
     csv_line = [2001,"Not null Id","UPDATE"]
-    assert common.check_csv_values(csv_line)
+    assert common.check_csv_values(csv_line,'env')
 
 def test_check_for_null_id():
     """Checks if id is null/empty string"""
     csv_line = ["","Null Id","UPDATE"]
-    assert not common.check_csv_values(csv_line)
+    assert not common.check_csv_values(csv_line,'env')
 
 def test_check_for_null_name():
     """Checks is name/description is null/empty string"""
     csv_line = [2001,"","UPDATE"]
-    assert not common.check_csv_values(csv_line)
+    assert not common.check_csv_values(csv_line,'env')
 
 def test_check_for_alpha_id():
     """Checks is name/description is null/empty string"""
     csv_line = ["abc","","UPDATE"]
-    assert not common.check_csv_values(csv_line)
+    assert not common.check_csv_values(csv_line,'env')
 
 def test_uninitialized_summary_count():
     """Test summary counts uninitialized correctly"""
@@ -134,7 +134,7 @@ def test_uninitialized_summary_count():
     assert(len(summary_count) == 0)
     values = "UPDATE"
     with pytest.raises(KeyError):
-        common.increment_summary_count(summary_count,values)
+        common.increment_summary_count(summary_count,values, 'test')
 
 def test_initialise_summary_count():
     """Test summary counts initialized correctly"""
@@ -155,7 +155,7 @@ def test_increment_summary_count_create():
     assert summary_count[common.blank_lines] == 0
     assert summary_count[common.error_lines] == 0
     values = "CREATE"
-    common.increment_summary_count(summary_count,values)
+    common.increment_summary_count(summary_count,values, 'test')
     assert summary_count[common.create_action] == 1
     assert summary_count[common.update_action] == 0
     assert summary_count[common.delete_action] == 0
@@ -171,7 +171,7 @@ def test_increment_summary_count_update():
     assert summary_count[common.blank_lines] == 0
     assert summary_count[common.error_lines] == 0
     values = "UPDATE"
-    common.increment_summary_count(summary_count,values)
+    common.increment_summary_count(summary_count,values, 'test')
     assert summary_count[common.create_action] == 0
     assert summary_count[common.update_action] == 1
     assert summary_count[common.delete_action] == 0
@@ -187,7 +187,7 @@ def test_increment_summary_count_delete():
     assert summary_count[common.blank_lines] == 0
     assert summary_count[common.error_lines] == 0
     values = "DELETE"
-    common.increment_summary_count(summary_count, values)
+    common.increment_summary_count(summary_count, values, 'test')
     assert summary_count[common.create_action] == 0
     assert summary_count[common.update_action] == 0
     assert summary_count[common.delete_action] == 1
@@ -203,7 +203,7 @@ def test_increment_summary_count_blank():
     assert summary_count[common.blank_lines] == 0
     assert summary_count[common.error_lines] == 0
     values = "BLANK"
-    common.increment_summary_count(summary_count, values)
+    common.increment_summary_count(summary_count, values, 'test')
     assert summary_count[common.create_action] == 0
     assert summary_count[common.update_action] == 0
     assert summary_count[common.delete_action] == 0
@@ -219,7 +219,7 @@ def test_increment_summary_count_error():
     assert summary_count[common.blank_lines] == 0
     assert summary_count[common.error_lines] == 0
     values = "ERROR"
-    common.increment_summary_count(summary_count, values)
+    common.increment_summary_count(summary_count, values, 'test')
     assert summary_count[common.create_action] == 0
     assert summary_count[common.update_action] == 0
     assert summary_count[common.delete_action] == 0
@@ -235,7 +235,7 @@ def test_increment_summary_count_nosuch():
     assert summary_count[common.blank_lines] == 0
     assert summary_count[common.error_lines] == 0
     values = "NOSUCH"
-    common.increment_summary_count(summary_count, values)
+    common.increment_summary_count(summary_count, values, 'test')
     assert summary_count[common.create_action] == 0
     assert summary_count[common.update_action] == 0
     assert summary_count[common.delete_action] == 0

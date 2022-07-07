@@ -34,7 +34,7 @@ def process_event(event, start):
         env = filename.split("/")[0]
         task = filename.split("/")[1].split("_")[1].split(".")[0]
         if not filename.endswith(".csv"):
-            log_for_audit("Incorrect file extension, found: {}, expected: '.csv'".format(filename.split(".")[1]))
+            log_for_audit(env, "Incorrect file extension, found: {}, expected: '.csv'".format(filename.split(".")[1]))
             raise IOError("Incorrect file extension, found: {}, expected: '.csv'".format(filename.split(".")[1]))
     except Exception as e:
         print("Error Processing Event: {}".format(e))
