@@ -52,7 +52,7 @@ def execute_db_query(db_connection, query, data, line, values, summary_count_dic
             env,
             "action: Process row | operation: {0} | id: {1} | description: {2} | line number: {3}".format(
                 values["action"], values["id"], values["name"], line
-            )
+            ),
         )
     except Exception as e:
         logger.log_for_error(env, "Line {} in transaction failed. Rolling back".format(line))
