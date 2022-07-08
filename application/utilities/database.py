@@ -53,7 +53,7 @@ def execute_db_query(db_connection, query, data, line, values, summary_count_dic
             log = log + x + ":" + str(y) + "|"
         logger.log_for_audit(
             env,
-            "action:Process row | {} | line number:{}".format(log, line),
+            "action:Process row | {} | line number:{}".format(log.rstrip(log[-1]), line),
         ),
     except Exception as e:
         logger.log_for_error(env, "Line {} in transaction failed. Rolling back".format(line))
