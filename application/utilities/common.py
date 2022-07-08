@@ -27,13 +27,13 @@ def valid_action(record_exists, row_data, env):
     if not record_exists and row_data["action"] in ("CREATE"):
         valid_action = True
     if not valid_action:
-        log_for_error(env, "Invalid action {} for the record with ID {}".format(row_data["action"], row_data["id"]))
+        log_for_error(env, "validation:Invalid action {} for the record with ID {}".format(row_data["action"], row_data["id"]))
     return valid_action
 
 
 def cleanup(db_connection, bucket, filename, event, start, summary_count_dict):
     # Close DB connection
-    log_for_audit(event["env"], "action: close DB connection")
+    log_for_audit(event["env"], "action:close DB connection")
     db_connection.close()
     # Archive file
     s3_class = utilities.s3.S3()
@@ -116,7 +116,7 @@ def process_file(csv_file, event, start, expected_col_count, summary_count_dict)
             increment_summary_count(summary_count_dict, "ERROR", event["env"])
             log_for_audit(
                 event["env"],
-                "action:Incorrect line format | line: {0} | expected:{1} | actual:{2}".format(
+                "action:validation | Incorrect line format | line:{0} | expected:{1} | actual:{2}".format(
                     count, expected_col_count, len(line)
                 ),
             )
@@ -130,7 +130,7 @@ def report_summary_counts(summary_count_dict, env):
 
 
 def slack_summary_counts(summary_count_dict):
-    report = "updated: {0}, inserted: {1}, deleted: {2}, blank: {3}, errored: {4}".format(
+    report = "updated:{0}, inserted:{1}, deleted:{2}, blank:{3}, errored:{4}".format(
         summary_count_dict[update_action],
         summary_count_dict[create_action],
         summary_count_dict[delete_action],
