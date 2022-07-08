@@ -11,7 +11,7 @@ profile = os.environ.get("PROFILE")
 # TODO move inside class later
 def connect_to_database(env, event, start):
     db = DB()
-    logger.log_for_audit(env, "Setting DB connection details")
+    logger.log_for_audit(env, "action:establish database connection")
     if not db.db_set_connection_details(env, event, start):
         logger.log_for_error(env, "Error DB Parameter(s) not found in secrets store.")
         message.send_failure_slack_message(event, start)
@@ -48,12 +48,13 @@ def execute_db_query(db_connection, query, data, line, values, summary_count_dic
         cursor.execute(query, data)
         db_connection.commit()
         common.increment_summary_count(summary_count_dict, values["action"], env)
+        log = ""
+        for x, y in values.items():
+            log = log + x + ":" + str(y) + " | "
         logger.log_for_audit(
             env,
-            "action: Process row | operation: {0} | id: {1} | description: {2} | line number: {3}".format(
-                values["action"], values["id"], values["name"], line
-            ),
-        )
+            "action:Process row | {} | line number:{}".format(log.rstrip(log[-1]), line),
+        ),
     except Exception as e:
         logger.log_for_error(env, "Line {} in transaction failed. Rolling back".format(line))
         logger.log_for_error(env, "Error: {}".format(e))
@@ -85,19 +86,16 @@ class DB:
         if formatted_secrets is not None:
             if db_host_key in formatted_secrets:
                 self.db_host = formatted_secrets[db_host_key]
-                logger.log_for_diagnostics(env, "Host: {}".format(self.db_host))
             else:
                 connection_details_set = False
                 logger.log_for_diagnostics(env, "No DB_HOST secret var set")
             if db_user_key in formatted_secrets:
                 self.db_user = formatted_secrets[db_user_key]
-                logger.log_for_diagnostics(env, "User: {}".format(self.db_user))
             else:
                 connection_details_set = False
                 logger.log_for_diagnostics(env, "No DB_USER secret var set")
             if db_password_key in formatted_secrets:
                 self.db_password = formatted_secrets[db_password_key]
-                logger.log_for_diagnostics(env, "DB_PASSWORD secret set")
             else:
                 connection_details_set = False
                 logger.log_for_diagnostics(env, "No DB_PASSWORD secret set")
@@ -105,7 +103,9 @@ class DB:
                 self.db_name = "pathwaysdos_{}".format(env)
             else:
                 self.db_name = "pathwaysdos"
-            logger.log_for_diagnostics(env, "DB Name: {}".format(self.db_name))
+            logger.log_for_diagnostics(
+                env, "DB name={} | password:secret | user:{} | host={}".format(self.db_name, self.db_user, self.db_host)
+            )
         else:
             connection_details_set = False
             logger.log_for_diagnostics(env, "Secrets not set")

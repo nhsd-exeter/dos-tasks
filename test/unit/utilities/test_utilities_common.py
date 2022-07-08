@@ -432,4 +432,4 @@ def test_slack_summary_count():
     summary_count = {}
     summary_count={"BLANK": 3, "CREATE": 2,"DELETE": 8, "ERROR": 1,"UPDATE": 4}
     report=common.slack_summary_counts(summary_count)
-    assert report ==  "updated: 4, inserted: 2, deleted: 8, blank: 3, errored: 1"
+    assert report ==  "updated:4, inserted:2, deleted:8, blank:3, errored:1"

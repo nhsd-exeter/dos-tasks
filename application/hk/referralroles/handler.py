@@ -34,7 +34,7 @@ def generate_db_query(row_values, env):
     elif row_values["action"] in ("DELETE", "REMOVE"):
         return delete_query(row_values)
     else:
-        logger.log_for_error(env, "Action {} not in approved list of actions".format(row_values["action"]))
+        logger.log_for_error(env, "action:validation | {} not in approved list of actions".format(row_values["action"]))
         raise psycopg2.DatabaseError("Database Action {} is invalid".format(row_values["action"]))
 
 

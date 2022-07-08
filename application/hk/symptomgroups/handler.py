@@ -42,7 +42,7 @@ def process_extracted_data(db_connection, row_data, summary_count_dict, event):
         except Exception as e:
             common.increment_summary_count(summary_count_dict, "ERROR", event["env"])
             logger.log_for_error(
-                "Processing {0} data failed with |{1}|{2}|{3}| => {4}".format(
+                "Processing {0} data failed with | {1} | {2} | {3} | => {4}".format(
                     task_description, row_values["id"], row_values["name"], row_values["zcode"], str(e)
                 ),
             )
@@ -63,7 +63,7 @@ def extract_query_data_from_csv(lines, env):
             data_dict["zcode"] = row_data["name"].startswith("z2.0 - ")
             data_dict["action"] = row_data["action"].upper()
         except Exception as ex:
-            logger.log_for_audit(env, "CSV data invalid " + ex)
+            logger.log_for_audit(env, "action:validation | CSV data invalid | " + ex)
         query_data[str(row_number)] = data_dict
     return query_data
 
@@ -77,7 +77,7 @@ def generate_db_query(row_values, env):
     elif row_values["action"] in ("DELETE"):
         return delete_query(row_values)
     else:
-        logger.log_for_error(env, "Action {} not in approved list of actions".format(row_values["action"]))
+        logger.log_for_error(env, "action:validation | {} not in approved list of actions".format(row_values["action"]))
         raise psycopg2.DatabaseError("Database Action {} is invalid".format(row_values["action"]))
 
 
