@@ -50,7 +50,7 @@ def execute_db_query(db_connection, query, data, line, values, summary_count_dic
         common.increment_summary_count(summary_count_dict, values["action"], env)
         log = ""
         for x, y in values.items():
-            log = log + "|" + x + ":" + str(y)
+            log = log + x + ":" + str(y) + "|"
         logger.log_for_audit(
             env,
             "action:Process row | {} | line number:{}".format(log, line),
