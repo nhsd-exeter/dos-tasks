@@ -27,7 +27,9 @@ def valid_action(record_exists, row_data, env):
     if not record_exists and row_data["action"] in ("CREATE"):
         valid_action = True
     if not valid_action:
-        log_for_error(env, "validation:Invalid action {} for the record with ID {}".format(row_data["action"], row_data["id"]))
+        log_for_error(
+            env, "validation:Invalid action {} for the record with ID {}".format(row_data["action"], row_data["id"])
+        )
     return valid_action
 
 

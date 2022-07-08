@@ -8,6 +8,7 @@ data_column_count = 4
 
 task_description = "Symptom Groups"
 
+
 def request(event, context):
     start = datetime.utcnow()
     message.send_start_message(event, start)
