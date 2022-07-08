@@ -86,19 +86,16 @@ class DB:
         if formatted_secrets is not None:
             if db_host_key in formatted_secrets:
                 self.db_host = formatted_secrets[db_host_key]
-                # logger.log_for_diagnostics(env, "Host: {}".format(self.db_host))
             else:
                 connection_details_set = False
                 logger.log_for_diagnostics(env, "No DB_HOST secret var set")
             if db_user_key in formatted_secrets:
                 self.db_user = formatted_secrets[db_user_key]
-                # logger.log_for_diagnostics(env, "User: {}".format(self.db_user))
             else:
                 connection_details_set = False
                 logger.log_for_diagnostics(env, "No DB_USER secret var set")
             if db_password_key in formatted_secrets:
                 self.db_password = formatted_secrets[db_password_key]
-                # logger.log_for_diagnostics(env, "DB_PASSWORD secret set")
             else:
                 connection_details_set = False
                 logger.log_for_diagnostics(env, "No DB_PASSWORD secret set")
