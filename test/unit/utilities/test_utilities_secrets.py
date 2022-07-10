@@ -30,9 +30,8 @@ def test_get_string_secrets(aws_credentials):
     assert response == secret
 
 
-@patch(f"{file_path}.message.send_failure_slack_message")
 @mock_secretsmanager
-def test_get_secrets_returns_client_error(mock_send_failure_slack_message, aws_credentials):
+def test_get_secrets_returns_client_error(aws_credentials):
     from ..secrets import SECRETS
     secretsmanager_client = boto3.client("secretsmanager")
     secret = {"username": "secret_username", "password": "secret_password"}
@@ -40,4 +39,3 @@ def test_get_secrets_returns_client_error(mock_send_failure_slack_message, aws_c
     with pytest.raises(ClientError) as assertion:
         response = SECRETS().get_secret_value(secret_store, mock_event, start)
     assert str(assertion.value) == "An error occurred (ResourceNotFoundException) when calling the GetSecretValue operation: Secrets Manager can't find the specified secret."
-    mock_send_failure_slack_message.assert_called_once()

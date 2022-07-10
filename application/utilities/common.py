@@ -53,6 +53,25 @@ def cleanup(db_connection, bucket, filename, event, start, summary_count_dict):
     return "Cleanup Successful"
 
 
+# TODO move to S3
+def archive_file(bucket, filename, event, start):
+    # Close DB connection
+    # log_for_audit(event["env"], "action:close DB connection")
+    # db_connection.close()
+    # Archive file
+    s3_class = utilities.s3.S3()
+    s3_class.copy_object(bucket, filename, event, start)
+    s3_class.delete_object(bucket, filename, event, start)
+    log_for_audit(
+        event["env"],
+        "action:archive file:{} | bucket:{}/archive/{}".format(
+            filename, filename.split("/")[0], filename.split("/")[1]
+        ),
+    )
+    # log_for_audit(event["env"], "action:task complete")
+    return "File Archive Successful"
+
+
 def retrieve_file_from_bucket(bucket, filename, event, start):
     log_for_audit(event["env"], "action:retrieve file | bucket:{} | file:{}".format(bucket, filename))
     s3_bucket = utilities.s3.S3()

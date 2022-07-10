@@ -8,6 +8,12 @@ secret_store = os.environ.get("SECRET_STORE")
 profile = os.environ.get("PROFILE")
 
 
+def close_connection(event, db_connection):
+    # Close DB connection
+    logger.log_for_audit(event["env"], "action:close DB connection")
+    db_connection.close()
+
+
 # TODO move inside class later
 def connect_to_database(env, event, start):
     db = DB()

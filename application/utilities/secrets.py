@@ -1,7 +1,7 @@
 import boto3
 import base64
 from botocore.exceptions import ClientError
-from utilities import message, logger
+from utilities import logger
 
 
 class SECRETS:
@@ -14,11 +14,9 @@ class SECRETS:
             response = self.secrets_client.get_secret_value(SecretId=secret_store_name)
         except ClientError as e:
             logger.log_for_error(event["env"], "Error retrieving secrets: {}".format(e))
-            message.send_failure_slack_message(event, start)
             raise e
         except Exception as e:
             logger.log_for_error(event["env"], "Error retrieving secrets: {}".format(e))
-            message.send_failure_slack_message(event, start)
             raise e
         else:
             if "SecretString" in response:
