@@ -25,9 +25,9 @@ def request(event, context):
             message.send_failure_slack_message(event, start, summary_count_dict)
         else:
             process_extracted_data(db_connection, csv_data, summary_count_dict, event)
-            common.report_summary_counts(summary_count_dict, env)
-            logger.log_for_audit(event["env"], "action:task complete")
             message.send_success_slack_message(event, start, summary_count_dict)
+        common.report_summary_counts(summary_count_dict, env)
+        logger.log_for_audit(event["env"], "action:task complete")
     except Exception as e:
         logger.log_for_error(env, "Problem {}".format(e))
         message.send_failure_slack_message(event, start)

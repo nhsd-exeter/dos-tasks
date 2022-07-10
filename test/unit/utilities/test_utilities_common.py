@@ -291,8 +291,7 @@ def test_process_file_success_with_incorrect_line_format():
                     "3": {"id": "00003", "name": "Mock Delete SD", "action": "DELETE"}}
 
 
-@patch(f"{file_path}.utilities.message.send_failure_slack_message")
-def test_process_file_raises_error_with_no_valid_length_lines(mock_send_failure_slack_message):
+def test_process_file_raises_error_with_no_valid_length_lines():
     summary_count_dict = {}
     summary_count_dict["CREATE"] = 0
     summary_count_dict["UPDATE"] = 0
@@ -304,7 +303,6 @@ def test_process_file_raises_error_with_no_valid_length_lines(mock_send_failure_
 00003,"Mock Delete SD","UPDATE","EXTRA"""
     lines = common.process_file(mock_csv_file, mock_event, start, 3 , summary_count_dict)
     assert lines == {}
-    mock_send_failure_slack_message.assert_called_once()
 
 
 # Possible duplicated test cases
