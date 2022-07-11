@@ -52,7 +52,8 @@ def process_extracted_data(db_connection, row_data, summary_count_dict, event):
                 common.increment_summary_count(summary_count_dict, "ERROR", event["env"])
         except Exception as e:
             common.increment_summary_count(summary_count_dict, "ERROR", event["env"])
-            logger.log_for_error(event["env"],
+            logger.log_for_error(
+                event["env"],
                 "Processing {0} data failed with | {1} | {2} | {3} | => {4}".format(
                     task_description, row_values["id"], row_values["name"], row_values["zcode"], str(e)
                 ),

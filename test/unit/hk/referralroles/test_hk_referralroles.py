@@ -207,7 +207,8 @@ def test_generate_db_query_raises_error(mock_delete_query, mock_update_query, mo
 
 
 @patch("psycopg2.connect")
-def test_process_extracted_data_error_check_exists_fails(mock_db_connect):
+@patch(f"{file_path}.common.increment_summary_count")
+def test_process_extracted_data_error_check_exists_fails(mock_increment_count,mock_db_connect):
     """Test error handling when extracting data and record exist check fails"""
     row_data = {}
     csv_dict={csv_rr_id,csv_rr_desc,"DELETE"}
@@ -216,6 +217,7 @@ def test_process_extracted_data_error_check_exists_fails(mock_db_connect):
     summary_count = {}
     with pytest.raises(Exception):
         handler.process_extracted_data(mock_db_connect, row_data, summary_count)
+    mock_increment_count.called_once()
 
 @patch("psycopg2.connect")
 @patch(f"{file_path}.database.does_record_exist", return_value=False)
@@ -288,3 +290,14 @@ def test_process_extracted_data_multiple_records(mock_exist,mock_valid_action,mo
     assert mock_exist.call_count == 2
     assert mock_generate.call_count == 2
     assert mock_execute.call_count == 2
+
+
+@patch(f"{file_path}.database.connect_to_database", return_value="db_connection")
+@patch(f"{file_path}.message.send_failure_slack_message", return_value = None)
+@patch(f"{file_path}.message.send_start_message", return_value = None)
+@patch(f"{file_path}.common.retrieve_file_from_bucket", return_value = None)
+def test_handler_exception(mock_db,mock_failure_message,mock_message_start,mock_s3):
+    """Test clean up function handling exceptions from downstream functions"""
+    
+    with pytest.raises(Exception):
+        handler.request(event=mock_event, context=None)
