@@ -9,7 +9,7 @@ profile = os.environ.get("PROFILE")
 
 
 def close_connection(event, db_connection):
-    # Close DB connection
+    # Close database connection
     if db_connection is not None:
         logger.log_for_audit(event["env"], "action:close DB connection")
         db_connection.close()
