@@ -17,7 +17,6 @@ def close_connection(event, db_connection):
         logger.log_for_error(event["env"], "action:no DB connection to close")
 
 
-
 # TODO move inside class later
 def connect_to_database(env, event, start):
     db = DB()
