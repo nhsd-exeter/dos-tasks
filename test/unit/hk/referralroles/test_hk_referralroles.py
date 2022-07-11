@@ -298,6 +298,5 @@ def test_process_extracted_data_multiple_records(mock_exist,mock_valid_action,mo
 @patch(f"{file_path}.common.retrieve_file_from_bucket", return_value = None)
 def test_handler_exception(mock_db,mock_failure_message,mock_message_start,mock_s3):
     """Test clean up function handling exceptions from downstream functions"""
-    
     with pytest.raises(Exception):
         handler.request(event=mock_event, context=None)

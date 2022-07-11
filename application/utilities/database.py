@@ -10,8 +10,12 @@ profile = os.environ.get("PROFILE")
 
 def close_connection(event, db_connection):
     # Close DB connection
-    logger.log_for_audit(event["env"], "action:close DB connection")
-    db_connection.close()
+    if db_connection is not None:
+        logger.log_for_audit(event["env"], "action:close DB connection")
+        db_connection.close()
+    else:
+        logger.log_for_error(event["env"], "action:no DB connection to close")
+
 
 
 # TODO move inside class later

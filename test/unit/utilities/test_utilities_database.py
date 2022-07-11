@@ -229,6 +229,16 @@ def test_close_database_connection(mock_db_object,mock_db_connect):
 
 
 # TODO move inside class later
+@patch(f"{file_path}.logger.log_for_error")
+@patch(f"{file_path}.DB")
+@patch("psycopg2.connect")
+def test_close_null_database_connection(mock_db_object,mock_db_connect,mock_logger):
+    mock_db_connect = None
+    database.close_connection(mock_event, mock_db_connect)
+    mock_logger.assert_called_once()
+
+
+# TODO move inside class later
 @patch(f"{file_path}.common.increment_summary_count")
 @patch("psycopg2.connect")
 def test_execute_db_query_success(mock_db_connect,mock_summary):
