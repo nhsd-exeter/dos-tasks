@@ -103,8 +103,6 @@ mock_close_connection,
 mock_send_success_slack_message,
 mock_send_failure_slack_message,
 mock_archive_file):
-
-    # mock_db_connection.side_effect = ValueError
     result = handler.request(mock_event, mock_context)
     assert result == "Referral roles execution completed"
     assert mock_send_start_message.call_count == 1
