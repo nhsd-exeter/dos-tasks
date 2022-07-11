@@ -16,6 +16,7 @@ def request(event, context):
     env = event["env"]
     filename = event["filename"]
     bucket = event["bucket"]
+    db_connection = None
     try:
         summary_count_dict = common.initialise_summary_count()
         db_connection = database.connect_to_database(env, event, start)
