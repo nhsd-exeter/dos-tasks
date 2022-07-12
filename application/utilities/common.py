@@ -32,6 +32,7 @@ def valid_action(record_exists, row_data, env):
         )
     return valid_action
 
+
 # TODO move to S3
 def archive_file(bucket, filename, event, start):
     # Archive file
