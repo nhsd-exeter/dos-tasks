@@ -23,7 +23,6 @@ def connect_to_database(env, event, start):
     logger.log_for_audit(env, "action:establish database connection")
     if not db.db_set_connection_details(env, event, start):
         logger.log_for_error(env, "Error DB Parameter(s) not found in secrets store.")
-        message.send_failure_slack_message(event, start)
         raise ValueError("DB Parameter(s) not found in secrets store")
     return db.db_connect(event, start)
 
@@ -127,5 +126,4 @@ class DB:
             )
         except Exception:
             logger.log_for_error(event["env"], "Connection parameters not set correctly")
-            message.send_failure_slack_message(event, start)
             raise psycopg2.InterfaceError()
