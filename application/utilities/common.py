@@ -32,32 +32,8 @@ def valid_action(record_exists, row_data, env):
         )
     return valid_action
 
-
-def cleanup(db_connection, bucket, filename, event, start, summary_count_dict):
-    # Close DB connection
-    log_for_audit(event["env"], "action:close DB connection")
-    db_connection.close()
-    # Archive file
-    s3_class = utilities.s3.S3()
-    s3_class.copy_object(bucket, filename, event, start)
-    s3_class.delete_object(bucket, filename, event, start)
-    log_for_audit(
-        event["env"],
-        "action:archive file:{} | bucket:{}/archive/{}".format(
-            filename, filename.split("/")[0], filename.split("/")[1]
-        ),
-    )
-    # Send Slack Notification
-    log_for_audit(event["env"], "action:task complete")
-    utilities.message.send_success_slack_message(event, start, summary_count_dict)
-    return "Cleanup Successful"
-
-
 # TODO move to S3
 def archive_file(bucket, filename, event, start):
-    # Close DB connection
-    # log_for_audit(event["env"], "action:close DB connection")
-    # db_connection.close()
     # Archive file
     s3_class = utilities.s3.S3()
     s3_class.copy_object(bucket, filename, event, start)
@@ -68,7 +44,6 @@ def archive_file(bucket, filename, event, start):
             filename, filename.split("/")[0], filename.split("/")[1]
         ),
     )
-    # log_for_audit(event["env"], "action:task complete")
     return "File Archive Successful"
 
 
@@ -149,11 +124,14 @@ def report_summary_counts(summary_count_dict, env):
 
 
 def slack_summary_counts(summary_count_dict):
-    report = "updated:{0}, inserted:{1}, deleted:{2}, blank:{3}, errored:{4}".format(
-        summary_count_dict[update_action],
-        summary_count_dict[create_action],
-        summary_count_dict[delete_action],
-        summary_count_dict[blank_lines],
-        summary_count_dict[error_lines],
-    )
+    if summary_count_dict is not None:
+        report = "updated:{0}, inserted:{1}, deleted:{2}, blank:{3}, errored:{4}".format(
+            summary_count_dict[update_action],
+            summary_count_dict[create_action],
+            summary_count_dict[delete_action],
+            summary_count_dict[blank_lines],
+            summary_count_dict[error_lines],
+        )
+    else:
+        report = ""
     return report

@@ -80,23 +80,16 @@ def test_invalid_action_lower_case():
     csv_dict["action"] = "delete"
     assert not common.valid_action(True,csv_dict, 'test')
 
-@patch("psycopg2.connect")
+
 @patch(f"{file_path}.utilities.s3.S3")
-@patch(f"{file_path}.utilities.message.send_success_slack_message")
-def test_cleanup_success(mock_send_success_slack_message, mock_s3_object, mock_db_connect):
-    mock_db_connect.close.return_value = "Closed connection"
+@patch(f"{file_path}.utilities.logger")
+def test_archive_file_success(mock_logger,mock_s3_object):
     mock_s3_object().copy_object = Mock(return_value="Object copied")
     mock_s3_object().delete_object = Mock(return_value="Object deleted")
     mock_bucket = ""
     mock_filename = "local/DPTS-001_symptomdiscriminators.csv"
-    mock_summary_count = {"BLANK": 1, "CREATE": 2,"DELETE": 3, "ERROR":4,"UPDATE": 5}
-    result = common.cleanup(mock_db_connect, mock_bucket, mock_filename, mock_event, start, mock_summary_count)
-    assert result == "Cleanup Successful"
-    mock_db_connect.close.assert_called_once()
-    mock_s3_object().copy_object.assert_called_once_with(mock_bucket, mock_filename, mock_event, start)
-    mock_s3_object().delete_object.assert_called_once_with(mock_bucket, mock_filename, mock_event, start)
-    mock_send_success_slack_message.assert_called_once_with(mock_event, start, mock_summary_count)
-
+    result = common.archive_file(mock_bucket, mock_filename, mock_event, start)
+    assert result == "File Archive Successful"
 
 @patch(f"{file_path}.utilities.s3.S3")
 def test_retrieve_file_from_bucket(mock_s3_object):
@@ -426,8 +419,13 @@ def test_process_file_call_count_inc_empty_line():
 
 
 def test_slack_summary_count():
-    """Test slack report log output """
+    """Test slack report log output of summary count """
     summary_count = {}
     summary_count={"BLANK": 3, "CREATE": 2,"DELETE": 8, "ERROR": 1,"UPDATE": 4}
     report=common.slack_summary_counts(summary_count)
     assert report ==  "updated:4, inserted:2, deleted:8, blank:3, errored:1"
+
+def test_slack_summary_count():
+    """Test slack report log output of null summary count """
+    report=common.slack_summary_counts(None)
+    assert report ==  ""
