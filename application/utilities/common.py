@@ -76,7 +76,7 @@ def initialise_summary_count():
     summary_count_dict[create_action] = 0
     summary_count_dict[update_action] = 0
     summary_count_dict[delete_action] = 0
-    summary_count_dict[blank_lines] = 0
+    summary_count_dict[blank_lines] = -1
     summary_count_dict[error_lines] = 0
     return summary_count_dict
 
