@@ -28,8 +28,8 @@ def test_db_connect(mock_connect):
     mock_connect.assert_called_with(host="mock_host", dbname="mock_name", user="mock_user", password="mock_password")
 
 
-@patch(f"{file_path}.message.send_failure_slack_message")
-def test_db_connect_error(mock_send_failure_slack_message):
+@patch(f"{file_path}.logger.log_for_error")
+def test_db_connect_error(mock_logger):
     mock_event = {"filename": "mock_filename", "env": "mock_env", "bucket": "mock_bucket"}
     start = ""
     db = database.DB()
@@ -39,7 +39,7 @@ def test_db_connect_error(mock_send_failure_slack_message):
     db.db_password = "mock_password"
     with pytest.raises(psycopg2.InterfaceError) as assertion:
         _ = db.db_connect(mock_event, start)
-    mock_send_failure_slack_message.assert_called_once()
+    mock_logger.assert_called_once()
 
 
 @patch(f"{file_path}.secrets.SECRETS.get_secret_value", return_value="{\"DB_HOST\": \"mock_host\", \"DB_USER\": \"mock_user\", \"DB_USER_PASSWORD\": \"mock_password\"}")
@@ -197,15 +197,15 @@ def test_does_record_exist_exception(mock_db_connect):
 
 
 # TODO move inside class later
-@patch(f"{file_path}.message.send_failure_slack_message")
+@patch(f"{file_path}.logger.log_for_error")
 @patch(f"{file_path}.DB")
-def test_connect_to_database_returns_error(mock_db_object, mock_send_failure_slack_message):
+def test_connect_to_database_returns_error(mock_db_object, mock_logger):
     mock_db_object().db_set_connection_details = Mock(return_value=False)
     with pytest.raises(ValueError) as assertion:
         database.connect_to_database(mock_env, mock_event, start)
     assert str(assertion.value) == "DB Parameter(s) not found in secrets store"
     mock_db_object().db_set_connection_details.assert_called_once()
-    mock_send_failure_slack_message.assert_called_once()
+    mock_logger.assert_called_once()
 
 
 # TODO move inside class later
