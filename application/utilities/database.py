@@ -2,7 +2,7 @@ import os
 import json
 import psycopg2
 import psycopg2.extras
-from utilities import secrets, logger, message, common
+from utilities import secrets, logger, common
 
 secret_store = os.environ.get("SECRET_STORE")
 profile = os.environ.get("PROFILE")
