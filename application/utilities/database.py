@@ -124,6 +124,6 @@ class DB:
             return psycopg2.connect(
                 host=self.db_host, dbname=self.db_name, user=self.db_user, password=self.db_password
             )
-        except Exception:
+        except Exception as e:
             logger.log_for_error(event["env"], "Connection parameters not set correctly")
-            raise psycopg2.InterfaceError()
+            raise psycopg2.InterfaceError(e)

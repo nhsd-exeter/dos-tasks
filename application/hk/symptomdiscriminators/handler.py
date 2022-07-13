@@ -17,6 +17,7 @@ def request(event, context):
     filename = event["filename"]
     bucket = event["bucket"]
     db_connection = None
+    logger.log_for_audit(event["env"], "action:task started")
     try:
         summary_count_dict = common.initialise_summary_count()
         db_connection = database.connect_to_database(env, event, start)

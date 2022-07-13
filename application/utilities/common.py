@@ -130,7 +130,7 @@ def slack_summary_counts(summary_count_dict):
             summary_count_dict[update_action],
             summary_count_dict[create_action],
             summary_count_dict[delete_action],
-            summary_count_dict[blank_lines],
+            summary_count_dict[blank_lines] if summary_count_dict[blank_lines] > 0 else 0,
             summary_count_dict[error_lines],
         )
     else:
