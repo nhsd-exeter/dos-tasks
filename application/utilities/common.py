@@ -16,11 +16,11 @@ def check_csv_format(csv_row, expected_col_count, env, count):
         return True
     else:
         log_for_audit(
-                env,
-                "action:validation | Incorrect line format | line:{0} | expected:{1} | actual:{2}".format(
-                    count, expected_col_count, len(csv_row)
-                ),
-            )
+            env,
+            "action:validation | Incorrect line format | line:{0} | expected:{1} | actual:{2}".format(
+                count, expected_col_count, len(csv_row)
+            ),
+        )
         return False
 
 
@@ -112,7 +112,7 @@ def process_file(csv_file, event, start, expected_col_count, summary_count_dict)
         if len(line) == 0:
             increment_summary_count(summary_count_dict, "BLANK", event["env"])
             continue
-        if check_csv_format(line, expected_col_count, event["env"],count) and check_csv_values(line, event["env"]):
+        if check_csv_format(line, expected_col_count, event["env"], count) and check_csv_values(line, event["env"]):
             lines[str(count)] = {"id": line[0], "name": line[1], "action": line[2]}
         else:
             increment_summary_count(summary_count_dict, "ERROR", event["env"])
