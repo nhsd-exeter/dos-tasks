@@ -18,11 +18,11 @@ csv_action = "DELETE"
 
 def test_check_csv():
     csv_line = "col1,col2,col3"
-    assert common.check_csv_format(csv_line,3, 'env')
+    assert common.check_csv_format(csv_line,3, 'env',1)
 
 def test_check_csv():
     csv_line = "col1,col2,col3"
-    assert not common.check_csv_format(csv_line,4, 'env')
+    assert not common.check_csv_format(csv_line,4, 'env',1)
 
 def test_valid_create_action():
     """Test valid condition for create action"""
