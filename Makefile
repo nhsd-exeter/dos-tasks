@@ -39,7 +39,6 @@ test: # Test project
 	make stop
 
 push: # Push project artefacts to the registry - mandatory: TASK=[task]
-	eval "$$(make aws-assume-role-export-variables)"
 	if [ "$(TASK)" == "all" ]; then
 		for task in $$(echo $(TASKS) | tr "," "\n"); do
 			task_type=$$(make task-type NAME=$$task)
@@ -238,7 +237,6 @@ pipeline-send-notification: ## Send Slack notification with the pipeline status 
 	make slack-it
 
 propagate: # Propagate the image to production ecr - mandatory: BUILD_COMMIT_HASH=[image hash],GIT_TAG=[git tag],ARTEFACTS=[comma separated list]
-	eval "$$(make aws-assume-role-export-variables PROFILE=$(PROFILE))"
 	if [ "$(ARTEFACTS)" == "all" ]; then
 		for image in $$(echo $(TASKS) | tr "," "\n"); do
 			task_type=$$(make task-type NAME=$$task)
