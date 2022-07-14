@@ -8,10 +8,10 @@ include $(abspath $(PROJECT_DIR)/build/automation/init.mk)
 build: # Build project - mandatory: TASK=[task]
 	if [ "$(TASK)" == "all" ]; then
 		for task in $$(echo $(TASKS) | tr "," "\n"); do
-			make build-image NAME=$$task AWS_ECR=$(AWS_LAMBDA_ECR)
+			make build-image NAME=$$task
 		done
 	else
-		make build-image NAME=$(TASK) AWS_ECR=$(AWS_LAMBDA_ECR)
+		make build-image NAME=$(TASK)
 	fi
 
 build-image: # Builds images - mandatory: NAME=[name]
@@ -43,11 +43,11 @@ push: # Push project artefacts to the registry - mandatory: TASK=[task]
 	if [ "$(TASK)" == "all" ]; then
 		for task in $$(echo $(TASKS) | tr "," "\n"); do
 			task_type=$$(make task-type NAME=$$task)
-			make docker-push NAME=$$task_type-$$task AWS_ECR=$(AWS_LAMBDA_ECR)
+			make docker-push NAME=$$task_type-$$task
 		done
 	else
 		task_type=$$(make task-type NAME=$(TASK))
-		make docker-push NAME=$$task_type-$(TASK) AWS_ECR=$(AWS_LAMBDA_ECR)
+		make docker-push NAME=$$task_type-$(TASK)
 	fi
 
 provision: # Provision environment - mandatory: PROFILE=[name], TASK=[task]
@@ -242,11 +242,11 @@ propagate: # Propagate the image to production ecr - mandatory: BUILD_COMMIT_HAS
 	if [ "$(ARTEFACTS)" == "all" ]; then
 		for image in $$(echo $(TASKS) | tr "," "\n"); do
 			task_type=$$(make task-type NAME=$$task)
-			make docker-image-find-and-version-as COMMIT=$(BUILD_COMMIT_HASH) NAME=$$task_type-$$image TAG=$(GIT_TAG) AWS_ECR=$(AWS_LAMBDA_ECR)
+			make docker-image-find-and-version-as COMMIT=$(BUILD_COMMIT_HASH) NAME=$$task_type-$$image TAG=$(GIT_TAG)
 		done
 	else
 		task_type=$$(make task-type NAME=$$task)
-		make docker-image-find-and-version-as COMMIT=$(BUILD_COMMIT_HASH) NAME=$$task_type-$(ARTEFACTS) TAG=$(GIT_TAG) AWS_ECR=$(AWS_LAMBDA_ECR)
+		make docker-image-find-and-version-as COMMIT=$(BUILD_COMMIT_HASH) NAME=$$task_type-$(ARTEFACTS) TAG=$(GIT_TAG)
 	fi
 parse-profile-from-tag: # Return profile based off of git tag - Mandatory GIT_TAG=[git tag]
 	echo $(GIT_TAG) | cut -d "-" -f2
@@ -273,6 +273,7 @@ create-artefact-repositories: # Create ECR repositories to store the artefacts -
 	make docker-create-repository NAME=hk-filter
 	make docker-create-repository NAME=hk-referralroles
 	make docker-create-repository NAME=hk-symptomdiscriminators
+	make docker-create-repository NAME=hk-symptomgroups
 
 create-tester-repository: # Create ECR repositories to store the artefacts
 	make docker-create-repository NAME=tester
