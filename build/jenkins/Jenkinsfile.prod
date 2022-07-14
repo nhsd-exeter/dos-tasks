@@ -44,7 +44,7 @@ pipeline {
     }
   }
   post {
-    always { sh "make pipeline-send-notification PIPELINE_NAME='UEC DoS Tasks (Prod)' BUILD_STATUS=${currentBuild.currentResult}" }
+    always { sh "make pipeline-send-notification PIPELINE_NAME='UEC DoS Tasks (Production)' BUILD_STATUS=${currentBuild.currentResult}" }
     cleanup { sh "make clean" }
   }
 }
