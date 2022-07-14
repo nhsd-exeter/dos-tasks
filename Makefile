@@ -280,4 +280,5 @@ create-tester-repository: # Create ECR repositories to store the artefacts
 
 .SILENT: \
 	aws-lambda-get-versions-to-remove \
+	parse-profile-from-tag \
 	task-type
