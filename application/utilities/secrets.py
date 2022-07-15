@@ -8,7 +8,7 @@ class SECRETS:
     def __init__(self):
         self.secrets_client = boto3.client("secretsmanager")
 
-    def get_secret_value(self, secret_store_name, event, start):
+    def get_secret_value(self, secret_store_name, event):
         try:
             print(secret_store_name)
             response = self.secrets_client.get_secret_value(SecretId=secret_store_name)

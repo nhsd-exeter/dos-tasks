@@ -102,7 +102,7 @@ def increment_summary_count(summary_count_dict, action, env):
         )
 
 
-def process_file(csv_file, event, start, expected_col_count, summary_count_dict):
+def process_file(csv_file, event, expected_col_count, summary_count_dict):
     """returns dictionary of row data keyed on row number col1=id, col2=description, col3=action"""
     lines = {}
     count = 0

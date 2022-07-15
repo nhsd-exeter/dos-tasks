@@ -244,7 +244,7 @@ def test_process_file_success():
     mock_csv_file = """00001,"Mock Create SD","CREATE"
 00002,"Mock Update SD","UPDATE"
 00003,"Mock Delete SD","DELETE"""
-    lines = common.process_file(mock_csv_file, mock_event, start, 3 , summary_count_dict)
+    lines = common.process_file(mock_csv_file, mock_event, 3 , summary_count_dict)
     assert lines == {"1": {"id": "00001", "name": "Mock Create SD", "action": "CREATE"},
                     "2": {"id": "00002", "name": "Mock Update SD", "action": "UPDATE"},
                     "3": {"id": "00003", "name": "Mock Delete SD", "action": "DELETE"}}
@@ -263,7 +263,7 @@ def test_process_file_success_with_empty_line():
 00002,"Mock Update SD","UPDATE"
 00003,"Mock Delete SD","DELETE"
 """
-    lines = common.process_file(mock_csv_file, mock_event, start, 3, summary_count_dict)
+    lines = common.process_file(mock_csv_file, mock_event, 3, summary_count_dict)
     assert lines == {"2": {"id": "00001", "name": "Mock Create SD", "action": "CREATE"},
                     "4": {"id": "00002", "name": "Mock Update SD", "action": "UPDATE"},
                     "5": {"id": "00003", "name": "Mock Delete SD", "action": "DELETE"}}
@@ -279,7 +279,7 @@ def test_process_file_success_with_incorrect_line_format():
     mock_csv_file = """00001,"Mock Create SD","CREATE","Unexpected Data"
 00002,"Mock Update SD","UPDATE"
 00003,"Mock Delete SD","DELETE"""
-    lines = common.process_file(mock_csv_file, mock_event, start, 3 , summary_count_dict)
+    lines = common.process_file(mock_csv_file, mock_event, 3 , summary_count_dict)
     assert lines == {"2": {"id": "00002", "name": "Mock Update SD", "action": "UPDATE"},
                     "3": {"id": "00003", "name": "Mock Delete SD", "action": "DELETE"}}
 
@@ -294,7 +294,7 @@ def test_process_file_raises_error_with_no_valid_length_lines():
     mock_csv_file = """00001,"Mock Create SD","CREATE","Unexpected Data"
 
 00003,"Mock Delete SD","UPDATE","EXTRA"""
-    lines = common.process_file(mock_csv_file, mock_event, start, 3 , summary_count_dict)
+    lines = common.process_file(mock_csv_file, mock_event, 3 , summary_count_dict)
     assert lines == {}
 
 
@@ -308,7 +308,7 @@ def test_process_file_valid_length():
     summary_count_dict["ERROR"] = 0
     """Test one valid line of csv equals one row of extracted data"""
     csv_file = """2001,"Automated insert SymptomGroup","CREATE"\n"""
-    lines = common.process_file(csv_file, mock_event, start, 3 , summary_count_dict)
+    lines = common.process_file(csv_file, mock_event, 3 , summary_count_dict)
     assert len(lines) == 1
 
 
@@ -321,7 +321,7 @@ def test_process_file_valid_length_multiline():
     summary_count_dict["ERROR"] = 0
     """Test two valid lines of csv equals two rows of extracted data"""
     csv_file = """2001,"Automated insert SymptomGroup","CREATE"\n2001,"Automated update SymptomGroup","UPDATE"\n"""
-    lines = common.process_file(csv_file, mock_event, start, 3 , summary_count_dict)
+    lines = common.process_file(csv_file, mock_event, 3 , summary_count_dict)
     assert len(lines) == 2
 
 
@@ -334,7 +334,7 @@ def test_process_file_empty_second_line():
     summary_count_dict["ERROR"] = 0
     """Test data extraction ignores any empty line at end of file"""
     csv_file = """2001,"Automated insert SymptomGroup","CREATE"\n\n"""
-    lines = common.process_file(csv_file, mock_event, start, 3 , summary_count_dict)
+    lines = common.process_file(csv_file, mock_event, 3 , summary_count_dict)
     assert len(lines) == 1
 
 
@@ -347,7 +347,7 @@ def test_process_file_empty_first_line():
     summary_count_dict["ERROR"] = 0
     """Test data extraction ignores any empty line at start of file"""
     csv_file = """\n2001,"Automated insert SymptomGroup","CREATE"\n"""
-    lines = common.process_file(csv_file, mock_event, start, 3 , summary_count_dict)
+    lines = common.process_file(csv_file, mock_event, 3 , summary_count_dict)
     assert len(lines) == 1
 
 
@@ -360,7 +360,7 @@ def test_process_file_three_lines_empty_second_line():
     summary_count_dict["ERROR"] = 0
     """Test data extraction ignores any empty line in middle of file"""
     csv_file = """2001,"Automated insert SymptomGroup","CREATE"\n\n\n2001,"Automated update SymptomGroup","UPDATE"\n"""
-    lines = common.process_file(csv_file, mock_event, start, 3 , summary_count_dict)
+    lines = common.process_file(csv_file, mock_event, 3 , summary_count_dict)
     assert len(lines) == 2
 
 
@@ -373,7 +373,7 @@ def test_process_file_incomplete_second_line():
     summary_count_dict["ERROR"] = 0
     """Test data extraction ignores a line itf it is incomplete"""
     csv_file = """2001,"Automated insert SymptomGroup","CREATE"\n2002,\n"""
-    lines = common.process_file(csv_file, mock_event, start, 3 , summary_count_dict)
+    lines = common.process_file(csv_file, mock_event, 3 , summary_count_dict)
     assert len(lines)==1
     assert lines["1"]["id"] == "2001"
 
@@ -387,7 +387,7 @@ def test_process_file_incomplete_first_line():
     summary_count_dict["ERROR"] = 0
     """Test data extraction ingores first line if it is incomplete"""
     csv_file = """2002,\n2001,"Automated insert SymptomGroup","CREATE"\n"""
-    lines = common.process_file(csv_file, mock_event, start, 3 , summary_count_dict)
+    lines = common.process_file(csv_file, mock_event, 3 , summary_count_dict)
     assert len(lines)==1
     assert lines["2"]["id"] == "2001"
 
@@ -401,7 +401,7 @@ def test_process_file_call_count():
     summary_count_dict["ERROR"] = 0
     """Test data extraction calls code to extract data from csv one per non empty line"""
     csv_file = """2001,"Automated insert SymptomGroup","CREATE"\n2001,"Automated update SymptomGroup","UPDATE"\n"""
-    lines = common.process_file(csv_file, mock_event, start, 3 , summary_count_dict)
+    lines = common.process_file(csv_file, mock_event, 3 , summary_count_dict)
     assert len(lines) == 2
 
 
@@ -414,7 +414,7 @@ def test_process_file_call_count_inc_empty_line():
     summary_count_dict["ERROR"] = 0
     """Test data extraction calls code to extract data ignores empty line"""
     csv_file = """2001,"Automated insert SymptomGroup","CREATE"\n\n2001,"Automated update SymptomGroup","UPDATE"\n"""
-    lines = common.process_file(csv_file, mock_event, start, 3 , summary_count_dict)
+    lines = common.process_file(csv_file, mock_event, 3 , summary_count_dict)
     assert len(lines) == 2
 
 

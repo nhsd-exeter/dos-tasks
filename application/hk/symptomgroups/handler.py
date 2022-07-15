@@ -20,9 +20,9 @@ def request(event, context):
     logger.log_for_audit(event["env"], "action:task started")
     try:
         summary_count_dict = common.initialise_summary_count()
-        db_connection = database.connect_to_database(env, event, start)
+        db_connection = database.connect_to_database(env, event)
         csv_file = common.retrieve_file_from_bucket(bucket, filename, event, start)
-        csv_data = common.process_file(csv_file, event, start, 3, summary_count_dict)
+        csv_data = common.process_file(csv_file, event, 3, summary_count_dict)
         if csv_data == {}:
             message.send_failure_slack_message(event, start, summary_count_dict)
         else:

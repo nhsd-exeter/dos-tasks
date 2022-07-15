@@ -117,26 +117,6 @@ mock_archive_file):
     mock_send_failure_slack_message.assert_called_once()
 
 
-# @patch(f"{file_path}.database.connect_to_database", return_value="db_connection")
-# @patch(f"{file_path}.common.retrieve_file_from_bucket", return_value="csv_file")
-# @patch(f"{file_path}.common.process_file", return_value={"1": {"id": "00001", "name": "Mock Create SD", "action": "CREATE"}, "2": {"id": "00002", "name": "Mock Update SD", "action": "UPDATE"}, "3": {"id": "00003", "name": "Mock Delete SD", "action": "DELETE"}})
-# @patch(f"{file_path}.process_extracted_data")
-# @patch(f"{file_path}.common.report_summary_counts", return_value="Symptom discriminators updated: 1, inserted: 1, deleted: 1")
-# @patch(f"{file_path}.common.cleanup")
-# @patch(f"{file_path}.message.send_start_message")
-# def test_request_success(mock_send_start_message, mock_cleanup,  mock_report_summary_count , mock_process_extracted_data, mock_process_file, mock_retrieve_file_from_bucket, mock_db_connection):
-#     result = handler.request(mock_event, mock_context)
-#     assert result == "Symptom discriminators execution completed"
-#     mock_send_start_message.assert_called_once()
-#     mock_cleanup.assert_called_once()
-#     mock_process_extracted_data.assert_called_once()
-#     mock_report_summary_count.assert_called_once()
-#     mock_process_file.assert_called_once()
-#     mock_retrieve_file_from_bucket.assert_called_once()
-#     mock_db_connection.assert_called_once()
-
-
-
 def test_create_query():
     test_values = {
                 "id": 10,

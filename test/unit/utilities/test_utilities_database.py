@@ -23,7 +23,7 @@ def test_db_connect(mock_connect):
     db.db_name = "mock_name"
     db.db_user = "mock_user"
     db.db_password = "mock_password"
-    result = db.db_connect(mock_event, start)
+    result = db.db_connect(mock_event)
     assert result != None
     mock_connect.assert_called_with(host="mock_host", dbname="mock_name", user="mock_user", password="mock_password")
 
@@ -38,7 +38,7 @@ def test_db_connect_error(mock_logger):
     db.db_user = "mock_user"
     db.db_password = "mock_password"
     with pytest.raises(psycopg2.InterfaceError) as assertion:
-        _ = db.db_connect(mock_event, start)
+        _ = db.db_connect(mock_event)
     mock_logger.assert_called_once()
 
 
@@ -48,7 +48,7 @@ def test_db_set_connection_details_success(mock_get_secrets_value):
     start = ""
     mock_env = "mock_env"
     db = database.DB()
-    connection_details_set = db.db_set_connection_details(mock_env, mock_event, start)
+    connection_details_set = db.db_set_connection_details(mock_env, mock_event)
     assert connection_details_set == True
     assert db.db_host == "mock_host"
     assert db.db_name == "pathwaysdos_mock_env"
@@ -60,10 +60,9 @@ def test_db_set_connection_details_success(mock_get_secrets_value):
 @patch(f"{file_path}.secrets.SECRETS.get_secret_value", return_value="{\"DB_HOSTER\": \"mock_host\", \"DB_USER\": \"mock_user\", \"DB_USER_PASSWORD\": \"mock_password\"}")
 def test_db_set_connection_details_host_key_not_set(mock_get_secrets_value):
     mock_event = {"filename": "mock_filename", "env": "mock_env", "bucket": "mock_bucket"}
-    start = ""
     mock_env = "mock_env"
     db = database.DB()
-    connection_details_set = db.db_set_connection_details(mock_env, mock_event, start)
+    connection_details_set = db.db_set_connection_details(mock_env, mock_event)
     assert connection_details_set == False
     assert db.db_host == ""
     assert db.db_name == "pathwaysdos_mock_env"
@@ -75,10 +74,9 @@ def test_db_set_connection_details_host_key_not_set(mock_get_secrets_value):
 @patch(f"{file_path}.secrets.SECRETS.get_secret_value", return_value="{\"DB_HOST\": \"mock_host\", \"DB_USERNAME\": \"mock_user\", \"DB_USER_PASSWORD\": \"mock_password\"}")
 def test_db_set_connection_details_user_key_not_set(mock_get_secrets_value):
     mock_event = {"filename": "mock_filename", "env": "mock_env", "bucket": "mock_bucket"}
-    start = ""
     mock_env = "mock_env"
     db = database.DB()
-    connection_details_set = db.db_set_connection_details(mock_env, mock_event, start)
+    connection_details_set = db.db_set_connection_details(mock_env, mock_event)
     assert connection_details_set == False
     assert db.db_host == "mock_host"
     assert db.db_name == "pathwaysdos_mock_env"
@@ -90,10 +88,9 @@ def test_db_set_connection_details_user_key_not_set(mock_get_secrets_value):
 @patch(f"{file_path}.secrets.SECRETS.get_secret_value", return_value="{\"DB_HOST\": \"mock_host\", \"DB_USER\": \"mock_user\", \"DB_PASSWORD\": \"mock_password\"}")
 def test_db_set_connection_details_password_key_not_set(mock_get_secrets_value):
     mock_event = {"filename": "mock_filename", "env": "mock_env", "bucket": "mock_bucket"}
-    start = ""
     mock_env = "mock_env"
     db = database.DB()
-    connection_details_set = db.db_set_connection_details(mock_env, mock_event, start)
+    connection_details_set = db.db_set_connection_details(mock_env, mock_event)
     assert connection_details_set == False
     assert db.db_host == "mock_host"
     assert db.db_name == "pathwaysdos_mock_env"
@@ -105,10 +102,9 @@ def test_db_set_connection_details_password_key_not_set(mock_get_secrets_value):
 @patch(f"{file_path}.secrets.SECRETS.get_secret_value", return_value="null")
 def test_db_set_connection_details_secrets_not_set(mock_get_secrets_value):
     mock_event = {"filename": "mock_filename", "env": "mock_env", "bucket": "mock_bucket"}
-    start = ""
     mock_env = "mock_env"
     db = database.DB()
-    connection_details_set = db.db_set_connection_details(mock_env, mock_event, start)
+    connection_details_set = db.db_set_connection_details(mock_env, mock_event)
     assert connection_details_set == False
     assert db.db_host == ""
     assert db.db_name == ""
@@ -120,10 +116,9 @@ def test_db_set_connection_details_secrets_not_set(mock_get_secrets_value):
 @patch(f"{file_path}.secrets.SECRETS.get_secret_value", return_value="{\"DB_HOST\": \"mock_host\", \"DB_USER\": \"mock_user\", \"DB_USER_PASSWORD\": \"mock_password\", \"DB_PERFORMANCE_PASSWORD\": \"mock_performance_password\", \"DB_PERFORMANCE_HOST\": \"mock_performance_host\"}")
 def test_db_set_connection_details_name_set_correctly_with_performance_env(mock_get_secrets_value):
     mock_event = {"filename": "mock_filename", "env": "mock_env", "bucket": "mock_bucket"}
-    start = ""
     mock_env = "performance"
     db = database.DB()
-    connection_details_set = db.db_set_connection_details(mock_env, mock_event, start)
+    connection_details_set = db.db_set_connection_details(mock_env, mock_event)
     assert connection_details_set == True
     assert db.db_host == "mock_performance_host"
     assert db.db_name == "pathwaysdos"
@@ -135,10 +130,9 @@ def test_db_set_connection_details_name_set_correctly_with_performance_env(mock_
 @patch(f"{file_path}.secrets.SECRETS.get_secret_value", return_value="{\"DB_HOST\": \"mock_host\", \"DB_USER\": \"mock_user\", \"DB_USER_PASSWORD\": \"mock_password\", \"DB_REGRESSION_HOST\": \"mock_regression_host\"}")
 def test_db_set_connection_details_name_set_correctly_with_regression_env(mock_get_secrets_value):
     mock_event = {"filename": "mock_filename", "env": "mock_env", "bucket": "mock_bucket"}
-    start = ""
     mock_env = "regression"
     db = database.DB()
-    connection_details_set = db.db_set_connection_details(mock_env, mock_event, start)
+    connection_details_set = db.db_set_connection_details(mock_env, mock_event)
     assert connection_details_set == True
     assert db.db_host == "mock_regression_host"
     assert db.db_name == "pathwaysdos_regression"
@@ -150,10 +144,9 @@ def test_db_set_connection_details_name_set_correctly_with_regression_env(mock_g
 @patch(f"{file_path}.secrets.SECRETS.get_secret_value", return_value="{\"DB_HOSTER\": \"mock_host\", \"DB_USERNAME\": \"mock_user\", \"DB_PASSWORD\": \"mock_password\"}")
 def test_db_set_connection_details_all_keys_incorrect(mock_get_secrets_value):
     mock_event = {"filename": "mock_filename", "env": "mock_env", "bucket": "mock_bucket"}
-    start = ""
     mock_env = "mock_env"
     db = database.DB()
-    connection_details_set = db.db_set_connection_details(mock_env, mock_event, start)
+    connection_details_set = db.db_set_connection_details(mock_env, mock_event)
     assert connection_details_set == False
     assert db.db_host == ""
     assert db.db_name == "pathwaysdos_mock_env"
@@ -202,7 +195,7 @@ def test_does_record_exist_exception(mock_db_connect):
 def test_connect_to_database_returns_error(mock_db_object, mock_logger):
     mock_db_object().db_set_connection_details = Mock(return_value=False)
     with pytest.raises(ValueError) as assertion:
-        database.connect_to_database(mock_env, mock_event, start)
+        database.connect_to_database(mock_env, mock_event)
     assert str(assertion.value) == "DB Parameter(s) not found in secrets store"
     mock_db_object().db_set_connection_details.assert_called_once()
     mock_logger.assert_called_once()
@@ -213,7 +206,7 @@ def test_connect_to_database_returns_error(mock_db_object, mock_logger):
 def test_connect_to_database_success(mock_db_object):
     mock_db_object().db_set_connection_details = Mock(return_value=True)
     mock_db_object().db_connect = Mock(return_value="Connection Established")
-    result = database.connect_to_database(mock_env, mock_event, start)
+    result = database.connect_to_database(mock_env, mock_event)
     assert result == "Connection Established"
     mock_db_object().db_set_connection_details.assert_called_once()
     mock_db_object().db_connect.assert_called_once()
