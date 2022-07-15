@@ -238,6 +238,42 @@ clean: # Clean up project
 	make docker-network-remove
 
 # --------------------------------------
+# Integration test targets
+# uec-dos-tasks-nonprod-housekeeping-bucket
+# s3://uec-dos-tasks-nonprod-housekeeping-bucket/teamb/archive/1-single-create_referrralroles.csv
+check_bucket_for_file: ## returns true if filename exists in bucket  - mandatory [BUCKET] [ENV] [FILENAME]
+	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
+		$(AWSCLI) s3 ls \
+			s3://$(BUCKET) \
+			2>&1 | grep -q $(FILENAME) \
+	" > /dev/null 2>&1 && echo true || echo false
+
+poll_s3_for_file: ## retries look up for file in bucket [MAX_ATTEMPTS] mandatory [BUCKET] [FILENAME]
+	echo "Checking bucket $(BUCKET) for file $(FILENAME)"
+	for i in {1..$(MAX_ATTEMPTS)}
+	do
+		archived=$$(make check_bucket_for_file BUCKET=$(BUCKET) FILENAME=$(FILENAME))
+		echo $$archived
+		if [ $$archived == true ]; then
+			break
+		fi
+		echo Sleeping..
+		sleep 1
+	done
+
+run-integration-result-check: # PROFILE SQL_FILE - name of SQL file to run INSTANCE_PAIR AB or BC
+	echo Running $(TF_VAR_db_checks_lambda_function_name) for $(SQL_FILE) against $(INSTANCE_PAIR)
+	if [ "$(INSTANCE_PAIR)" == "AB" ] || \
+	[ "$(INSTANCE_PAIR)" == "BC" ] ; then
+		aws lambda invoke --function-name $(TF_VAR_db_checks_lambda_function_name) --log-type Tail --payload '{ "sql-file": "$(SQL_FILE)","database_name": "$(DATABASE_TO_MIGRATE)", "instance_pair": "$(INSTANCE_PAIR)" }' $(SQL_FILE)-$(INSTANCE_PAIR)-response.json | jq -r .LogResult - | base64 -d | tee $(SQL_FILE)-$(INSTANCE_PAIR)-response.log
+		echo "== Response output =="
+		cat $(SQL_FILE)-$(INSTANCE_PAIR)-response.json
+		echo
+	else
+		echo INSTANCE_PAIR parameter must be AB or BA not $(INSTANCE_PAIR)
+	fi
+# --------------------------------------
+
 
 build-tester: # Builds image used for testing - mandatory: PROFILE=[name]
 	make docker-image NAME=tester
@@ -492,4 +528,6 @@ create-tester-repository: # Create ECR repositories to store the artefacts
 	aws-lambda-get-versions-to-remove \
 	parse-profile-from-tag \
 	cron-task-check \
+	check_bucket_for_file \
+	poll_s3_for_file \
 	task-type
