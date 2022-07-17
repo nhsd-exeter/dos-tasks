@@ -188,8 +188,9 @@ def test_process_extracted_data_error_check_exists_fails(mock_increment_count,mo
     mock_increment_count.called_once()
 
 @patch("psycopg2.connect")
+@patch(f"{file_path}.logger.log_for_error")
 @patch(f"{file_path}.database.does_record_exist", return_value=True)
-def test_process_extracted_data_error_check_exists_passes(mock_exists,mock_db_connect):
+def test_process_extracted_data_error_check_exists_passes(mock_exists,mock_logger,mock_db_connect):
     """Test error handling when extracting data and record exist check passes"""
     row_data = {}
     csv_dict = {}
@@ -199,12 +200,32 @@ def test_process_extracted_data_error_check_exists_passes(mock_exists,mock_db_co
     csv_dict["action"] = "DELETE"
     row_data[0]=csv_dict
     mock_db_connect = ""
-    summary_count = {}
+    summary_count = {"BLANK": 0, "CREATE": 0,"DELETE": 0, "ERROR": 0,"UPDATE": 0}
     event = generate_event_payload()
     with pytest.raises(Exception):
         handler.process_extracted_data(mock_db_connect, row_data, summary_count, event)
+    assert mock_logger.call_count == 1
     assert mock_exists.call_count == 1
 
+@patch("psycopg2.connect")
+@patch(f"{file_path}.common.increment_summary_count")
+@patch(f"{file_path}.database.does_record_exist", return_value=True)
+@patch(f"{file_path}.common.valid_action", return_value=False)
+def test_process_extracted_data_valid_action_fails(mock_valid_action,mock_exists,mock_increment,mock_db_connect):
+    """Test error handling when extracting data and record exist check fails"""
+    row_data = {}
+    csv_dict = {}
+    csv_dict["id"] = csv_sg_id
+    csv_dict["name"] = csv_sg_desc
+    csv_dict["zcode"] = False
+    csv_dict["action"] = "INVALID"
+    row_data[0]=csv_dict
+    summary_count = {}
+    event = generate_event_payload()
+    handler.process_extracted_data(mock_db_connect, row_data, summary_count, event)
+    assert mock_exists.call_count == 1
+    assert mock_valid_action.call_count == 1
+    assert mock_increment.call_count == 1
 
 @patch(f"{file_path}.database.connect_to_database", return_value="db_connection")
 @patch(f"{file_path}.message.send_failure_slack_message", return_value = None)
@@ -216,30 +237,87 @@ def test_handler_exception(mock_db,mock_failure_message,mock_message_start,mock_
     with pytest.raises(Exception):
         handler.request(event=payload, context=None)
 
-@patch("psycopg2.connect")
-@patch(f"{file_path}.common.cleanup")
-@patch(f"{file_path}.database.execute_db_query")
-@patch(f"{file_path}.database.does_record_exist", return_value=True)
-@patch(f"{file_path}.common.retrieve_file_from_bucket", return_value="""2001,"New Symptom Group","UPDATE"\n""")
-@patch(f"{file_path}.database.connect_to_database", return_value="db_connection")
-@patch(f"{file_path}.message.send_start_message")
+
 @patch(f"{file_path}.common.initialise_summary_count")
-@patch(f"{file_path}.common.process_file", return_value={"1": {"id": "00001", "name": "Mock Create SG", "action": "CREATE"}})
-def test_handler_pass(mock_process_file,mock_inititalise_summary,mock_send_start_message,mock_db_details,mock_get_object,
-mock_does_record_exist,mock_execute_db_query,mock_cleanup,mock_db_connect):
+@patch(f"{file_path}.common.archive_file")
+@patch(f"{file_path}.message.send_failure_slack_message")
+@patch(f"{file_path}.message.send_success_slack_message")
+@patch(f"{file_path}.database.close_connection", return_value="")
+@patch(f"{file_path}.database.connect_to_database", return_value="db_connection")
+@patch(f"{file_path}.common.retrieve_file_from_bucket", return_value="csv_file")
+@patch(f"{file_path}.common.process_file", return_value={"1": {"id": "00001", "name": "Mock Create SD", "action": "CREATE"}, "2": {"id": "00002", "name": "Mock Update SD", "action": "UPDATE"}, "3": {"id": "00003", "name": "Mock Delete SD", "action": "DELETE"}})
+@patch(f"{file_path}.process_extracted_data")
+@patch(f"{file_path}.common.report_summary_counts", return_value="Referral roles updated: 1, inserted: 1, deleted: 1")
+@patch(f"{file_path}.message.send_start_message")
+def test_handler_pass(mock_send_start_message,
+mock_report_summary_count ,
+mock_process_extracted_data,
+mock_process_file,
+mock_retrieve_file_from_bucket,
+mock_db_connection,
+mock_close_connection,
+mock_send_success_slack_message,
+mock_send_failure_slack_message,
+mock_archive_file,
+mock_summary_count):
     """Test top level request calls downstream functions - success"""
     payload = generate_event_payload()
-    handler.request(event=payload, context=None)
+    result = handler.request(event=payload, context=None)
+    assert result == "Symptom Groups execution completed"
     mock_send_start_message.assert_called_once()
-    mock_get_object.assert_called_once()
-    mock_cleanup.assert_called_once()
-    mock_does_record_exist.assert_called_once()
-    mock_execute_db_query.assert_called_once
+    mock_process_extracted_data.assert_called_once()
+    mock_summary_count.assert_called_once()
+    mock_report_summary_count.assert_called_once()
+    mock_process_file.assert_called_once()
+    mock_retrieve_file_from_bucket.assert_called_once()
+    mock_db_connection.assert_called_once()
+    mock_close_connection.assert_called_once()
+    mock_archive_file.assert_called_once()
+    mock_send_success_slack_message.assert_called_once()
+    assert mock_send_failure_slack_message.call_count == 0
+
+
+@patch(f"{file_path}.common.initialise_summary_count")
+@patch(f"{file_path}.common.archive_file")
+@patch(f"{file_path}.message.send_failure_slack_message")
+@patch(f"{file_path}.message.send_success_slack_message")
+@patch(f"{file_path}.database.close_connection", return_value="")
+@patch(f"{file_path}.database.connect_to_database", return_value="db_connection")
+@patch(f"{file_path}.common.retrieve_file_from_bucket", return_value="csv_file")
+@patch(f"{file_path}.common.process_file", return_value={})
+@patch(f"{file_path}.process_extracted_data")
+@patch(f"{file_path}.common.report_summary_counts", return_value="Referral roles updated: 1, inserted: 1, deleted: 1")
+@patch(f"{file_path}.message.send_start_message")
+def test_handler_empty_file(mock_send_start_message,
+mock_report_summary_count ,
+mock_process_extracted_data,
+mock_process_file,
+mock_retrieve_file_from_bucket,
+mock_db_connection,
+mock_close_connection,
+mock_send_success_slack_message,
+mock_send_failure_slack_message,
+mock_archive_file,
+mock_summary_count):
+    """Test top level request calls downstream functions - success"""
+    payload = generate_event_payload()
+    result = handler.request(event=payload, context=None)
+    assert result == "Symptom Groups execution completed"
+    mock_send_start_message.assert_called_once()
+    mock_summary_count.assert_called_once()
+    mock_report_summary_count.assert_called_once()
+    mock_process_file.assert_called_once()
+    mock_retrieve_file_from_bucket.assert_called_once()
+    mock_db_connection.assert_called_once()
+    mock_close_connection.assert_called_once()
+    mock_archive_file.assert_called_once()
+    assert mock_process_extracted_data.call_count == 0
+    assert mock_send_success_slack_message.call_count == 0
+    mock_send_failure_slack_message.assert_called_once()
 
 @patch("psycopg2.connect")
 @patch(f"{file_path}.common.cleanup")
 @patch(f"{file_path}.database.does_record_exist", return_value=False)
-@patch(f"{file_path}.common.retrieve_file_from_bucket", return_value="""2001,"New Symptom Group","UPDATE"\n""")
 @patch(f"{file_path}.database.connect_to_database", return_value="db_connection")
 @patch(f"{file_path}.message.send_start_message")
 def test_handler_fail(mock_send_start_message,mock_db_details,mock_get_object,
@@ -251,6 +329,43 @@ mock_does_record_exist,mock_cleanup,mock_db_connect):
     mock_get_object.assert_called_once()
     mock_cleanup.assert_called_once()
     mock_does_record_exist.assert_called_once()
+
+@patch(f"{file_path}.common.initialise_summary_count")
+@patch(f"{file_path}.common.archive_file")
+@patch(f"{file_path}.message.send_failure_slack_message")
+@patch(f"{file_path}.message.send_success_slack_message")
+@patch(f"{file_path}.database.close_connection", return_value="")
+@patch(f"{file_path}.database.connect_to_database", return_value="db_connection")
+@patch(f"{file_path}.common.retrieve_file_from_bucket", return_value="csv_file", side_effect=ValueError)
+@patch(f"{file_path}.common.process_file", return_value={"1": {"id": "00001", "name": "Mock Create SD", "action": "CREATE"}, "2": {"id": "00002", "name": "Mock Update SD", "action": "UPDATE"}, "3": {"id": "00003", "name": "Mock Delete SD", "action": "DELETE"}})
+@patch(f"{file_path}.process_extracted_data")
+@patch(f"{file_path}.common.report_summary_counts", return_value="Referral roles updated: 1, inserted: 1, deleted: 1")
+@patch(f"{file_path}.message.send_start_message")
+def test_handler_fail(mock_send_start_message,
+mock_report_summary_count ,
+mock_process_extracted_data,
+mock_process_file,
+mock_retrieve_file_from_bucket,
+mock_db_connection,
+mock_close_connection,
+mock_send_success_slack_message,
+mock_send_failure_slack_message,
+mock_archive_file,
+mock_summary_count):
+    """Test top level request calls downstream functions - success"""
+    payload = generate_event_payload()
+    result = handler.request(event=payload, context=None)
+    assert result == "Symptom Groups execution completed"
+    assert mock_send_start_message.call_count == 1
+    assert mock_process_extracted_data.call_count == 0
+    assert mock_report_summary_count.call_count == 0
+    assert mock_process_file.call_count == 0
+    assert mock_retrieve_file_from_bucket.call_count == 1
+    assert mock_db_connection.call_count == 1
+    mock_close_connection.assert_called_once()
+    mock_archive_file.assert_called_once()
+    assert mock_send_success_slack_message.call_count == 0
+    mock_send_failure_slack_message.assert_called_once()
 
 
 def generate_event_payload():

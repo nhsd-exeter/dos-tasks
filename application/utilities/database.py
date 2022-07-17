@@ -2,21 +2,29 @@ import os
 import json
 import psycopg2
 import psycopg2.extras
-from utilities import secrets, logger, message, common
+from utilities import secrets, logger, common
 
 secret_store = os.environ.get("SECRET_STORE")
 profile = os.environ.get("PROFILE")
 
 
+def close_connection(event, db_connection):
+    # Close database connection
+    if db_connection is not None:
+        logger.log_for_audit(event["env"], "action:close DB connection")
+        db_connection.close()
+    else:
+        logger.log_for_error(event["env"], "action:no DB connection to close")
+
+
 # TODO move inside class later
-def connect_to_database(env, event, start):
+def connect_to_database(env, event):
     db = DB()
     logger.log_for_audit(env, "action:establish database connection")
-    if not db.db_set_connection_details(env, event, start):
+    if not db.db_set_connection_details(env, event):
         logger.log_for_error(env, "Error DB Parameter(s) not found in secrets store.")
-        message.send_failure_slack_message(event, start)
         raise ValueError("DB Parameter(s) not found in secrets store")
-    return db.db_connect(event, start)
+    return db.db_connect(event)
 
 
 # TODO move inside class later
@@ -53,7 +61,7 @@ def execute_db_query(db_connection, query, data, line, values, summary_count_dic
             log = log + x + ":" + str(y) + " | "
         logger.log_for_audit(
             env,
-            "action:Process row | {} | line number:{}".format(log.rstrip(log[-1]), line),
+            "action:Process row | {} | line number:{}".format(log[:-2], line),
         ),
     except Exception as e:
         logger.log_for_error(env, "Line {} in transaction failed. Rolling back".format(line))
@@ -70,8 +78,8 @@ class DB:
         self.db_user = ""
         self.db_password = ""
 
-    def db_set_connection_details(self, env, event, start):
-        secret_list = secrets.SECRETS().get_secret_value(secret_store, event, start)
+    def db_set_connection_details(self, env, event):
+        secret_list = secrets.SECRETS().get_secret_value(secret_store, event)
         formatted_secrets = json.loads(secret_list, strict=False)
         connection_details_set = True
         db_host_key = "DB_HOST"
@@ -111,12 +119,11 @@ class DB:
             logger.log_for_diagnostics(env, "Secrets not set")
         return connection_details_set
 
-    def db_connect(self, event, start):
+    def db_connect(self, event):
         try:
             return psycopg2.connect(
                 host=self.db_host, dbname=self.db_name, user=self.db_user, password=self.db_password
             )
-        except Exception:
+        except Exception as e:
             logger.log_for_error(event["env"], "Connection parameters not set correctly")
-            message.send_failure_slack_message(event, start)
-            raise psycopg2.InterfaceError()
+            raise psycopg2.InterfaceError(e)

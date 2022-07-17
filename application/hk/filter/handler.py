@@ -48,13 +48,12 @@ def process_event(event, start):
 
 def invoke_hk_lambda(task, filename, env, bucket, start):
     profile = os.environ.get("PROFILE")
-    # version = os.environ.get(task)
     payload = {"filename": filename, "env": env, "bucket": bucket}
     function = "uec-dos-tasks-{0}-hk-{1}-lambda".format(profile, task)
     try:
         response = lambda_client.invoke(FunctionName=function, InvocationType="Event", Payload=json.dumps(payload))
         print("Response: {}".format(response))
-        send_success_slack_message(payload, start)
+        send_success_slack_message(payload, start, None)
         return "HK {} invoked successfully".format(task)
     except Exception as e:
         print("Error Invoking Lambda: {}".format(e))

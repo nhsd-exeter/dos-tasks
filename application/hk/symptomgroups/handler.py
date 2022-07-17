@@ -16,15 +16,29 @@ def request(event, context):
     env = event["env"]
     filename = event["filename"]
     bucket = event["bucket"]
-    summary_count_dict = common.initialise_summary_count()
-    db_connection = database.connect_to_database(env, event, start)
-    csv_file = common.retrieve_file_from_bucket(bucket, filename, event, start)
-    csv_data = common.process_file(csv_file, event, start, 3, summary_count_dict)
-    extracted_data = extract_query_data_from_csv(csv_data, env)
-    process_extracted_data(db_connection, extracted_data, summary_count_dict, event)
-    common.report_summary_counts(summary_count_dict, env)
-    common.cleanup(db_connection, bucket, filename, event, start, summary_count_dict)
-    return task_description + " execution successful"
+    db_connection = None
+    logger.log_for_audit(event["env"], "action:task started")
+    try:
+        summary_count_dict = common.initialise_summary_count()
+        db_connection = database.connect_to_database(env, event)
+        csv_file = common.retrieve_file_from_bucket(bucket, filename, event, start)
+        csv_data = common.process_file(csv_file, event, 3, summary_count_dict)
+        if csv_data == {}:
+            message.send_failure_slack_message(event, start, summary_count_dict)
+        else:
+            extracted_data = extract_query_data_from_csv(csv_data, env)
+            process_extracted_data(db_connection, extracted_data, summary_count_dict, event)
+            message.send_success_slack_message(event, start, summary_count_dict)
+        common.report_summary_counts(summary_count_dict, env)
+        logger.log_for_audit(event["env"], "action:task complete")
+    except Exception as e:
+        logger.log_for_error(env, "Problem {}".format(e))
+        message.send_failure_slack_message(event, start)
+    finally:
+        if db_connection is not None:
+            database.close_connection(event, db_connection)
+        common.archive_file(bucket, filename, event, start)
+    return task_description + " execution completed"
 
 
 # TODO consider moving to common or refactoring
@@ -42,6 +56,7 @@ def process_extracted_data(db_connection, row_data, summary_count_dict, event):
         except Exception as e:
             common.increment_summary_count(summary_count_dict, "ERROR", event["env"])
             logger.log_for_error(
+                event["env"],
                 "Processing {0} data failed with | {1} | {2} | {3} | => {4}".format(
                     task_description, row_values["id"], row_values["name"], row_values["zcode"], str(e)
                 ),

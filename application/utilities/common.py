@@ -10,12 +10,17 @@ blank_lines = "BLANK"
 error_lines = "ERROR"
 
 
-def check_csv_format(csv_row, csv_column_count, env):
+def check_csv_format(csv_row, expected_col_count, env, count):
     """Checks length of csv data"""
-    if len(csv_row) == csv_column_count:
+    if len(csv_row) == expected_col_count:
         return True
     else:
-        log_for_audit(env, "action:validation | Problem:CSV format invalid - invalid length")
+        log_for_audit(
+            env,
+            "action:validation | Incorrect line format | line:{0} | expected:{1} | actual:{2}".format(
+                count, expected_col_count, len(csv_row)
+            ),
+        )
         return False
 
 
@@ -33,10 +38,8 @@ def valid_action(record_exists, row_data, env):
     return valid_action
 
 
-def cleanup(db_connection, bucket, filename, event, start, summary_count_dict):
-    # Close DB connection
-    log_for_audit(event["env"], "action:close DB connection")
-    db_connection.close()
+# TODO move to S3
+def archive_file(bucket, filename, event, start):
     # Archive file
     s3_class = utilities.s3.S3()
     s3_class.copy_object(bucket, filename, event, start)
@@ -47,10 +50,7 @@ def cleanup(db_connection, bucket, filename, event, start, summary_count_dict):
             filename, filename.split("/")[0], filename.split("/")[1]
         ),
     )
-    # Send Slack Notification
-    log_for_audit(event["env"], "action:task complete")
-    utilities.message.send_success_slack_message(event, start, summary_count_dict)
-    return "Cleanup Successful"
+    return "File Archive Successful"
 
 
 def retrieve_file_from_bucket(bucket, filename, event, start):
@@ -81,7 +81,7 @@ def initialise_summary_count():
     summary_count_dict[create_action] = 0
     summary_count_dict[update_action] = 0
     summary_count_dict[delete_action] = 0
-    summary_count_dict[blank_lines] = 0
+    summary_count_dict[blank_lines] = -1
     summary_count_dict[error_lines] = 0
     return summary_count_dict
 
@@ -102,7 +102,7 @@ def increment_summary_count(summary_count_dict, action, env):
         )
 
 
-def process_file(csv_file, event, start, expected_col_count, summary_count_dict):
+def process_file(csv_file, event, expected_col_count, summary_count_dict):
     """returns dictionary of row data keyed on row number col1=id, col2=description, col3=action"""
     lines = {}
     count = 0
@@ -112,18 +112,10 @@ def process_file(csv_file, event, start, expected_col_count, summary_count_dict)
         if len(line) == 0:
             increment_summary_count(summary_count_dict, "BLANK", event["env"])
             continue
-        if check_csv_format(line, expected_col_count, event["env"]) and check_csv_values(line, event["env"]):
+        if check_csv_format(line, expected_col_count, event["env"], count) and check_csv_values(line, event["env"]):
             lines[str(count)] = {"id": line[0], "name": line[1], "action": line[2]}
         else:
             increment_summary_count(summary_count_dict, "ERROR", event["env"])
-            log_for_audit(
-                event["env"],
-                "action:validation | Incorrect line format | line:{0} | expected:{1} | actual:{2}".format(
-                    count, expected_col_count, len(line)
-                ),
-            )
-    if lines == {}:
-        utilities.message.send_failure_slack_message(event, start, summary_count_dict)
     return lines
 
 
@@ -132,11 +124,14 @@ def report_summary_counts(summary_count_dict, env):
 
 
 def slack_summary_counts(summary_count_dict):
-    report = "updated:{0}, inserted:{1}, deleted:{2}, blank:{3}, errored:{4}".format(
-        summary_count_dict[update_action],
-        summary_count_dict[create_action],
-        summary_count_dict[delete_action],
-        summary_count_dict[blank_lines],
-        summary_count_dict[error_lines],
-    )
+    if summary_count_dict is not None:
+        report = "updated:{0}, inserted:{1}, deleted:{2}, blank:{3}, errored:{4}".format(
+            summary_count_dict[update_action],
+            summary_count_dict[create_action],
+            summary_count_dict[delete_action],
+            summary_count_dict[blank_lines] if summary_count_dict[blank_lines] > 0 else 0,
+            summary_count_dict[error_lines],
+        )
+    else:
+        report = ""
     return report
