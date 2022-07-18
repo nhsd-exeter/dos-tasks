@@ -1,6 +1,6 @@
 # import psycopg2
 # import psycopg2.extras
-from utilities import logger, common, database
+from utilities import logger, database, cron_common
 from datetime import datetime
 import os
 
@@ -16,29 +16,29 @@ notes = ""
 
 def request(event, context):
     start = datetime.utcnow()
-    logger.log_for_audit("operation:start")
     print("Event: {}".format(event))
     env = os.getenv("DB_NAME")
     event_id = event["id"]
     event_time = event["time"]
-    logger.log_for_audit("Event id: {0}, event time: {1} , environment: {2}".format(event_id, event_time, env))
+    logger.log_for_audit(env, "operation:start")
+    logger.log_for_audit(env, "Event id: {0}, event time: {1} , environment: {2}".format(event_id, event_time, env))
     # temporarily not needed except for messaging
     payload = {"filename": "NA", "env": env, "bucket": "NA"}
     db_connection = database.connect_to_database(env, payload, start)
-    reset_rag_status(db_connection)
-    common.cron_cleanup(db_connection)
-    logger.log_for_audit("operation:end")
+    reset_rag_status(env, db_connection)
+    cron_common.cron_cleanup(env, db_connection)
+    logger.log_for_audit(env, "operation:end")
     return task_description + " execution successful"
 
 
-def reset_rag_status(db_connection):
+def reset_rag_status(env, db_connection):
 
     try:
         update_query, data = generate_update_query()
         updated_services = database.execute_cron_query(db_connection, update_query, data)
-        log_updated_services(db_connection, updated_services)
+        log_updated_services(env, db_connection, updated_services)
     except KeyError as e:
-        logger.log_for_error("Exception raised running rag reset job {}".format(e))
+        logger.log_for_error(env, "Exception raised running rag reset job {}".format(e))
         raise e
 
 
@@ -105,22 +105,23 @@ def get_log_entry(log_info):
     return log_text
 
 
-def log_updated_services(db_connection, updated_services):
+def log_updated_services(env, db_connection, updated_services):
     for service in updated_services:
         try:
             service_id = service["serviceid"]
             log_info = get_log_data(db_connection, service_id)
             log_text = get_log_entry(log_info)
-            logger.log_for_audit(log_text)
+            logger.log_for_audit(env, log_text)
         except KeyError as e:
-            logger.log_for_error("Data returned from db does not include serviceid column ")
+            logger.log_for_error(env, "Data returned from db does not include serviceid column ")
             raise e
     format_data = "%b %d %Y %H:%M:%S"
     end_at = datetime.utcnow()
     logger.log_for_audit(
+        env,
         "operation:AutoUpdateCapacityStatus|records updated:{0}|updated at:{1}".format(
             str(len(updated_services)), end_at.strftime(format_data)
-        )
+        ),
     )
 
 

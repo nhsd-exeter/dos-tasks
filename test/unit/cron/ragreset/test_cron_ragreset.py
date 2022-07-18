@@ -56,7 +56,7 @@ expected_region_name_query = """select s.uid, s.name,
     """
 
 @patch("psycopg2.connect")
-@patch(f"{file_path}.common.cron_cleanup")
+@patch(f"{file_path}.cron_common.cron_cleanup")
 @patch(f"{file_path}.database.execute_cron_query", return_value="" )
 @patch(f"{file_path}.database.connect_to_database", return_value="db_connection")
 def test_handler_pass(mock_db_details, mock_update_query, mock_cleanup, mock_db_connect):
@@ -111,7 +111,7 @@ def test_log_updated_services(mock_db_connect):
     row_one = {"serviceid": 1,"service_name": "Mustang"}
     row_two = {"serviceid": 2,"service_name": "Mustang"}
     updated_services = [row_one,row_two]
-    handler.log_updated_services(mock_db_connect,updated_services)
+    handler.log_updated_services('mockenv', mock_db_connect,updated_services)
 
 @patch("psycopg2.connect")
 def test_log_updated_services_keyerror(mock_db_connect):
@@ -119,7 +119,7 @@ def test_log_updated_services_keyerror(mock_db_connect):
     row_two = {"service_name": "Mustang"}
     updated_services = [row_one,row_two]
     with pytest.raises(KeyError):
-        handler.log_updated_services(mock_db_connect,updated_services)
+        handler.log_updated_services('mockenv', mock_db_connect,updated_services)
 
 @patch("psycopg2.connect")
 @patch(f"{file_path}.log_updated_services", return_value="" )
@@ -127,6 +127,6 @@ def test_log_updated_services_keyerror(mock_db_connect):
 @patch(f"{file_path}.generate_update_query", side_effect=[{1:'',2:''}])
 def test_reset_rag_status(mock_update_query, mock_execute, mock_log, mock_db_connect):
     with pytest.raises(KeyError):
-        handler.reset_rag_status(mock_db_connect)
+        handler.reset_rag_status('mockenv', mock_db_connect)
 
 
