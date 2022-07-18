@@ -249,8 +249,7 @@ check_integration_test_files:## iterate over integration test folder [MAX_ATTEMP
 	do
 		filename=`basename "$$f"`
 		make poll_s3_for_file MAX_ATTEMPTS=$(MAX_ATTEMPTS) BUCKET=$(BUCKET) FILENAME=$$filename
-	done 
-	
+	done
 
 poll_s3_for_file: ## retries look up for file in bucket [MAX_ATTEMPTS] mandatory [BUCKET] [FILENAME]
 	echo "Checking bucket $(BUCKET) for file $(FILENAME)"
