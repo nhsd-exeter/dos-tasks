@@ -48,7 +48,7 @@ def test_db_set_connection_details_success(mock_get_secrets_value):
     start = ""
     mock_env = "mock_env"
     db = database.DB()
-    connection_details_set = db.db_set_connection_details(mock_env, mock_event)
+    connection_details_set = db.db_set_connection_details(mock_env)
     assert connection_details_set == True
     assert db.db_host == "mock_host"
     assert db.db_name == "pathwaysdos_mock_env"
@@ -62,7 +62,7 @@ def test_db_set_connection_details_host_key_not_set(mock_get_secrets_value):
     mock_event = {"filename": "mock_filename", "env": "mock_env", "bucket": "mock_bucket"}
     mock_env = "mock_env"
     db = database.DB()
-    connection_details_set = db.db_set_connection_details(mock_env, mock_event)
+    connection_details_set = db.db_set_connection_details(mock_env)
     assert connection_details_set == False
     assert db.db_host == ""
     assert db.db_name == "pathwaysdos_mock_env"
@@ -76,7 +76,7 @@ def test_db_set_connection_details_user_key_not_set(mock_get_secrets_value):
     mock_event = {"filename": "mock_filename", "env": "mock_env", "bucket": "mock_bucket"}
     mock_env = "mock_env"
     db = database.DB()
-    connection_details_set = db.db_set_connection_details(mock_env, mock_event)
+    connection_details_set = db.db_set_connection_details(mock_env)
     assert connection_details_set == False
     assert db.db_host == "mock_host"
     assert db.db_name == "pathwaysdos_mock_env"
@@ -90,7 +90,7 @@ def test_db_set_connection_details_password_key_not_set(mock_get_secrets_value):
     mock_event = {"filename": "mock_filename", "env": "mock_env", "bucket": "mock_bucket"}
     mock_env = "mock_env"
     db = database.DB()
-    connection_details_set = db.db_set_connection_details(mock_env, mock_event)
+    connection_details_set = db.db_set_connection_details(mock_env)
     assert connection_details_set == False
     assert db.db_host == "mock_host"
     assert db.db_name == "pathwaysdos_mock_env"
@@ -104,7 +104,7 @@ def test_db_set_connection_details_secrets_not_set(mock_get_secrets_value):
     mock_event = {"filename": "mock_filename", "env": "mock_env", "bucket": "mock_bucket"}
     mock_env = "mock_env"
     db = database.DB()
-    connection_details_set = db.db_set_connection_details(mock_env, mock_event)
+    connection_details_set = db.db_set_connection_details(mock_env)
     assert connection_details_set == False
     assert db.db_host == ""
     assert db.db_name == ""
@@ -118,7 +118,7 @@ def test_db_set_connection_details_name_set_correctly_with_performance_env(mock_
     mock_event = {"filename": "mock_filename", "env": "mock_env", "bucket": "mock_bucket"}
     mock_env = "performance"
     db = database.DB()
-    connection_details_set = db.db_set_connection_details(mock_env, mock_event)
+    connection_details_set = db.db_set_connection_details(mock_env)
     assert connection_details_set == True
     assert db.db_host == "mock_performance_host"
     assert db.db_name == "pathwaysdos"
@@ -132,7 +132,7 @@ def test_db_set_connection_details_name_set_correctly_with_regression_env(mock_g
     mock_event = {"filename": "mock_filename", "env": "mock_env", "bucket": "mock_bucket"}
     mock_env = "regression"
     db = database.DB()
-    connection_details_set = db.db_set_connection_details(mock_env, mock_event)
+    connection_details_set = db.db_set_connection_details(mock_env)
     assert connection_details_set == True
     assert db.db_host == "mock_regression_host"
     assert db.db_name == "pathwaysdos_regression"
@@ -146,7 +146,7 @@ def test_db_set_connection_details_all_keys_incorrect(mock_get_secrets_value):
     mock_event = {"filename": "mock_filename", "env": "mock_env", "bucket": "mock_bucket"}
     mock_env = "mock_env"
     db = database.DB()
-    connection_details_set = db.db_set_connection_details(mock_env, mock_event)
+    connection_details_set = db.db_set_connection_details(mock_env)
     assert connection_details_set == False
     assert db.db_host == ""
     assert db.db_name == "pathwaysdos_mock_env"
@@ -195,7 +195,7 @@ def test_does_record_exist_exception(mock_db_connect):
 def test_connect_to_database_returns_error(mock_db_object, mock_logger):
     mock_db_object().db_set_connection_details = Mock(return_value=False)
     with pytest.raises(ValueError) as assertion:
-        database.connect_to_database(mock_env, mock_event)
+        database.connect_to_database(mock_env)
     assert str(assertion.value) == "DB Parameter(s) not found in secrets store"
     mock_db_object().db_set_connection_details.assert_called_once()
     mock_logger.assert_called_once()
@@ -206,7 +206,7 @@ def test_connect_to_database_returns_error(mock_db_object, mock_logger):
 def test_connect_to_database_success(mock_db_object):
     mock_db_object().db_set_connection_details = Mock(return_value=True)
     mock_db_object().db_connect = Mock(return_value="Connection Established")
-    result = database.connect_to_database(mock_env, mock_event)
+    result = database.connect_to_database(mock_env)
     assert result == "Connection Established"
     mock_db_object().db_set_connection_details.assert_called_once()
     mock_db_object().db_connect.assert_called_once()
