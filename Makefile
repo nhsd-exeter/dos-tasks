@@ -239,14 +239,18 @@ clean: # Clean up project
 
 # --------------------------------------
 # Integration test targets
-# uec-dos-tasks-nonprod-housekeeping-bucket
-# s3://uec-dos-tasks-nonprod-housekeeping-bucket/teamb/archive/1-single-create_referrralroles.csv
-check_bucket_for_file: ## returns true if filename exists in bucket  - mandatory [BUCKET] [ENV] [FILENAME]
-	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
-		$(AWSCLI) s3 ls \
-			s3://$(BUCKET) \
-			2>&1 | grep -q $(FILENAME) \
-	" > /dev/null 2>&1 && echo true || echo false
+load_integration_test_files_to_s3:  ### Upload file to bucket - mandatory: FILE=[local path (inside container)],URI=[remote path]; optional: ARGS=[S3 cp options]
+	args="--recursive --include 'int_*.csv'"
+	make aws-s3-upload FILE=$(FILE) URI=$(BUCKET) ARGS=$$args
+
+check_integration_test_files:## iterate over integration test folder [MAX_ATTEMPTS] mandatory [BUCKET] [FILENAME]
+	int_test_folder="test/integration/*"
+	for f in $$int_test_folder
+	do
+		filename=`basename "$$f"`
+		make poll_s3_for_file MAX_ATTEMPTS=$(MAX_ATTEMPTS) BUCKET=$(BUCKET) FILENAME=$$filename
+	done 
+	
 
 poll_s3_for_file: ## retries look up for file in bucket [MAX_ATTEMPTS] mandatory [BUCKET] [FILENAME]
 	echo "Checking bucket $(BUCKET) for file $(FILENAME)"
@@ -260,6 +264,13 @@ poll_s3_for_file: ## retries look up for file in bucket [MAX_ATTEMPTS] mandatory
 		echo Sleeping..
 		sleep 1
 	done
+
+check_bucket_for_file: ## returns true if filename exists in bucket  - mandatory [BUCKET] [ENV] [FILENAME]
+	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
+		$(AWSCLI) s3 ls \
+			s3://$(BUCKET) \
+			2>&1 | grep -q $(FILENAME) \
+	" > /dev/null 2>&1 && echo true || echo false
 
 run-integration-result-check: # PROFILE SQL_FILE - name of SQL file to run INSTANCE_PAIR AB or BC
 	echo Running $(TF_VAR_db_checks_lambda_function_name) for $(SQL_FILE) against $(INSTANCE_PAIR)
