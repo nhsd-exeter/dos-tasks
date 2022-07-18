@@ -135,12 +135,3 @@ def slack_summary_counts(summary_count_dict):
     else:
         report = ""
     return report
-
-
-# --------- cron common functions
-# TODO more to add maybe
-def cron_cleanup(db_connection):
-    # Close DB connection
-    log_for_audit("Closing DB connection...")
-    db_connection.close()
-    return "Cleanup Successful"
