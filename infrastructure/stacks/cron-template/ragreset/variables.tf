@@ -10,7 +10,7 @@ variable "image_version" {
   description = "The version of the Lambda docker image"
 }
 
-variable "aws_lambda_ecr" {
+variable "aws_ecr" {
   description = "ECR repository to store lambda docker images"
 }
 
