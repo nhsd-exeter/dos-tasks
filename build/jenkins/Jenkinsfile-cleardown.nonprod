@@ -5,9 +5,6 @@ echo "Setting the cron schedule to: ${cron_string}"
 
 pipeline {
   agent any
-  triggers {
-    cron(cron_string)
-  }
   options {
     buildDiscarder(logRotator(daysToKeepStr: "7", numToKeepStr: "13"))
     disableConcurrentBuilds()
@@ -20,7 +17,7 @@ pipeline {
     ENVIRONMENT = "nonprod"
 
   }
-  triggers { pollSCM("* * * * *") }
+  triggers { cron(cron_string) }
   stages {
     stage("Show Configuration") {
       steps {
