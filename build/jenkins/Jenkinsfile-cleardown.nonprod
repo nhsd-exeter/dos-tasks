@@ -1,7 +1,13 @@
+cron_string = env.BRANCH_NAME.equals("task/DPTS-505_Poc_rag_reset") ? "29 12 * * *" : ""
+
+echo "Setting the cron schedule to: ${cron_string}"
+
+
 pipeline {
   agent any
-
-
+  triggers {
+    cron(cron_string)
+  }
   options {
     buildDiscarder(logRotator(daysToKeepStr: "7", numToKeepStr: "13"))
     disableConcurrentBuilds()
