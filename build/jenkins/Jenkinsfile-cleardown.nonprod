@@ -1,4 +1,4 @@
-cron_string = env.BRANCH_NAME.equals("task/DPTS-505_Poc_rag_reset") ? "29 12 * * *" : ""
+cron_string = env.BRANCH_NAME.equals("main") ? "29 17 * * *" : ""
 
 echo "Setting the cron schedule to: ${cron_string}"
 
