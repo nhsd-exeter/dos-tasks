@@ -91,6 +91,8 @@ def test_archive_file_success(mock_logger,mock_s3_object):
     result = common.archive_file(mock_bucket, mock_filename, mock_event, start)
     assert result == "File Archive Successful"
 
+
+
 @patch(f"{file_path}.utilities.s3.S3")
 def test_retrieve_file_from_bucket(mock_s3_object):
     mock_s3_object().get_object = Mock(return_value="Object returned")

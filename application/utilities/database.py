@@ -8,23 +8,23 @@ secret_store = os.environ.get("SECRET_STORE")
 profile = os.environ.get("PROFILE")
 
 
-def close_connection(event, db_connection):
+def close_connection(env, db_connection):
     # Close database connection
     if db_connection is not None:
-        logger.log_for_audit(event["env"], "action:close DB connection")
+        logger.log_for_audit(env, "action:close DB connection")
         db_connection.close()
     else:
-        logger.log_for_error(event["env"], "action:no DB connection to close")
+        logger.log_for_error(env, "action:no DB connection to close")
 
 
 # TODO move inside class later
-def connect_to_database(env, event):
+def connect_to_database(env):
     db = DB()
     logger.log_for_audit(env, "action:establish database connection")
-    if not db.db_set_connection_details(env, event):
+    if not db.db_set_connection_details(env):
         logger.log_for_error(env, "Error DB Parameter(s) not found in secrets store.")
         raise ValueError("DB Parameter(s) not found in secrets store")
-    return db.db_connect(event)
+    return db.db_connect(env)
 
 
 # TODO move inside class later
@@ -71,6 +71,21 @@ def execute_db_query(db_connection, query, data, line, values, summary_count_dic
         cursor.close()
 
 
+def execute_cron_query(db_connection, query, data):
+    cursor = db_connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    try:
+        cursor.execute(query, data)
+        rows = cursor.fetchall()
+        db_connection.commit()
+        return rows
+        # TODO add logging as required
+    except Exception as e:
+        logger.log_for_error("Transaction failed. Rolling back. Error: {}".format(e))
+        db_connection.rollback()
+    finally:
+        cursor.close()
+
+
 class DB:
     def __init__(self) -> None:
         self.db_host = ""
@@ -78,8 +93,8 @@ class DB:
         self.db_user = ""
         self.db_password = ""
 
-    def db_set_connection_details(self, env, event):
-        secret_list = secrets.SECRETS().get_secret_value(secret_store, event)
+    def db_set_connection_details(self, env):
+        secret_list = secrets.SECRETS().get_secret_value(secret_store, env)
         formatted_secrets = json.loads(secret_list, strict=False)
         connection_details_set = True
         db_host_key = "DB_HOST"
@@ -119,11 +134,11 @@ class DB:
             logger.log_for_diagnostics(env, "Secrets not set")
         return connection_details_set
 
-    def db_connect(self, event):
+    def db_connect(self, env):
         try:
             return psycopg2.connect(
                 host=self.db_host, dbname=self.db_name, user=self.db_user, password=self.db_password
             )
         except Exception as e:
-            logger.log_for_error(event["env"], "Connection parameters not set correctly")
+            logger.log_for_error(env, "Connection parameters not set correctly")
             raise psycopg2.InterfaceError(e)

@@ -3,4 +3,4 @@
 # ==============================================================================
 # Service variables
 
-TASKS := filter,referralroles,symptomgroups,symptomdiscriminators
+TASKS := filter,referralroles,symptomgroups,symptomdiscriminators,ragreset

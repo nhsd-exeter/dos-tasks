@@ -61,7 +61,6 @@ resource "aws_iam_role_policy" "lambda_role_policy" {
     {
       "Effect": "Allow",
       "Action": [
-        "logs:CreateLogGroup",
         "logs:CreateLogStream",
         "logs:PutLogEvents"
       ],
@@ -147,6 +146,7 @@ POLICY
 resource "aws_cloudwatch_log_group" "lambda_log_group" {
   name              = "/aws/lambda/${var.service_prefix}-${var.name}-lambda"
   retention_in_days = var.log_retention
+  tags              = var.tags
 }
 
 resource "aws_cloudwatch_log_subscription_filter" "splunk_firehose_subscription" {

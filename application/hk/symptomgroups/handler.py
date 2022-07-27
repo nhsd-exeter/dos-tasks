@@ -17,10 +17,10 @@ def request(event, context):
     filename = event["filename"]
     bucket = event["bucket"]
     db_connection = None
-    logger.log_for_audit(event["env"], "action:task started")
+    logger.log_for_audit(env, "action:task started")
     try:
         summary_count_dict = common.initialise_summary_count()
-        db_connection = database.connect_to_database(env, event)
+        db_connection = database.connect_to_database(env)
         csv_file = common.retrieve_file_from_bucket(bucket, filename, event, start)
         csv_data = common.process_file(csv_file, event, 3, summary_count_dict)
         if csv_data == {}:
@@ -30,7 +30,7 @@ def request(event, context):
             process_extracted_data(db_connection, extracted_data, summary_count_dict, event)
             message.send_success_slack_message(event, start, summary_count_dict)
         common.report_summary_counts(summary_count_dict, env)
-        logger.log_for_audit(event["env"], "action:task complete")
+        logger.log_for_audit(env, "action:task complete")
     except Exception as e:
         logger.log_for_error(env, "Problem {}".format(e))
         message.send_failure_slack_message(event, start)

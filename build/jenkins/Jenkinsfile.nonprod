@@ -1,8 +1,10 @@
 pipeline {
   agent any
   parameters {
-    choice(name: 'Task', choices: ['none', 'all', 'filter', 'referralroles','symptomgroups','symptomdiscriminators'], description: 'Select which task to deploy')
+    choice(name: 'Task', choices: ['none', 'all', 'filter', 'referralroles','symptomgroups','symptomdiscriminators','ragreset'], description: 'Select which task to deploy')
+    choice(name: 'Database', choices: ['none', 'fix', 'teamb', 'test1', 'performance'], description: 'Select target database (cron jobs ONLY)')
   }
+
   options {
     buildDiscarder(logRotator(daysToKeepStr: "7", numToKeepStr: "13"))
     disableConcurrentBuilds()
@@ -14,6 +16,7 @@ pipeline {
     PROFILE = "nonprod"
     ENVIRONMENT = "nonprod"
     TASK = "${params.Task}"
+    DB_NAME = "${params.Database}"
   }
   triggers { pollSCM("* * * * *") }
   stages {
@@ -42,14 +45,14 @@ pipeline {
     stage("Deploy") {
       when { expression { params.Task != "none" } }
       steps {
-        script { sh "make provision TASK=${params.Task}" }
+        script { sh "make provision TASK=${params.Task} DB_NAME=${params.Database}" }
       }
     }
 
     stage("Check and remove older versions") {
       when { expression { params.Task != "none" } }
       steps {
-        script { sh "make remove-old-versions-for-task TASK=${params.Task}" }
+        script { sh "make remove-old-versions-for-task TASK=${params.Task} DB_NAME=${params.Database}" }
       }
     }
   }

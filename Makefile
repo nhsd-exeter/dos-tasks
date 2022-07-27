@@ -5,6 +5,24 @@ include $(abspath $(PROJECT_DIR)/build/automation/init.mk)
 # ==============================================================================
 # Development workflow targets
 
+copy-cron-template-stack: ## update placeholder value for cron job target database Mandatory [DB_NAME] [TASK]
+	echo "Updating environment variable to $(DB_NAME) for $(TASK)"
+	rm -rf  $(TERRAFORM_DIR)/$(STACK)/$(TASK)-$(DB_NAME)
+	mkdir $(TERRAFORM_DIR)/$(STACK)/$(TASK)-$(DB_NAME)
+	sed "s/DB_NAME_TO_REPLACE/$(DB_NAME)/g" $(TERRAFORM_DIR)/$(STACK)/cron-template/$(TASK)/template/main.tf  > \
+			$(TERRAFORM_DIR)/$(STACK)/cron-template/$(TASK)/main.tf
+	cp $(TERRAFORM_DIR)/$(STACK)/cron-template/$(TASK)/*.tf $(TERRAFORM_DIR)/$(STACK)/$(TASK)-$(DB_NAME)
+
+
+build-stack-for-cron-job: ## create a stack for cron and db - cron tasks only mandatory: TASK=[task] DB_NAME=[db name minus prefix eg test not pathwaysdos-test]
+	task_type=$$(make task-type NAME=$(TASK))
+	if [ "$$task_type" == 'cron' ]; then
+		make copy-cron-template-stack DB_NAME=$(DB_NAME)
+	else
+		echo "$(TASK) is not a recognised cron job. Nothing to do"
+	fi
+
+#==========================
 build: # Build project - mandatory: TASK=[task]
 	if [ "$(TASK)" == "all" ]; then
 		for task in $$(echo $(TASKS) | tr "," "\n"); do
@@ -49,23 +67,162 @@ push: # Push project artefacts to the registry - mandatory: TASK=[task]
 		make docker-push NAME=$$task_type-$(TASK)
 	fi
 
-provision: # Provision environment - mandatory: PROFILE=[name], TASK=[task]
-	eval "$$(make secret-fetch-and-export-variables)"
-	make terraform-apply-auto-approve STACK=$(STACKS) PROFILE=$(PROFILE)
+# Provision
+provision: ## provision resources for hk and cron - mandatory PROFILE TASK  and DB_NAME (cron only)
 	if [ "$(TASK)" == "all" ]; then
-		make terraform-apply-auto-approve STACK=$(TASKS) PROFILE=$(PROFILE)
+		for task in $$(echo $(TASKS) | tr "," "\n"); do
+			task_type=$$(make task-type NAME=$$task)
+			if [ "$$task_type" == 'cron' ] && [ ! -z "$(DB_NAME)" ]; then
+				make provision-cron PROFILE=$(PROFILE) TASK=$$task DB_NAME=$(DB_NAME)
+			else
+				echo "$$task is not a cron job or no database specified for cron job"
+			fi
+			if [ "$$task_type" == 'hk' ]; then
+				make provision-hk PROFILE=$(PROFILE) TASK=$$task
+			fi
+		done
 	else
-		make terraform-apply-auto-approve STACK=$(TASK) PROFILE=$(PROFILE)
+		task_type=$$(make task-type NAME=$(TASK))
+		if [ "$$task_type" == 'cron' ] && [ ! -z "$(DB_NAME)" ]; then
+				make provision-cron PROFILE=$(PROFILE) TASK=$(TASK) DB_NAME=$(DB_NAME)
+		else
+				echo "No database specified for cron job"
+		fi
+		if [ "$$task_type" == 'hk' ]; then
+			make provision-hk PROFILE=$(PROFILE) TASK=$(TASK)
+		fi
 	fi
 
-plan: # Plan environment - mandatory: PROFILE=[name], TASK=[hk task]
+provision-hk: ## Provision environment - mandatory: PROFILE=[name], TASK=[task]
+	echo "Provisioning $(PROFILE) lambda for hk task $(TASK)"
+	eval "$$(make secret-fetch-and-export-variables)"
+	make terraform-apply-auto-approve STACK=$(STACKS) PROFILE=$(PROFILE)
+	make terraform-apply-auto-approve STACK=$(TASK) PROFILE=$(PROFILE)
+
+
+provision-cron: ## cron specific version of provision PROFILE TASK DB_NAME
+	echo "Provisioning $(PROFILE) lambda $(TASK)-$(DB_NAME) for cron job"
+	make build-stack-for-cron-job TASK=$(TASK) DB_NAME=$(DB_NAME)
+	eval "$$(make secret-fetch-and-export-variables)"
+	make terraform-apply-auto-approve STACK=$(STACKS) PROFILE=$(PROFILE)
+	make terraform-apply-auto-approve STACK=$(TASK)-$(DB_NAME) PROFILE=$(PROFILE)
+	make delete-stack-for-cron-job TASK=$(TASK) DB_NAME=$(DB_NAME)
+
+# Plan targets
+plan: # Plan cron and hk lambdas - mandatory: PROFILE=[name], TASK=[hk task] DB_NAME
 	eval "$$(make secret-fetch-and-export-variables)"
 	make terraform-plan STACK=$(STACKS) PROFILE=$(PROFILE)
 	if [ "$(TASK)" == "all" ]; then
-		make terraform-plan STACK=$(TASKS) PROFILE=$(PROFILE)
+		for task in $$(echo $(TASKS) | tr "," "\n"); do
+			task_type=$$(make task-type NAME=$$task)
+			if [ "$$task_type" == 'cron' ] && [ ! -z "$(DB_NAME)" ]; then
+				make plan-cron PROFILE=$(PROFILE) TASK=$$task DB_NAME=$(DB_NAME)
+			else
+				echo "$$task is not a cron job or no database specified for cron job"
+			fi
+			if [ "$$task_type" == 'hk' ]; then
+				make plan-hk PROFILE=$(PROFILE) TASK=$$task
+			fi
+		done
 	else
-		make terraform-plan STACK=$(TASK) PROFILE=$(PROFILE)
+		task_type=$$(make task-type NAME=$(TASK))
+		if [ "$$task_type" == 'cron' ] && [ ! -z "$(DB_NAME)" ]; then
+				make plan-cron PROFILE=$(PROFILE) TASK=$(TASK) DB_NAME=$(DB_NAME)
+		else
+				echo "No database specified for cron job"
+		fi
+		if [ "$$task_type" == 'hk' ]; then
+			make plan-hk PROFILE=$(PROFILE) TASK=$(TASK)
+		fi
 	fi
+
+plan-hk: # Plan housekeeping lambda - mandatory: PROFILE=[name], TASK=[hk task]
+	echo "Planning for hk task $(TASK)"
+	eval "$$(make secret-fetch-and-export-variables)"
+	make terraform-plan STACK=$(TASK) PROFILE=$(PROFILE)
+
+plan-cron: # Plan cron job - mandatory: PROFILE=[name], TASK=[hk task] DB_NAME
+	echo "Planning for cron job $(TASK)-$(DB_NAME)"
+	make build-stack-for-cron-job TASK=$(TASK) DB_NAME=$(DB_NAME)
+	eval "$$(make secret-fetch-and-export-variables)"
+	make terraform-plan STACK=$(TASK)-$(DB_NAME) PROFILE=$(PROFILE)
+	make delete-stack-for-cron-job TASK=$(TASK) DB_NAME=$(DB_NAME)
+
+#  Destroy targets
+
+destroy: # To destroy cron and hk lambdas - mandatory: PROFILE=[name], TASK=[hk task] DB_NAME
+	if [ "$(TASK)" == "all" ]; then
+		for task in $$(echo $(TASKS) | tr "," "\n"); do
+			task_type=$$(make task-type NAME=$$task)
+			if [ "$$task_type" == 'cron' ] && [ ! -z "$(DB_NAME)" ]; then
+				make destroy-cron PROFILE=$(PROFILE) TASK=$$task DB_NAME=$(DB_NAME)
+			else
+				echo "No database specified for cron job"
+			fi
+			if [ "$$task_type" == 'hk' ]; then
+				make destroy-hk PROFILE=$(PROFILE) TASK=$$task
+			fi
+		done
+	else
+		task_type=$$(make task-type NAME=$(TASK))
+		if [ "$$task_type" == 'cron' ] && [ ! -z "$(DB_NAME)" ]; then
+				make destroy-cron PROFILE=$(PROFILE) TASK=$(TASK) DB_NAME=$(DB_NAME)
+		else
+				echo "No database specified for cron job"
+		fi
+		if [ "$$task_type" == 'hk' ]; then
+			make destroy-hk PROFILE=$(PROFILE) TASK=$(TASK)
+		fi
+	fi
+
+# eg make destroy PROFILE=nonprod TASK=symptomgroups
+destroy-hk: # Destroy housekeeping lambda - mandatory: PROFILE=[name], TASK=[hk task]
+	task_type=$$(make task-type NAME=$(TASK))
+	if [ "$$task_type" == 'hk' ]; then
+		eval "$$(make secret-fetch-and-export-variables)"
+		make terraform-destroy-auto-approve STACK=$(TASK) PROFILE=$(PROFILE)
+	else
+		echo $(TASK) is not an hk job
+	fi
+
+# make destroy-all-cron PROFILE=nonprod
+destroy-all-cron: ## Clear down every cron for every db - mandatory [PROFILE]
+	for task in $$(echo $(TASKS) | tr "," "\n"); do
+		task_type=$$(make task-type NAME=$$task)
+		if [ "$$task_type" == 'cron' ]; then
+			make destroy-cron-for_database PROFILE=$(PROFILE) TASK=$$task
+		else
+			echo "Task $$task is not a cron job"
+		fi
+	done
+
+destroy-cron-for_database: ## iterate over all dbs for cron task - mandatory [PROFILE] [TASK]
+	for db_name in $$(echo $(ENVIRONMENT_LIST) | tr "," "\n" | tr -d []); do
+		make destroy-cron PROFILE=$(PROFILE) TASK=$(TASK) DB_NAME=$$db_name
+	done
+
+# eg make destroy-cron PROFILE=nonprod TASK=ragreset DB_NAME=teamb
+destroy-cron: # Destroy environment - mandatory: PROFILE=[name], TASK=[hk task] [DB_NAME]
+	task_type=$$(make task-type NAME=$(TASK))
+	if [ "$$task_type" == 'cron' ]; then
+		echo "Clearing down the $(PROFILE) $(TASK) lambda for the $(DB_NAME) database"
+		eval "$$(make secret-fetch-and-export-variables)"
+		make build-stack-for-cron-job TASK=$(TASK) DB_NAME=$(DB_NAME)
+		make terraform-destroy-auto-approve STACK=$(TASK)-$(DB_NAME) PROFILE=$(PROFILE)
+		make delete-stack-for-cron-job TASK=$(TASK) DB_NAME=$(DB_NAME)
+	else
+		echo $(TASK) is not a cron job
+	fi
+
+delete-stack-for-cron-job: ## create a stack for cron and db - cron tasks only mandatory: TASK=[task] DB_NAME=[db name minus prefix eg test not pathwaysdos-test]
+	task_type=$$(make task-type NAME=$(TASK))
+	if [ "$$task_type" == 'cron' ]; then
+		rm -r $(TERRAFORM_DIR)/$(STACK)/$(TASK)-$(DB_NAME)
+	else
+		echo "$(TASK) is not a recognised cron job. Nothing to do"
+	fi
+
+# ----------
 
 unit-test: # Runs unit tests for task - mandatory: TASK=[task]
 	make unit-test-utilities
@@ -159,23 +316,43 @@ python-code-coverage-format: ### Test Python code with 'coverage' - mandatory: C
 	"
 
 # --------------------------------------
-
-remove-old-versions-for-task: ## Prune old versions of hk task lambdas - Mandatory; [PROFILE] - Optional [TASK]
-	eval "$$(make aws-assume-role-export-variables)"
+remove-old-versions-for-task: ## Prune old versions of hk and/or cron lambdas - Mandatory; [PROFILE] - Optional [TASK] [DB_NAME]
 	if [ "$(TASK)" == "all" ]; then
 		for task in $$(echo $(TASKS) | tr "," "\n"); do
 			task_type=$$(make task-type NAME=$$task)
-			lambda_name="${SERVICE_PREFIX}-$$task_type-$$task-lambda"
-			echo "Checking for older versions of lambda function $$lambda_name"
-			make aws-lambda-remove-old-versions NAME=$$lambda_name
-			done
+			if [ $$task_type == "hk" ]; then
+				make remove-old-versions-for-hk-task PROFILE=$(PROFILE) TASK=$$task
+			fi
+			if [ $$task_type == "cron" ] && [ ! -z "$(DB_NAME)" ]; then
+				make remove-old-versions-for-cron-task PROFILE=$(PROFILE) TASK=$$task DB_NAME=$(DB_NAME)
+			else
+				echo "DB_NAME parameter required to remove older cron job versions"
+			fi
+		done
 	else
 			task_type=$$(make task-type NAME=$(TASK))
-			lambda_name="${SERVICE_PREFIX}-$$task_type-$(TASK)-lambda"
-			echo "Checking for older versions of lambda function $$lambda_name"
-			make aws-lambda-remove-old-versions NAME=$$lambda_name
+			if [ $$task_type == "hk" ]; then
+				make remove-old-versions-for-hk-task PROFILE=$(PROFILE) TASK=$(TASK)
+			fi
+			if [ $$task_type == "cron" ]; then
+				make remove-old-versions-for-cron-task PROFILE=$(PROFILE) TASK=$(TASK) DB_NAME=$(DB_NAME)
+			fi
 	fi
 
+
+remove-old-versions-for-hk-task: ## Prune old versions of hk task lambdas - Mandatory; [PROFILE] [TASK]
+	eval "$$(make aws-assume-role-export-variables)"
+	task_type=$$(make task-type NAME=$(TASK))
+	lambda_name="${SERVICE_PREFIX}-$$task_type-$(TASK)-lambda"
+	echo "Checking for older versions of hk lambda function $$lambda_name"
+	make aws-lambda-remove-old-versions NAME=$$lambda_name
+
+remove-old-versions-for-cron-task: ## Prune old versions of cron lambdas - Mandatory; [PROFILE] [TASK] [DB_NAME]
+	eval "$$(make aws-assume-role-export-variables)"
+	task_type=$$(make task-type NAME=$(TASK))
+	lambda_name="${SERVICE_PREFIX}-$$task_type-$(TASK)-$(DB_NAME)-lambda"
+	echo "Checking for older versions of cron lambda function $$lambda_name"
+	make aws-lambda-remove-old-versions NAME=$$lambda_name
 
 aws-lambda-remove-old-versions: ## Remove older versions Mandatory NAME=[lambda function] Optional LAMBDA_VERSIONS_TO_RETAIN (default 5)
 	older_versions_to_remove="$$(make aws-lambda-get-versions-to-remove NAME=$(NAME))"
@@ -272,6 +449,7 @@ create-artefact-repositories: # Create ECR repositories to store the artefacts -
 	make docker-create-repository NAME=hk-referralroles
 	make docker-create-repository NAME=hk-symptomdiscriminators
 	make docker-create-repository NAME=hk-symptomgroups
+	make docker-create-repository NAME=cron-ragreset
 
 create-tester-repository: # Create ECR repositories to store the artefacts
 	make docker-create-repository NAME=tester
@@ -281,4 +459,5 @@ create-tester-repository: # Create ECR repositories to store the artefacts
 .SILENT: \
 	aws-lambda-get-versions-to-remove \
 	parse-profile-from-tag \
+	cron-task-check \
 	task-type

@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 import requests
 import json
-from utilities.common import slack_summary_counts
+import utilities.common
 
 slack_webhook_url = os.environ.get("SLACK_WEBHOOK_URL")
 profile = os.environ.get("PROFILE")
@@ -19,7 +19,7 @@ def send_success_slack_message(event, start, summary_count_dict):
     bucket = event["bucket"]
     finish, duration = calculate_execution_time(start)
     start = start.strftime("%Y-%m-%d %H:%M:%S")
-    summarycount = slack_summary_counts(summary_count_dict)
+    summarycount = utilities.common.slack_summary_counts(summary_count_dict)
     success_payload = {
         "attachments": [
             {
@@ -65,7 +65,7 @@ def send_failure_slack_message(
     bucket = event["bucket"]
     finish, duration = calculate_execution_time(start)
     start = start.strftime("%Y-%m-%d %H:%M:%S")
-    summarycount = slack_summary_counts(summary_count_dict)
+    summarycount = utilities.common.slack_summary_counts(summary_count_dict)
     failure_payload = {
         "attachments": [
             {
