@@ -1,5 +1,9 @@
+from unittest import result
 from unittest.mock import patch
+from datetime import datetime, timedelta
+from application.cron.removeoldchanges.handler import getThresholdDate
 import pytest
+
 # import string
 # import psycopg2
 
@@ -51,62 +55,35 @@ def test_handler_pass(mock_db_details, mock_update_query, mock_cleanup, mock_db_
 
 
 def test_generate_delete_query():
-    update_query, data  = handler.generate_update_query()
-    assert update_query == expected_delete_query
-    assert len(data) == 8
-    assert data[0] == ""
-    assert data[1] == handler.modified_by
-    # assert data[2] == handler.modified_by_id
-    # assert data[3] == handler.new_status
-    # assert data[4] == handler.new_status
-    # assert data[5] == handler.interval_type
-    # assert data[6] == handler.ignore_org_types[0]
-    # assert data[7] == handler.ignore_org_types[1]
+    threshold_date=datetime.now()
+    delete_query, data  = handler.generate_delete_query(threshold_date)
+    assert delete_query == expected_delete_query
+
+@patch("psycopg2.connect")
+def test_log_deleted_services(mock_db_connect):
+    row_one = {"serviceid": 1,"service_name": "Mustang"}
+    row_two = {"serviceid": 2,"service_name": "Mustang"}
+    deleted_services = [row_one,row_two]
+    handler.log_deleted_services('mockenv', mock_db_connect,deleted_services)
+
+@patch("psycopg2.connect")
+def test_log_deleted_services_keyerror(mock_db_connect):
+    row_one = {"service_name": "Mustang"}
+    row_two = {"service_name": "Mustang"}
+    deleted_services = [row_one,row_two]
+    with pytest.raises(KeyError):
+        handler.log_deleted_services('mockenv', mock_db_connect,deleted_services)
 
 
-# def test_generate_service_query():
-#     service_id = 999
-#     query, data  = handler.generate_service_query(service_id)
-#     assert ''.join(query.split()) == ''.join(expected_service_query.split())
-#     assert query == expected_service_query
-#     assert len(data) == 1
-#     assert data[0] == service_id
 
-# def test_parent_uid_query():
-#     service_id = 999
-#     query, data  = handler.generate_parent_uid_query(service_id)
-#     assert ''.join(query.split()) == ''.join(expected_parent_uid_query.split())
-#     assert len(data) == 1
-#     assert data[0] == service_id
 
-# def test_generate_region_name_query():
-#     service_id = 999
-#     query, data  = handler.generate_region_name_query(service_id)
-#     assert ''.join(query.split()) == ''.join(expected_region_name_query.split())
-#     assert len(data) == 2
-#     assert data[0] == service_id
-#     assert data[1] == service_id
-
-# # TODO may need to revisit
-# @patch("psycopg2.connect")
-# def test_log_updated_services(mock_db_connect):
-#     row_one = {"serviceid": 1,"service_name": "Mustang"}
-#     row_two = {"serviceid": 2,"service_name": "Mustang"}
-#     updated_services = [row_one,row_two]
-#     handler.log_updated_services('mockenv', mock_db_connect,updated_services)
-
-# @patch("psycopg2.connect")
-# def test_log_updated_services_keyerror(mock_db_connect):
-#     row_one = {"service_name": "Mustang"}
-#     row_two = {"service_name": "Mustang"}
-#     updated_services = [row_one,row_two]
-#     with pytest.raises(KeyError):
-#         handler.log_updated_services('mockenv', mock_db_connect,updated_services)
-
-# @patch("psycopg2.connect")
-# @patch(f"{file_path}.log_updated_services", return_value="" )
-# @patch(f"{file_path}.database.execute_cron_query", side_effect=KeyError)
-# @patch(f"{file_path}.generate_update_query", side_effect=[{1:'',2:''}])
-# def test_reset_rag_status(mock_update_query, mock_execute, mock_log, mock_db_connect):
-#     with pytest.raises(KeyError):
-#         handler.reset_rag_status('mockenv', mock_db_connect)
+#TODO  - comeback to best method for this
+@patch(f"{file_path}.getThresholdDate", return_value="2016, 8, 4, 12, 22, 44, 123456")
+def test_getThresholdDate(mock_getThresholdDate):
+    with patch('datetime.datetime') as date_mock:
+        current_timestamp = date_mock.now().return_value
+        threshold_in_days = 1
+        threshold_date = current_timestamp - timedelta(days=threshold_in_days)
+        threshold_date = threshold_date.strftime('%Y-%m-%d %H:%M:%S')
+        returned_date = getThresholdDate(threshold_in_days)
+        # assert returned_date == threshold_date

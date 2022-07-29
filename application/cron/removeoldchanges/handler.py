@@ -1,19 +1,11 @@
 # import psycopg2
 # import psycopg2.extras
 from utilities import logger, database, cron_common
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 
 task_description = "Remove old changes"
 threshold_in_days = 90
-# threshold_in_seconds = threshold_in_days * 60 * 60 * 24
-# threshold_in_seconds = 7776000
-# ignore_org_types = [1, 2]
-# interval_type = "interval"
-# new_status = 1
-# modified_by = "ROBOT"
-# modified_by_id = 9
-# notes = ""
 
 
 def request(event, context):
@@ -98,43 +90,7 @@ def log_deleted_services(env, db_connection, deleted_services):
 
 
 def getThresholdDate(threshold_in_days):
-    threshold_in_seconds = 60 * 60 * 24 * threshold_in_days
     current_timestamp = datetime.now()
-    threshold_date = current_timestamp - threshold_in_seconds
-    threshold_date = threshold_date.strftime("%d-%b-%Y %H:%M:%S")
-    print(threshold_date)
+    threshold_date = current_timestamp - timedelta(days=threshold_in_days)
+    threshold_date = threshold_date.strftime("%Y-%m-%d %H:%M:%S")
     return threshold_date
-
-
-# def
-
-# def get_service_data(db_connection, service_id):
-#     query, data = generate_service_query(service_id)
-#     result_set = database.execute_cron_query(db_connection, query, data)
-#     return result_set
-
-
-# def generate_service_query(service_id):
-#     query = """select uid, name, typeid, parentid
-#             from services
-#             where id = %s
-#     """
-#     data = (service_id,)
-#     return query, data
-
-
-# def get_parent_uid(db_connection, service_id):
-#     query, data = generate_parent_uid_query(service_id)
-#     result_set = database.execute_cron_query(db_connection, query, data)
-#     return result_set
-
-
-# def generate_parent_uid_query(service_id):
-#     query = """select
-#             ser.id as parentid,
-#             ser.uid as parentuid
-#             from services as ser
-#             where ser.id = (select parentid from services where id = %s);
-#     """
-#     data = (service_id,)
-#     return query, data
