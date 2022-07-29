@@ -40,6 +40,6 @@ variable "splunk_firehose_role" {
 
 variable "schedule_removeoldchanges" {
   description = "Schedule for remove old changes job"
-  #change to 7 days after testing
+  #change to once a day at 2am after testing
   default = "rate(5 minutes)"
 }
