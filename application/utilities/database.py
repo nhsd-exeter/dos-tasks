@@ -80,7 +80,7 @@ def execute_cron_query(env, db_connection, query, data):
         return rows
         # TODO add logging as required
     except Exception as e:
-        logger.log_for_error("Transaction failed. Rolling back. Error: {}".format(e))
+        logger.log_for_error(env,"Transaction failed. Rolling back. Error: {}".format(e))
         db_connection.rollback()
     finally:
         cursor.close()
