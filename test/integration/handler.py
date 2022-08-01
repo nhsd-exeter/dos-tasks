@@ -5,11 +5,11 @@ from datetime import datetime
 import os
 
 # Handler called after all hk lambdas in list of lambdas have been triggered
-# Iterates thru same list of hk lambdas run and for each one executes a bespoke query 
-# Checks result of query against expected results - eg should be a new record with id of x 
+# Iterates thru same list of hk lambdas run and for each one executes a bespoke query
+# Checks result of query against expected results - eg should be a new record with id of x
 # If tests pass for hk job A proceed to check job B otherwise fail fast
-# Need to pass db_name as per cron 
-# Need function per hk job  
+# Need to pass db_name as per cron
+# Need function per hk job
 
 
 def request(event, context):
@@ -53,9 +53,8 @@ def get_symptomgroups_data(db_connection):
 
 def check_symptomgroups(db_connection):
     symptomgroup_data = get_symptomgroups_data(db_connection)
-    # TODO 
+    # TODO
     # check record inserted, check record updated, check record deleted
 
 def check_results(db_connection):
     check_symptomgroups(db_connection)
-    
