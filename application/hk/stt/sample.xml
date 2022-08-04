@@ -1,0 +1,1810 @@
+<?xml version="1.0" encoding="utf-8"?>
+<NHSPathways xsi:schemaLocation="http://www.nhspathways.org/webservices/pathways/pathwaysCase.xsd" xmlns="http://www.nhspathways.org/webservices/pathways/pathwaysCase" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <PathwaysCase>
+    <PathwaysReleaseID>25.2.0_internalV3</PathwaysReleaseID>
+    <CaseID>95334e13-c745-4c7a-99af-5f37ae3aa8dd</CaseID>
+    <CADCaseID>7ed1a494-3f9b-4e92-bfa4-1f1d898e63da</CADCaseID>
+    <HostCaseID>6f5f0c4c-7b5a-40dc-bfa7-bb37aec6d9c9</HostCaseID>
+    <CaseTriageStart>2021-03-01T11:14:52.4312169Z</CaseTriageStart>
+    <CaseTriageEnd>2021-03-01T11:17:20.2037808Z</CaseTriageEnd>
+    <PostCode>DH1 2HP</PostCode>
+    <CallHandlerUserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</CallHandlerUserID>
+    <ClinicianUserID />
+    <SymptomGroup>1203</SymptomGroup>
+    <LaunchType>0</LaunchType>
+    <Trauma>
+      <TraumaID>0</TraumaID>
+      <TraumaDescription>Non Trauma</TraumaDescription>
+    </Trauma>
+    <Skillset>
+      <SkillsetID>5</SkillsetID>
+      <SkillsetDescription>111 Call Handler</SkillsetDescription>
+    </Skillset>
+    <Party>
+      <Party>1</Party>
+    </Party>
+    <Patient>
+      <FirstName>Joe</FirstName>
+      <LastName>Bloggs</LastName>
+      <Telephone />
+      <GP />
+      <LocationNotes />
+      <Age>
+        <AgeID>1</AgeID>
+        <AgeDescription>Adult</AgeDescription>
+        <AgeHours>263003</AgeHours>
+        <DOBorYear>01/03/1991</DOBorYear>
+      </Age>
+      <Gender>
+        <GenderID>2</GenderID>
+        <GenderDescription>Female</GenderDescription>
+      </Gender>
+    </Patient>
+    <TriageDisposition>
+      <DispositionCode>Dx75</DispositionCode>
+      <DispositionDescription>MUST contact own GP Practice within 3 working days</DispositionDescription>
+    </TriageDisposition>
+    <FinalDisposition>
+      <DispositionCode>Dx75</DispositionCode>
+      <DispositionDescription>The individual MUST contact a local service within 3 working days.</DispositionDescription>
+    </FinalDisposition>
+    <FinalDispositionCMSID>
+      <FinalDispositionCMSID>1075</FinalDispositionCMSID>
+    </FinalDispositionCMSID>
+    <CallReason>
+      <CallReason>TEST</CallReason>
+    </CallReason>
+    <DOS>
+      <DOStransactionID />
+      <ServiceID />
+      <ServiceName />
+      <ContactDetails />
+      <Open24Hrs />
+      <AccessNotes />
+      <Address />
+      <Capacity />
+    </DOS>
+    <Pathway>
+      <PathwayID>PW1751</PathwayID>
+      <PathwayDescription>Mental Health Problems</PathwayDescription>
+    </Pathway>
+    <TriageLineDetails>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:14:52.7900281Z</TimeIn>
+        <TimeOut>2021-03-01T11:15:33.4502502Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PFA1</PathwayID>
+        <OrderNumber>5</OrderNumber>
+        <AdditionalText />
+        <ReportText>An injury or health problem was the reason for the contact.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>What is the reason for the contact?</QuestionText>
+        <AnswerText>an injury or other health problem</AnswerText>
+        <QuestionType>Tx220074</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:15:33.5126525Z</TimeIn>
+        <TimeOut>2021-03-01T11:15:33.5126525Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PFA1</PathwayID>
+        <OrderNumber>200</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>to'Immediatethreatstolife(SPA/OOHversion)'-'Majorbloodloss'stem</QuestionText>
+        <AnswerText>"present"</AnswerText>
+        <QuestionType>Tx221807</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:15:33.6218666Z</TimeIn>
+        <TimeOut>2021-03-01T11:15:33.6218666Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PA116</PathwayID>
+        <OrderNumber>0</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>injury,illnessorlabourestablishedinEntryFlow</QuestionText>
+        <AnswerText>"present"</AnswerText>
+        <QuestionType>Tx221799</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:15:33.8246758Z</TimeIn>
+        <TimeOut>2021-03-01T11:15:35.9782566Z</TimeOut>
+        <AnswerNumber>3</AnswerNumber>
+        <PathwayID>PA116</PathwayID>
+        <OrderNumber>10100</OrderNumber>
+        <AdditionalText />
+        <ReportText>Heavy bleeding had not occurred in the previous 2 hours.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>Have you been bleeding RED BLOOD very heavily IN THE LAST 2 HOURS?</QuestionText>
+        <AnswerText>no</AnswerText>
+        <QuestionType>Tx224120</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>False</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:15:36.0250613Z</TimeIn>
+        <TimeOut>2021-03-01T11:15:36.0250613Z</TimeOut>
+        <AnswerNumber>2</AnswerNumber>
+        <PathwayID>PA116</PathwayID>
+        <OrderNumber>1100</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>SocialConcernsExcluded</QuestionText>
+        <AnswerText>*</AnswerText>
+        <QuestionType>Tx221343</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:15:36.212269Z</TimeIn>
+        <TimeOut>2021-03-01T11:15:41.9064843Z</TimeOut>
+        <AnswerNumber>4</AnswerNumber>
+        <PathwayID>PA116</PathwayID>
+        <OrderNumber>2300</OrderNumber>
+        <AdditionalText>TEST</AdditionalText>
+        <ReportText>An illness or health problem was the main problem.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>What is the main problem?</QuestionText>
+        <AnswerText>illness or other health problem (specify)</AnswerText>
+        <QuestionType>Tx130011</QuestionType>
+        <SystemFlag>0</SystemFlag>
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText>Illness</DispositionRatText>
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:15:42.3745101Z</TimeIn>
+        <TimeOut>2021-03-01T11:15:44.4494259Z</TimeOut>
+        <AnswerNumber>3</AnswerNumber>
+        <PathwayID>PA118</PathwayID>
+        <OrderNumber>0</OrderNumber>
+        <AdditionalText />
+        <ReportText>The individual was not fighting for breath.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>Are you so breathless that speaking more than a few words is impossible?</QuestionText>
+        <AnswerText>no</AnswerText>
+        <QuestionType>Tx61025</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>False</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:15:44.4962372Z</TimeIn>
+        <TimeOut>2021-03-01T11:15:44.4962372Z</TimeOut>
+        <AnswerNumber>2</AnswerNumber>
+        <PathwayID>PA118</PathwayID>
+        <OrderNumber>100</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>SYSTEM_FLUPANDEMIC</QuestionText>
+        <AnswerText>*</AnswerText>
+        <QuestionType>Tx220845</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:15:44.8238315Z</TimeIn>
+        <TimeOut>2021-03-01T11:15:46.8685923Z</TimeOut>
+        <AnswerNumber>7</AnswerNumber>
+        <PathwayID>PA118</PathwayID>
+        <OrderNumber>5200</OrderNumber>
+        <AdditionalText />
+        <ReportText>The main reason for the assessment was not an allergic reaction, heart attack, chest/upper back pain, probable stroke, recent fit/seizure or suicide attempt.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>WHAT IS SAID TO BE THE MAIN REASON FOR THIS CONTACT?</QuestionText>
+        <AnswerText>more</AnswerText>
+        <QuestionType>Tx223440</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:15:47.0713903Z</TimeIn>
+        <TimeOut>2021-03-01T11:15:49.0214458Z</TimeOut>
+        <AnswerNumber>4</AnswerNumber>
+        <PathwayID>PA118</PathwayID>
+        <OrderNumber>2200</OrderNumber>
+        <AdditionalText />
+        <ReportText>The main reason for contact was not new confusion, declared diabetic hypo/hyperglycaemia, or ICD shock.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>WHAT IS SAID TO BE THE MAIN REASON FOR THIS CONTACT?</QuestionText>
+        <AnswerText>none of the above</AnswerText>
+        <QuestionType>Tx220032</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:15:49.6142616Z</TimeIn>
+        <TimeOut>2021-03-01T11:15:52.5627494Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PA118</PathwayID>
+        <OrderNumber>4200</OrderNumber>
+        <AdditionalText />
+        <ReportText>The skin on the torso felt normal, warm or hot.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>Does the skin on the chest, back or abdomen feel a normal temperature?</QuestionText>
+        <AnswerText>yes - normal, warm or hot</AnswerText>
+        <QuestionType>Tx223142</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText>Warm to touch</DispositionRatText>
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:15:52.6875694Z</TimeIn>
+        <TimeOut>2021-03-01T11:15:52.6875694Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PA118</PathwayID>
+        <OrderNumber>3700</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>ShockAsked</QuestionText>
+        <AnswerText>"present"</AnswerText>
+        <QuestionType>Tx221724</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>7</InterfaceID>
+        <TimeIn>2021-03-01T11:15:52.9215647Z</TimeIn>
+        <TimeOut>2021-03-01T11:16:01.0661515Z</TimeOut>
+        <AnswerNumber>0</AnswerNumber>
+        <PathwayID>PW1751</PathwayID>
+        <OrderNumber>0</OrderNumber>
+        <AdditionalText />
+        <ReportText>Pathway Selected: PW1751, Mental Health Problems</ReportText>
+        <Action>Next</Action>
+        <QuestionText />
+        <AnswerText />
+        <QuestionType />
+        <SystemFlag>0</SystemFlag>
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:16:01.2221622Z</TimeIn>
+        <TimeOut>2021-03-01T11:16:10.1327875Z</TimeOut>
+        <AnswerNumber>3</AnswerNumber>
+        <PathwayID>PW1751</PathwayID>
+        <OrderNumber>0</OrderNumber>
+        <AdditionalText />
+        <ReportText>There was no worsening of a known mental health problem.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>Is this a known mental health problem that has got worse?</QuestionText>
+        <AnswerText>no</AnswerText>
+        <QuestionType>Tx222282</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:16:10.2887927Z</TimeIn>
+        <TimeOut>2021-03-01T11:16:10.2887927Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PW1751</PathwayID>
+        <OrderNumber>900</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>KnownMentalHealthWorseningAsked</QuestionText>
+        <AnswerText>"present"</AnswerText>
+        <QuestionType>Tx224398</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:16:10.6475895Z</TimeIn>
+        <TimeOut>2021-03-01T11:16:12.3792494Z</TimeOut>
+        <AnswerNumber>4</AnswerNumber>
+        <PathwayID>PW1751</PathwayID>
+        <OrderNumber>200</OrderNumber>
+        <AdditionalText />
+        <ReportText>The individual had not been hearing voices, seeing things or behaving abnormally.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>Have you been hearing voices, seeing things or behaving strangely?</QuestionText>
+        <AnswerText>no</AnswerText>
+        <QuestionType>Tx1540</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:16:12.4728712Z</TimeIn>
+        <TimeOut>2021-03-01T11:16:12.4728712Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PW1751</PathwayID>
+        <OrderNumber>1000</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>HearingVoicesSeeingThingsStrangeBehaviourAsked</QuestionText>
+        <AnswerText>"present"</AnswerText>
+        <QuestionType>Tx224466</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:16:12.7692724Z</TimeIn>
+        <TimeOut>2021-03-01T11:16:14.8916508Z</TimeOut>
+        <AnswerNumber>4</AnswerNumber>
+        <PathwayID>PW1751</PathwayID>
+        <OrderNumber>100</OrderNumber>
+        <AdditionalText />
+        <ReportText>The main problem was not depression, low mood or sleep difficulty.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>Is the main problem about depression, feeling low or sleep difficulty?</QuestionText>
+        <AnswerText>no</AnswerText>
+        <QuestionType>Tx222279</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:16:15.2036671Z</TimeIn>
+        <TimeOut>2021-03-01T11:16:17.6373512Z</TimeOut>
+        <AnswerNumber>5</AnswerNumber>
+        <PathwayID>PW1751</PathwayID>
+        <OrderNumber>600</OrderNumber>
+        <AdditionalText />
+        <ReportText>Help or advice about drug, alcohol or solvent misuse was not required.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>Do you need help or advice about a drug, alcohol or solvent problem?</QuestionText>
+        <AnswerText>no</AnswerText>
+        <QuestionType>Tx222278</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:16:17.9337525Z</TimeIn>
+        <TimeOut>2021-03-01T11:16:20.5713067Z</TimeOut>
+        <AnswerNumber>5</AnswerNumber>
+        <PathwayID>PW1751</PathwayID>
+        <OrderNumber>700</OrderNumber>
+        <AdditionalText />
+        <ReportText>There were no problems with anxiety, stress or panic attacks.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>Are you having trouble with anxiety, stress or panic attacks?</QuestionText>
+        <AnswerText>no</AnswerText>
+        <QuestionType>Tx222281</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:16:20.9613317Z</TimeIn>
+        <TimeOut>2021-03-01T11:16:22.6621048Z</TimeOut>
+        <AnswerNumber>4</AnswerNumber>
+        <PathwayID>PW1756</PathwayID>
+        <OrderNumber>0</OrderNumber>
+        <AdditionalText />
+        <ReportText>The individual had not attacked or threatened anyone.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>Have you attacked anyone or threatened them with violence?</QuestionText>
+        <AnswerText>no</AnswerText>
+        <QuestionType>Tx1194</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>False</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:16:22.7401045Z</TimeIn>
+        <TimeOut>2021-03-01T11:16:22.7401045Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PW1756</PathwayID>
+        <OrderNumber>8900</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>PATIENT_PARTY</QuestionText>
+        <AnswerText>==1</AnswerText>
+        <QuestionType>Tx170003</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:16:23.1457177Z</TimeIn>
+        <TimeOut>2021-03-01T11:16:25.204986Z</TimeOut>
+        <AnswerNumber>3</AnswerNumber>
+        <PathwayID>PW1756</PathwayID>
+        <OrderNumber>9100</OrderNumber>
+        <AdditionalText />
+        <ReportText>The individual denied suicidal thoughts.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>Have things got so bad that you are thinking about ending your life?</QuestionText>
+        <AnswerText>no</AnswerText>
+        <QuestionType>Tx223597</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:16:25.2985881Z</TimeIn>
+        <TimeOut>2021-03-01T11:16:25.2985881Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PW1756</PathwayID>
+        <OrderNumber>10400</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>EndingLifeAsked</QuestionText>
+        <AnswerText>"present"</AnswerText>
+        <QuestionType>Tx223684</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:16:25.8446163Z</TimeIn>
+        <TimeOut>2021-03-01T11:16:27.825861Z</TimeOut>
+        <AnswerNumber>3</AnswerNumber>
+        <PathwayID>PW1756</PathwayID>
+        <OrderNumber>1100</OrderNumber>
+        <AdditionalText />
+        <ReportText>There was no new or worsening confusion.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>Have you suddenly become confused OR more confused than usual?</QuestionText>
+        <AnswerText>no</AnswerText>
+        <QuestionType>Tx1213</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:16:28.1066763Z</TimeIn>
+        <TimeOut>2021-03-01T11:16:31.8351821Z</TimeOut>
+        <AnswerNumber>5</AnswerNumber>
+        <PathwayID>PW1756</PathwayID>
+        <OrderNumber>1400</OrderNumber>
+        <AdditionalText />
+        <ReportText>Medication type or dosage had not changed within the previous 2 weeks.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>Have you had any change of medication IN THE LAST 2 WEEKS?</QuestionText>
+        <AnswerText>no</AnswerText>
+        <QuestionType>Tx2947</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:16:32.1939954Z</TimeIn>
+        <TimeOut>2021-03-01T11:16:36.0791117Z</TimeOut>
+        <AnswerNumber>6</AnswerNumber>
+        <PathwayID>PW1756</PathwayID>
+        <OrderNumber>11700</OrderNumber>
+        <AdditionalText />
+        <ReportText>A major life event had not affected the individual's life in the last 6 months.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>Have you had any major life event IN THE LAST 6 MONTHS?</QuestionText>
+        <AnswerText>no</AnswerText>
+        <QuestionType>Tx222000</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:16:36.3599215Z</TimeIn>
+        <TimeOut>2021-03-01T11:16:38.6843955Z</TimeOut>
+        <AnswerNumber>5</AnswerNumber>
+        <PathwayID>PW1756</PathwayID>
+        <OrderNumber>2900</OrderNumber>
+        <AdditionalText />
+        <ReportText>There was no unexplained weight loss or gain or intolerance of extreme temperatures.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>Have you had any of these symptoms?</QuestionText>
+        <AnswerText>no</AnswerText>
+        <QuestionType>Tx715</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:16:38.8871965Z</TimeIn>
+        <TimeOut>2021-03-01T11:16:40.8855822Z</TimeOut>
+        <AnswerNumber>3</AnswerNumber>
+        <PathwayID>PW1756</PathwayID>
+        <OrderNumber>3700</OrderNumber>
+        <AdditionalText />
+        <ReportText>The individual had not experienced intrusive memories of a past traumatic event.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>Are you troubled by memories of a past stressful or traumatic experience?</QuestionText>
+        <AnswerText>no</AnswerText>
+        <QuestionType>Tx221764</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:16:41.0883781Z</TimeIn>
+        <TimeOut>2021-03-01T11:16:42.5236265Z</TimeOut>
+        <AnswerNumber>3</AnswerNumber>
+        <PathwayID>PW1756</PathwayID>
+        <OrderNumber>3800</OrderNumber>
+        <AdditionalText />
+        <ReportText>There was no recent history of severe headaches.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>Have you started getting severe headaches?</QuestionText>
+        <AnswerText>no</AnswerText>
+        <QuestionType>Tx140144</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:16:42.7264239Z</TimeIn>
+        <TimeOut>2021-03-01T11:16:45.7068576Z</TimeOut>
+        <AnswerNumber>2</AnswerNumber>
+        <PathwayID>PW1756</PathwayID>
+        <OrderNumber>4300</OrderNumber>
+        <AdditionalText />
+        <ReportText>The individual had feelings of being down, depressed or hopeless during the last 4 weeks.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>Have you had any of the following DURING THE LAST 4 WEEKS?</QuestionText>
+        <AnswerText>felt down, depressed or hopeless</AnswerText>
+        <QuestionType>Tx221762</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText>Felt down, depressed or hopeless in last 4 weeks</DispositionRatText>
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords>Depression, worsening</CxKeywords>
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:16:45.9564479Z</TimeIn>
+        <TimeOut>2021-03-01T11:16:50.4359416Z</TimeOut>
+        <AnswerNumber>3</AnswerNumber>
+        <PathwayID>PW1756</PathwayID>
+        <OrderNumber>4000</OrderNumber>
+        <AdditionalText />
+        <ReportText>There had been no previous medical assessment of the problem.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>Have you already seen a doctor about the problem?</QuestionText>
+        <AnswerText>no</AnswerText>
+        <QuestionType>Tx1536</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:16:50.513938Z</TimeIn>
+        <TimeOut>2021-03-01T11:16:50.513938Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PW1756</PathwayID>
+        <OrderNumber>12800</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>IAPTReferral</QuestionText>
+        <AnswerText>"present"</AnswerText>
+        <QuestionType>Tx225467</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:16:50.5919438Z</TimeIn>
+        <TimeOut>2021-03-01T11:16:50.5919438Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PW1756</PathwayID>
+        <OrderNumber>4700</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>SDPCDepressedMood</QuestionText>
+        <AnswerText>"PC depressed mood"</AnswerText>
+        <QuestionType>Tx222027</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>4177</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:16:50.6699496Z</TimeIn>
+        <TimeOut>2021-03-01T11:16:50.6699496Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PW1756</PathwayID>
+        <OrderNumber>5100</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>Dx75</QuestionText>
+        <AnswerText>"present"</AnswerText>
+        <QuestionType>Tx222006</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>False</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:16:50.8103412Z</TimeIn>
+        <TimeOut>2021-03-01T11:16:50.8103412Z</TimeOut>
+        <AnswerNumber>2</AnswerNumber>
+        <PathwayID>PT8</PathwayID>
+        <OrderNumber>0</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>EDStreaming</QuestionText>
+        <AnswerText>*</AnswerText>
+        <QuestionType>Tx225375</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>False</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:16:50.8883459Z</TimeIn>
+        <TimeOut>2021-03-01T11:16:50.8883459Z</TimeOut>
+        <AnswerNumber>2</AnswerNumber>
+        <PathwayID>PT8</PathwayID>
+        <OrderNumber>5</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>MentalHealthSafetyAsked</QuestionText>
+        <AnswerText>*</AnswerText>
+        <QuestionType>Tx223263</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>False</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:16:50.9663482Z</TimeIn>
+        <TimeOut>2021-03-01T11:16:50.9663482Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PT8</PathwayID>
+        <OrderNumber>10</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>PATIENT_PARTY</QuestionText>
+        <AnswerText>==1</AnswerText>
+        <QuestionType>Tx170003</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:16:51.2315507Z</TimeIn>
+        <TimeOut>2021-03-01T11:16:53.4312174Z</TimeOut>
+        <AnswerNumber>5</AnswerNumber>
+        <PathwayID>PT8</PathwayID>
+        <OrderNumber>100</OrderNumber>
+        <AdditionalText />
+        <ReportText>The individual had not considered harming themselves or anyone else.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>Have you THOUGHT about doing something to harm yourself or anyone else?</QuestionText>
+        <AnswerText>no</AnswerText>
+        <QuestionType>Tx221961</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:16:53.6652176Z</TimeIn>
+        <TimeOut>2021-03-01T11:16:55.8336661Z</TimeOut>
+        <AnswerNumber>3</AnswerNumber>
+        <PathwayID>PT8</PathwayID>
+        <OrderNumber>800</OrderNumber>
+        <AdditionalText />
+        <ReportText>No one else was considered to be vulnerable and at risk</ReportText>
+        <Action>Next</Action>
+        <QuestionText>IS THERE ANYONE VULNERABLE AND AT RISK BECAUSE OF THE SITUATION?</QuestionText>
+        <AnswerText>no</AnswerText>
+        <QuestionType>Tx221941</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>False</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:16:55.927268Z</TimeIn>
+        <TimeOut>2021-03-01T11:16:55.927268Z</TimeOut>
+        <AnswerNumber>2</AnswerNumber>
+        <PathwayID>PT8</PathwayID>
+        <OrderNumber>1500</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>Dx11</QuestionText>
+        <AnswerText>*</AnswerText>
+        <QuestionType>Tx222018</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>False</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:16:56.0208707Z</TimeIn>
+        <TimeOut>2021-03-01T11:16:56.0208707Z</TimeOut>
+        <AnswerNumber>2</AnswerNumber>
+        <PathwayID>PT8</PathwayID>
+        <OrderNumber>1300</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>Dx05</QuestionText>
+        <AnswerText>*</AnswerText>
+        <QuestionType>Tx222015</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>False</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:16:56.1144836Z</TimeIn>
+        <TimeOut>2021-03-01T11:16:56.1144836Z</TimeOut>
+        <AnswerNumber>2</AnswerNumber>
+        <PathwayID>PT8</PathwayID>
+        <OrderNumber>1600</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>Dx12</QuestionText>
+        <AnswerText>*</AnswerText>
+        <QuestionType>Tx222377</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>False</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:16:56.2080725Z</TimeIn>
+        <TimeOut>2021-03-01T11:16:56.2080725Z</TimeOut>
+        <AnswerNumber>2</AnswerNumber>
+        <PathwayID>PT8</PathwayID>
+        <OrderNumber>1200</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>Dx06</QuestionText>
+        <AnswerText>*</AnswerText>
+        <QuestionType>Tx222016</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>False</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:16:56.3016862Z</TimeIn>
+        <TimeOut>2021-03-01T11:16:56.3016862Z</TimeOut>
+        <AnswerNumber>2</AnswerNumber>
+        <PathwayID>PT8</PathwayID>
+        <OrderNumber>1700</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>Dx13</QuestionText>
+        <AnswerText>*</AnswerText>
+        <QuestionType>Tx222019</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>False</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:16:56.3952755Z</TimeIn>
+        <TimeOut>2021-03-01T11:16:56.3952755Z</TimeOut>
+        <AnswerNumber>2</AnswerNumber>
+        <PathwayID>PT8</PathwayID>
+        <OrderNumber>900</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>Dx07</QuestionText>
+        <AnswerText>*</AnswerText>
+        <QuestionType>Tx222315</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>False</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:16:56.4888785Z</TimeIn>
+        <TimeOut>2021-03-01T11:16:56.4888785Z</TimeOut>
+        <AnswerNumber>2</AnswerNumber>
+        <PathwayID>PT8</PathwayID>
+        <OrderNumber>1900</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>Dx14</QuestionText>
+        <AnswerText>*</AnswerText>
+        <QuestionType>Tx222082</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>False</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:16:56.5980836Z</TimeIn>
+        <TimeOut>2021-03-01T11:16:56.5980836Z</TimeOut>
+        <AnswerNumber>2</AnswerNumber>
+        <PathwayID>PT8</PathwayID>
+        <OrderNumber>1100</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>Dx08</QuestionText>
+        <AnswerText>*</AnswerText>
+        <QuestionType>Tx222017</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>False</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:16:56.7228921Z</TimeIn>
+        <TimeOut>2021-03-01T11:16:56.7228921Z</TimeOut>
+        <AnswerNumber>2</AnswerNumber>
+        <PathwayID>PT8</PathwayID>
+        <OrderNumber>1800</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>Dx15</QuestionText>
+        <AnswerText>*</AnswerText>
+        <QuestionType>Tx222378</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>False</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:16:56.8320893Z</TimeIn>
+        <TimeOut>2021-03-01T11:16:56.8320893Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PT8</PathwayID>
+        <OrderNumber>1000</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>Dx75</QuestionText>
+        <AnswerText>=="present"</AnswerText>
+        <QuestionType>Tx222013</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>False</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:16:56.9412927Z</TimeIn>
+        <TimeOut>2021-03-01T11:16:56.9412927Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PT8</PathwayID>
+        <OrderNumber>6600</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>IAPTReferral</QuestionText>
+        <AnswerText>=="present"</AnswerText>
+        <QuestionType>Tx225468</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>False</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:16:57.0349045Z</TimeIn>
+        <TimeOut>2021-03-01T11:16:57.0349045Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PT8</PathwayID>
+        <OrderNumber>7300</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>PATIENT_AGEGROUP</QuestionText>
+        <AnswerText>=="ADULT"</AnswerText>
+        <QuestionType>Tx221039</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>False</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:16:57.1440969Z</TimeIn>
+        <TimeOut>2021-03-01T11:16:57.1440969Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PT8</PathwayID>
+        <OrderNumber>7400</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>PATIENT_AGE</QuestionText>
+        <AnswerText>&gt;=18</AnswerText>
+        <QuestionType>Tx224830</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:16:57.40931Z</TimeIn>
+        <TimeOut>2021-03-01T11:17:04.8506872Z</TimeOut>
+        <AnswerNumber>3</AnswerNumber>
+        <PathwayID>PT8</PathwayID>
+        <OrderNumber>7800</OrderNumber>
+        <AdditionalText />
+        <ReportText>The individual was not receiving therapy or under specialist care.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>Are you currently having therapy or under specialist care for this problem?</QuestionText>
+        <AnswerText>no</AnswerText>
+        <QuestionType>Tx225459</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText>Talking therapies referral</DispositionRatText>
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords>Talking therapies referral</CxKeywords>
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2021-03-01T11:17:04.959882Z</TimeIn>
+        <TimeOut>2021-03-01T11:17:04.959882Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PT8</PathwayID>
+        <OrderNumber>8000</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>SDAllImprovingAccessToPsychologicalTherapiesService</QuestionText>
+        <AnswerText>"Improving Access to Psychological Therapies service"</AnswerText>
+        <QuestionType>Tx225444</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>4533</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>4</InterfaceID>
+        <TimeIn>2021-03-01T11:17:05.9427114Z</TimeIn>
+        <TimeOut>2021-03-01T11:17:12.7927378Z</TimeOut>
+        <AnswerNumber>0</AnswerNumber>
+        <PathwayID>PT8</PathwayID>
+        <OrderNumber>8000</OrderNumber>
+        <AdditionalText />
+        <ReportText>DOS call</ReportText>
+        <Action>Next</Action>
+        <QuestionText />
+        <AnswerText />
+        <QuestionType>DOS</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>4</InterfaceID>
+        <TimeIn>2021-03-01T11:17:05.9427114Z</TimeIn>
+        <TimeOut>2021-03-01T11:17:12.7927378Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PT8</PathwayID>
+        <OrderNumber>8000</OrderNumber>
+        <AdditionalText />
+        <ReportText>The individual MUST contact a local service within 3 working days.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>MUST contact a local service within 3 working days</QuestionText>
+        <AnswerText>The individual MUST contact a local service within 3 working days.</AnswerText>
+        <QuestionType>Dx220041</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode>Dx75</DispositionCode>
+          <DispositionRationale>The symptoms must be assessed, even if they have improved. It is best that they are seen by a local service to ensure continuity of care. Referral to out of hours service is not appropriate.</DispositionRationale>
+          <DispositionOverrideID>1</DispositionOverrideID>
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>4</InterfaceID>
+        <TimeIn>2021-03-01T11:17:05.9427114Z</TimeIn>
+        <TimeOut>2021-03-01T11:17:12.7927378Z</TimeOut>
+        <AnswerNumber>2</AnswerNumber>
+        <PathwayID>PT8</PathwayID>
+        <OrderNumber>8000</OrderNumber>
+        <AdditionalText />
+        <ReportText>Before you go, I will just check whether I need to give you any further instructions or advice.</ReportText>
+        <Action>Next</Action>
+        <QuestionText />
+        <AnswerText />
+        <QuestionType>Cx220784</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>3</InterfaceID>
+        <TimeIn>2021-03-01T11:17:13.1515517Z</TimeIn>
+        <TimeOut>2021-03-01T11:17:20.2037808Z</TimeOut>
+        <AnswerNumber>2</AnswerNumber>
+        <PathwayID>PT8</PathwayID>
+        <OrderNumber>8000</OrderNumber>
+        <AdditionalText />
+        <ReportText>Any thoughts about ending your life or harming yourself - CONTACT THE GP PRACTICE OR OUT OF HOURS SERVICE IMMEDIATELY.</ReportText>
+        <Action>Next</Action>
+        <QuestionText />
+        <AnswerText />
+        <QuestionType>Cx220893</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>3</InterfaceID>
+        <TimeIn>2021-03-01T11:17:13.1515517Z</TimeIn>
+        <TimeOut>2021-03-01T11:17:20.2037808Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PT8</PathwayID>
+        <OrderNumber>8000</OrderNumber>
+        <AdditionalText />
+        <ReportText>You can also access support via nhs.uk (search for mental health support) or contact a healthcare professional.</ReportText>
+        <Action>Next</Action>
+        <QuestionText />
+        <AnswerText />
+        <QuestionType>Cx221684</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>3</InterfaceID>
+        <TimeIn>2021-03-01T11:17:13.1515517Z</TimeIn>
+        <TimeOut>2021-03-01T11:17:20.2037808Z</TimeOut>
+        <AnswerNumber>2</AnswerNumber>
+        <PathwayID>PT8</PathwayID>
+        <OrderNumber>8000</OrderNumber>
+        <AdditionalText />
+        <ReportText>If there are any new symptoms, or if the condition gets worse, changes or you have any other concerns, call us back.</ReportText>
+        <Action>Next</Action>
+        <QuestionText />
+        <AnswerText />
+        <QuestionType>Cx1910</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>bbe93c3d-f6c4-4a76-9442-d130b4343be7</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>3</InterfaceID>
+        <TimeIn>2021-03-01T11:17:13.1515517Z</TimeIn>
+        <TimeOut>2021-03-01T11:17:20.2037808Z</TimeOut>
+        <AnswerNumber>4</AnswerNumber>
+        <PathwayID>PT8</PathwayID>
+        <OrderNumber>8000</OrderNumber>
+        <AdditionalText />
+        <ReportText>Remember to take a list of any current medications if you go to the out of hours surgery.</ReportText>
+        <Action>Next</Action>
+        <QuestionText />
+        <AnswerText />
+        <QuestionType>Cx1910</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+    </TriageLineDetails>
+  </PathwaysCase>
+</NHSPathways>
