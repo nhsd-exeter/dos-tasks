@@ -1,4 +1,4 @@
-module "symptomgroups_lambda" {
+module "stt_lambda" {
   source             = "../../modules/lambda"
   name               = "hk-stt"
   image_uri          = "${var.aws_ecr}/${var.project_group_short}/${var.project_name_short}/hk-stt:${var.image_version}"
