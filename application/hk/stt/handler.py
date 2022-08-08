@@ -1,11 +1,11 @@
 import xml.etree.ElementTree as ET
 import zipfile
 import io
+
 # from scenario import Scenario
 from . import scenario
 from utilities import logger, message, common, database
 from datetime import datetime
-
 
 
 ns = {"pathwayscase": "http://www.nhspathways.org/webservices/pathways/pathwaysCase"}
@@ -41,7 +41,7 @@ def process_zipfile(filename):
         with zipfile.ZipFile(filename, mode="r") as archive:
             for name in archive.namelist():
                 scenario_file = archive.read(name)
-                process_scenario_file(name,io.StringIO(scenario_file.decode('utf-8')))
+                process_scenario_file(name, io.StringIO(scenario_file.decode("utf-8")))
     else:
         # TODO
         print("not a zip")
@@ -57,6 +57,7 @@ def get_scenario_id_from_file_name(file_name):
         name_elements = elements[0].split(" ")
     return name_elements[1].replace('"', "")
 
+
 def process_scenario_file(file_name, scenario_file):
 
     tree = get_tree(scenario_file)
@@ -67,8 +68,20 @@ def process_scenario_file(file_name, scenario_file):
     final_disposition_group_cmsid = get_final_disposition_group_cmsid(tree)
     final_disposition_code = get_final_disposition_code(tree)
     report_texts, symptom_discriminator_uid, symptom_discriminator_desc_text = get_triage_line_data(tree)
-    scenar = scenario.Scenario(pathways_release_id, file_name,symptom_group, triage_disposition_uid, triage_disposition_description, final_disposition_group_cmsid, final_disposition_code, report_texts, symptom_discriminator_uid, symptom_discriminator_desc_text)
+    scenar = scenario.Scenario(
+        pathways_release_id,
+        file_name,
+        symptom_group,
+        triage_disposition_uid,
+        triage_disposition_description,
+        final_disposition_group_cmsid,
+        final_disposition_code,
+        report_texts,
+        symptom_discriminator_uid,
+        symptom_discriminator_desc_text,
+    )
     return scenar
+
 
 def get_tree(file):
     tree = ET.parse(file)
@@ -78,11 +91,13 @@ def get_tree(file):
 def get_root(tree):
     return tree.getroot()
 
+
 # TODO need to handle exceptions eg non numeric bundles like dental
-def get_pathways_release_id(tree)-> str:
+def get_pathways_release_id(tree) -> str:
     pathways_release_id = tree.find("./pathwayscase:PathwaysCase/pathwayscase:PathwaysReleaseID", ns)
     release_id = pathways_release_id.text.split("_")
     return release_id[0]
+
 
 def get_symptom_group(tree):
     symptom_group_element = tree.find("./pathwayscase:PathwaysCase/pathwayscase:SymptomGroup[1]", ns)
