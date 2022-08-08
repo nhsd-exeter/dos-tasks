@@ -10,11 +10,13 @@ from utilities import secrets,common
 
 file_path = "application.hk.stt.handler"
 env = "unittest"
-# test/unit/hk/stt/Scenario_2.xml
+bucket = "NoSuchBucket"
+
 sample_scenario_file_name = "test-files/Scenario_2.xml"
 alt_scenario_file_name = "test-files/Scenario 1.xml"
 malformed_scenario_file_name = "test-files/Scenario_malformed.xml"
-sample_bundle_file_name = "19.0.zip"
+sample_bundle_file_name = "test-files/19.0.zip"
+malformed_bundle_file_name = "test-files/Scenario_malformed.zip"
 expected_symptom_group = "1203"
 expected_triage_disposition_uid = "Dx75"
 expected_triage_disposition_description = "MUST contact own GP Practice within 3 working days"
@@ -30,9 +32,64 @@ expected_scenario_id = "2"
 alt_expected_scenario_id = "1"
 #  TODO get tree once
 
-def test_listdir():
-    print(os.listdir())
-    assert True == True
+
+@patch(f"{file_path}.common.archive_file")
+@patch(f"{file_path}.message.send_failure_slack_message")
+@patch(f"{file_path}.message.send_success_slack_message")
+@patch(f"{file_path}.database.close_connection", return_value="")
+@patch(f"{file_path}.database.connect_to_database", return_value="db_connection")
+@patch(f"{file_path}.common.retrieve_file_from_bucket", return_value="zip_file")
+@patch(f"{file_path}.process_zipfile", return_value=True)
+@patch(f"{file_path}.message.send_start_message")
+def test_handler_pass(mock_send_start_message,
+mock_process_zipfile,
+mock_retrieve_file_from_bucket,
+mock_db_connection,
+mock_close_connection,
+mock_send_success_slack_message,
+mock_send_failure_slack_message,
+mock_archive_file):
+    """Test top level request calls downstream functions - success"""
+    payload = generate_event_payload()
+    result = handler.request(event=payload, context=None)
+    assert result == "Import STT scenarios execution completed"
+    mock_send_start_message.assert_called_once()
+    mock_process_zipfile.assert_called_once()
+    mock_retrieve_file_from_bucket.assert_called_once()
+    mock_db_connection.assert_called_once()
+    mock_close_connection.assert_called_once()
+    mock_archive_file.assert_called_once()
+    mock_send_success_slack_message.assert_called_once()
+    assert mock_send_failure_slack_message.call_count == 0
+
+@patch(f"{file_path}.common.archive_file")
+@patch(f"{file_path}.message.send_failure_slack_message")
+@patch(f"{file_path}.message.send_success_slack_message")
+@patch(f"{file_path}.database.close_connection", return_value="")
+@patch(f"{file_path}.database.connect_to_database", return_value="db_connection")
+@patch(f"{file_path}.common.retrieve_file_from_bucket", return_value="zip_file")
+@patch(f"{file_path}.process_zipfile", return_value=False)
+@patch(f"{file_path}.message.send_start_message")
+def test_handler_fail(mock_send_start_message,
+mock_process_zipfile,
+mock_retrieve_file_from_bucket,
+mock_db_connection,
+mock_close_connection,
+mock_send_success_slack_message,
+mock_send_failure_slack_message,
+mock_archive_file):
+    """Test top level request calls downstream functions - success"""
+    payload = generate_event_payload()
+    result = handler.request(event=payload, context=None)
+    assert result == "Import STT scenarios execution completed"
+    mock_send_start_message.assert_called_once()
+    mock_process_zipfile.assert_called_once()
+    mock_retrieve_file_from_bucket.assert_called_once()
+    mock_db_connection.assert_called_once()
+    mock_close_connection.assert_called_once()
+    mock_archive_file.assert_called_once()
+    mock_send_failure_slack_message.assert_called_once()
+    assert mock_send_success_slack_message.call_count == 0
 
 def test_get_pathways_release_id():
     """Test function to extract bundle/pathways release version from xml"""
@@ -115,9 +172,18 @@ def test_process_malformed_scenario():
 
 @patch("psycopg2.connect")
 def test_process_zipfile(mock_db_connect):
-    handler.process_zipfile(mock_db_connect, sample_bundle_file_name)
-    # TODO
-    assert True == True
+    processed = handler.process_zipfile(mock_db_connect, sample_bundle_file_name)
+    assert processed == True
+
+@patch("psycopg2.connect")
+def test_process_non_zipfile(mock_db_connect):
+    processed = handler.process_zipfile(mock_db_connect, alt_scenario_file_name)
+    assert processed == False
+
+@patch("psycopg2.connect")
+def test_process_malformed_xml_in_zipfile(mock_db_connect):
+    processed = handler.process_zipfile(mock_db_connect, malformed_bundle_file_name)
+    assert processed == False
 
 def test_get_insert_query():
     expected_report_texts = "One.Two.Three"
@@ -142,3 +208,7 @@ def test_get_insert_query():
         expected_symptom_discriminator_desc_text,
         sample_scenario_file_name,
         sample_scenario_file_name)
+
+def generate_event_payload():
+    """Utility function to generate dummy event data"""
+    return {"filename": sample_scenario_file_name, "env": env, "bucket": bucket}

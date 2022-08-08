@@ -25,7 +25,11 @@ def request(event, context):
         db_connection = database.connect_to_database(env)
         # TODO will be a compressed file - testing on .zip -  rar?
         bundle_zip = common.retrieve_file_from_bucket(bucket, filename, event, start)
-        process_zipfile(db_connection, bundle_zip)
+        processed = process_zipfile(db_connection, bundle_zip)
+        if processed is True:
+            message.send_success_slack_message()
+        else:
+            message.send_failure_slack_message(event, start)
         # TODO will need to unpack
     except Exception as e:
         logger.log_for_error(env, "Problem {}".format(e))
@@ -37,6 +41,7 @@ def request(event, context):
 
 
 def process_zipfile(db_connection, filename):
+    processed = True
     if zipfile.is_zipfile(filename):
         with zipfile.ZipFile(filename, mode="r") as archive:
             for name in archive.namelist():
@@ -45,10 +50,12 @@ def process_zipfile(db_connection, filename):
                     template_scenario = process_scenario_file(name, io.StringIO(scenario_file.decode("utf-8")))
                     insert_template_scenario(db_connection, template_scenario)
                 except Exception as e:
-                    logger.log_for_error("stt", "Problem {}".format(e))
+                    processed = False
+                    logger.log_for_error("stt", "Problem processing scenario file {0}: {1}".format(name, e))
     else:
-        # TODO
-        print("not a zip")
+        processed = False
+        logger.log_for_error("stt", "Release bundle {0} is not a zip file".format(filename))
+    return processed
 
 
 def insert_template_scenario(db_connection, template_scenario):
