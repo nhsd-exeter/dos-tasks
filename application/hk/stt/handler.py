@@ -25,7 +25,7 @@ def request(event, context):
         db_connection = database.connect_to_database(env)
         # TODO will be a compressed file - testing on .zip -  rar?
         bundle_zip = common.retrieve_file_from_bucket(bucket, filename, event, start)
-        process_zipfile(bundle_zip)
+        process_zipfile(db_connection, bundle_zip)
         # TODO will need to unpack
     except Exception as e:
         logger.log_for_error(env, "Problem {}".format(e))
@@ -36,15 +36,48 @@ def request(event, context):
     return task_description + " execution completed"
 
 
-def process_zipfile(filename):
+def process_zipfile(db_connection, filename):
     if zipfile.is_zipfile(filename):
         with zipfile.ZipFile(filename, mode="r") as archive:
             for name in archive.namelist():
                 scenario_file = archive.read(name)
-                process_scenario_file(name, io.StringIO(scenario_file.decode("utf-8")))
+                try:
+                    template_scenario = process_scenario_file(name, io.StringIO(scenario_file.decode("utf-8")))
+                    insert_template_scenario(db_connection, template_scenario)
+                except Exception as e:
+                    logger.log_for_error("stt", "Problem {}".format(e))
     else:
         # TODO
         print("not a zip")
+
+
+def insert_template_scenario(db_connection, template_scenario):
+    query, data = get_insert_query(template_scenario)
+    database.execute_query(db_connection, query, data)
+
+
+def get_insert_query(template_scenario):
+    query = """insert into pathwaysdos.searchscenarios (releaseid, scenarioid, symptomgroup_uid, triagedispositionuid,
+    triage_disposition_description, final_disposition_group_cmsid, final_disposition_code,
+    report_texts, symptom_discriminator_uid, symptom_discriminator_desc_text, scenariofilename,
+    scenariofile, created_on)
+    values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,now()
+    )"""
+    data = (
+        template_scenario.pathways_release_id,
+        template_scenario.file_name,
+        template_scenario.symptom_group,
+        template_scenario.triage_disposition_uid,
+        template_scenario.triage_disposition_description,
+        template_scenario.final_disposition_group_cmsid,
+        template_scenario.final_disposition_code,
+        template_scenario.report_texts,
+        template_scenario.symptom_discriminator_uid,
+        template_scenario.symptom_discriminator_desc_text,
+        template_scenario.file_name,
+        template_scenario.file_name,
+    )
+    return query, data
 
 
 def get_scenario_id_from_file_name(file_name):
@@ -59,28 +92,32 @@ def get_scenario_id_from_file_name(file_name):
 
 
 def process_scenario_file(file_name, scenario_file):
+    try:
+        tree = get_tree(scenario_file)
+        pathways_release_id = get_pathways_release_id(tree)
+        symptom_group = get_symptom_group(tree)
+        triage_disposition_uid = get_triage_disposition_uid(tree)
+        triage_disposition_description = get_triage_disposition_description(tree)
+        final_disposition_group_cmsid = get_final_disposition_group_cmsid(tree)
+        final_disposition_code = get_final_disposition_code(tree)
+        report_texts, symptom_discriminator_uid, symptom_discriminator_desc_text = get_triage_line_data(tree)
+        template_scenario = scenario.Scenario(
+            pathways_release_id,
+            file_name,
+            symptom_group,
+            triage_disposition_uid,
+            triage_disposition_description,
+            final_disposition_group_cmsid,
+            final_disposition_code,
+            report_texts,
+            symptom_discriminator_uid,
+            symptom_discriminator_desc_text,
+        )
+    except ET.ParseError as e:
+        logger.log_for_error("stt", "Invalid xml {}".format(e))
+        raise e
 
-    tree = get_tree(scenario_file)
-    pathways_release_id = get_pathways_release_id(tree)
-    symptom_group = get_symptom_group(tree)
-    triage_disposition_uid = get_triage_disposition_uid(tree)
-    triage_disposition_description = get_triage_disposition_description(tree)
-    final_disposition_group_cmsid = get_final_disposition_group_cmsid(tree)
-    final_disposition_code = get_final_disposition_code(tree)
-    report_texts, symptom_discriminator_uid, symptom_discriminator_desc_text = get_triage_line_data(tree)
-    scenar = scenario.Scenario(
-        pathways_release_id,
-        file_name,
-        symptom_group,
-        triage_disposition_uid,
-        triage_disposition_description,
-        final_disposition_group_cmsid,
-        final_disposition_code,
-        report_texts,
-        symptom_discriminator_uid,
-        symptom_discriminator_desc_text,
-    )
-    return scenar
+    return template_scenario
 
 
 def get_tree(file):

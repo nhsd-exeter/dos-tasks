@@ -99,6 +99,19 @@ def execute_query(env, db_connection, query, data):
         cursor.close()
 
 
+def execute_query(db_connection, query, data):
+    cursor = db_connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    try:
+        cursor.execute(query, data)
+        db_connection.commit()
+        # TODO add logging as required
+    except Exception as e:
+        logger.log_for_error("Transaction failed. Rolling back. Error: {}".format(e))
+        db_connection.rollback()
+    finally:
+        cursor.close()
+
+
 class DB:
     def __init__(self) -> None:
         self.db_host = ""

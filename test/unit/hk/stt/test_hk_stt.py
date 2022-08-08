@@ -2,6 +2,7 @@ from unittest.mock import Mock, patch
 import pytest
 import string
 import psycopg2
+import os
 
 from .. import handler
 # from .. import scenario
@@ -10,8 +11,9 @@ from utilities import secrets,common
 file_path = "application.hk.stt.handler"
 env = "unittest"
 # test/unit/hk/stt/Scenario_2.xml
-sample_scenario_file_name = "Scenario_2.xml"
-alt_scenario_file_name = "Scenario 1.xml"
+sample_scenario_file_name = "test-files/Scenario_2.xml"
+alt_scenario_file_name = "test-files/Scenario 1.xml"
+malformed_scenario_file_name = "test-files/Scenario_malformed.xml"
 sample_bundle_file_name = "19.0.zip"
 expected_symptom_group = "1203"
 expected_triage_disposition_uid = "Dx75"
@@ -27,6 +29,10 @@ expected_pathways_release_id = "25.2.0"
 expected_scenario_id = "2"
 alt_expected_scenario_id = "1"
 #  TODO get tree once
+
+def test_listdir():
+    print(os.listdir())
+    assert True == True
 
 def test_get_pathways_release_id():
     """Test function to extract bundle/pathways release version from xml"""
@@ -103,9 +109,36 @@ def test_process_scenario():
     assert scenario.symptom_discriminator_uid == expected_symptom_discriminator_uid
     assert scenario.symptom_discriminator_desc_text == expected_symptom_discriminator_desc_text
 
+def test_process_malformed_scenario():
+    with pytest.raises(Exception):
+        handler.process_scenario_file(malformed_scenario_file_name,malformed_scenario_file_name)
 
-def test_process_zipfile():
-    handler.process_zipfile(sample_bundle_file_name)
+@patch("psycopg2.connect")
+def test_process_zipfile(mock_db_connect):
+    handler.process_zipfile(mock_db_connect, sample_bundle_file_name)
     # TODO
     assert True == True
 
+def test_get_insert_query():
+    expected_report_texts = "One.Two.Three"
+    template_scenario = handler.process_scenario_file(sample_scenario_file_name,sample_scenario_file_name)
+    template_scenario.report_texts = expected_report_texts
+    query, data = handler.get_insert_query(template_scenario)
+    assert query == """insert into pathwaysdos.searchscenarios (releaseid, scenarioid, symptomgroup_uid, triagedispositionuid,
+    triage_disposition_description, final_disposition_group_cmsid, final_disposition_code,
+    report_texts, symptom_discriminator_uid, symptom_discriminator_desc_text, scenariofilename,
+    scenariofile, created_on)
+    values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,now()
+    )"""
+    assert data == (expected_pathways_release_id,
+        sample_scenario_file_name,
+        expected_symptom_group,
+        expected_triage_disposition_uid,
+        expected_triage_disposition_description,
+        expected_final_disposition_group_cmsid,
+        expected_final_disposition_code,
+        expected_report_texts,
+        expected_symptom_discriminator_uid,
+        expected_symptom_discriminator_desc_text,
+        sample_scenario_file_name,
+        sample_scenario_file_name)
