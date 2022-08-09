@@ -24,7 +24,7 @@ def request(event, context):
     try:
         db_connection = database.connect_to_database(env)
         # TODO will be a compressed file - testing on .zip -  rar?
-        bundle_zip = common.retrieve_file_from_bucket(bucket, filename, event, start)
+        bundle_zip = common.retrieve_compressed_file_from_bucket(bucket, filename, event, start)
         processed = process_zipfile(db_connection, bundle_zip)
         if processed is True:
             message.send_success_slack_message()
@@ -121,6 +121,7 @@ def process_scenario_file(file_name, scenario_file):
             symptom_discriminator_desc_text,
         )
     except ET.ParseError as e:
+        print(file_name)
         logger.log_for_error("stt", "Invalid xml {}".format(e))
         raise e
 

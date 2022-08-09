@@ -38,7 +38,7 @@ alt_expected_scenario_id = "1"
 @patch(f"{file_path}.message.send_success_slack_message")
 @patch(f"{file_path}.database.close_connection", return_value="")
 @patch(f"{file_path}.database.connect_to_database", return_value="db_connection")
-@patch(f"{file_path}.common.retrieve_file_from_bucket", return_value="zip_file")
+@patch(f"{file_path}.common.retrieve_compressed_file_from_bucket", return_value="zip_file")
 @patch(f"{file_path}.process_zipfile", return_value=True)
 @patch(f"{file_path}.message.send_start_message")
 def test_handler_pass(mock_send_start_message,
@@ -67,7 +67,7 @@ mock_archive_file):
 @patch(f"{file_path}.message.send_success_slack_message")
 @patch(f"{file_path}.database.close_connection", return_value="")
 @patch(f"{file_path}.database.connect_to_database", return_value="db_connection")
-@patch(f"{file_path}.common.retrieve_file_from_bucket", return_value="zip_file")
+@patch(f"{file_path}.common.retrieve_compressed_file_from_bucket", return_value="zip_file")
 @patch(f"{file_path}.process_zipfile", return_value=False)
 @patch(f"{file_path}.message.send_start_message")
 def test_handler_fail(mock_send_start_message,
