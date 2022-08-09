@@ -2,9 +2,9 @@ import xml.etree.ElementTree as ET
 import zipfile
 import io
 
-# from scenario import Scenario
-from . import scenario
-from utilities import logger, message, common, database
+#  works but not from docker
+# from . import scenario
+from utilities import logger, message, common, database, scenario
 from datetime import datetime
 
 
