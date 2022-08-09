@@ -45,9 +45,9 @@ def process_zipfile(db_connection, filename):
     if zipfile.is_zipfile(filename):
         with zipfile.ZipFile(filename, mode="r") as archive:
             for name in archive.namelist():
-                scenario_file = archive.open(name)
+                scenario_file = archive.read(name)
                 try:
-                    template_scenario = process_scenario_file(name, io.StringIO(scenario_file.read().decode("utf-8")))
+                    template_scenario = process_scenario_file(name, io.StringIO(scenario_file.decode("utf-8")))
                     insert_template_scenario(db_connection, template_scenario)
                 except Exception as e:
                     processed = False
