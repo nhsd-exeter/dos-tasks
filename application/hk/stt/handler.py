@@ -25,6 +25,7 @@ def request(event, context):
         db_connection = database.connect_to_database(env)
         # TODO will be a compressed file - testing on .zip -  rar?
         bundle_zip = common.retrieve_compressed_file_from_bucket(bucket, filename, event, start)
+        logger.log_for_audit(env, "action:bundle downloaded")
         processed = process_zipfile(db_connection, bundle_zip)
         if processed is True:
             message.send_success_slack_message()
