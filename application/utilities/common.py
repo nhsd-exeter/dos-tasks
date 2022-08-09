@@ -59,6 +59,12 @@ def retrieve_file_from_bucket(bucket, filename, event, start):
     return s3_bucket.get_object(bucket, filename, event, start)
 
 
+def retrieve_compressed_file_from_bucket(bucket, filename, event, start):
+    log_for_audit(event["env"], "action:retrieve file | bucket:{} | file:{}".format(bucket, filename))
+    s3_bucket = utilities.s3.S3()
+    return s3_bucket.get_compressed_object(bucket, filename, event, start)
+
+
 def check_csv_values(line, env):
     """Returns false if either id or name are null or empty string"""
     valid_values = True
