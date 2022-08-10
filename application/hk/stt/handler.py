@@ -116,6 +116,7 @@ def get_insert_query(template_scenario):
     )
     return query, data
 
+
 def process_scenario_file(file_name, scenario_file):
     try:
         scenario_dict = map_xml_to_json(scenario_file)
@@ -150,6 +151,7 @@ def process_scenario_file(file_name, scenario_file):
 def map_xml_to_json(file_as_string):
     return xmltodict.parse(file_as_string)
 
+
 # def get_root(file_as_string):
 #     root_element = ET.fromstring(file_as_string)
 #     return root_element
@@ -161,9 +163,11 @@ def get_pathways_release_id(scenario_dict) -> str:
     release_id = pathways_release_id.split("_")
     return release_id[0]
 
+
 def get_symptom_group(scenario_dict):
     symptom_group_element = scenario_dict["NHSPathways"]["PathwaysCase"]["SymptomGroup"]
     return symptom_group_element
+
 
 def get_triage_disposition_uid(scenario_dict):
     disposition_uid = scenario_dict["NHSPathways"]["PathwaysCase"]["TriageDisposition"]["DispositionCode"]
@@ -171,12 +175,16 @@ def get_triage_disposition_uid(scenario_dict):
 
 
 def get_triage_disposition_description(scenario_dict):
-    disposition_description = scenario_dict["NHSPathways"]["PathwaysCase"]["TriageDisposition"]["DispositionDescription"]
+    disposition_description = scenario_dict["NHSPathways"]["PathwaysCase"]["TriageDisposition"][
+        "DispositionDescription"
+    ]
     return disposition_description
 
 
 def get_final_disposition_group_cmsid(scenario_dict):
-    final_disposition_group = scenario_dict["NHSPathways"]["PathwaysCase"]["FinalDispositionCMSID"]["FinalDispositionCMSID"]
+    final_disposition_group = scenario_dict["NHSPathways"]["PathwaysCase"]["FinalDispositionCMSID"][
+        "FinalDispositionCMSID"
+    ]
     return final_disposition_group
 
 
@@ -192,8 +200,8 @@ def get_triage_line_data(scenario_dict):
     triage_lines = get_triage_lines(scenario_dict)
     for triage_line in triage_lines:
         report_texts = add_report_text(triage_line, report_texts)
-        care_advice_sd = triage_line["CareAdvice"]['SymptomDiscriminator']
-        if care_advice_sd != '0':
+        care_advice_sd = triage_line["CareAdvice"]["SymptomDiscriminator"]
+        if care_advice_sd != "0":
             symptom_discriminator_uid = care_advice_sd
             symptom_discriminator_desc = triage_line["AnswerText"]
     return report_texts, symptom_discriminator_uid, symptom_discriminator_desc.replace('"', "")
@@ -205,8 +213,8 @@ def get_triage_lines(scenario_dict):
 
 def add_report_text(triage_line, report_text_list):
     report_text = None
-    if triage_line['IncludeInReport'] == 'True':
-        report_text = triage_line['ReportText']
+    if triage_line["IncludeInReport"] == "True":
+        report_text = triage_line["ReportText"]
     if report_text is not None:
         report_text_list.append(report_text)
     return report_text_list
@@ -233,7 +241,6 @@ def add_report_text(triage_line, report_text_list):
 #     pathways_release_id = root.find("./pathwayscase:PathwaysCase/pathwayscase:PathwaysReleaseID", ns)
 #     release_id = pathways_release_id.text.split("_")
 #     return release_id[0]
-
 
 
 # def get_symptom_group(root):
