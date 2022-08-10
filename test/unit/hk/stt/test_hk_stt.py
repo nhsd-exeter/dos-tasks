@@ -101,61 +101,59 @@ mock_archive_file):
 
 def test_get_pathways_release_id():
     """Test function to extract bundle/pathways release version from xml"""
-    root = handler.get_root(convert_file_to_stream(sample_scenario_file_name))
-    pathways_release_id = handler.get_pathways_release_id(root)
+    # root = handler.get_root(convert_file_to_stream(sample_scenario_file_name))
+    scenario_dict = handler.map_xml_to_json(convert_file_to_stream(sample_scenario_file_name))
+    pathways_release_id = handler.get_pathways_release_id(scenario_dict)
     assert pathways_release_id == expected_pathways_release_id
-
-# def test_get_scenario_id_from_file_name_with_underscore_separator():
-#     """Test function to extract scenario id from name of file"""
-#     scenario_id = handler.get_scenario_id_from_file_name(convert_file_to_stream(sample_scenario_file_name))
-#     assert scenario_id == expected_scenario_id
-
-# def test_get_scenario_id_from_file_name_with_space_separator():
-#     """Test function to extract scenario id from name of file"""
-#     scenario_id = handler.get_scenario_id_from_file_name(alt_scenario_file_name)
-#     assert scenario_id == alt_expected_scenario_id
 
 def test_get_symptom_group():
     """Test function to extract symptomgroup from xml"""
-    root = handler.get_root(convert_file_to_stream(sample_scenario_file_name))
-    symptom_group = handler.get_symptom_group(root)
+    # root = handler.get_root(convert_file_to_stream(sample_scenario_file_name))
+    scenario_dict = handler.map_xml_to_json(convert_file_to_stream(sample_scenario_file_name))
+    symptom_group = handler.get_symptom_group(scenario_dict)
     assert symptom_group == expected_symptom_group
 
 def test_get_triage_disposition_uid():
     """Test function to extract triage disposition uid from xml"""
-    root = handler.get_root(convert_file_to_stream(sample_scenario_file_name))
-    disposition_uid = handler.get_triage_disposition_uid(root)
+    # root = handler.get_root(convert_file_to_stream(sample_scenario_file_name))
+    scenario_dict = handler.map_xml_to_json(convert_file_to_stream(sample_scenario_file_name))
+    disposition_uid = handler.get_triage_disposition_uid(scenario_dict)
     assert disposition_uid == expected_triage_disposition_uid
 
 def test_get_triage_disposition_description():
     """Test function to extract triage disposition description from xml"""
-    root = handler.get_root(convert_file_to_stream(sample_scenario_file_name))
-    disposition_description = handler.get_triage_disposition_description(root)
+    # root = handler.get_root(convert_file_to_stream(sample_scenario_file_name))
+    scenario_dict = handler.map_xml_to_json(convert_file_to_stream(sample_scenario_file_name))
+    disposition_description = handler.get_triage_disposition_description(scenario_dict)
     assert disposition_description == expected_triage_disposition_description
 
 def test_get_final_disposition_group_cmsid():
     """Test function to extract final disposition cmsid from xml"""
-    root = handler.get_root(convert_file_to_stream(sample_scenario_file_name))
-    final_disposition_cmsid = handler.get_final_disposition_group_cmsid(root)
+    # root = handler.get_root(convert_file_to_stream(sample_scenario_file_name))
+    scenario_dict = handler.map_xml_to_json(convert_file_to_stream(sample_scenario_file_name))
+    final_disposition_cmsid = handler.get_final_disposition_group_cmsid(scenario_dict)
     assert final_disposition_cmsid == expected_final_disposition_group_cmsid
 
 def test_get_final_disposition_code():
     """Test function to extract final disposition code from xml"""
-    root = handler.get_root(convert_file_to_stream(sample_scenario_file_name))
-    final_disposition_code = handler.get_final_disposition_code(root)
+    # root = handler.get_root(convert_file_to_stream(sample_scenario_file_name))
+    scenario_dict = handler.map_xml_to_json(convert_file_to_stream(sample_scenario_file_name))
+    final_disposition_code = handler.get_final_disposition_code(scenario_dict)
     assert final_disposition_code == expected_final_disposition_code
 
 def test_get_triage_lines():
     """Test function to extract all triage lines from xml"""
     triage_lines = []
-    root = handler.get_root(convert_file_to_stream(sample_scenario_file_name))
-    triage_lines = handler.get_triage_lines(root)
+    # root = handler.get_root(convert_file_to_stream(sample_scenario_file_name))
+    scenario_dict = handler.map_xml_to_json(convert_file_to_stream(sample_scenario_file_name))
+    triage_lines = handler.get_triage_lines(scenario_dict)
     assert len(triage_lines) == expected_number_of_triage_lines
 
 def test_get_triage_line_data():
     """Test function to extract last symptom discriminator from xml"""
-    root = handler.get_root(convert_file_to_stream(sample_scenario_file_name))
-    report_texts, symptom_discriminator_uid, symptom_discriminator_desc = handler.get_triage_line_data(root)
+    # root = handler.get_root(convert_file_to_stream(sample_scenario_file_name))
+    scenario_dict = handler.map_xml_to_json(convert_file_to_stream(sample_scenario_file_name))
+    report_texts, symptom_discriminator_uid, symptom_discriminator_desc = handler.get_triage_line_data(scenario_dict)
     assert len(report_texts) == expected_report_text_length
     assert report_texts[expected_report_text_length-1] == expected_last_report_text
     assert symptom_discriminator_uid == expected_symptom_discriminator_uid
@@ -236,3 +234,10 @@ def get_compressed_object(file_to_upload):
     s3_client.upload_file(Filename=file_to_upload, Bucket=bucket, Key=mock_zip_filename)
     response_body = s3.S3().get_compressed_object(bucket, mock_zip_filename, mock_event, start)
     return response_body
+
+
+# def map_xml_to_json():
+#     d = handler.map_xml_to_json(convert_file_to_stream(sample_scenario_file_name))
+#     print(d["NHSPathways"]["PathwaysCase"]["PathwaysReleaseID"])
+#     assert True == False
+

@@ -1,6 +1,7 @@
 import xml.etree.ElementTree as ET
 import zipfile
 import io
+import xmltodict
 
 #  works but not from docker
 # from . import scenario
@@ -115,28 +116,17 @@ def get_insert_query(template_scenario):
     )
     return query, data
 
-
-# def get_scenario_id_from_file_name(file_name):
-#     """scenario id can be separated by space or underscore eg Scenario_230.xml or Scenario 330.xml
-#     sometimes both formats in same release/bundle"""
-#     elements = file_name.split(".")
-#     if file_name.count("_") > 0:
-#         name_elements = elements[0].split("_")
-#     else:
-#         name_elements = elements[0].split(" ")
-#     return name_elements[1].replace('"', "")
-
-
 def process_scenario_file(file_name, scenario_file):
     try:
-        root = get_root(scenario_file)
-        pathways_release_id = get_pathways_release_id(root)
-        symptom_group = get_symptom_group(root)
-        triage_disposition_uid = get_triage_disposition_uid(root)
-        triage_disposition_description = get_triage_disposition_description(root)
-        final_disposition_group_cmsid = get_final_disposition_group_cmsid(root)
-        final_disposition_code = get_final_disposition_code(root)
-        report_texts, symptom_discriminator_uid, symptom_discriminator_desc_text = get_triage_line_data(root)
+        scenario_dict = map_xml_to_json(scenario_file)
+        # scenario_dictroot = get_root(scenario_file)
+        pathways_release_id = get_pathways_release_id(scenario_dict)
+        symptom_group = get_symptom_group(scenario_dict)
+        triage_disposition_uid = get_triage_disposition_uid(scenario_dict)
+        triage_disposition_description = get_triage_disposition_description(scenario_dict)
+        final_disposition_group_cmsid = get_final_disposition_group_cmsid(scenario_dict)
+        final_disposition_code = get_final_disposition_code(scenario_dict)
+        report_texts, symptom_discriminator_uid, symptom_discriminator_desc_text = get_triage_line_data(scenario_dict)
         template_scenario = scenario.Scenario(
             pathways_release_id,
             file_name,
@@ -157,94 +147,165 @@ def process_scenario_file(file_name, scenario_file):
     return template_scenario
 
 
-# def get_tree(file):
-#     # tree = ET.parse(file)
-#     # return tree
-#     return get_root(file)
+def map_xml_to_json(file_as_string):
+    return xmltodict.parse(file_as_string)
 
+# def get_root(file_as_string):
+#     root_element = ET.fromstring(file_as_string)
+#     return root_element
 
-def get_root(file_as_string):
-    root_element = ET.fromstring(file_as_string)
-    return root_element
-
-
-# TODO need to handle exceptions eg non numeric bundles like dental
-def get_pathways_release_id(root) -> str:
-    pathways_release_id = root.find("./pathwayscase:PathwaysCase/pathwayscase:PathwaysReleaseID", ns)
-    release_id = pathways_release_id.text.split("_")
+# xmldict alternatives
+def get_pathways_release_id(scenario_dict) -> str:
+    # pathways_release_id = root.find("./pathwayscase:PathwaysCase/pathwayscase:PathwaysReleaseID", ns)
+    pathways_release_id = scenario_dict["NHSPathways"]["PathwaysCase"]["PathwaysReleaseID"]
+    release_id = pathways_release_id.split("_")
     return release_id[0]
 
+def get_symptom_group(scenario_dict):
+    symptom_group_element = scenario_dict["NHSPathways"]["PathwaysCase"]["SymptomGroup"]
+    return symptom_group_element
 
-def get_symptom_group(root):
-    symptom_group_element = root.find("./pathwayscase:PathwaysCase/pathwayscase:SymptomGroup[1]", ns)
-    return symptom_group_element.text
-
-
-def get_triage_disposition_uid(root):
-    disposition_uid = root.find(
-        "./pathwayscase:PathwaysCase/pathwayscase:TriageDisposition/pathwayscase:DispositionCode[1]", ns
-    )
-    return disposition_uid.text
+def get_triage_disposition_uid(scenario_dict):
+    disposition_uid = scenario_dict["NHSPathways"]["PathwaysCase"]["TriageDisposition"]["DispositionCode"]
+    return disposition_uid
 
 
-def get_triage_disposition_description(root):
-    disposition_description = root.find(
-        "./pathwayscase:PathwaysCase/pathwayscase:TriageDisposition/pathwayscase:DispositionDescription[1]", ns
-    )
-    return disposition_description.text
+def get_triage_disposition_description(scenario_dict):
+    disposition_description = scenario_dict["NHSPathways"]["PathwaysCase"]["TriageDisposition"]["DispositionDescription"]
+    return disposition_description
 
 
-def get_final_disposition_group_cmsid(root):
-    final_disposition_group = root.find(
-        "./pathwayscase:PathwaysCase/pathwayscase:FinalDispositionCMSID/pathwayscase:FinalDispositionCMSID[1]", ns
-    )
-    return final_disposition_group.text
+def get_final_disposition_group_cmsid(scenario_dict):
+    final_disposition_group = scenario_dict["NHSPathways"]["PathwaysCase"]["FinalDispositionCMSID"]["FinalDispositionCMSID"]
+    return final_disposition_group
 
 
-def get_final_disposition_code(root):
-    final_disposition_code = root.find(
-        "./pathwayscase:PathwaysCase/pathwayscase:FinalDisposition/pathwayscase:DispositionCode[1]", ns
-    )
-    return final_disposition_code.text
+def get_final_disposition_code(scenario_dict):
+    final_disposition_code = scenario_dict["NHSPathways"]["PathwaysCase"]["FinalDisposition"]["DispositionCode"]
+    return final_disposition_code
 
 
-def get_triage_line_data(root):
+def get_triage_line_data(scenario_dict):
     report_texts = []
     symptom_discriminator_uid = ""
-    symptom_discriminator_desc_text = ""
-    triage_lines = get_triage_lines(root)
+    symptom_discriminator_desc = ""
+    triage_lines = get_triage_lines(scenario_dict)
     for triage_line in triage_lines:
         report_texts = add_report_text(triage_line, report_texts)
-        care_advice_sd = triage_line.find("pathwayscase:CareAdvice/pathwayscase:SymptomDiscriminator[.!='0']", ns)
-        if care_advice_sd is not None:
-            symptom_discriminator_uid = care_advice_sd.text
-            symptom_discriminator_desc = triage_line.find("pathwayscase:AnswerText", ns)
-            symptom_discriminator_desc_text = symptom_discriminator_desc.text
-    return report_texts, symptom_discriminator_uid, symptom_discriminator_desc_text.replace('"', "")
+        care_advice_sd = triage_line["CareAdvice"]['SymptomDiscriminator']
+        if care_advice_sd != '0':
+            symptom_discriminator_uid = care_advice_sd
+            symptom_discriminator_desc = triage_line["AnswerText"]
+    return report_texts, symptom_discriminator_uid, symptom_discriminator_desc.replace('"', "")
 
 
-def get_triage_lines(root):
-    return root.findall("./pathwayscase:PathwaysCase/pathwayscase:TriageLineDetails/pathwayscase:TriageLine", ns)
+def get_triage_lines(scenario_dict):
+    return scenario_dict["NHSPathways"]["PathwaysCase"]["TriageLineDetails"]["TriageLine"]
 
 
 def add_report_text(triage_line, report_text_list):
     report_text = None
-    if identify_report_elements_to_include(triage_line) is not None:
-        report_text = get_report_text(triage_line)
+    if triage_line['IncludeInReport'] == 'True':
+        report_text = triage_line['ReportText']
     if report_text is not None:
         report_text_list.append(report_text)
     return report_text_list
 
 
-def identify_report_elements_to_include(triage_line):
-    return triage_line.find("pathwayscase:IncludeInReport[.='True']", ns)
+# def identify_report_elements_to_include(triage_line):
+#     return triage_line.find("pathwayscase:IncludeInReport[.='True']", ns)
 
 
-def get_report_text(triage_line):
-    report_text = None
-    report_text_element = triage_line.find("pathwayscase:ReportText[.!='']", ns)
-    if report_text_element is not None:
-        report_text = report_text_element.text
-        # TODO may not be needed
-        report_text = report_text.replace('"', "")
-    return report_text
+# def get_report_text(triage_line):
+#     report_text = None
+#     report_text_element = triage_line.find("pathwayscase:ReportText[.!='']", ns)
+#     if report_text_element is not None:
+#         report_text = report_text_element.text
+#         # TODO may not be needed
+#         report_text = report_text.replace('"', "")
+#     return report_text
+
+
+# original
+
+# TODO need to handle exceptions eg non numeric bundles like dental
+# def get_pathways_release_id(root) -> str:
+#     pathways_release_id = root.find("./pathwayscase:PathwaysCase/pathwayscase:PathwaysReleaseID", ns)
+#     release_id = pathways_release_id.text.split("_")
+#     return release_id[0]
+
+
+
+# def get_symptom_group(root):
+#     symptom_group_element = root.find("./pathwayscase:PathwaysCase/pathwayscase:SymptomGroup[1]", ns)
+#     return symptom_group_element.text
+
+
+# def get_triage_disposition_uid(root):
+#     disposition_uid = root.find(
+#         "./pathwayscase:PathwaysCase/pathwayscase:TriageDisposition/pathwayscase:DispositionCode[1]", ns
+#     )
+#     return disposition_uid.text
+
+
+# def get_triage_disposition_description(root):
+#     disposition_description = root.find(
+#         "./pathwayscase:PathwaysCase/pathwayscase:TriageDisposition/pathwayscase:DispositionDescription[1]", ns
+#     )
+#     return disposition_description.text
+
+
+# def get_final_disposition_group_cmsid(root):
+#     final_disposition_group = root.find(
+#         "./pathwayscase:PathwaysCase/pathwayscase:FinalDispositionCMSID/pathwayscase:FinalDispositionCMSID[1]", ns
+#     )
+#     return final_disposition_group.text
+
+
+# def get_final_disposition_code(root):
+#     final_disposition_code = root.find(
+#         "./pathwayscase:PathwaysCase/pathwayscase:FinalDisposition/pathwayscase:DispositionCode[1]", ns
+#     )
+#     return final_disposition_code.text
+
+
+# def get_triage_line_data(root):
+#     report_texts = []
+#     symptom_discriminator_uid = ""
+#     symptom_discriminator_desc_text = ""
+#     triage_lines = get_triage_lines(root)
+#     for triage_line in triage_lines:
+#         report_texts = add_report_text(triage_line, report_texts)
+#         care_advice_sd = triage_line.find("pathwayscase:CareAdvice/pathwayscase:SymptomDiscriminator[.!='0']", ns)
+#         if care_advice_sd is not None:
+#             symptom_discriminator_uid = care_advice_sd.text
+#             symptom_discriminator_desc = triage_line.find("pathwayscase:AnswerText", ns)
+#             symptom_discriminator_desc_text = symptom_discriminator_desc.text
+#     return report_texts, symptom_discriminator_uid, symptom_discriminator_desc_text.replace('"', "")
+
+
+# def get_triage_lines(root):
+#     return root.findall("./pathwayscase:PathwaysCase/pathwayscase:TriageLineDetails/pathwayscase:TriageLine", ns)
+
+
+# def add_report_text(triage_line, report_text_list):
+#     report_text = None
+#     if identify_report_elements_to_include(triage_line) is not None:
+#         report_text = get_report_text(triage_line)
+#     if report_text is not None:
+#         report_text_list.append(report_text)
+#     return report_text_list
+
+
+# def identify_report_elements_to_include(triage_line):
+#     return triage_line.find("pathwayscase:IncludeInReport[.='True']", ns)
+
+
+# def get_report_text(triage_line):
+#     report_text = None
+#     report_text_element = triage_line.find("pathwayscase:ReportText[.!='']", ns)
+#     if report_text_element is not None:
+#         report_text = report_text_element.text
+#         # TODO may not be needed
+#         report_text = report_text.replace('"', "")
+#     return report_text
