@@ -26,7 +26,7 @@ def request(event, context):
         # TODO will be a compressed file - testing on .zip -  rar?
         bundle = common.retrieve_compressed_file_from_bucket(bucket, filename, event, start)
         logger.log_for_audit(env, "action:bundle {} downloaded".format(filename))
-        processed = process_zipfile(env,db_connection, bundle, filename)
+        processed = process_zipfile(env, db_connection, bundle, filename)
         if processed is True:
             message.send_success_slack_message()
         else:
@@ -40,11 +40,13 @@ def request(event, context):
         common.archive_file(bucket, filename, event, start)
     return task_description + " execution completed"
 
+
 # input_zip = zipfile.ZipFile(io.BytesIO(bundle_zip))
 #     for name in input_zip.namelist():
 #         print("=========== name ============")
 #         scenario_file = input_zip.read(name).decode("utf-8")
 #         print(scenario_file)
+
 
 def process_zipfile(env, db_connection, bundle, filename):
     processed = True
@@ -63,8 +65,9 @@ def process_zipfile(env, db_connection, bundle, filename):
                 raise e
     except Exception as e:
         processed = False
-        logger.log_for_error("stt", "Problem processing {0} -> {1}".format(filename,e))
+        logger.log_for_error("stt", "Problem processing {0} -> {1}".format(filename, e))
     return processed
+
 
 # def process_zipfile(db_connection, filename):
 #     processed = True
