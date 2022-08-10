@@ -24,9 +24,9 @@ def request(event, context):
     try:
         db_connection = database.connect_to_database(env)
         # TODO will be a compressed file - testing on .zip -  rar?
-        bundle_zip = common.retrieve_compressed_file_from_bucket(bucket, filename, event, start)
-        logger.log_for_audit(env, "action:bundle downloaded")
-        processed = process_zipfile(db_connection, bundle_zip)
+        bundle = common.retrieve_compressed_file_from_bucket(bucket, filename, event, start)
+        logger.log_for_audit(env, "action:bundle {} downloaded".format(filename))
+        processed = process_zipfile(env,db_connection, bundle, filename)
         if processed is True:
             message.send_success_slack_message()
         else:
@@ -40,23 +40,48 @@ def request(event, context):
         common.archive_file(bucket, filename, event, start)
     return task_description + " execution completed"
 
+# input_zip = zipfile.ZipFile(io.BytesIO(bundle_zip))
+#     for name in input_zip.namelist():
+#         print("=========== name ============")
+#         scenario_file = input_zip.read(name).decode("utf-8")
+#         print(scenario_file)
 
-def process_zipfile(db_connection, filename):
+def process_zipfile(env, db_connection, bundle, filename):
     processed = True
-    if zipfile.is_zipfile(filename):
-        with zipfile.ZipFile(filename, mode="r") as archive:
-            for name in archive.namelist():
-                scenario_file = archive.read(name)
-                try:
-                    template_scenario = process_scenario_file(name, io.StringIO(scenario_file.decode("utf-8")))
-                    insert_template_scenario(db_connection, template_scenario)
-                except Exception as e:
-                    processed = False
-                    logger.log_for_error("stt", "Problem processing scenario file {0}: {1}".format(name, e))
-    else:
+    try:
+        bundle_zip = zipfile.ZipFile(io.BytesIO(bundle))
+        for name in bundle_zip.namelist():
+            logger.log_for_audit(env, "action:processing scenario {}".format(name))
+            scenario_file = bundle_zip.read(name).decode("utf-8")
+            try:
+                # template_scenario = process_scenario_file(name, io.StringIO(scenario_file.decode("utf-8")))
+                template_scenario = process_scenario_file(name, scenario_file)
+                insert_template_scenario(db_connection, template_scenario)
+            except Exception as e:
+                processed = False
+                logger.log_for_error("stt", "Problem processing scenario file {0}: {1}".format(name, e))
+                raise e
+    except Exception as e:
         processed = False
-        logger.log_for_error("stt", "Release bundle {0} is not a zip file".format(filename))
+        logger.log_for_error("stt", "Problem processing {0} -> {1}".format(filename,e))
     return processed
+
+# def process_zipfile(db_connection, filename):
+#     processed = True
+#     if zipfile.is_zipfile(filename):
+#         with zipfile.ZipFile(filename, mode="r") as archive:
+#             for name in archive.namelist():
+#                 scenario_file = archive.read(name)
+#                 try:
+#                     template_scenario = process_scenario_file(name, io.StringIO(scenario_file.decode("utf-8")))
+#                     insert_template_scenario(db_connection, template_scenario)
+#                 except Exception as e:
+#                     processed = False
+#                     logger.log_for_error("stt", "Problem processing scenario file {0}: {1}".format(name, e))
+#     else:
+#         processed = False
+#         logger.log_for_error("stt", "Release bundle {0} is not a zip file".format(filename))
+#     return processed
 
 
 def insert_template_scenario(db_connection, template_scenario):
@@ -88,27 +113,27 @@ def get_insert_query(template_scenario):
     return query, data
 
 
-def get_scenario_id_from_file_name(file_name):
-    """scenario id can be separated by space or underscore eg Scenario_230.xml or Scenario 330.xml
-    sometimes both formats in same release/bundle"""
-    elements = file_name.split(".")
-    if file_name.count("_") > 0:
-        name_elements = elements[0].split("_")
-    else:
-        name_elements = elements[0].split(" ")
-    return name_elements[1].replace('"', "")
+# def get_scenario_id_from_file_name(file_name):
+#     """scenario id can be separated by space or underscore eg Scenario_230.xml or Scenario 330.xml
+#     sometimes both formats in same release/bundle"""
+#     elements = file_name.split(".")
+#     if file_name.count("_") > 0:
+#         name_elements = elements[0].split("_")
+#     else:
+#         name_elements = elements[0].split(" ")
+#     return name_elements[1].replace('"', "")
 
 
 def process_scenario_file(file_name, scenario_file):
     try:
-        tree = get_tree(scenario_file)
-        pathways_release_id = get_pathways_release_id(tree)
-        symptom_group = get_symptom_group(tree)
-        triage_disposition_uid = get_triage_disposition_uid(tree)
-        triage_disposition_description = get_triage_disposition_description(tree)
-        final_disposition_group_cmsid = get_final_disposition_group_cmsid(tree)
-        final_disposition_code = get_final_disposition_code(tree)
-        report_texts, symptom_discriminator_uid, symptom_discriminator_desc_text = get_triage_line_data(tree)
+        root = get_root(scenario_file)
+        pathways_release_id = get_pathways_release_id(root)
+        symptom_group = get_symptom_group(root)
+        triage_disposition_uid = get_triage_disposition_uid(root)
+        triage_disposition_description = get_triage_disposition_description(root)
+        final_disposition_group_cmsid = get_final_disposition_group_cmsid(root)
+        final_disposition_code = get_final_disposition_code(root)
+        report_texts, symptom_discriminator_uid, symptom_discriminator_desc_text = get_triage_line_data(root)
         template_scenario = scenario.Scenario(
             pathways_release_id,
             file_name,
@@ -129,60 +154,62 @@ def process_scenario_file(file_name, scenario_file):
     return template_scenario
 
 
-def get_tree(file):
-    tree = ET.parse(file)
-    return tree
+# def get_tree(file):
+#     # tree = ET.parse(file)
+#     # return tree
+#     return get_root(file)
 
 
-def get_root(tree):
-    return tree.getroot()
+def get_root(file_as_string):
+    root_element = ET.fromstring(file_as_string)
+    return root_element
 
 
 # TODO need to handle exceptions eg non numeric bundles like dental
-def get_pathways_release_id(tree) -> str:
-    pathways_release_id = tree.find("./pathwayscase:PathwaysCase/pathwayscase:PathwaysReleaseID", ns)
+def get_pathways_release_id(root) -> str:
+    pathways_release_id = root.find("./pathwayscase:PathwaysCase/pathwayscase:PathwaysReleaseID", ns)
     release_id = pathways_release_id.text.split("_")
     return release_id[0]
 
 
-def get_symptom_group(tree):
-    symptom_group_element = tree.find("./pathwayscase:PathwaysCase/pathwayscase:SymptomGroup[1]", ns)
+def get_symptom_group(root):
+    symptom_group_element = root.find("./pathwayscase:PathwaysCase/pathwayscase:SymptomGroup[1]", ns)
     return symptom_group_element.text
 
 
-def get_triage_disposition_uid(tree):
-    disposition_uid = tree.find(
+def get_triage_disposition_uid(root):
+    disposition_uid = root.find(
         "./pathwayscase:PathwaysCase/pathwayscase:TriageDisposition/pathwayscase:DispositionCode[1]", ns
     )
     return disposition_uid.text
 
 
-def get_triage_disposition_description(tree):
-    disposition_description = tree.find(
+def get_triage_disposition_description(root):
+    disposition_description = root.find(
         "./pathwayscase:PathwaysCase/pathwayscase:TriageDisposition/pathwayscase:DispositionDescription[1]", ns
     )
     return disposition_description.text
 
 
-def get_final_disposition_group_cmsid(tree):
-    final_disposition_group = tree.find(
+def get_final_disposition_group_cmsid(root):
+    final_disposition_group = root.find(
         "./pathwayscase:PathwaysCase/pathwayscase:FinalDispositionCMSID/pathwayscase:FinalDispositionCMSID[1]", ns
     )
     return final_disposition_group.text
 
 
-def get_final_disposition_code(tree):
-    final_disposition_code = tree.find(
+def get_final_disposition_code(root):
+    final_disposition_code = root.find(
         "./pathwayscase:PathwaysCase/pathwayscase:FinalDisposition/pathwayscase:DispositionCode[1]", ns
     )
     return final_disposition_code.text
 
 
-def get_triage_line_data(tree):
+def get_triage_line_data(root):
     report_texts = []
     symptom_discriminator_uid = ""
     symptom_discriminator_desc_text = ""
-    triage_lines = get_triage_lines(tree)
+    triage_lines = get_triage_lines(root)
     for triage_line in triage_lines:
         report_texts = add_report_text(triage_line, report_texts)
         care_advice_sd = triage_line.find("pathwayscase:CareAdvice/pathwayscase:SymptomDiscriminator[.!='0']", ns)
@@ -193,8 +220,8 @@ def get_triage_line_data(tree):
     return report_texts, symptom_discriminator_uid, symptom_discriminator_desc_text.replace('"', "")
 
 
-def get_triage_lines(tree):
-    return tree.findall("./pathwayscase:PathwaysCase/pathwayscase:TriageLineDetails/pathwayscase:TriageLine", ns)
+def get_triage_lines(root):
+    return root.findall("./pathwayscase:PathwaysCase/pathwayscase:TriageLineDetails/pathwayscase:TriageLine", ns)
 
 
 def add_report_text(triage_line, report_text_list):

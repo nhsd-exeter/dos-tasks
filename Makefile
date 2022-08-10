@@ -274,13 +274,18 @@ unit-test-task: # Run task unit tests - mandatory: TASK=[name of task]
 	fi
 
 unit-test-utilities: # Run utilities unit tests
+	rm -rf $(APPLICATION_DIR)/test-files
 	rm -rf $(APPLICATION_DIR)/utilities/test
 	mkdir $(APPLICATION_DIR)/utilities/test
+	mkdir $(APPLICATION_DIR)/test-files
+	cp $(APPLICATION_TEST_DIR)/stt-test-files/* $(APPLICATION_DIR)/test-files
 	cp $(APPLICATION_TEST_DIR)/unit/utilities/* $(APPLICATION_DIR)/utilities/test
 	make docker-run-tools IMAGE=$$(make _docker-get-reg)/tester:latest \
 		DIR=application \
 		CMD="python3 -m pytest utilities/test/"
 	rm -rf $(APPLICATION_DIR)/utilities/test
+	rm -rf $(APPLICATION_DIR)/test-files
+
 
 copy-stt-coverage-test-files:
 	rm -rf $(APPLICATION_DIR)/test-files
