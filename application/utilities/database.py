@@ -106,7 +106,7 @@ def execute_query(db_connection, query, data):
         db_connection.commit()
         # TODO add logging as required
     except Exception as e:
-        logger.log_for_error("stt","Transaction failed. Rolling back. Error: {}".format(e))
+        logger.log_for_error("stt", "Transaction failed. Rolling back. Error: {}".format(e))
         db_connection.rollback()
     finally:
         cursor.close()

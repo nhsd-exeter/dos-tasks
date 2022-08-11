@@ -29,7 +29,7 @@ def request(event, context):
         logger.log_for_audit(env, "action:bundle {} downloaded".format(filename))
         processed = process_zipfile(env, db_connection, bundle, filename)
         if processed is True:
-            message.send_success_slack_message()
+            message.send_success_slack_message(event,start, None)
         else:
             message.send_failure_slack_message(event, start)
         # TODO will need to unpack
