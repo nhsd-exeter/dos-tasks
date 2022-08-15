@@ -41,14 +41,6 @@ def request(event, context):
         common.archive_file(bucket, filename, event, start)
     return task_description + " execution completed"
 
-
-# input_zip = zipfile.ZipFile(io.BytesIO(bundle_zip))
-#     for name in input_zip.namelist():
-#         print("=========== name ============")
-#         scenario_file = input_zip.read(name).decode("utf-8")
-#         print(scenario_file)
-
-
 def process_zipfile(env, db_connection, bundle, filename):
     processed = True
     try:
@@ -57,7 +49,6 @@ def process_zipfile(env, db_connection, bundle, filename):
             logger.log_for_audit(env, "action:processing scenario {}".format(name))
             scenario_file = bundle_zip.read(name).decode("utf-8")
             try:
-                # template_scenario = process_scenario_file(name, io.StringIO(scenario_file.decode("utf-8")))
                 template_scenario = process_scenario_file(name, scenario_file)
                 insert_template_scenario(db_connection, template_scenario)
             except Exception as e:
@@ -69,40 +60,23 @@ def process_zipfile(env, db_connection, bundle, filename):
         logger.log_for_error("stt", "Problem processing {0} -> {1}".format(filename, e))
     return processed
 
-
-# def process_zipfile(db_connection, filename):
-#     processed = True
-#     if zipfile.is_zipfile(filename):
-#         with zipfile.ZipFile(filename, mode="r") as archive:
-#             for name in archive.namelist():
-#                 scenario_file = archive.read(name)
-#                 try:
-#                     template_scenario = process_scenario_file(name, io.StringIO(scenario_file.decode("utf-8")))
-#                     insert_template_scenario(db_connection, template_scenario)
-#                 except Exception as e:
-#                     processed = False
-#                     logger.log_for_error("stt", "Problem processing scenario file {0}: {1}".format(name, e))
-#     else:
-#         processed = False
-#         logger.log_for_error("stt", "Release bundle {0} is not a zip file".format(filename))
-#     return processed
-
-
 def insert_template_scenario(db_connection, template_scenario):
     query, data = get_insert_query(template_scenario)
     database.execute_query(db_connection, query, data)
 
 
 def get_insert_query(template_scenario):
-    query = """insert into pathwaysdos.searchscenarios (releaseid, scenarioid, symptomgroup_uid, triagedispositionuid,
-    triage_disposition_description, final_disposition_group_cmsid, final_disposition_code,
+    query = """insert into pathwaysdos.searchscenarios (releaseid, scenarioid, ageid, genderid, symptomgroup_uid,
+    triagedispositionuid,triage_disposition_description, final_disposition_group_cmsid, final_disposition_code,
     report_texts, symptom_discriminator_uid, symptom_discriminator_desc_text, scenariofilename,
     scenariofile, created_on)
-    values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,now()
+    values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,now()
     )"""
     data = (
         template_scenario.pathways_release_id,
         template_scenario.file_name,
+        template_scenario.age_id,
+        template_scenario.gender_id,
         template_scenario.symptom_group,
         template_scenario.triage_disposition_uid,
         template_scenario.triage_disposition_description,
@@ -120,7 +94,8 @@ def get_insert_query(template_scenario):
 def process_scenario_file(file_name, scenario_file):
     try:
         scenario_dict = map_xml_to_json(scenario_file)
-        # scenario_dictroot = get_root(scenario_file)
+        age_id = get_age_id(scenario_dict)
+        gender_id = get_gender_id(scenario_dict)
         pathways_release_id = get_pathways_release_id(scenario_dict)
         symptom_group = get_symptom_group(scenario_dict)
         triage_disposition_uid = get_triage_disposition_uid(scenario_dict)
@@ -139,6 +114,8 @@ def process_scenario_file(file_name, scenario_file):
             report_texts,
             symptom_discriminator_uid,
             symptom_discriminator_desc_text,
+            age_id,
+            gender_id
         )
     except ET.ParseError as e:
         print(file_name)
@@ -152,13 +129,15 @@ def map_xml_to_json(file_as_string):
     return xmltodict.parse(file_as_string)
 
 
-# def get_root(file_as_string):
-#     root_element = ET.fromstring(file_as_string)
-#     return root_element
+def get_age_id(scenario_dict):
+    age_id = scenario_dict["NHSPathways"]["PathwaysCase"]["Patient"]["Age"]["AgeID"]
+    return age_id
 
-# xmldict alternatives
+def get_gender_id(scenario_dict):
+    gender_id = scenario_dict["NHSPathways"]["PathwaysCase"]["Patient"]["Gender"]["GenderID"]
+    return gender_id
+
 def get_pathways_release_id(scenario_dict) -> str:
-    # pathways_release_id = root.find("./pathwayscase:PathwaysCase/pathwayscase:PathwaysReleaseID", ns)
     pathways_release_id = scenario_dict["NHSPathways"]["PathwaysCase"]["PathwaysReleaseID"]
     release_id = pathways_release_id.split("_")
     return release_id[0]
@@ -218,101 +197,3 @@ def add_report_text(triage_line, report_text_list):
     if report_text is not None:
         report_text_list.append(report_text)
     return report_text_list
-
-
-# def identify_report_elements_to_include(triage_line):
-#     return triage_line.find("pathwayscase:IncludeInReport[.='True']", ns)
-
-
-# def get_report_text(triage_line):
-#     report_text = None
-#     report_text_element = triage_line.find("pathwayscase:ReportText[.!='']", ns)
-#     if report_text_element is not None:
-#         report_text = report_text_element.text
-#         # TODO may not be needed
-#         report_text = report_text.replace('"', "")
-#     return report_text
-
-
-# original
-
-# TODO need to handle exceptions eg non numeric bundles like dental
-# def get_pathways_release_id(root) -> str:
-#     pathways_release_id = root.find("./pathwayscase:PathwaysCase/pathwayscase:PathwaysReleaseID", ns)
-#     release_id = pathways_release_id.text.split("_")
-#     return release_id[0]
-
-
-# def get_symptom_group(root):
-#     symptom_group_element = root.find("./pathwayscase:PathwaysCase/pathwayscase:SymptomGroup[1]", ns)
-#     return symptom_group_element.text
-
-
-# def get_triage_disposition_uid(root):
-#     disposition_uid = root.find(
-#         "./pathwayscase:PathwaysCase/pathwayscase:TriageDisposition/pathwayscase:DispositionCode[1]", ns
-#     )
-#     return disposition_uid.text
-
-
-# def get_triage_disposition_description(root):
-#     disposition_description = root.find(
-#         "./pathwayscase:PathwaysCase/pathwayscase:TriageDisposition/pathwayscase:DispositionDescription[1]", ns
-#     )
-#     return disposition_description.text
-
-
-# def get_final_disposition_group_cmsid(root):
-#     final_disposition_group = root.find(
-#         "./pathwayscase:PathwaysCase/pathwayscase:FinalDispositionCMSID/pathwayscase:FinalDispositionCMSID[1]", ns
-#     )
-#     return final_disposition_group.text
-
-
-# def get_final_disposition_code(root):
-#     final_disposition_code = root.find(
-#         "./pathwayscase:PathwaysCase/pathwayscase:FinalDisposition/pathwayscase:DispositionCode[1]", ns
-#     )
-#     return final_disposition_code.text
-
-
-# def get_triage_line_data(root):
-#     report_texts = []
-#     symptom_discriminator_uid = ""
-#     symptom_discriminator_desc_text = ""
-#     triage_lines = get_triage_lines(root)
-#     for triage_line in triage_lines:
-#         report_texts = add_report_text(triage_line, report_texts)
-#         care_advice_sd = triage_line.find("pathwayscase:CareAdvice/pathwayscase:SymptomDiscriminator[.!='0']", ns)
-#         if care_advice_sd is not None:
-#             symptom_discriminator_uid = care_advice_sd.text
-#             symptom_discriminator_desc = triage_line.find("pathwayscase:AnswerText", ns)
-#             symptom_discriminator_desc_text = symptom_discriminator_desc.text
-#     return report_texts, symptom_discriminator_uid, symptom_discriminator_desc_text.replace('"', "")
-
-
-# def get_triage_lines(root):
-#     return root.findall("./pathwayscase:PathwaysCase/pathwayscase:TriageLineDetails/pathwayscase:TriageLine", ns)
-
-
-# def add_report_text(triage_line, report_text_list):
-#     report_text = None
-#     if identify_report_elements_to_include(triage_line) is not None:
-#         report_text = get_report_text(triage_line)
-#     if report_text is not None:
-#         report_text_list.append(report_text)
-#     return report_text_list
-
-
-# def identify_report_elements_to_include(triage_line):
-#     return triage_line.find("pathwayscase:IncludeInReport[.='True']", ns)
-
-
-# def get_report_text(triage_line):
-#     report_text = None
-#     report_text_element = triage_line.find("pathwayscase:ReportText[.!='']", ns)
-#     if report_text_element is not None:
-#         report_text = report_text_element.text
-#         # TODO may not be needed
-#         report_text = report_text.replace('"', "")
-#     return report_text

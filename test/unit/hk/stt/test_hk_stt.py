@@ -38,6 +38,8 @@ expected_symptom_discriminator_desc_text = 'Improving Access to Psychological Th
 expected_pathways_release_id = "25.2.0"
 expected_scenario_id = "2"
 alt_expected_scenario_id = "1"
+expected_gender_id = "2"
+expected_age_id = "1"
 #  TODO get root once
 
 
@@ -101,42 +103,48 @@ mock_archive_file):
 
 def test_get_pathways_release_id():
     """Test function to extract bundle/pathways release version from xml"""
-    # root = handler.get_root(convert_file_to_stream(sample_scenario_file_name))
     scenario_dict = handler.map_xml_to_json(convert_file_to_stream(sample_scenario_file_name))
     pathways_release_id = handler.get_pathways_release_id(scenario_dict)
     assert pathways_release_id == expected_pathways_release_id
 
+def test_get_gender_id():
+    """Test function to extract symptomgroup from xml"""
+    scenario_dict = handler.map_xml_to_json(convert_file_to_stream(sample_scenario_file_name))
+    gender_id = handler.get_gender_id(scenario_dict)
+    assert gender_id == expected_gender_id
+
+def test_get_age_id():
+    """Test function to extract symptomgroup from xml"""
+    scenario_dict = handler.map_xml_to_json(convert_file_to_stream(sample_scenario_file_name))
+    age_id = handler.get_age_id(scenario_dict)
+    assert age_id == expected_age_id
+
 def test_get_symptom_group():
     """Test function to extract symptomgroup from xml"""
-    # root = handler.get_root(convert_file_to_stream(sample_scenario_file_name))
     scenario_dict = handler.map_xml_to_json(convert_file_to_stream(sample_scenario_file_name))
     symptom_group = handler.get_symptom_group(scenario_dict)
     assert symptom_group == expected_symptom_group
 
 def test_get_triage_disposition_uid():
     """Test function to extract triage disposition uid from xml"""
-    # root = handler.get_root(convert_file_to_stream(sample_scenario_file_name))
     scenario_dict = handler.map_xml_to_json(convert_file_to_stream(sample_scenario_file_name))
     disposition_uid = handler.get_triage_disposition_uid(scenario_dict)
     assert disposition_uid == expected_triage_disposition_uid
 
 def test_get_triage_disposition_description():
     """Test function to extract triage disposition description from xml"""
-    # root = handler.get_root(convert_file_to_stream(sample_scenario_file_name))
     scenario_dict = handler.map_xml_to_json(convert_file_to_stream(sample_scenario_file_name))
     disposition_description = handler.get_triage_disposition_description(scenario_dict)
     assert disposition_description == expected_triage_disposition_description
 
 def test_get_final_disposition_group_cmsid():
     """Test function to extract final disposition cmsid from xml"""
-    # root = handler.get_root(convert_file_to_stream(sample_scenario_file_name))
     scenario_dict = handler.map_xml_to_json(convert_file_to_stream(sample_scenario_file_name))
     final_disposition_cmsid = handler.get_final_disposition_group_cmsid(scenario_dict)
     assert final_disposition_cmsid == expected_final_disposition_group_cmsid
 
 def test_get_final_disposition_code():
     """Test function to extract final disposition code from xml"""
-    # root = handler.get_root(convert_file_to_stream(sample_scenario_file_name))
     scenario_dict = handler.map_xml_to_json(convert_file_to_stream(sample_scenario_file_name))
     final_disposition_code = handler.get_final_disposition_code(scenario_dict)
     assert final_disposition_code == expected_final_disposition_code
@@ -144,14 +152,12 @@ def test_get_final_disposition_code():
 def test_get_triage_lines():
     """Test function to extract all triage lines from xml"""
     triage_lines = []
-    # root = handler.get_root(convert_file_to_stream(sample_scenario_file_name))
     scenario_dict = handler.map_xml_to_json(convert_file_to_stream(sample_scenario_file_name))
     triage_lines = handler.get_triage_lines(scenario_dict)
     assert len(triage_lines) == expected_number_of_triage_lines
 
 def test_get_triage_line_data():
     """Test function to extract last symptom discriminator from xml"""
-    # root = handler.get_root(convert_file_to_stream(sample_scenario_file_name))
     scenario_dict = handler.map_xml_to_json(convert_file_to_stream(sample_scenario_file_name))
     report_texts, symptom_discriminator_uid, symptom_discriminator_desc = handler.get_triage_line_data(scenario_dict)
     assert len(report_texts) == expected_report_text_length
@@ -171,6 +177,8 @@ def test_process_scenario():
     assert len(scenario.report_texts) == expected_report_text_length
     assert scenario.symptom_discriminator_uid == expected_symptom_discriminator_uid
     assert scenario.symptom_discriminator_desc_text == expected_symptom_discriminator_desc_text
+    assert scenario.gender_id == expected_gender_id
+    assert scenario.age_id == expected_age_id
 
 def test_process_malformed_scenario():
     with pytest.raises(Exception):
@@ -198,14 +206,16 @@ def test_get_insert_query():
     template_scenario = handler.process_scenario_file(sample_scenario_file_name,convert_file_to_stream(sample_scenario_file_name))
     template_scenario.report_texts = expected_report_texts
     query, data = handler.get_insert_query(template_scenario)
-    assert query == """insert into pathwaysdos.searchscenarios (releaseid, scenarioid, symptomgroup_uid, triagedispositionuid,
-    triage_disposition_description, final_disposition_group_cmsid, final_disposition_code,
+    assert query == """insert into pathwaysdos.searchscenarios (releaseid, scenarioid, ageid, genderid, symptomgroup_uid,
+    triagedispositionuid,triage_disposition_description, final_disposition_group_cmsid, final_disposition_code,
     report_texts, symptom_discriminator_uid, symptom_discriminator_desc_text, scenariofilename,
     scenariofile, created_on)
-    values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,now()
+    values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,now()
     )"""
     assert data == (expected_pathways_release_id,
         sample_scenario_file_name,
+        expected_age_id,
+        expected_gender_id,
         expected_symptom_group,
         expected_triage_disposition_uid,
         expected_triage_disposition_description,
@@ -234,10 +244,3 @@ def get_compressed_object(file_to_upload):
     s3_client.upload_file(Filename=file_to_upload, Bucket=bucket, Key=mock_zip_filename)
     response_body = s3.S3().get_compressed_object(bucket, mock_zip_filename, mock_event, start)
     return response_body
-
-
-# def map_xml_to_json():
-#     d = handler.map_xml_to_json(convert_file_to_stream(sample_scenario_file_name))
-#     print(d["NHSPathways"]["PathwaysCase"]["PathwaysReleaseID"])
-#     assert True == False
-

@@ -11,6 +11,8 @@ class Scenario:
         report_texts,
         symptom_discriminator_uid,
         symptom_discriminator_desc_text,
+        age_id,
+        gender_id
     ):
         self.pathways_release_id = pathways_release_id
         self.file_name = file_name
@@ -22,3 +24,5 @@ class Scenario:
         self.report_texts = report_texts
         self.symptom_discriminator_uid = symptom_discriminator_uid
         self.symptom_discriminator_desc_text = symptom_discriminator_desc_text
+        self.age_id = age_id
+        self.gender_id = gender_id
