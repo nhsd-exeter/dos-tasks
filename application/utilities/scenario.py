@@ -12,7 +12,7 @@ class Scenario:
         symptom_discriminator_uid,
         symptom_discriminator_desc_text,
         age_id,
-        gender_id
+        gender_id,
     ):
         self.pathways_release_id = pathways_release_id
         self.file_name = file_name

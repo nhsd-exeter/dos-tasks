@@ -41,6 +41,7 @@ def request(event, context):
         common.archive_file(bucket, filename, event, start)
     return task_description + " execution completed"
 
+
 def process_zipfile(env, db_connection, bundle, filename):
     processed = True
     try:
@@ -59,6 +60,7 @@ def process_zipfile(env, db_connection, bundle, filename):
         processed = False
         logger.log_for_error("stt", "Problem processing {0} -> {1}".format(filename, e))
     return processed
+
 
 def insert_template_scenario(db_connection, template_scenario):
     query, data = get_insert_query(template_scenario)
@@ -115,7 +117,7 @@ def process_scenario_file(file_name, scenario_file):
             symptom_discriminator_uid,
             symptom_discriminator_desc_text,
             age_id,
-            gender_id
+            gender_id,
         )
     except ET.ParseError as e:
         print(file_name)
@@ -133,9 +135,11 @@ def get_age_id(scenario_dict):
     age_id = scenario_dict["NHSPathways"]["PathwaysCase"]["Patient"]["Age"]["AgeID"]
     return age_id
 
+
 def get_gender_id(scenario_dict):
     gender_id = scenario_dict["NHSPathways"]["PathwaysCase"]["Patient"]["Gender"]["GenderID"]
     return gender_id
+
 
 def get_pathways_release_id(scenario_dict) -> str:
     pathways_release_id = scenario_dict["NHSPathways"]["PathwaysCase"]["PathwaysReleaseID"]
