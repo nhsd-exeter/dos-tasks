@@ -156,6 +156,76 @@ def test_get_symptom_group_id():
     symptom_group = handler.get_symptom_group_id(scenario_dict)
     assert symptom_group == expected_symptom_group_id
 
+def test_get_disposition_id_query():
+    """Test function to build query to look up disposition id from code"""
+    scenario_dict = handler.map_xml_to_json(convert_file_to_stream(sample_scenario_file_name))
+    disposition_code = handler.get_disposition_code(scenario_dict)
+    query, data = handler.get_disposition_id_query(disposition_code)
+    assert query == """select id from pathwaysdos.dispositions where dxCode = %s"""
+    assert data == (disposition_code,)
+
+def test_get_disposition_group_id_query():
+    """Test function to build query to look up disposition group id from uid"""
+    scenario_dict = handler.map_xml_to_json(convert_file_to_stream(sample_scenario_file_name))
+    disposition_group_uid = handler.get_disposition_group_uid(scenario_dict)
+    query, data = handler.get_disposition_group_id_query(disposition_group_uid)
+    assert query == """select id from pathwaysdos.dispositiongroups where uid = %s"""
+    data = (disposition_group_uid,)
+
+#
+@patch("psycopg2.connect")
+@patch(f"{file_path}.get_disposition_code", return_value="DX20")
+@patch(f"{file_path}.get_disposition_id_query",side_effect=[{1:'',2:''}])
+@patch(f"{file_path}.database.execute_query",return_value=[{"id":1}])
+def test_get_valid_disposition_id(mock_execute, mock_query, mock_code, mock_db_connect):
+    """Test function to derive id of disposition from db based on code"""
+    scenario_dict = {}
+    disposition_id = handler.get_disposition_id(scenario_dict, mock_db_connect)
+    assert disposition_id == 1
+    mock_code.assert_called_once()
+    mock_query.assert_called_once()
+    mock_execute.assert_called_once()
+
+@patch("psycopg2.connect")
+@patch(f"{file_path}.get_disposition_code", return_value="DX20")
+@patch(f"{file_path}.get_disposition_id_query",side_effect=[{1:'',2:''}])
+@patch(f"{file_path}.database.execute_query",return_value=[])
+def test_get_invalid_disposition_id(mock_execute, mock_query, mock_code, mock_db_connect):
+    """Test function to derive id of disposition from db based on code"""
+    scenario_dict = {}
+    disposition_id = handler.get_disposition_id(scenario_dict, mock_db_connect)
+    assert disposition_id is None
+    mock_code.assert_called_once()
+    mock_query.assert_called_once()
+    mock_execute.assert_called_once()
+
+@patch("psycopg2.connect")
+@patch(f"{file_path}.get_disposition_group_uid", return_value="1002")
+@patch(f"{file_path}.get_disposition_group_id_query",side_effect=[{1:'',2:''}])
+@patch(f"{file_path}.database.execute_query",return_value=[{"id":6}])
+def test_get_valid_disposition_group_id(mock_execute, mock_query, mock_code, mock_db_connect):
+    """Test function to derive id of disposition from db based on code"""
+    scenario_dict = {}
+    disposition_group_id = handler.get_disposition_group_id(scenario_dict, mock_db_connect)
+    assert disposition_group_id == 6
+    mock_code.assert_called_once()
+    mock_query.assert_called_once()
+    mock_execute.assert_called_once()
+
+@patch("psycopg2.connect")
+@patch(f"{file_path}.get_disposition_group_uid", return_value="1002")
+@patch(f"{file_path}.get_disposition_group_id_query",side_effect=[{1:'',2:''}])
+@patch(f"{file_path}.database.execute_query",return_value=[])
+def test_get_invalid_disposition_group_id(mock_execute, mock_query, mock_code, mock_db_connect):
+    """Test function to derive id of disposition from db based on code"""
+    scenario_dict = {}
+    disposition_group_id = handler.get_disposition_group_id(scenario_dict, mock_db_connect)
+    assert disposition_group_id is None
+    mock_code.assert_called_once()
+    mock_query.assert_called_once()
+    mock_execute.assert_called_once()
+
+
 def test_get_disposition_code():
     """Test function to extract triage disposition uid from xml"""
     scenario_dict = handler.map_xml_to_json(convert_file_to_stream(sample_scenario_file_name))
@@ -183,13 +253,16 @@ def test_get_triage_line_data():
     assert triage_report[expected_triage_report_length-1] == expected_triage_report_last_line
     assert symptom_discriminator_id == expected_symptom_discriminator_id
 
-def test_process_scenario():
-    scenario = handler.process_scenario_file(sample_scenario_file_name, convert_file_to_stream(sample_scenario_file_name),bundle_id)
+@patch("psycopg2.connect")
+@patch(f"{file_path}.get_disposition_group_id",return_value=5)
+@patch(f"{file_path}.get_disposition_id",return_value=6)
+def test_process_scenario(mock_disposition, mock_disposition_group, mock_db_connect):
+    scenario = handler.process_scenario_file(sample_scenario_file_name, convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
     assert scenario.bundle_id == bundle_id
     assert scenario.scenario_id == expected_scenario_id
     assert scenario.symptom_group_id == expected_symptom_group_id
-    assert scenario.disposition_id == expected_disposition_code
-    assert scenario.disposition_group_id == expected_disposition_group_id
+    assert scenario.disposition_id == 6
+    assert scenario.disposition_group_id == 5
     assert len(scenario.triage_report) == expected_triage_report_length
     assert scenario.symptom_discriminator_id == expected_symptom_discriminator_id
     assert scenario.gender_id == expected_gender_id
@@ -200,10 +273,14 @@ def test_process_malformed_scenario():
         handler.process_scenario_file(malformed_scenario_file_name,convert_file_to_stream(malformed_scenario_file_name), bundle_id)
 
 @patch("psycopg2.connect")
-def test_process_zipfile(mock_db_connect):
+@patch(f"{file_path}.get_disposition_group_id",return_value=5)
+@patch(f"{file_path}.get_disposition_id",return_value=5)
+def test_process_zipfile(mock_disposition, mock_disposition_group, mock_db_connect):
     bundle = get_compressed_object(sample_bundle_file_name)
     processed = handler.process_zipfile(env, mock_db_connect, bundle,mock_zip_filename, bundle_id)
     assert processed == True
+    assert mock_disposition.call_count == 3
+    assert mock_disposition_group.call_count == 3
 
 @patch("psycopg2.connect")
 def test_process_non_zipfile(mock_db_connect):
@@ -215,6 +292,32 @@ def test_process_malformed_xml_in_zipfile(mock_db_connect):
     bundle = get_compressed_object(malformed_bundle_file_name)
     processed = handler.process_zipfile(env, mock_db_connect,bundle,malformed_bundle_file_name, bundle_id)
     assert processed == False
+
+@patch("psycopg2.connect")
+@patch(f"{file_path}.logger.log_for_audit")
+@patch(f"{file_path}.get_disposition_group_id",return_value=5)
+@patch(f"{file_path}.get_disposition_id",return_value=5)
+@patch(f"{file_path}.validate_template_scenario",return_value=False)
+def test_process_zipfile_invalid_template(mock_validator, mock_disposition, mock_disposition_group, mock_logger, mock_db_connect):
+    bundle = get_compressed_object(sample_bundle_file_name)
+    processed = handler.process_zipfile(env, mock_db_connect, bundle,mock_zip_filename, bundle_id)
+    assert processed == True
+    assert mock_disposition.call_count == 3
+    assert mock_disposition_group.call_count == 3
+    assert mock_logger.call_count == 6
+
+@patch("psycopg2.connect")
+@patch(f"{file_path}.logger.log_for_audit")
+@patch(f"{file_path}.get_disposition_group_id",return_value=5)
+@patch(f"{file_path}.get_disposition_id",return_value=5)
+@patch(f"{file_path}.validate_template_scenario",return_value=True)
+def test_process_zipfile_valid_template(mock_validator, mock_disposition, mock_disposition_group, mock_logger, mock_db_connect):
+    bundle = get_compressed_object(sample_bundle_file_name)
+    processed = handler.process_zipfile(env, mock_db_connect, bundle,mock_zip_filename, bundle_id)
+    assert processed == True
+    assert mock_disposition.call_count == 3
+    assert mock_disposition_group.call_count == 3
+    assert mock_logger.call_count == 3
 
 @patch("psycopg2.connect")
 @patch(f"{file_path}.database.execute_query", return_value=([{"id": 3}]))
@@ -231,9 +334,12 @@ def test_get_bundle_insert_query():
     assert query == """insert into pathwaysdos.scenariobundles (name,createdtime) values (%s,now()) returning id"""
     assert data == (bundle_id,)
 
-def test_get_scenario_insert_query():
+@patch("psycopg2.connect")
+@patch(f"{file_path}.get_disposition_group_id",return_value=7)
+@patch(f"{file_path}.get_disposition_id",return_value=8)
+def test_get_scenario_insert_query( mock_disposition, mock_disposition_group, mock_db_connect):
     expected_triage_report = "One.Two.Three"
-    template_scenario = handler.process_scenario_file(sample_scenario_file_name,convert_file_to_stream(sample_scenario_file_name),bundle_id)
+    template_scenario = handler.process_scenario_file(sample_scenario_file_name,convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
     template_scenario.triage_report = expected_triage_report
     query, data = handler.get_scenario_insert_query(template_scenario)
     assert query == """insert into scenarios(bundleid, scenarioid, symptomgroupid, dispositionid,
@@ -244,13 +350,41 @@ dispositiongroupid, symptomdiscriminatorid, ageid, genderid, triagereport, creat
     assert data == (bundle_id,
         expected_scenario_id,
         expected_symptom_group_id,
-        expected_disposition_code,
-        expected_disposition_group_id,
+        8,
+        7,
         expected_symptom_discriminator_id,
         expected_age_id,
         expected_gender_id,
         expected_triage_report,
     )
+    mock_disposition.assert_called_once()
+    mock_disposition_group.assert_called_once()
+
+@patch("psycopg2.connect")
+@patch(f"{file_path}.logger.log_for_audit")
+@patch(f"{file_path}.get_disposition_group_id",return_value=7)
+@patch(f"{file_path}.get_disposition_id",return_value=8)
+def test_validate_template_scenario_invalid_disposition(mock_disposition, mock_disposition_group, mock_logger, mock_db_connect):
+    template_scenario = handler.process_scenario_file(sample_scenario_file_name,convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
+    template_scenario.disposition_id = None
+    valid_template = handler.validate_template_scenario(env, template_scenario,mock_db_connect)
+    assert valid_template == False
+    assert mock_logger.call_count == 1
+    mock_disposition.assert_called_once()
+    mock_disposition_group.assert_called_once()
+
+@patch("psycopg2.connect")
+@patch(f"{file_path}.logger.log_for_audit")
+@patch(f"{file_path}.get_disposition_group_id",return_value=7)
+@patch(f"{file_path}.get_disposition_id",return_value=8)
+def test_validate_template_scenario_invalid_dispositio_group(mock_disposition, mock_disposition_group, mock_logger, mock_db_connect):
+    template_scenario = handler.process_scenario_file(sample_scenario_file_name,convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
+    template_scenario.disposition_group_id = None
+    valid_template = handler.validate_template_scenario(env, template_scenario,mock_db_connect)
+    assert valid_template == False
+    assert mock_logger.call_count == 1
+    mock_disposition.assert_called_once()
+    mock_disposition_group.assert_called_once()
 
 def generate_event_payload():
     """Utility function to generate dummy event data"""

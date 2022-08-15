@@ -52,8 +52,12 @@ def process_zipfile(env, db_connection, bundle, filename, bundle_id):
             logger.log_for_audit(env, "action:processing scenario {}".format(name))
             scenario_file = bundle_zip.read(name).decode("utf-8")
             try:
-                template_scenario = process_scenario_file(name, scenario_file, bundle_id)
-                insert_template_scenario(db_connection, template_scenario)
+                template_scenario = process_scenario_file(name, scenario_file, bundle_id, db_connection)
+                valid_template = validate_template_scenario(env, template_scenario, db_connection)
+                if valid_template is True:
+                    insert_template_scenario(db_connection, template_scenario)
+                else:
+                    logger.log_for_audit(env, "action:invalid scenario {}".format(name))
             except Exception as e:
                 processed = False
                 logger.log_for_error("stt", "Problem processing scenario file {0}: {1}".format(name, e))
@@ -62,6 +66,21 @@ def process_zipfile(env, db_connection, bundle, filename, bundle_id):
         processed = False
         logger.log_for_error("stt", "Problem processing {0} -> {1}".format(filename, e))
     return processed
+
+
+def validate_template_scenario(env, template_scenario, db_connection):
+    valid_template = True
+    if template_scenario.disposition_id is None:
+        logger.log_for_audit(
+            env, "Scenario {} references unrecognised disposition".format(template_scenario.scenario_id)
+        )
+        valid_template = False
+    if template_scenario.disposition_group_id is None:
+        logger.log_for_audit(
+            env, "Scenario {} references unrecognised disposition group".format(template_scenario.scenario_id)
+        )
+        valid_template = False
+    return valid_template
 
 
 def insert_template_scenario(db_connection, template_scenario):
@@ -89,15 +108,15 @@ dispositiongroupid, symptomdiscriminatorid, ageid, genderid, triagereport, creat
     return query, data
 
 
-def process_scenario_file(file_name, scenario_file, bundle_id):
+def process_scenario_file(file_name, scenario_file, bundle_id, db_connection):
     try:
         scenario_dict = map_xml_to_json(scenario_file)
         scenario_id = get_scenario_id(file_name)
         age_id = get_age_id(scenario_dict)
         gender_id = get_gender_id(scenario_dict)
         symptom_group_id = get_symptom_group_id(scenario_dict)
-        disposition_id = get_disposition_code(scenario_dict)
-        disposition_group_id = get_disposition_group_uid(scenario_dict)
+        disposition_id = get_disposition_id(scenario_dict, db_connection)
+        disposition_group_id = get_disposition_group_id(scenario_dict, db_connection)
         triage_report, symptom_discriminator_id = get_triage_line_data(scenario_dict)
 
         template_scenario = scenario.Scenario(
@@ -176,8 +195,24 @@ def get_symptom_group_id(scenario_dict):
 
 
 def get_disposition_code(scenario_dict):
-    disposition_uid = scenario_dict["NHSPathways"]["PathwaysCase"]["TriageDisposition"]["DispositionCode"]
-    return disposition_uid.upper()
+    disposition_code = scenario_dict["NHSPathways"]["PathwaysCase"]["TriageDisposition"]["DispositionCode"]
+    return disposition_code.upper()
+
+
+def get_disposition_id_query(disposition_code):
+    query = """select id from pathwaysdos.dispositions where dxCode = %s"""
+    data = (disposition_code,)
+    return query, data
+
+
+def get_disposition_id(scenario_dict, db_connection):
+    disposition_id = None
+    disposition_code = get_disposition_code(scenario_dict)
+    query, data = get_disposition_id_query(disposition_code)
+    result_set = database.execute_query(db_connection, query, data)
+    if len(result_set) > 0:
+        disposition_id = result_set[0]["id"]
+    return disposition_id
 
 
 def get_disposition_group_uid(scenario_dict):
@@ -185,6 +220,22 @@ def get_disposition_group_uid(scenario_dict):
         "FinalDispositionCMSID"
     ]
     return final_disposition_group_uid
+
+
+def get_disposition_group_id_query(disposition_group_uid):
+    query = """select id from pathwaysdos.dispositiongroups where uid = %s"""
+    data = (disposition_group_uid,)
+    return query, data
+
+
+def get_disposition_group_id(scenario_dict, db_connection):
+    disposition_group_id = None
+    disposition_code = get_disposition_group_uid(scenario_dict)
+    query, data = get_disposition_group_id_query(disposition_code)
+    result_set = database.execute_query(db_connection, query, data)
+    if len(result_set) > 0:
+        disposition_group_id = result_set[0]["id"]
+    return disposition_group_id
 
 
 def get_triage_line_data(scenario_dict):
