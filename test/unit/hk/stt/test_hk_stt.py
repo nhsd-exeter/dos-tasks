@@ -27,11 +27,11 @@ malformed_scenario_file_name = "test-files/Scenario_malformed.xml"
 sample_bundle_file_name = "test-files/19.0.zip"
 malformed_bundle_file_name = "test-files/Scenario_malformed.zip"
 expected_symptom_group_id = "1203"
-expected_disposition_id = "Dx75"
+expected_disposition_code = "DX75"
 expected_disposition_group_id = "1075"
 expected_triage_report_length = 33
 expected_number_of_triage_lines = 62
-expected_last_report_text = "Remember to take a list of any current medications if you go to the out of hours surgery."
+expected_triage_report_last_line = "Remember to take a list of any current medications if you go to the out of hours surgery."
 expected_symptom_discriminator_id = '4533'
 expected_scenario_id = 2
 alt_expected_scenario_id = "1"
@@ -137,11 +137,6 @@ def test_get_bundle_name_no_release_number():
     bundle_name = handler.get_bundle_name("Dental_stt.zip")
     assert expected_bundle_name == bundle_name
 
-# def test_get_pathways_release_id():
-#     """Test function to extract bundle/pathways release version from xml"""
-#     scenario_dict = handler.map_xml_to_json(convert_file_to_stream(sample_scenario_file_name))
-#     pathways_release_id = handler.get_pathways_release_id(scenario_dict)
-#     assert pathways_release_id == expected_pathways_release_id
 
 def test_get_gender_id():
     """Test function to extract symptomgroup from xml"""
@@ -155,35 +150,23 @@ def test_get_age_id():
     age_id = handler.get_age_id(scenario_dict)
     assert age_id == expected_age_id
 
-def test_get_symptom_group():
+def test_get_symptom_group_id():
     """Test function to extract symptomgroup from xml"""
     scenario_dict = handler.map_xml_to_json(convert_file_to_stream(sample_scenario_file_name))
-    symptom_group = handler.get_symptom_group(scenario_dict)
+    symptom_group = handler.get_symptom_group_id(scenario_dict)
     assert symptom_group == expected_symptom_group_id
 
-def test_get_triage_disposition_uid():
+def test_get_disposition_code():
     """Test function to extract triage disposition uid from xml"""
     scenario_dict = handler.map_xml_to_json(convert_file_to_stream(sample_scenario_file_name))
-    disposition_uid = handler.get_triage_disposition_uid(scenario_dict)
-    assert disposition_uid == expected_disposition_id
+    disposition_code = handler.get_disposition_code(scenario_dict)
+    assert disposition_code == expected_disposition_code
 
-# def test_get_triage_disposition_description():
-#     """Test function to extract triage disposition description from xml"""
-#     scenario_dict = handler.map_xml_to_json(convert_file_to_stream(sample_scenario_file_name))
-#     disposition_description = handler.get_triage_disposition_description(scenario_dict)
-#     assert disposition_description == expected_triage_disposition_description
-
-def test_get_final_disposition_group_cmsid():
+def test_get_disposition_group_uid():
     """Test function to extract final disposition cmsid from xml"""
     scenario_dict = handler.map_xml_to_json(convert_file_to_stream(sample_scenario_file_name))
-    final_disposition_cmsid = handler.get_final_disposition_group_cmsid(scenario_dict)
-    assert final_disposition_cmsid == expected_disposition_group_id
-
-# def test_get_final_disposition_code():
-#     """Test function to extract final disposition code from xml"""
-#     scenario_dict = handler.map_xml_to_json(convert_file_to_stream(sample_scenario_file_name))
-#     final_disposition_code = handler.get_final_disposition_code(scenario_dict)
-#     assert final_disposition_code == expected_final_disposition_code
+    disposition_group_id = handler.get_disposition_group_uid(scenario_dict)
+    assert disposition_group_id == expected_disposition_group_id
 
 def test_get_triage_lines():
     """Test function to extract all triage lines from xml"""
@@ -195,23 +178,20 @@ def test_get_triage_lines():
 def test_get_triage_line_data():
     """Test function to extract last symptom discriminator from xml"""
     scenario_dict = handler.map_xml_to_json(convert_file_to_stream(sample_scenario_file_name))
-    report_texts, symptom_discriminator_uid = handler.get_triage_line_data(scenario_dict)
-    assert len(report_texts) == expected_triage_report_length
-    assert report_texts[expected_triage_report_length-1] == expected_last_report_text
-    assert symptom_discriminator_uid == expected_symptom_discriminator_id
-    # assert symptom_discriminator_desc == expected_symptom_discriminator_desc_text
+    triage_report, symptom_discriminator_id = handler.get_triage_line_data(scenario_dict)
+    assert len(triage_report) == expected_triage_report_length
+    assert triage_report[expected_triage_report_length-1] == expected_triage_report_last_line
+    assert symptom_discriminator_id == expected_symptom_discriminator_id
 
 def test_process_scenario():
     scenario = handler.process_scenario_file(sample_scenario_file_name, convert_file_to_stream(sample_scenario_file_name),bundle_id)
     assert scenario.bundle_id == bundle_id
     assert scenario.scenario_id == expected_scenario_id
     assert scenario.symptom_group_id == expected_symptom_group_id
-    assert scenario.disposition_id == expected_disposition_id
-    # assert scenario.triage_disposition_description == expected_triage_disposition_description
+    assert scenario.disposition_id == expected_disposition_code
     assert scenario.disposition_group_id == expected_disposition_group_id
     assert len(scenario.triage_report) == expected_triage_report_length
     assert scenario.symptom_discriminator_id == expected_symptom_discriminator_id
-    # assert scenario.symptom_discriminator_desc_text == expected_symptom_discriminator_desc_text
     assert scenario.gender_id == expected_gender_id
     assert scenario.age_id == expected_age_id
 
@@ -264,7 +244,7 @@ dispositiongroupid, symptomdiscriminatorid, ageid, genderid, triagereport, creat
     assert data == (bundle_id,
         expected_scenario_id,
         expected_symptom_group_id,
-        expected_disposition_id,
+        expected_disposition_code,
         expected_disposition_group_id,
         expected_symptom_discriminator_id,
         expected_age_id,

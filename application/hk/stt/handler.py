@@ -95,9 +95,9 @@ def process_scenario_file(file_name, scenario_file, bundle_id):
         scenario_id = get_scenario_id(file_name)
         age_id = get_age_id(scenario_dict)
         gender_id = get_gender_id(scenario_dict)
-        symptom_group_id = get_symptom_group(scenario_dict)
-        disposition_id = get_triage_disposition_uid(scenario_dict)
-        disposition_group_id = get_final_disposition_group_cmsid(scenario_dict)
+        symptom_group_id = get_symptom_group_id(scenario_dict)
+        disposition_id = get_disposition_code(scenario_dict)
+        disposition_group_id = get_disposition_group_uid(scenario_dict)
         triage_report, symptom_discriminator_id = get_triage_line_data(scenario_dict)
 
         template_scenario = scenario.Scenario(
@@ -122,16 +122,19 @@ def process_scenario_file(file_name, scenario_file, bundle_id):
 def map_xml_to_json(file_as_string):
     return xmltodict.parse(file_as_string)
 
+
 def add_bundle(db_connection, zip_file_name):
     bundle_name = get_bundle_name(zip_file_name)
     query, data = get_bundle_insert_query(bundle_name)
     result_set = database.execute_query(db_connection, query, data)
     return result_set[0]["id"]
 
+
 def get_bundle_insert_query(bundle_id):
     query = """insert into pathwaysdos.scenariobundles (name,createdtime) values (%s,now()) returning id"""
     data = (bundle_id,)
     return query, data
+
 
 def get_bundle_name(zip_file_name):
     """Extract name of bundle from provided zip file assuming convention - R33.2.0_STT_Bundle_stt.zip"""
@@ -141,6 +144,7 @@ def get_bundle_name(zip_file_name):
     if bundle_id[0] != "R":
         start_at_position = 0
     return bundle_id[start_at_position:]
+
 
 def get_scenario_id(scenario_file_name):
     """Extract id for scenario from file name allowing for naming conventions used"""
@@ -152,7 +156,7 @@ def get_scenario_id(scenario_file_name):
     try:
         return int(scenario_identifier[1])
     except ValueError:
-        logger.log_for_error("stt","Problem converting {} to id".format(scenario_identifier[1]))
+        logger.log_for_error("stt", "Problem converting {} to id".format(scenario_identifier[1]))
         raise ValueError("Can't convert {} to int for storing as scenario id".format(scenario_identifier[1]))
 
 
@@ -165,54 +169,30 @@ def get_gender_id(scenario_dict):
     gender_id = scenario_dict["NHSPathways"]["PathwaysCase"]["Patient"]["Gender"]["GenderID"]
     return gender_id
 
+def get_symptom_group_id(scenario_dict):
+    symptom_group_id = scenario_dict["NHSPathways"]["PathwaysCase"]["SymptomGroup"]
+    return symptom_group_id
 
-# def get_pathways_release_id(scenario_dict) -> str:
-#     pathways_release_id = scenario_dict["NHSPathways"]["PathwaysCase"]["PathwaysReleaseID"]
-#     release_id = pathways_release_id.split("_")
-#     return release_id[0]
-
-
-def get_symptom_group(scenario_dict):
-    symptom_group_element = scenario_dict["NHSPathways"]["PathwaysCase"]["SymptomGroup"]
-    return symptom_group_element
-
-
-def get_triage_disposition_uid(scenario_dict):
+def get_disposition_code(scenario_dict):
     disposition_uid = scenario_dict["NHSPathways"]["PathwaysCase"]["TriageDisposition"]["DispositionCode"]
-    return disposition_uid
+    return disposition_uid.upper()
 
-
-# def get_triage_disposition_description(scenario_dict):
-#     disposition_description = scenario_dict["NHSPathways"]["PathwaysCase"]["TriageDisposition"][
-#         "DispositionDescription"
-#     ]
-#     return disposition_description
-
-
-def get_final_disposition_group_cmsid(scenario_dict):
-    final_disposition_group = scenario_dict["NHSPathways"]["PathwaysCase"]["FinalDispositionCMSID"][
+def get_disposition_group_uid(scenario_dict):
+    final_disposition_group_uid = scenario_dict["NHSPathways"]["PathwaysCase"]["FinalDispositionCMSID"][
         "FinalDispositionCMSID"
     ]
-    return final_disposition_group
-
-
-# def get_final_disposition_code(scenario_dict):
-#     final_disposition_code = scenario_dict["NHSPathways"]["PathwaysCase"]["FinalDisposition"]["DispositionCode"]
-#     return final_disposition_code
-
+    return final_disposition_group_uid
 
 def get_triage_line_data(scenario_dict):
     report_texts = []
-    symptom_discriminator_uid = ""
-    # symptom_discriminator_desc = ""
+    symptom_discriminator_id = ""
     triage_lines = get_triage_lines(scenario_dict)
     for triage_line in triage_lines:
         report_texts = add_report_text(triage_line, report_texts)
         care_advice_sd = triage_line["CareAdvice"]["SymptomDiscriminator"]
         if care_advice_sd != "0":
-            symptom_discriminator_uid = care_advice_sd
-            # symptom_discriminator_desc = triage_line["AnswerText"]
-    return report_texts, symptom_discriminator_uid
+            symptom_discriminator_id = care_advice_sd
+    return report_texts, symptom_discriminator_id
 
 
 def get_triage_lines(scenario_dict):
