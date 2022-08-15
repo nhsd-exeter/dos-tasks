@@ -2,6 +2,15 @@
 
 --  1.1 Create import staging table for pharmacies
 -- max in text is 65,535 default if not specified is 64000
+
+CREATE TABLE IF NOT EXISTS pathwaysdos.searchscenariobundles
+(
+  id INTEGER PRIMARY KEY
+  bundlename varchar(255) NOT NULL
+  createdtime TIMESTAMP NOT NULL,
+);
+
+
 CREATE TABLE IF NOT EXISTS pathwaysdos.searchscenarios
 (
   id bigserial NOT NULL,
@@ -21,6 +30,7 @@ CREATE TABLE IF NOT EXISTS pathwaysdos.searchscenarios
   retired BOOLEAN DEFAULT FALSE,
   PRIMARY KEY (id) USING INDEX TABLESPACE pathwaysdos_index_01
 );
+
 
 -- 2.0 Constraints
 CREATE UNIQUE INDEX idx_bundle_scenario
@@ -61,4 +71,5 @@ GRANT SELECT ON ALL tables IN SCHEMA pathwaysdos TO pathwaysdos_read_grp;
 GRANT UPDATE, INSERT, DELETE ON ALL tables IN SCHEMA pathwaysdos TO pathwaysdos_write_grp;
 REVOKE UPDATE ON TABLE pathwaysdos.users FROM pathwaysdos_write_grp;
 GRANT UPDATE(id, username, firstname, lastname,email, password, phone,status,createdtime,lastlogintime,homeorganisation, accessreason,approvedby,approveddate, validationtoken) ON TABLE pathwaysdos.users TO pathwaysdos_write_grp;
-GRANT TRUNCATE ON pathwaysdos.searchscenarios TO pathwaysdos;
+
+--GRANT TRUNCATE ON pathwaysdos.searchscenarios TO pathwaysdos;

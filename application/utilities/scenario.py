@@ -1,28 +1,22 @@
 class Scenario:
     def __init__(
         self,
-        pathways_release_id,
-        file_name,
-        symptom_group,
-        triage_disposition_uid,
-        triage_disposition_description,
-        final_disposition_group_cmsid,
-        final_disposition_code,
-        report_texts,
-        symptom_discriminator_uid,
-        symptom_discriminator_desc_text,
+        bundle_id,
+        scenario_id,
+        symptom_group_id,
+        disposition_id,
+        disposition_group_id,
+        triage_report,
+        symptom_discriminator_id,
         age_id,
         gender_id,
     ):
-        self.pathways_release_id = pathways_release_id
-        self.file_name = file_name
-        self.symptom_group = symptom_group
-        self.triage_disposition_uid = triage_disposition_uid
-        self.triage_disposition_description = triage_disposition_description
-        self.final_disposition_group_cmsid = final_disposition_group_cmsid
-        self.final_disposition_code = final_disposition_code
-        self.report_texts = report_texts
-        self.symptom_discriminator_uid = symptom_discriminator_uid
-        self.symptom_discriminator_desc_text = symptom_discriminator_desc_text
+        self.bundle_id = bundle_id
+        self.scenario_id = scenario_id
+        self.symptom_group_id = symptom_group_id
+        self.disposition_id = disposition_id
+        self.disposition_group_id = disposition_group_id
+        self.triage_report = triage_report
+        self.symptom_discriminator_id = symptom_discriminator_id
         self.age_id = age_id
         self.gender_id = gender_id

@@ -1,7 +1,8 @@
 -- 1.0 Tables
 begin;
 
-  DROP TABLE IF EXISTS pathwaysdos.searchscenarios;
+  DROP TABLE IF EXISTS pathwaysdos.scenarios;
+  DROP TABLE IF EXISTS pathwaysdos.scenariobundles;
 
 end;
 
