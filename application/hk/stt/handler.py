@@ -169,19 +169,23 @@ def get_gender_id(scenario_dict):
     gender_id = scenario_dict["NHSPathways"]["PathwaysCase"]["Patient"]["Gender"]["GenderID"]
     return gender_id
 
+
 def get_symptom_group_id(scenario_dict):
     symptom_group_id = scenario_dict["NHSPathways"]["PathwaysCase"]["SymptomGroup"]
     return symptom_group_id
 
+
 def get_disposition_code(scenario_dict):
     disposition_uid = scenario_dict["NHSPathways"]["PathwaysCase"]["TriageDisposition"]["DispositionCode"]
     return disposition_uid.upper()
+
 
 def get_disposition_group_uid(scenario_dict):
     final_disposition_group_uid = scenario_dict["NHSPathways"]["PathwaysCase"]["FinalDispositionCMSID"][
         "FinalDispositionCMSID"
     ]
     return final_disposition_group_uid
+
 
 def get_triage_line_data(scenario_dict):
     report_texts = []
