@@ -128,13 +128,13 @@ def test_get_scenario_id_no_int():
 def test_get_bundle_name_release_number():
     """Test function to extract bundle name from zip file provided"""
     expected_bundle_name = "33.2.0"
-    bundle_name = handler.get_bundle_name("R33.2.0_STT_Bundle_stt.zip")
+    bundle_name = handler.get_bundle_name("teamb/R33.2.0_STT_Bundle_stt.zip")
     assert expected_bundle_name == bundle_name
 
 def test_get_bundle_name_no_release_number():
     """Test function to extract bundle name from zip file provided"""
     expected_bundle_name = "Dental"
-    bundle_name = handler.get_bundle_name("Dental_stt.zip")
+    bundle_name = handler.get_bundle_name("teamb/Dental_stt.zip")
     assert expected_bundle_name == bundle_name
 
 
@@ -324,7 +324,7 @@ def test_process_zipfile_valid_template(mock_validator, mock_disposition, mock_d
 @patch(f"{file_path}.get_bundle_insert_query",return_value=("query", "data"))
 def test_add_bundle(mock_db_connect,mock_execute,mock_query):
     """Test function to add bundle to database"""
-    bundle_file_name = "R32.2.3_stt.zip"
+    bundle_file_name = "teamb/R32.2.3_stt.zip"
     inserted_bundle_id = handler.add_bundle(mock_db_connect,bundle_file_name)
     assert inserted_bundle_id == 3
 

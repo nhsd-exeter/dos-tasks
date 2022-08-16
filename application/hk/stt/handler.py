@@ -158,7 +158,10 @@ def get_bundle_insert_query(bundle_id):
 def get_bundle_name(zip_file_name):
     """Extract name of bundle from provided zip file assuming convention - R33.2.0_STT_Bundle_stt.zip"""
     bundle_parts = zip_file_name.split("_")
-    bundle_id = bundle_parts[0]
+    # teamb R33.2.0
+    bundle_path = bundle_parts[0]
+    bundle_id_parts = bundle_path.split("/")
+    bundle_id = bundle_id_parts[1]
     start_at_position = 1
     if bundle_id[0] != "R":
         start_at_position = 0
