@@ -69,7 +69,7 @@ def test_log_deleted_changes(mock_db_connect):
 
 
 
-#TODO  - comeback to best method for this
+#TODO  - will comeback to best method for this
 @patch(f"{file_path}.getThresholdDate", return_value="2016, 8, 4, 12, 22, 44, 123456")
 def test_getThresholdDate(mock_getThresholdDate):
     with patch('datetime.datetime') as date_mock:
