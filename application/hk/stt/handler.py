@@ -131,8 +131,10 @@ def process_scenario_file(file_name, scenario_file, bundle_id, db_connection):
             gender_id,
         )
     except ET.ParseError as e:
-        print(file_name)
         logger.log_for_error("stt", "Invalid xml {}".format(e))
+        raise e
+    except Exception as ex:
+        logger.log_for_error("stt", "Problem processing scenario file: {}".format(ex))
         raise e
 
     return template_scenario
@@ -143,10 +145,13 @@ def map_xml_to_json(file_as_string):
 
 
 def add_bundle(db_connection, zip_file_name):
+    bundle_id = None
     bundle_name = get_bundle_name(zip_file_name)
     query, data = get_bundle_insert_query(bundle_name)
-    result_set = database.execute_cron_query(db_connection, query, data)
-    return result_set[0]["id"]
+    result_set = database.execute_resultset_query(db_connection, query, data)
+    if result_set is not None:
+        bundle_id = result_set[0]["id"]
+    return bundle_id
 
 
 def get_bundle_insert_query(bundle_id):
@@ -211,7 +216,7 @@ def get_disposition_id(scenario_dict, db_connection):
     disposition_id = None
     disposition_code = get_disposition_code(scenario_dict)
     query, data = get_disposition_id_query(disposition_code)
-    result_set = database.execute_cron_query(db_connection, query, data)
+    result_set = database.execute_resultset_query(db_connection, query, data)
     if len(result_set) > 0:
         disposition_id = result_set[0]["id"]
     return disposition_id
@@ -234,7 +239,7 @@ def get_disposition_group_id(scenario_dict, db_connection):
     disposition_group_id = None
     disposition_code = get_disposition_group_uid(scenario_dict)
     query, data = get_disposition_group_id_query(disposition_code)
-    result_set = database.execute_cron_query(db_connection, query, data)
+    result_set = database.execute_resultset_query(db_connection, query, data)
     if len(result_set) > 0:
         disposition_group_id = result_set[0]["id"]
     return disposition_group_id

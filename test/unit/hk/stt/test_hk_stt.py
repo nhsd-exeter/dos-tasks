@@ -176,7 +176,7 @@ def test_get_disposition_group_id_query():
 @patch("psycopg2.connect")
 @patch(f"{file_path}.get_disposition_code", return_value="DX20")
 @patch(f"{file_path}.get_disposition_id_query",side_effect=[{1:'',2:''}])
-@patch(f"{file_path}.database.execute_cron_query",return_value=[{"id":1}])
+@patch(f"{file_path}.database.execute_resultset_query",return_value=[{"id":1}])
 def test_get_valid_disposition_id(mock_execute, mock_query, mock_code, mock_db_connect):
     """Test function to derive id of disposition from db based on code"""
     scenario_dict = {}
@@ -189,7 +189,7 @@ def test_get_valid_disposition_id(mock_execute, mock_query, mock_code, mock_db_c
 @patch("psycopg2.connect")
 @patch(f"{file_path}.get_disposition_code", return_value="DX20")
 @patch(f"{file_path}.get_disposition_id_query",side_effect=[{1:'',2:''}])
-@patch(f"{file_path}.database.execute_cron_query",return_value=[])
+@patch(f"{file_path}.database.execute_resultset_query",return_value=[])
 def test_get_invalid_disposition_id(mock_execute, mock_query, mock_code, mock_db_connect):
     """Test function to derive id of disposition from db based on code"""
     scenario_dict = {}
@@ -202,7 +202,7 @@ def test_get_invalid_disposition_id(mock_execute, mock_query, mock_code, mock_db
 @patch("psycopg2.connect")
 @patch(f"{file_path}.get_disposition_group_uid", return_value="1002")
 @patch(f"{file_path}.get_disposition_group_id_query",side_effect=[{1:'',2:''}])
-@patch(f"{file_path}.database.execute_cron_query",return_value=[{"id":6}])
+@patch(f"{file_path}.database.execute_resultset_query",return_value=[{"id":6}])
 def test_get_valid_disposition_group_id(mock_execute, mock_query, mock_code, mock_db_connect):
     """Test function to derive id of disposition from db based on code"""
     scenario_dict = {}
@@ -215,7 +215,7 @@ def test_get_valid_disposition_group_id(mock_execute, mock_query, mock_code, moc
 @patch("psycopg2.connect")
 @patch(f"{file_path}.get_disposition_group_uid", return_value="1002")
 @patch(f"{file_path}.get_disposition_group_id_query",side_effect=[{1:'',2:''}])
-@patch(f"{file_path}.database.execute_cron_query",return_value=[])
+@patch(f"{file_path}.database.execute_resultset_query",return_value=[])
 def test_get_invalid_disposition_group_id(mock_execute, mock_query, mock_code, mock_db_connect):
     """Test function to derive id of disposition from db based on code"""
     scenario_dict = {}
@@ -320,7 +320,7 @@ def test_process_zipfile_valid_template(mock_validator, mock_disposition, mock_d
     assert mock_logger.call_count == 3
 
 @patch("psycopg2.connect")
-@patch(f"{file_path}.database.execute_cron_query", return_value=([{"id": 3}]))
+@patch(f"{file_path}.database.execute_resultset_query", return_value=([{"id": 3}]))
 @patch(f"{file_path}.get_bundle_insert_query",return_value=("query", "data"))
 def test_add_bundle(mock_db_connect,mock_execute,mock_query):
     """Test function to add bundle to database"""
