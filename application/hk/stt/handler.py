@@ -135,7 +135,7 @@ def process_scenario_file(file_name, scenario_file, bundle_id, db_connection):
         raise e
     except Exception as ex:
         logger.log_for_error("stt", "Problem processing scenario file: {}".format(ex))
-        raise e
+        raise ex
 
     return template_scenario
 
