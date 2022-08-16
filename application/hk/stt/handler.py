@@ -158,7 +158,6 @@ def get_bundle_insert_query(bundle_id):
 def get_bundle_name(zip_file_name):
     """Extract name of bundle from provided zip file assuming convention - R33.2.0_STT_Bundle_stt.zip"""
     bundle_parts = zip_file_name.split("_")
-    # teamb R33.2.0
     bundle_path = bundle_parts[0]
     bundle_id_parts = bundle_path.split("/")
     bundle_id = bundle_id_parts[1]
@@ -212,7 +211,7 @@ def get_disposition_id(scenario_dict, db_connection):
     disposition_id = None
     disposition_code = get_disposition_code(scenario_dict)
     query, data = get_disposition_id_query(disposition_code)
-    result_set = database.execute_query(db_connection, query, data)
+    result_set = database.execute_cron_query(db_connection, query, data)
     if len(result_set) > 0:
         disposition_id = result_set[0]["id"]
     return disposition_id
@@ -235,7 +234,7 @@ def get_disposition_group_id(scenario_dict, db_connection):
     disposition_group_id = None
     disposition_code = get_disposition_group_uid(scenario_dict)
     query, data = get_disposition_group_id_query(disposition_code)
-    result_set = database.execute_query(db_connection, query, data)
+    result_set = database.execute_cron_query(db_connection, query, data)
     if len(result_set) > 0:
         disposition_group_id = result_set[0]["id"]
     return disposition_group_id
