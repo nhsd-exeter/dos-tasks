@@ -38,7 +38,7 @@ variable "splunk_firehose_role" {
   description = "Name of splunk firehose IAM role"
 }
 
-variable "schedule_ragreset" {
-  description = "Schedule for reset rag status job"
+variable "schedule_removeoldchanges" {
+  description = "Schedule for remove old changes job"
   default     = "rate(5 minutes)"
 }
