@@ -145,7 +145,7 @@ def map_xml_to_json(file_as_string):
 def add_bundle(db_connection, zip_file_name):
     bundle_name = get_bundle_name(zip_file_name)
     query, data = get_bundle_insert_query(bundle_name)
-    result_set = database.execute_query(db_connection, query, data)
+    result_set = database.execute_cron_query(db_connection, query, data)
     return result_set[0]["id"]
 
 
