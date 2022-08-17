@@ -45,12 +45,11 @@ def test_generate_delete_query():
 
 
 #TODO  - will comeback to best method for this
-@patch(f"{file_path}.getThresholdDate", return_value="2016, 8, 4, 12, 22, 44, 123456")
-def test_getThresholdDate(mock_getThresholdDate):
-    with patch('datetime.datetime') as date_mock:
-        current_timestamp = date_mock.now().return_value
+
+def test_getThresholdDate():
+        current_timestamp = datetime.now()
         threshold_in_days = 1
         threshold_date = current_timestamp - timedelta(days=threshold_in_days)
         threshold_date = threshold_date.strftime('%Y-%m-%d %H:%M:%S')
         returned_date = getThresholdDate(threshold_in_days)
-        # assert returned_date == threshold_date
+        assert returned_date == threshold_date

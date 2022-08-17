@@ -28,7 +28,7 @@ def remove_old_changes(env, db_connection):
         database.execute_cron_query(db_connection, delete_query, data)
     # log_deleted_changes(env, db_connection, deleted_changes)
     except KeyError as e:
-        logger.log_for_error(env, "Exception raised running remove old changes job {}".format(e))
+        logger.log_for_error(env, "Delete query failed")
         raise e
 
 
@@ -39,6 +39,8 @@ def generate_delete_query(threshold_date):
         *
     """
     data = (threshold_date,)
+    print(query)
+    print(data)
     return query, data
 
 
@@ -88,4 +90,5 @@ def getThresholdDate(threshold_in_days):
     current_timestamp = datetime.now()
     threshold_date = current_timestamp - timedelta(days=threshold_in_days)
     threshold_date = threshold_date.strftime("%Y-%m-%d %H:%M:%S")
+    print(threshold_date)
     return threshold_date
