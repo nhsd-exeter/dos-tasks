@@ -4,11 +4,8 @@ from datetime import datetime, timedelta
 from application.cron.removeoldchanges.handler import getThresholdDate
 import pytest
 
-# import string
-# import psycopg2
 
 from .. import handler
-# from utilities import secrets,common
 
 file_path = "application.cron.removeoldchanges.handler"
 
@@ -18,28 +15,6 @@ expected_delete_query = """
         *
     """
 
-
-# expected_service_query = """select uid, name, typeid, parentid
-#             from services
-#             where id = %s
-#     """
-
-# expected_parent_uid_query = """select ser.id as parentid, ser.uid as parentuid
-#             from services as ser
-#             where ser.id = (select parentid from services where id = %s);
-#     """
-
-# expected_region_name_query = """select s.uid, s.name,
-#             (with recursive tree AS(
-#             select s.id,s.uid,s.parentid,s.name, 1 AS lvl FROM services s where s.id = %s
-#             union all
-#             select s.id,s.uid,s.parentid,s.name, lvl+1 AS lvl
-#             from services s
-#             inner join tree t ON s.id = t.parentid)
-#             select name from tree order by lvl desc limit 1) AS dosregion
-#         from services s
-#         where s.id = %s
-#     """
 
 @patch("psycopg2.connect")
 @patch(f"{file_path}.cron_common.cron_cleanup")
@@ -59,12 +34,12 @@ def test_generate_delete_query():
     delete_query, data  = handler.generate_delete_query(threshold_date)
     assert delete_query == expected_delete_query
 
-@patch("psycopg2.connect")
-def test_log_deleted_changes(mock_db_connect):
-    row_one = {"serviceid": 1,"service_name": "Mustang"}
-    row_two = {"serviceid": 2,"service_name": "Mustang"}
-    deleted_services = [row_one,row_two]
-    handler.log_deleted_changes('mockenv', mock_db_connect,deleted_services)
+# @patch("psycopg2.connect")
+# def test_log_deleted_changes(mock_db_connect):
+#     row_one = {"serviceid": 1,"service_name": "Mustang"}
+#     row_two = {"serviceid": 2,"service_name": "Mustang"}
+#     deleted_services = [row_one,row_two]
+#     handler.log_deleted_changes('mockenv', mock_db_connect,deleted_services)
 
 
 
