@@ -10,7 +10,7 @@ from .. import handler
 file_path = "application.cron.removeoldchanges.handler"
 
 expected_delete_query = """
-        delete from pathwaysdos.changes c where c.createdTimestamp < (%s)
+        delete from pathwaysdos.changes c where c.createdTimestamp < now()+ interval '-90 days'
         returning
         *
     """
@@ -33,10 +33,11 @@ def test_generate_delete_query():
     current_timestamp = datetime.now()
     threshold_date = current_timestamp - timedelta(90)
     threshold_date = threshold_date.strftime("%Y-%m-%d %H:%M:%S")
-    query, data  = handler.generate_delete_query(threshold_date)
+    # query, data  = handler.generate_delete_query(threshold_date)
+    query  = handler.generate_delete_query(threshold_date)
     assert ''.join(query.split()) == ''.join(expected_delete_query.split())
-    assert len(data) == 1
-    assert data[0] == threshold_date
+    # assert len(data) == 1
+    # assert data[0] == threshold_date
 
 # @patch("psycopg2.connect")
 # def test_log_deleted_changes(mock_db_connect):
