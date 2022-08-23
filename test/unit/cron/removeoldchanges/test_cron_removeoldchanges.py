@@ -22,7 +22,7 @@ expected_delete_query = """
 @patch(f"{file_path}.database.connect_to_database", return_value="db_connection")
 def test_handler_pass(mock_db_details, mock_update_query, mock_cleanup, mock_db_connect):
     """Test top level request calls downstream functions - success"""
-    payload = {"id": "ABC", "time": "DEF"}
+    payload = {"id": "A", "time": "D"}
     handler.request(event=payload, context=None)
     mock_cleanup.assert_called_once()
     mock_db_details.assert_called_once()

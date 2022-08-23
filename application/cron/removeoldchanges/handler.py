@@ -38,8 +38,6 @@ def remove_old_changes(env, db_connection):
         raise e
 
 
-# where c.createdTimestamp < (%s)
-
 
 def generate_delete_query(threshold_date):
     query = """delete from pathwaysdos.changes c where c.createdTimestamp < now()+ interval '-90 days'
