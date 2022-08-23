@@ -1,5 +1,6 @@
 from utilities import logger, database, cron_common
-# from datetime import datetime, timedelta
+
+from datetime import datetime, timedelta
 import os
 
 task_description = "Remove old changes"
@@ -23,8 +24,8 @@ def request(event, context):
 def remove_old_changes(env, db_connection):
 
     try:
-        # threshold_date = getThresholdDate
-        delete_query = generate_delete_query()
+        threshold_date = getThresholdDate
+        delete_query = generate_delete_query(threshold_date)
         database.execute_cron_delete_query(env, db_connection, delete_query)
     # log_deleted_changes(env, db_connection, deleted_changes)
     except KeyError as e:
@@ -35,17 +36,16 @@ def remove_old_changes(env, db_connection):
 # where c.createdTimestamp < (%s)
 
 
-def generate_delete_query():
-    query = """
-        delete from pathwaysdos.changes c
+def generate_delete_query(threshold_date):
+    query = """delete from pathwaysdos.changes c where c.createdTimestamp < (%s)
         returning
         *
     """
-    # data = (threshold_date,)
+    data = (threshold_date,)
     print(query)
-    # print(data)
-    # return query, data
-    return query
+    print(data)
+    return query, data
+    # return query
 
 
 # def get_log_data(db_connection):
@@ -90,9 +90,9 @@ def generate_delete_query():
 #     )
 
 
-# def getThresholdDate(threshold_in_days):
-#     current_timestamp = datetime.now()
-#     threshold_date = current_timestamp - timedelta(days=threshold_in_days)
-#     threshold_date = threshold_date.strftime("%Y-%m-%d %H:%M:%S")
-#     print(threshold_date)
-#     return threshold_date
+def getThresholdDate(threshold_in_days):
+    current_timestamp = datetime.now()
+    threshold_date = current_timestamp - timedelta(days=threshold_in_days)
+    threshold_date = threshold_date.strftime("%Y-%m-%d %H:%M:%S")
+    print(threshold_date)
+    return threshold_date

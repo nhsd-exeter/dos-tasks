@@ -1,7 +1,7 @@
 from unittest import result
 from unittest.mock import patch
 from datetime import datetime, timedelta
-# from application.cron.removeoldchanges.handler import getThresholdDate
+from application.cron.removeoldchanges.handler import getThresholdDate
 import pytest
 
 
@@ -10,7 +10,7 @@ from .. import handler
 file_path = "application.cron.removeoldchanges.handler"
 
 expected_delete_query = """
-        delete from pathwaysdos.changes c
+        delete from pathwaysdos.changes c where c.createdTimestamp < (%s)
         returning
         *
     """
@@ -30,9 +30,13 @@ def test_handler_pass(mock_db_details, mock_update_query, mock_cleanup, mock_db_
 
 
 def test_generate_delete_query():
-    # threshold_date=datetime.now()
-    delete_query = handler.generate_delete_query()
-    assert delete_query == expected_delete_query
+    current_timestamp = datetime.now()
+    threshold_date = current_timestamp - timedelta(90)
+    threshold_date = threshold_date.strftime("%Y-%m-%d %H:%M:%S")
+    query, data  = handler.generate_delete_query(threshold_date)
+    assert ''.join(query.split()) == ''.join(expected_delete_query.split())
+    assert len(data) == 1
+    assert data[0] == threshold_date
 
 # @patch("psycopg2.connect")
 # def test_log_deleted_changes(mock_db_connect):
@@ -46,10 +50,10 @@ def test_generate_delete_query():
 
 #TODO  - will comeback to best method for this
 
-# def test_getThresholdDate():
-#         current_timestamp = datetime.now()
-#         threshold_in_days = 1
-#         threshold_date = current_timestamp - timedelta(days=threshold_in_days)
-#         threshold_date = threshold_date.strftime('%Y-%m-%d %H:%M:%S')
-#         returned_date = getThresholdDate(threshold_in_days)
-#         assert returned_date == threshold_date
+def test_getThresholdDate():
+        current_timestamp = datetime.now()
+        threshold_in_days = 1
+        threshold_date = current_timestamp - timedelta(days=threshold_in_days)
+        threshold_date = threshold_date.strftime('%Y-%m-%d %H:%M:%S')
+        returned_date = getThresholdDate(threshold_in_days)
+        assert returned_date == threshold_date
