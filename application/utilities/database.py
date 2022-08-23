@@ -71,14 +71,16 @@ def execute_db_query(db_connection, query, data, line, values, summary_count_dic
         cursor.close()
 
 
-def execute_cron_delete_query(env, db_connection, query):
+def execute_cron_delete_query(env, db_connection, query,data):
     cursor = db_connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
     try:
-        cursor.execute(query)
+        print("cron_Delete_query")
+        print(query)
+        cursor.execute(query,data)
         db_connection.commit()
         # TODO add logging as required
     except Exception as e:
-        logger.log_for_error(env, "Error: {}".format(e))
+        logger.log_for_error(env, "Cron Delete Query Error: {}".format(e))
         db_connection.rollback()
     finally:
         cursor.close()
