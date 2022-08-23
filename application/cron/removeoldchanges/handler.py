@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import os
 
 task_description = "Remove old changes"
-# threshold_in_days = 90
+threshold_in_days = 90
 
 
 def request(event, context):
