@@ -15,19 +15,25 @@ expected_delete_query = """
         *
     """
 
+expected_delete_count_query = """
+        select count(*) as removed_count from pathwaysdos.changes c where c.createdTimestamp < now()+ interval '-90 days'
+        returning
+        *
+    """
 
 @patch("psycopg2.connect")
 @patch(f"{file_path}.cron_common.cron_cleanup")
 @patch(f"{file_path}.database.execute_cron_delete_query", return_value="" )
+@patch(f"{file_path}.database.execute_cron_nodata_query", return_value={})
+@patch(f"{file_path}.log_removed_changes", return_value={})
 @patch(f"{file_path}.database.connect_to_database", return_value="db_connection")
-def test_handler_pass(mock_db_details, mock_update_query, mock_cleanup, mock_db_connect):
+def test_handler_pass(mock_db_details,mock_log_removed_changes,mock_delete_count_query, mock_delete_query, mock_cleanup, mock_db_connect):
     """Test top level request calls downstream functions - success"""
     payload = {"id": "A", "time": "D"}
     handler.request(event=payload, context=None)
     mock_cleanup.assert_called_once()
     mock_db_details.assert_called_once()
-    mock_update_query.assert_called_once()
-
+    mock_delete_query.assert_called_once()
 
 def test_generate_delete_query():
     current_timestamp = datetime.now()
@@ -38,6 +44,12 @@ def test_generate_delete_query():
     assert ''.join(query.split()) == ''.join(expected_delete_query.split())
     # assert len(data) == 1
     # assert data[0] == threshold_date
+
+def test_generate_delete_count_query():
+    query = handler.generate_delete_count_query()
+    assert ''.join(query.split()) == ''.join(expected_delete_count_query.split())
+    # assert query == expected_delete_count_query
+
 
 # @patch("psycopg2.connect")
 # def test_log_deleted_changes(mock_db_connect):
