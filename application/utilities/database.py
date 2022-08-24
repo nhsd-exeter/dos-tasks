@@ -84,7 +84,7 @@ def execute_cron_delete_query(env, db_connection, query):
         cursor.close()
 
 
-def execute_cron_nodata_query(db_connection, query):
+def execute_cron_nodata_query(env, db_connection, query):
     cursor = db_connection.cursor()
     try:
         cursor.execute(query)
@@ -93,7 +93,7 @@ def execute_cron_nodata_query(db_connection, query):
         return rows
         # TODO add logging as required
     except Exception as e:
-        logger.log_for_error("Query failed. Error: {}".format(e))
+        logger.log_for_error(env,"Query failed. Error: {}".format(e))
         # db_connection.rollback()
     finally:
         cursor.close()
