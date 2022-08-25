@@ -15,7 +15,7 @@ expected_delete_query = """
         *
     """
 
-expected_delete_count_query = """select count(*) as removed_count from pathwaysdos.changes c where c.createdTimestamp < now()+ interval '-90 days'
+expected_delete_count_query = """select count(*) removed_count from pathwaysdos.changes c where c.createdTimestamp < now()+ interval '-90 days'
     """
 
 @patch("psycopg2.connect")
