@@ -66,6 +66,7 @@ def generate_delete_count_query():
 def get_delete_count(env, db_connection):
     query = generate_delete_count_query()
     result_set = database.execute_cron_nodata_query(env, db_connection, query)
+    print(result_set)
     return result_set
 
 
@@ -74,6 +75,7 @@ def get_log_data(env, db_connection):
     log_info = {}
     log_info["operation"] = "delete"
     log_info["removed_count"] = delete_count[0]["removed_count"]
+    print(log_info)
     return log_info
 
 

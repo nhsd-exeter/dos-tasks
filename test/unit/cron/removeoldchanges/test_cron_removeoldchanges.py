@@ -15,8 +15,7 @@ expected_delete_query = """
         *
     """
 
-expected_delete_count_query = """
-        select count(*) as removed_count from pathwaysdos.changes c where c.createdTimestamp < now()+ interval '-90 days'
+expected_delete_count_query = """select count(*) as removed_count from pathwaysdos.changes c where c.createdTimestamp < now()+ interval '-90 days'
         returning
         *
     """
@@ -39,25 +38,22 @@ def test_generate_delete_query():
     current_timestamp = datetime.now()
     threshold_date = current_timestamp - timedelta(90)
     threshold_date = threshold_date.strftime("%Y-%m-%d %H:%M:%S")
-    # query, data  = handler.generate_delete_query(threshold_date)
     query  = handler.generate_delete_query(threshold_date)
     assert ''.join(query.split()) == ''.join(expected_delete_query.split())
-    # assert len(data) == 1
-    # assert data[0] == threshold_date
+
 
 def test_generate_delete_count_query():
     query = handler.generate_delete_count_query()
     assert ''.join(query.split()) == ''.join(expected_delete_count_query.split())
-    # assert query == expected_delete_count_query
+    assert query == expected_delete_count_query
 
 
-# @patch("psycopg2.connect")
-# def test_log_deleted_changes(mock_db_connect):
-#     row_one = {"serviceid": 1,"service_name": "Mustang"}
-#     row_two = {"serviceid": 2,"service_name": "Mustang"}
-#     deleted_services = [row_one,row_two]
-#     handler.log_deleted_changes('mockenv', mock_db_connect,deleted_services)
-
+@patch("psycopg2.connect")
+@patch(f"{file_path}.get_delete_count", return_value= [{"removed_count": 1}])
+def test_get_log_data(mock_get_delete_count,mock_db_connect):
+    handler.get_log_data('mockenv', mock_db_connect)
+    # assert log_info == {"operation": "delete", "removed_count" : 1}
+    mock_get_delete_count.assert_called_once()
 
 
 
