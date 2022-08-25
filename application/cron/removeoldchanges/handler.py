@@ -57,8 +57,6 @@ def generate_delete_query(threshold_date):
 
 def generate_delete_count_query():
     query = """select count(*) as removed_count from pathwaysdos.changes c where c.createdTimestamp < now()+ interval '-90 days'
-        returning
-        *
     """
     return query
 
@@ -72,6 +70,7 @@ def get_delete_count(env, db_connection):
 
 def get_log_data(env, db_connection):
     delete_count = get_delete_count(env, db_connection)
+    print(delete_count)
     log_info = {}
     log_info["operation"] = "delete"
     log_info["removed_count"] = delete_count[0]["removed_count"]

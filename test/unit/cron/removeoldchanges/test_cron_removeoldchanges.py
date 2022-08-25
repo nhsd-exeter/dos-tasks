@@ -16,8 +16,6 @@ expected_delete_query = """
     """
 
 expected_delete_count_query = """select count(*) as removed_count from pathwaysdos.changes c where c.createdTimestamp < now()+ interval '-90 days'
-        returning
-        *
     """
 
 @patch("psycopg2.connect")
@@ -51,9 +49,18 @@ def test_generate_delete_count_query():
 @patch("psycopg2.connect")
 @patch(f"{file_path}.get_delete_count", return_value= [{"removed_count": 1}])
 def test_get_log_data(mock_get_delete_count,mock_db_connect):
+# def test_get_log_data(mock_db_connect):
     handler.get_log_data('mockenv', mock_db_connect)
     # assert log_info == {"operation": "delete", "removed_count" : 1}
     mock_get_delete_count.assert_called_once()
+
+
+@patch("psycopg2.connect")
+def test_get_delete_count(mock_db_connect):
+    actual_return = handler.get_delete_count('mockenv', mock_db_connect)
+    expected_return = {"removed_count" : 1}
+    # assert expected_return == actual_return
+
 
 
 
