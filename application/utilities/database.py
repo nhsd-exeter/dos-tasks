@@ -91,7 +91,7 @@ def execute_cron_nodata_query(env, db_connection, query):
         rows = cursor.fetchall()
         print("Total number of rows in table: ", cursor.rowcount)
         logger.log_for_diagnostics(env, "Query rows: {0}".format(rows))
-        print(rows["removed_count"])
+        print(rows[0])
         return rows
     except Exception as e:
         logger.log_for_error(env, "Query failed. Error: {}".format(e))
