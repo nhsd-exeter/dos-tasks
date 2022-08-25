@@ -89,12 +89,10 @@ def execute_cron_nodata_query(env, db_connection, query):
     try:
         cursor.execute(query)
         rows = cursor.fetchall()
-        # db_connection.commit()
+        logger.log_for_diagnostics(env, "Query rows: {0}".format(rows))
         return rows
-        # TODO add logging as required
     except Exception as e:
         logger.log_for_error(env, "Query failed. Error: {}".format(e))
-        # db_connection.rollback()
     finally:
         cursor.close()
 

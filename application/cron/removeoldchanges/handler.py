@@ -24,16 +24,19 @@ def request(event, context):
 def remove_old_changes(env, db_connection):
     try:
         threshold_date = getThresholdDate
+        print("result from count query")
+        delete_count_result = get_delete_count(env, db_connection)
+        print(delete_count_result)
         delete_query = generate_delete_query(threshold_date)
         database.execute_cron_delete_query(env, db_connection, delete_query)
-        log_removed_changes(env, db_connection)
+        log_removed_changes(env, db_connection, delete_count_result)
     except KeyError as e:
         logger.log_for_error(env, "Delete query failed")
         raise e
 
 
-def log_removed_changes(env, db_connection):
-    log_info = get_log_data(env, db_connection)
+def log_removed_changes(env, db_connection, delete_count_result):
+    log_info = get_log_data(env, db_connection, delete_count_result)
     log_text = get_log_entry(log_info)
     logger.log_for_audit(env, log_text)
     format_data = "%b %d %Y %H:%M:%S"
@@ -64,16 +67,13 @@ def generate_delete_count_query():
 def get_delete_count(env, db_connection):
     query = generate_delete_count_query()
     result_set = database.execute_cron_nodata_query(env, db_connection, query)
-    print(result_set)
     return result_set
 
 
-def get_log_data(env, db_connection):
-    delete_count = get_delete_count(env, db_connection)
-    print(delete_count)
+def get_log_data(env, db_connectiond, delete_count_result):
     log_info = {}
     log_info["operation"] = "delete"
-    log_info["removed_count"] = delete_count[0]["removed_count"]
+    log_info["removed_count"] = delete_count_result[0]["removed_count"]
     print(log_info)
     return log_info
 
