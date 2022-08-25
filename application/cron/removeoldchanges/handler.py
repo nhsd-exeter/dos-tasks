@@ -24,9 +24,9 @@ def request(event, context):
 def remove_old_changes(env, db_connection):
     try:
         threshold_date = getThresholdDate
-        print("result from count query")
         delete_count_result = get_delete_count(env, db_connection)
-        print(delete_count_result)
+        print("result from count query")
+        print(delete_count_result[0])
         delete_query = generate_delete_query(threshold_date)
         database.execute_cron_delete_query(env, db_connection, delete_query)
         log_removed_changes(env, db_connection, delete_count_result)
