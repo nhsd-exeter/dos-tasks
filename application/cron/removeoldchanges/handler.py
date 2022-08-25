@@ -76,9 +76,9 @@ def get_delete_count(env, db_connection):
 def get_log_data(env, db_connectiond, delete_count_result):
     log_info = {}
     log_info["operation"] = "delete"
-    log_info["removed_count"] = delete_count_result[0][""]
+    log_info["removed_count"] = delete_count_result[0]
     print(log_info)
-    log_info["removed_count"] = delete_count_result[0][""]
+    log_info["removed_count"] = delete_count_result[0]["removed_count"]
     print(log_info)
     return log_info
 

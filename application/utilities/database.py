@@ -85,7 +85,7 @@ def execute_cron_delete_query(env, db_connection, query):
 
 
 def execute_cron_nodata_query(env, db_connection, query):
-    cursor = db_connection.cursor()
+    cursor = db_connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
     try:
         cursor.execute(query)
         rows = cursor.fetchall()
