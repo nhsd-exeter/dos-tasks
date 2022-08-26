@@ -25,7 +25,6 @@ def remove_old_changes(env, db_connection):
     try:
         threshold_date = getThresholdDate
         delete_count_result = get_delete_count(env, db_connection)
-        # rows = delete_count_result
         delete_query = generate_delete_query(threshold_date)
         database.execute_cron_delete_query(env, db_connection, delete_query)
         log_removed_changes(env, db_connection, delete_count_result)
@@ -43,7 +42,7 @@ def log_removed_changes(env, db_connection, delete_count_result):
     end_at = datetime.utcnow()
     logger.log_for_audit(
         env,
-        "operation:RemoveOldChanges|records deleted:{0}|deleted at:{1}".format(
+        "operation:RemoveOldChanges| records deleted:{0}| deleted at:{1}".format(
             deleted_count, end_at.strftime(format_data)
         ),
     )
@@ -65,14 +64,14 @@ def generate_delete_count_query():
 
 def get_delete_count(env, db_connection):
     query = generate_delete_count_query()
-    result_set = database.execute_cron_nodata_query(env, db_connection, query)
+    result_set = database.execute_cron_query_without_data(env, db_connection, query)
     return result_set
 
 
 def get_log_data(env, db_connectiond, delete_count_result):
     log_info = {}
     log_info["operation"] = "delete"
-    log_info["records deleted"] = delete_count_result[0]["removed_count"]
+    log_info["records to delete"] = delete_count_result[0]["removed_count"]
     return log_info
 
 
