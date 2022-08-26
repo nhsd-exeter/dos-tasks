@@ -25,9 +25,7 @@ def remove_old_changes(env, db_connection):
     try:
         threshold_date = getThresholdDate
         delete_count_result = get_delete_count(env, db_connection)
-        print("result from count query")
-        rows = delete_count_result
-        print(rows)
+        # rows = delete_count_result
         delete_query = generate_delete_query(threshold_date)
         database.execute_cron_delete_query(env, db_connection, delete_query)
         log_removed_changes(env, db_connection, delete_count_result)
@@ -40,11 +38,14 @@ def log_removed_changes(env, db_connection, delete_count_result):
     log_info = get_log_data(env, db_connection, delete_count_result)
     log_text = get_log_entry(log_info)
     logger.log_for_audit(env, log_text)
+    deleted_count = delete_count_result[0]["removed_count"]
     format_data = "%b %d %Y %H:%M:%S"
     end_at = datetime.utcnow()
     logger.log_for_audit(
         env,
-        "operation:RemoveOldChanges|updated at:{0}".format(end_at.strftime(format_data)),
+        "operation:RemoveOldChanges|records deleted:{0}|deleted at:{1}".format(
+            deleted_count, end_at.strftime(format_data)
+        ),
     )
 
 
@@ -53,10 +54,7 @@ def generate_delete_query(threshold_date):
         returning
         *
     """
-    # data = (threshold_date,)
     return query
-    # , data
-    # return query
 
 
 def generate_delete_count_query():
@@ -68,18 +66,13 @@ def generate_delete_count_query():
 def get_delete_count(env, db_connection):
     query = generate_delete_count_query()
     result_set = database.execute_cron_nodata_query(env, db_connection, query)
-    print("get_Delete_count")
-    print(result_set)
     return result_set
 
 
 def get_log_data(env, db_connectiond, delete_count_result):
     log_info = {}
     log_info["operation"] = "delete"
-    log_info["removed_count"] = delete_count_result[0]
-    print(log_info)
-    log_info["removed_count"] = delete_count_result[0]["removed_count"]
-    print(log_info)
+    log_info["records deleted"] = delete_count_result[0]["removed_count"]
     return log_info
 
 
