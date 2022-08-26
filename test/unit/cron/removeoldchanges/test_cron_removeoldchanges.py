@@ -9,8 +9,7 @@ from .. import handler
 
 file_path = "application.cron.removeoldchanges.handler"
 
-expected_delete_query = """
-        delete from pathwaysdos.changes c where c.createdTimestamp < now()+ interval '-90 days'
+expected_delete_query = """delete from pathwaysdos.changes c where c.createdTimestamp < (%s)
         returning
         *
     """
@@ -36,7 +35,9 @@ def test_generate_delete_query():
     current_timestamp = datetime.now()
     threshold_date = current_timestamp - timedelta(90)
     threshold_date = threshold_date.strftime("%Y-%m-%d %H:%M:%S")
-    query  = handler.generate_delete_query(threshold_date)
+    query, data  = handler.generate_delete_query(threshold_date)
+    assert len(data) == 1
+    assert data[0] == threshold_date
     assert ''.join(query.split()) == ''.join(expected_delete_query.split())
 
 

@@ -26,7 +26,7 @@ def remove_old_changes(env, db_connection):
         threshold_date = getThresholdDate
         delete_count_result = get_delete_count(env, db_connection)
         delete_query = generate_delete_query(threshold_date)
-        database.execute_cron_delete_query(env, db_connection, delete_query)
+        database.execute_cron_delete_query(env, db_connection, delete_query, threshold_date)
         log_removed_changes(env, db_connection, delete_count_result)
     except KeyError as e:
         logger.log_for_error(env, "Delete query failed")
@@ -48,12 +48,20 @@ def log_removed_changes(env, db_connection, delete_count_result):
     )
 
 
+# def generate_delete_query(threshold_date):
+#     query = """delete from pathwaysdos.changes c where c.createdTimestamp < now()+ interval '-90 days'
+#         returning
+#         *
+#     """
+#     return query
+
 def generate_delete_query(threshold_date):
-    query = """delete from pathwaysdos.changes c where c.createdTimestamp < now()+ interval '-90 days'
+    query = """delete from pathwaysdos.changes c where c.createdTimestamp < (%s)
         returning
         *
     """
-    return query
+    data = (threshold_date,)
+    return query, data
 
 
 def generate_delete_count_query():
