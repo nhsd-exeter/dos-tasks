@@ -74,8 +74,6 @@ def execute_db_query(db_connection, query, data, line, values, summary_count_dic
 def execute_cron_delete_query(env, db_connection, query, data):
     cursor = db_connection.cursor()
     try:
-        print(query)
-        print(data)
         cursor.execute(query, data)
         db_connection.commit()
         # TODO add logging as required

@@ -137,9 +137,9 @@ def generate_service_query(service_id):
     return query, data
 
 
-def get_parent_uid(env,db_connection, service_id):
+def get_parent_uid(env, db_connection, service_id):
     query, data = generate_parent_uid_query(service_id)
-    result_set = database.execute_cron_query(env,db_connection, query, data)
+    result_set = database.execute_cron_query(env, db_connection, query, data)
     return result_set
 
 
@@ -154,9 +154,9 @@ def generate_parent_uid_query(service_id):
     return query, data
 
 
-def get_region_name(env,db_connection, service_id):
+def get_region_name(env, db_connection, service_id):
     query, data = generate_region_name_query(service_id)
-    result_set = database.execute_cron_query(env,db_connection, query, data)
+    result_set = database.execute_cron_query(env, db_connection, query, data)
     return result_set
 
 

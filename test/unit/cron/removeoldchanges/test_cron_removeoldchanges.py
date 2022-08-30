@@ -51,25 +51,6 @@ def test_generate_delete_count_query():
     assert len(data) == 1
     assert data[0] == threshold_date
 
-@patch("psycopg2.connect")
-@patch(f"{file_path}.get_delete_count", return_value= [{"removed_count": 1}])
-def test_get_log_data(mock_get_delete_count,mock_db_connect):
-# def test_get_log_data(mock_db_connect):
-    handler.get_log_data('mockenv', mock_db_connect,mock_get_delete_count)
-    # assert log_info == {"operation": "delete", "removed_count" : 1}
-    # mock_get_delete_count.assert_called_once()
-
-
-@patch("psycopg2.connect")
-def test_get_delete_count(mock_db_connect):
-    current_timestamp = datetime.now()
-    threshold_date = current_timestamp - timedelta(90)
-    threshold_date = threshold_date.strftime("%Y-%m-%d %H:%M:%S")
-    actual_return = handler.get_delete_count('mockenv', mock_db_connect, threshold_date)
-    expected_return = {"removed_count" : 1}
-    # assert expected_return == actual_return
-
-
 
 #TODO  - will comeback to best method for this
 
