@@ -72,7 +72,7 @@ def execute_db_query(db_connection, query, data, line, values, summary_count_dic
 
 
 def execute_cron_delete_query(env, db_connection, query, data):
-    cursor = db_connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor = db_connection.cursor
     try:
         cursor.execute(query, data)
         db_connection.commit()
@@ -105,7 +105,7 @@ def execute_cron_query(db_connection, query, data):
         return rows
         # TODO add logging as required
     except Exception as e:
-        logger.log_for_error("ENV","Transaction failed. Rolling back. Error: {}".format(e))
+        logger.log_for_error("ENV", "Transaction failed. Rolling back. Error: {}".format(e))
         db_connection.rollback()
     finally:
         cursor.close()
