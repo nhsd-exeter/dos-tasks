@@ -9,7 +9,7 @@ from .. import handler
 
 file_path = "application.cron.removeoldchanges.handler"
 
-expected_delete_query = """delete from pathwaysdos.changes c where c.createdTimestamp < (%s)
+expected_delete_query = """delete from pathwaysdos.changes c where c.createdTimestamp < %s
         returning
         *
     """
@@ -61,7 +61,6 @@ def test_get_delete_count(mock_db_connect):
     actual_return = handler.get_delete_count('mockenv', mock_db_connect)
     expected_return = {"removed_count" : 1}
     # assert expected_return == actual_return
-
 
 
 

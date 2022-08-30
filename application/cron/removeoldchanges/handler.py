@@ -55,8 +55,9 @@ def log_removed_changes(env, db_connection, delete_count_result):
 #     """
 #     return query
 
+
 def generate_delete_query(threshold_date):
-    query = """delete from pathwaysdos.changes c where c.createdTimestamp < (%s)
+    query = """delete from pathwaysdos.changes c where c.createdTimestamp < %s
         returning
         *
     """
