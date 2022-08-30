@@ -276,7 +276,7 @@ def test_execute_cron_query_failure(mock_db_connect):
     data = (2001)
     mock_db_connect.cursor.return_value.fetchall.return_value = Exception
     query = """select * from pathwaysdos.symptomgroups where id = (%s);"""
-    database.execute_cron_query(mock_db_connect, query, data)
+    database.execute_cron_query("mock_env",mock_db_connect, query, data)
     # TODO work out why rollback is NOT called
     # mock_db_connect.rollback.assert_called_once()
     mock_db_connect.cursor().close.assert_called_once()

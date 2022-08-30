@@ -24,7 +24,7 @@ def request(event, context):
 def remove_old_changes(env, db_connection):
     try:
         threshold_date = getThresholdDate(threshold_in_days)
-        delete_count_result = get_delete_count(env, db_connection)
+        delete_count_result = get_delete_count(env, db_connection, threshold_date)
         delete_query, data = generate_delete_query(threshold_date)
         database.execute_cron_delete_query(env, db_connection, delete_query, data)
         log_removed_changes(env, db_connection, delete_count_result)
@@ -65,15 +65,16 @@ def generate_delete_query(threshold_date):
     return query, data
 
 
-def generate_delete_count_query():
-    query = """select count(*) removed_count from pathwaysdos.changes c where c.createdTimestamp < now()+ interval '-90 days'
+def generate_delete_count_query(threshold_date):
+    query = """select count(*) removed_count from pathwaysdos.changes c where c.createdTimestamp < %s
     """
-    return query
+    data = (threshold_date,)
+    return query, data
 
 
-def get_delete_count(env, db_connection):
-    query = generate_delete_count_query()
-    result_set = database.execute_cron_query_without_data(env, db_connection, query)
+def get_delete_count(env, db_connection, threshold_date):
+    query, data = generate_delete_count_query(threshold_date)
+    result_set = database.execute_cron_query(env, db_connection, query, data)
     return result_set
 
 

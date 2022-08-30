@@ -98,7 +98,7 @@ def execute_cron_query_without_data(env, db_connection, query):
         cursor.close()
 
 
-def execute_cron_query(db_connection, query, data):
+def execute_cron_query(env, db_connection, query, data):
     cursor = db_connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
     try:
         cursor.execute(query, data)
@@ -107,7 +107,7 @@ def execute_cron_query(db_connection, query, data):
         return rows
         # TODO add logging as required
     except Exception as e:
-        logger.log_for_error("ENV", "Transaction failed. Rolling back. Error: {}".format(e))
+        logger.log_for_error(env, "Transaction failed. Rolling back. Error: {}".format(e))
         db_connection.rollback()
     finally:
         cursor.close()
