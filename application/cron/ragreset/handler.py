@@ -97,9 +97,8 @@ def get_log_entry(log_info):
     log_text = ""
     for key, value in log_info.items():
         kv_pair = key + ":" + str(value)
-        log_text = log_text + "| " + kv_pair
-    log_text = log_text + " |"
-    print(log_text)
+        log_text = log_text + "| " + kv_pair + " "
+    log_text = log_text + "  |"
     return log_text
 
 
