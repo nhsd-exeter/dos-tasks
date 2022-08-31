@@ -128,5 +128,3 @@ def test_log_updated_services_keyerror(mock_db_connect):
 def test_reset_rag_status(mock_update_query, mock_execute, mock_log, mock_db_connect):
     with pytest.raises(KeyError):
         handler.reset_rag_status('mockenv', mock_db_connect)
-
-

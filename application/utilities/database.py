@@ -83,19 +83,6 @@ def execute_cron_delete_query(env, db_connection, query, data):
     finally:
         cursor.close()
 
-
-def execute_cron_query_without_data(env, db_connection, query):
-    cursor = db_connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    try:
-        cursor.execute(query)
-        rows = cursor.fetchall()
-        return rows
-    except Exception as e:
-        logger.log_for_error(env, "Query failed. Error: {}".format(e))
-    finally:
-        cursor.close()
-
-
 def execute_cron_query(env, db_connection, query, data):
     cursor = db_connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
     try:

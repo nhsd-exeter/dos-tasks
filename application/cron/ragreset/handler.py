@@ -19,12 +19,12 @@ def request(event, context):
     env = os.getenv("DB_NAME")
     event_id = event["id"]
     event_time = event["time"]
-    logger.log_for_audit(env, "operation:start")
-    logger.log_for_audit(env, "Event id: {0}, event time: {1} , environment: {2}".format(event_id, event_time, env))
+    logger.log_for_audit(env, "| operation:start")
+    logger.log_for_audit(env, "| Event id: {0}, event time: {1} , environment: {2}".format(event_id, event_time, env))
     db_connection = database.connect_to_database(env)
     reset_rag_status(env, db_connection)
     cron_common.cron_cleanup(env, db_connection)
-    logger.log_for_audit(env, "operation:end")
+    logger.log_for_audit(env, "| operation:end")
     return task_description + " execution successful"
 
 
@@ -35,7 +35,7 @@ def reset_rag_status(env, db_connection):
         updated_services = database.execute_cron_query(env, db_connection, update_query, data)
         log_updated_services(env, db_connection, updated_services)
     except KeyError as e:
-        logger.log_for_error(env, "Exception raised running rag reset job {}".format(e))
+        logger.log_for_error(env, "| Exception raised running rag reset job {}".format(e))
         raise e
 
 
@@ -99,6 +99,7 @@ def get_log_entry(log_info):
         kv_pair = key + ":" + str(value)
         log_text = log_text + "|" + kv_pair
     log_text = log_text + "|"
+    print(log_text)
     return log_text
 
 
@@ -110,13 +111,13 @@ def log_updated_services(env, db_connection, updated_services):
             log_text = get_log_entry(log_info)
             logger.log_for_audit(env, log_text)
         except KeyError as e:
-            logger.log_for_error(env, "Data returned from db does not include serviceid column ")
+            logger.log_for_error(env, "| Data returned from db does not include serviceid column ")
             raise e
     format_data = "%b %d %Y %H:%M:%S"
     end_at = datetime.utcnow()
     logger.log_for_audit(
         env,
-        "operation:AutoUpdateCapacityStatus|records updated:{0}|updated at:{1}".format(
+        "| operation:AutoUpdateCapacityStatus|records updated:{0}|updated at:{1}".format(
             str(len(updated_services)), end_at.strftime(format_data)
         ),
     )

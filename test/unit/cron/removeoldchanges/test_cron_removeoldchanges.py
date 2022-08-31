@@ -19,7 +19,7 @@ expected_delete_count_query = """select count(*) removed_count from pathwaysdos.
 
 @patch("psycopg2.connect")
 @patch(f"{file_path}.cron_common.cron_cleanup")
-@patch(f"{file_path}.database.execute_cron_delete_query", return_value="" )
+@patch(f"{file_path}.database.execute_cron_query", return_value="" )
 @patch(f"{file_path}.database.execute_cron_query", return_value={})
 @patch(f"{file_path}.log_removed_changes", return_value={})
 @patch(f"{file_path}.database.connect_to_database", return_value="db_connection")
@@ -29,7 +29,8 @@ def test_handler_pass(mock_db_details,mock_log_removed_changes,mock_delete_count
     handler.request(event=payload, context=None)
     mock_cleanup.assert_called_once()
     mock_db_details.assert_called_once()
-    mock_delete_query.assert_called_once()
+    # mock_delete_query.assert_called_once()
+    assert mock_delete_query.call_count == 2
 
 def test_generate_delete_query():
     current_timestamp = datetime.now()
@@ -61,3 +62,8 @@ def test_getThresholdDate():
         threshold_date = threshold_date.strftime('%Y-%m-%d %H:%M:%S')
         returned_date = getThresholdDate(threshold_in_days)
         assert returned_date == threshold_date
+
+@patch("psycopg2.connect")
+def test_log_remove_changes(mock_db_connect):
+    delete_count_result = [ {"removed_count": 1} ]
+    handler.log_removed_changes('mockenv', mock_db_connect,delete_count_result)
