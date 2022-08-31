@@ -16,7 +16,7 @@ mock_filename = "mock_env/mock_file.csv"
 mock_event = {"filename": "mock_filename", "env": "mock_env", "bucket": "mock_bucket"}
 start = "20220527"
 mock_zip_filename = "mock_env/mock_file.zip"
-sample_bundle_file_name = "test-files/19.0.zip"
+sample_bundle_file_name = "test-files/R34.2.0_stt.zip"
 
 
 @mock_s3

@@ -24,7 +24,8 @@ bundle_id = 4
 sample_scenario_file_name = "test-files/Scenario_2.xml"
 alt_scenario_file_name = "test-files/Scenario 1.xml"
 malformed_scenario_file_name = "test-files/Scenario_malformed.xml"
-sample_bundle_file_name = "test-files/19.0.zip"
+# build by running unarchiver against .rar and then removing _MACOSX__ paths from output
+sample_bundle_file_name = "test-files/R34.2.0_stt.zip"
 malformed_bundle_file_name = "test-files/Scenario_malformed.zip"
 expected_symptom_group_id = "1203"
 expected_disposition_code = "DX75"
