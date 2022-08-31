@@ -83,6 +83,7 @@ def execute_cron_delete_query(env, db_connection, query, data):
     finally:
         cursor.close()
 
+
 def execute_cron_query(env, db_connection, query, data):
     cursor = db_connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
     try:
