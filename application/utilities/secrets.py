@@ -13,10 +13,10 @@ class SECRETS:
             print(secret_store_name)
             response = self.secrets_client.get_secret_value(SecretId=secret_store_name)
         except ClientError as e:
-            logger.log_for_error(env, "Error retrieving secrets: {}".format(e))
+            logger.log_for_error(env, "| Error retrieving secrets: {}".format(e))
             raise e
         except Exception as e:
-            logger.log_for_error(env, "Error retrieving secrets: {}".format(e))
+            logger.log_for_error(env, "| Error retrieving secrets: {}".format(e))
             raise e
         else:
             if "SecretString" in response:
