@@ -224,7 +224,8 @@ def get_disposition_id(scenario_dict, db_connection):
 def get_disposition_group_uid(scenario_dict):
     try:
         final_disposition_group_uid = scenario_dict["NHSPathways"]["PathwaysCase"]["FinalDispositionCMSID"][
-        "FinalDispositionCMSID"]
+            "FinalDispositionCMSID"
+        ]
     except KeyError as e:
         logger.log_for_audit("stt", "Scenario does not include FinalDispositionCMSID element -> {}".format(e))
         final_disposition_group_uid = None
