@@ -164,7 +164,7 @@ def test_get_disposition_id_query():
     scenario_dict = handler.map_xml_to_json(convert_file_to_stream(sample_scenario_file_name))
     disposition_code = handler.get_disposition_code(scenario_dict)
     query, data = handler.get_disposition_id_query(disposition_code)
-    assert query == """select id from pathwaysdos.dispositions where dxCode = %s"""
+    assert query == """select id from pathwaysdos.dispositions where upper(dxcode) = %s"""
     assert data == (disposition_code,)
 
 def test_get_disposition_group_id_query():

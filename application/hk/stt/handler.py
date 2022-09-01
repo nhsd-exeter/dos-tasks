@@ -257,7 +257,7 @@ def get_disposition_code(scenario_dict):
 
 
 def get_disposition_id_query(disposition_code):
-    query = """select id from pathwaysdos.dispositions where dxCode = %s"""
+    query = """select id from pathwaysdos.dispositions where upper(dxcode) = %s"""
     data = (disposition_code,)
     return query, data
 
