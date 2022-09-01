@@ -55,7 +55,7 @@ def process_zipfile(env, db_connection, bundle, filename, bundle_id):
                 template_scenario = process_scenario_file(name, scenario_file, bundle_id, db_connection)
                 valid_template = validate_template_scenario(env, template_scenario)
                 if valid_template is True:
-                    insert_template_scenario(db_connection, template_scenario)
+                    insert_template_scenario(env, db_connection, template_scenario)
                 else:
                     logger.log_for_audit(env, "action:invalid scenario {}".format(name))
             except Exception as e:
@@ -82,13 +82,35 @@ def validate_template_scenario(env, template_scenario):
     return valid_template
 
 
-def insert_template_scenario(db_connection, template_scenario):
-    query, data = get_scenario_insert_query(template_scenario)
-    database.execute_query(db_connection, query, data)
+def insert_template_scenario(env, db_connection, template_scenario):
+    if is_new_scenario(db_connection, template_scenario):
+        query, data = get_scenario_insert_query(template_scenario)
+        database.execute_query(db_connection, query, data)
+        logger.log_for_audit(
+            env, "Scenario {} for bundle {} uploaded".format(template_scenario.scenario_id, template_scenario.bundle_id)
+        )
+    else:
+        logger.log_for_audit(
+            env, "Scenario {} for bundle {} already exists".format(template_scenario.scenario_id, template_scenario.bundle_id)
+        )
 
+def is_new_scenario(db_connection, template_scenario):
+    """Returns true if scenario not already loaded to db; otherwise false"""
+    new_scenario = False
+    query, data = get_existing_scenario_check_query(template_scenario)
+    result_set = database.execute_resultset_query(db_connection, query, data)
+    if len(result_set) == 0:
+        new_scenario = True
+    return new_scenario
+
+def get_existing_scenario_check_query(template_scenario):
+    query = """select s.id from pathwaysdos.scenarios s where s.bundleid = %s and
+    s.scenarioid = %s"""
+    data = (template_scenario.bundle_id,template_scenario.scenario_id,)
+    return query, data
 
 def get_scenario_insert_query(template_scenario):
-    query = """insert into scenarios(bundleid, scenarioid, symptomgroupid, dispositionid,
+    query = """insert into pathwaysdos.scenarios(bundleid, scenarioid, symptomgroupid, dispositionid,
 dispositiongroupid, symptomdiscriminatorid, ageid, genderid, triagereport, createdtime
 )
     values (%s,%s,%s,%s,%s,%s,%s,%s,%s,now()

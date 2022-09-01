@@ -345,7 +345,7 @@ def test_process_zipfile_valid_template(mock_validator, mock_disposition, mock_d
     assert processed == True
     assert mock_disposition.call_count == 3
     assert mock_disposition_group.call_count == 3
-    assert mock_logger.call_count == 3
+    assert mock_logger.call_count == 6
 
 @patch("psycopg2.connect")
 @patch(f"{file_path}.database.execute_resultset_query", return_value=([{"id": 3}]))
@@ -370,7 +370,7 @@ def test_get_scenario_insert_query( mock_disposition, mock_disposition_group, mo
     template_scenario = handler.process_scenario_file(sample_scenario_file_name,convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
     template_scenario.triage_report = expected_triage_report
     query, data = handler.get_scenario_insert_query(template_scenario)
-    assert query == """insert into scenarios(bundleid, scenarioid, symptomgroupid, dispositionid,
+    assert query == """insert into pathwaysdos.scenarios(bundleid, scenarioid, symptomgroupid, dispositionid,
 dispositiongroupid, symptomdiscriminatorid, ageid, genderid, triagereport, createdtime
 )
     values (%s,%s,%s,%s,%s,%s,%s,%s,%s,now()
@@ -424,6 +424,55 @@ def test_get_disposition_group_id(mock_execute, mock_query, mock_db_connect):
     assert mock_execute.call_count == 0
     assert mock_query.call_count == 0
 
+@patch("psycopg2.connect")
+def test_get_existing_scenario_check_query(mock_db_connect):
+    template_scenario = handler.process_scenario_file(sample_scenario_file_name,convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
+    query, data = handler.get_existing_scenario_check_query(template_scenario)
+    assert query == """select s.id from pathwaysdos.scenarios s where s.bundleid = %s and
+    s.scenarioid = %s"""
+    assert data == (bundle_id,expected_scenario_id,)
+
+@patch("psycopg2.connect")
+@patch(f"{file_path}.database.execute_resultset_query",return_value=([{"id": 3}]))
+def test_is_new_scenario(mock_execute, mock_db_connect):
+    template_scenario = handler.process_scenario_file(sample_scenario_file_name,convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
+    is_new_scenario = handler.is_new_scenario(mock_db_connect, template_scenario)
+    assert is_new_scenario == False
+
+@patch("psycopg2.connect")
+@patch(f"{file_path}.database.execute_resultset_query",return_value=[])
+def test_is_not_new_scenario(mock_execute, mock_db_connect):
+    template_scenario = handler.process_scenario_file(sample_scenario_file_name,convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
+    is_new_scenario = handler.is_new_scenario(mock_db_connect, template_scenario)
+    assert is_new_scenario == True
+# -----
+
+@patch("psycopg2.connect")
+@patch(f"{file_path}.is_new_scenario",return_value=True)
+@patch(f"{file_path}.logger.log_for_audit")
+@patch(f"{file_path}.database.execute_query")
+@patch(f"{file_path}.get_scenario_insert_query",return_value=("query", "data"))
+def test_insert_template_scenario(mock_insert, mock_execute, mock_logger, mock_is_new, mock_db_connect):
+    template_scenario = handler.process_scenario_file(sample_scenario_file_name,convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
+    handler.insert_template_scenario(env, mock_db_connect, template_scenario)
+    assert mock_logger.call_count == 1
+    assert mock_insert.call_count == 1
+    assert mock_execute.call_count == 1
+    assert mock_is_new.call_count == 1
+
+
+@patch("psycopg2.connect")
+@patch(f"{file_path}.is_new_scenario",return_value=False)
+@patch(f"{file_path}.logger.log_for_audit")
+@patch(f"{file_path}.database.execute_query")
+@patch(f"{file_path}.get_scenario_insert_query",return_value=("query", "data"))
+def test_insert_duplicate_template_scenario(mock_insert, mock_execute, mock_logger, mock_is_new, mock_db_connect):
+    template_scenario = handler.process_scenario_file(sample_scenario_file_name,convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
+    handler.insert_template_scenario(env, mock_db_connect, template_scenario)
+    assert mock_logger.call_count == 1
+    assert mock_insert.call_count == 0
+    assert mock_execute.call_count == 0
+    assert mock_is_new.call_count == 1
 
 def generate_event_payload():
     """Utility function to generate dummy event data"""
