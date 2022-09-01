@@ -350,11 +350,13 @@ def test_process_zipfile_valid_template(mock_validator, mock_disposition, mock_d
 @patch("psycopg2.connect")
 @patch(f"{file_path}.database.execute_resultset_query", return_value=([{"id": 3}]))
 @patch(f"{file_path}.get_bundle_insert_query",return_value=("query", "data"))
-def test_add_bundle(mock_db_connect,mock_execute,mock_query):
+@patch(f"{file_path}.is_new_bundle", return_value=True)
+def test_add_bundle(mock_new_bundle, mock_query, mock_execute, mock_db_connect):
     """Test function to add bundle to database"""
     bundle_file_name = "teamb/R32.2.3_stt.zip"
     inserted_bundle_id = handler.add_bundle(mock_db_connect,bundle_file_name)
     assert inserted_bundle_id == 3
+    assert mock_new_bundle.call_count == 1
 
 def test_get_bundle_insert_query():
     bundle_id = 5
@@ -434,19 +436,41 @@ def test_get_existing_scenario_check_query(mock_db_connect):
 
 @patch("psycopg2.connect")
 @patch(f"{file_path}.database.execute_resultset_query",return_value=([{"id": 3}]))
-def test_is_new_scenario(mock_execute, mock_db_connect):
+def test_is_not_new_scenario(mock_execute, mock_db_connect):
     template_scenario = handler.process_scenario_file(sample_scenario_file_name,convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
     is_new_scenario = handler.is_new_scenario(mock_db_connect, template_scenario)
     assert is_new_scenario == False
 
 @patch("psycopg2.connect")
 @patch(f"{file_path}.database.execute_resultset_query",return_value=[])
-def test_is_not_new_scenario(mock_execute, mock_db_connect):
+def test_is_new_scenario(mock_execute, mock_db_connect):
     template_scenario = handler.process_scenario_file(sample_scenario_file_name,convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
     is_new_scenario = handler.is_new_scenario(mock_db_connect, template_scenario)
     assert is_new_scenario == True
 # -----
+@patch("psycopg2.connect")
+@patch(f"{file_path}.database.execute_resultset_query",return_value=([{"id": 3}]))
+@patch(f"{file_path}.get_existing_bundle_check_query", return_value=("query", "data"))
+def test_is_not_new_bundle(mock_query, mock_execute, mock_db_connect):
+    is_new_bundle = handler.is_new_bundle(mock_db_connect, "Dental")
+    assert is_new_bundle == False
+    assert mock_query.call_count == 1
 
+@patch("psycopg2.connect")
+@patch(f"{file_path}.database.execute_resultset_query",return_value=([]))
+@patch(f"{file_path}.get_existing_bundle_check_query", return_value=("query", "data"))
+def test_is_new_bundle(mock_query, mock_execute, mock_db_connect):
+    is_new_bundle = handler.is_new_bundle(mock_db_connect, "Dental")
+    assert is_new_bundle == True
+    assert mock_query.call_count == 1
+
+@patch("psycopg2.connect")
+def test_get_existing_bundle_check_query(mock_db_connect):
+    bundle_name = "Dental"
+    query, data = handler.get_existing_bundle_check_query(bundle_name)
+    assert query == """select sb.id from pathwaysdos.scenariobundles sb where sb.name = %s"""
+    assert data == (bundle_name,)
+# ------
 @patch("psycopg2.connect")
 @patch(f"{file_path}.is_new_scenario",return_value=True)
 @patch(f"{file_path}.logger.log_for_audit")

@@ -177,11 +177,26 @@ def map_xml_to_json(file_as_string):
 def add_bundle(db_connection, zip_file_name):
     bundle_id = None
     bundle_name = get_bundle_name(zip_file_name)
-    query, data = get_bundle_insert_query(bundle_name)
-    result_set = database.execute_resultset_query(db_connection, query, data)
-    if result_set is not None:
-        bundle_id = result_set[0]["id"]
+    if is_new_bundle(db_connection, bundle_name):
+        query, data = get_bundle_insert_query(bundle_name)
+        result_set = database.execute_resultset_query(db_connection, query, data)
+        if result_set is not None:
+            bundle_id = result_set[0]["id"]
     return bundle_id
+
+def is_new_bundle(db_connection, bundle_name):
+    """Returns true if bundle with this name not already loaded to db; otherwise false"""
+    new_bundle = False
+    query, data = get_existing_bundle_check_query(bundle_name)
+    result_set = database.execute_resultset_query(db_connection, query, data)
+    if len(result_set) == 0:
+        new_bundle = True
+    return new_bundle
+
+def get_existing_bundle_check_query(bundle_name):
+    query = """select sb.id from pathwaysdos.scenariobundles sb where sb.name = %s"""
+    data = (bundle_name,)
+    return query, data
 
 
 def get_bundle_insert_query(bundle_id):

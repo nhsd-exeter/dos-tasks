@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS pathwaysdos.scenarios
   scenarioid integer NOT NULL,
   symptomgroupid varchar(255) NOT NULL,
   dispositionid integer NOT NULL,
-  dispositiongroupid integer NOT NULL,
+  dispositiongroupid integer,
   symptomdiscriminatorid integer NOT NULL,
   ageid integer NOT NULL,
   genderid integer NOT NULL,
