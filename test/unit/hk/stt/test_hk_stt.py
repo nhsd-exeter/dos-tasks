@@ -350,7 +350,7 @@ def test_process_zipfile_valid_template(mock_validator, mock_disposition, mock_d
 @patch("psycopg2.connect")
 @patch(f"{file_path}.database.execute_resultset_query", return_value=([{"id": 3}]))
 @patch(f"{file_path}.get_bundle_insert_query",return_value=("query", "data"))
-@patch(f"{file_path}.is_new_bundle", return_value=True)
+@patch(f"{file_path}.is_new_bundle", return_value=None)
 def test_add_bundle(mock_new_bundle, mock_query, mock_execute, mock_db_connect):
     """Test function to add bundle to database"""
     bundle_file_name = "teamb/R32.2.3_stt.zip"
@@ -453,7 +453,7 @@ def test_is_new_scenario(mock_execute, mock_db_connect):
 @patch(f"{file_path}.get_existing_bundle_check_query", return_value=("query", "data"))
 def test_is_not_new_bundle(mock_query, mock_execute, mock_db_connect):
     is_new_bundle = handler.is_new_bundle(mock_db_connect, "Dental")
-    assert is_new_bundle == False
+    assert is_new_bundle == 3
     assert mock_query.call_count == 1
 
 @patch("psycopg2.connect")
@@ -461,7 +461,7 @@ def test_is_not_new_bundle(mock_query, mock_execute, mock_db_connect):
 @patch(f"{file_path}.get_existing_bundle_check_query", return_value=("query", "data"))
 def test_is_new_bundle(mock_query, mock_execute, mock_db_connect):
     is_new_bundle = handler.is_new_bundle(mock_db_connect, "Dental")
-    assert is_new_bundle == True
+    assert is_new_bundle == None
     assert mock_query.call_count == 1
 
 @patch("psycopg2.connect")
