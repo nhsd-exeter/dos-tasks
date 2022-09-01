@@ -22,6 +22,8 @@ start = "20220527"
 
 bundle_id = 4
 sample_scenario_file_name = "test-files/Scenario_2.xml"
+original_scenario_file_name = "test-files/Scenario 380.xml"
+empty_disposition_group_element_scenario_file_name = "test-files/Scenario 596.xml"
 alt_scenario_file_name = "test-files/Scenario 1.xml"
 malformed_scenario_file_name = "test-files/Scenario_malformed.xml"
 # build by running unarchiver against .rar and then removing _MACOSX__ paths from output
@@ -171,7 +173,26 @@ def test_get_disposition_group_id_query():
     disposition_group_uid = handler.get_disposition_group_uid(scenario_dict)
     query, data = handler.get_disposition_group_id_query(disposition_group_uid)
     assert query == """select id from pathwaysdos.dispositiongroups where uid = %s"""
-    data = (disposition_group_uid,)
+    assert data == (disposition_group_uid,)
+
+def test_get_disposition_group_id_query_missing_element():
+    """Test function to build query to look up disposition group id from uid"""
+    scenario_dict = handler.map_xml_to_json(convert_file_to_stream(original_scenario_file_name))
+    disposition_group_uid = handler.get_disposition_group_uid(scenario_dict)
+    query, data = handler.get_disposition_group_id_query(disposition_group_uid)
+    assert query == """select id from pathwaysdos.dispositiongroups where uid = %s"""
+    assert data == (disposition_group_uid,)
+    assert disposition_group_uid == None
+
+def test_get_disposition_group_id_query_empty_element():
+    """Test function to build query to look up disposition group id from uid"""
+    scenario_dict = handler.map_xml_to_json(convert_file_to_stream(empty_disposition_group_element_scenario_file_name))
+    disposition_group_uid = handler.get_disposition_group_uid(scenario_dict)
+    query, data = handler.get_disposition_group_id_query(disposition_group_uid)
+    assert query == """select id from pathwaysdos.dispositiongroups where uid = %s"""
+    assert data == (disposition_group_uid,)
+    assert disposition_group_uid == None
+
 
 #
 @patch("psycopg2.connect")
@@ -238,6 +259,12 @@ def test_get_disposition_group_uid():
     scenario_dict = handler.map_xml_to_json(convert_file_to_stream(sample_scenario_file_name))
     disposition_group_id = handler.get_disposition_group_uid(scenario_dict)
     assert disposition_group_id == expected_disposition_group_id
+
+def test_get_disposition_group_uid_missing_element():
+    """Test function to extract final disposition cmsid from xml"""
+    scenario_dict = handler.map_xml_to_json(convert_file_to_stream(original_scenario_file_name))
+    disposition_group_id = handler.get_disposition_group_uid(scenario_dict)
+    assert disposition_group_id == None
 
 def test_get_triage_lines():
     """Test function to extract all triage lines from xml"""
@@ -368,7 +395,7 @@ dispositiongroupid, symptomdiscriminatorid, ageid, genderid, triagereport, creat
 def test_validate_template_scenario_invalid_disposition(mock_disposition, mock_disposition_group, mock_logger, mock_db_connect):
     template_scenario = handler.process_scenario_file(sample_scenario_file_name,convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
     template_scenario.disposition_id = None
-    valid_template = handler.validate_template_scenario(env, template_scenario,mock_db_connect)
+    valid_template = handler.validate_template_scenario(env, template_scenario)
     assert valid_template == False
     assert mock_logger.call_count == 1
     mock_disposition.assert_called_once()
@@ -378,14 +405,25 @@ def test_validate_template_scenario_invalid_disposition(mock_disposition, mock_d
 @patch(f"{file_path}.logger.log_for_audit")
 @patch(f"{file_path}.get_disposition_group_id",return_value=7)
 @patch(f"{file_path}.get_disposition_id",return_value=8)
-def test_validate_template_scenario_invalid_dispositio_group(mock_disposition, mock_disposition_group, mock_logger, mock_db_connect):
+def test_validate_template_scenario_invalid_disposition_group(mock_disposition, mock_disposition_group, mock_logger, mock_db_connect):
     template_scenario = handler.process_scenario_file(sample_scenario_file_name,convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
     template_scenario.disposition_group_id = None
-    valid_template = handler.validate_template_scenario(env, template_scenario,mock_db_connect)
-    assert valid_template == False
+    valid_template = handler.validate_template_scenario(env, template_scenario)
+    assert valid_template == True
     assert mock_logger.call_count == 1
     mock_disposition.assert_called_once()
     mock_disposition_group.assert_called_once()
+
+@patch("psycopg2.connect")
+@patch(f"{file_path}.get_disposition_group_id_query")
+@patch(f"{file_path}.database.execute_resultset_query")
+def test_get_disposition_group_id(mock_execute, mock_query, mock_db_connect):
+    scenario_dict = handler.map_xml_to_json(convert_file_to_stream(original_scenario_file_name))
+    disposition_group_id = handler.get_disposition_group_id(scenario_dict,mock_db_connect)
+    assert disposition_group_id == None
+    assert mock_execute.call_count == 0
+    assert mock_query.call_count == 0
+
 
 def generate_event_payload():
     """Utility function to generate dummy event data"""

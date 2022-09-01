@@ -1,0 +1,1580 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<NHSPathways xsi:schemaLocation="http://www.nhspathways.org/webservices/pathways/pathwaysCase.xsd" xmlns="http://www.nhspathways.org/webservices/pathways/pathwaysCase" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <PathwaysCase>
+    <PathwaysReleaseID>10.0.0</PathwaysReleaseID>
+    <CaseID>29fbcbc5-a92e-404d-bde2-c4e1ca5072b8</CaseID>
+    <CADCaseID>f24e0d1e-c4fa-4849-9ff8-f99e22d78022</CADCaseID>
+    <HostCaseID>4d24af43-dcba-4259-bc75-084be80e92fa</HostCaseID>
+    <CaseTriageStart>2015-03-16T13:51:22.24Z</CaseTriageStart>
+    <CaseTriageEnd>2015-03-16T14:03:59.227Z</CaseTriageEnd>
+    <PostCode>DH1 2HP</PostCode>
+    <CallHandlerUserID>JW</CallHandlerUserID>
+    <ClinicianUserID />
+    <DOStransactionID />
+    <SymptomGroup>1172</SymptomGroup>
+    <Trauma>
+      <TraumaID>0</TraumaID>
+      <TraumaDescription>Non Trauma</TraumaDescription>
+    </Trauma>
+    <Skillset>
+      <SkillsetID>5</SkillsetID>
+      <SkillsetDescription>111 Call Handler</SkillsetDescription>
+    </Skillset>
+    <Party>
+      <Party>3</Party>
+    </Party>
+    <Patient>
+      <FirstName>Joe</FirstName>
+      <LastName>Bloggs</LastName>
+      <Telephone />
+      <GP />
+      <LocationNotes />
+      <Age>
+        <AgeID>4</AgeID>
+        <AgeDescription>Infant</AgeDescription>
+        <DOBorYear>09 March 2015</DOBorYear>
+      </Age>
+      <Gender>
+        <GenderID>1</GenderID>
+        <GenderDescription>Male</GenderDescription>
+      </Gender>
+    </Patient>
+    <TriageDisposition>
+      <DispositionCode>Dx30</DispositionCode>
+      <DispositionDescription>The individual needs to speak to a midwife within 1 hour.</DispositionDescription>
+    </TriageDisposition>
+    <FinalDisposition>
+      <DispositionCode>Dx30</DispositionCode>
+      <DispositionDescription>The individual needs to speak to a midwife within 1 hour.</DispositionDescription>
+    </FinalDisposition>
+    <DOS>
+      <DOStransactionID />
+      <ServiceID />
+      <ServiceName />
+      <ContactDetails />
+      <Open24Hrs />
+      <AccessNotes />
+      <Address />
+      <Capacity />
+    </DOS>
+    <Pathway>
+      <PathwayID>PW808</PathwayID>
+      <PathwayDescription>Unwell</PathwayDescription>
+    </Pathway>
+    <TriageLineDetails>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>6</InterfaceID>
+        <TimeIn>2015-03-16T13:51:22.297Z</TimeIn>
+        <TimeOut>2015-03-16T13:51:22.297Z</TimeOut>
+        <AnswerNumber>0</AnswerNumber>
+        <PathwayID />
+        <OrderNumber>0</OrderNumber>
+        <AdditionalText />
+        <ReportText>Patient:  Joe Bloggs, Age Gender Selected: Infant, Male</ReportText>
+        <Action>Next</Action>
+        <QuestionText />
+        <AnswerText />
+        <QuestionType />
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>7</InterfaceID>
+        <TimeIn>2015-03-16T13:51:22.297Z</TimeIn>
+        <TimeOut>2015-03-16T13:51:22.297Z</TimeOut>
+        <AnswerNumber>0</AnswerNumber>
+        <PathwayID>PMI</PathwayID>
+        <OrderNumber>0</OrderNumber>
+        <AdditionalText />
+        <ReportText>Pathway Selected: PMI, Calling About Someone Else</ReportText>
+        <Action>Next</Action>
+        <QuestionText />
+        <AnswerText />
+        <QuestionType />
+        <SystemFlag>2</SystemFlag>
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2015-03-16T13:51:22.42Z</TimeIn>
+        <TimeOut>2015-03-16T13:51:27.16Z</TimeOut>
+        <AnswerNumber>3</AnswerNumber>
+        <PathwayID>PMI</PathwayID>
+        <OrderNumber>5</OrderNumber>
+        <AdditionalText />
+        <ReportText>Birth had not occurred within the last hour.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>Has the baby just been born?</QuestionText>
+        <AnswerText>no</AnswerText>
+        <QuestionType>Tx140118</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2015-03-16T13:51:27.243Z</TimeIn>
+        <TimeOut>2015-03-16T13:51:28.543Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PMI</PathwayID>
+        <OrderNumber>1100</OrderNumber>
+        <AdditionalText />
+        <ReportText>An injury or health problem was the reason for the contact.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>What is the reason for the contact?</QuestionText>
+        <AnswerText>an injury or other health problem</AnswerText>
+        <QuestionType>Tx220109</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2015-03-16T13:51:28.597Z</TimeIn>
+        <TimeOut>2015-03-16T13:51:28.597Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PMI</PathwayID>
+        <OrderNumber>1200</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>to'Immediatethreatstolife(SPA/OOHversion)'-'ABC'menu</QuestionText>
+        <AnswerText>"present"</AnswerText>
+        <QuestionType>Tx221788</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2015-03-16T13:51:28.627Z</TimeIn>
+        <TimeOut>2015-03-16T13:51:28.627Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PA156</PathwayID>
+        <OrderNumber>0</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>aninjuryorotherhealthproblemestablishedinEntryFlow</QuestionText>
+        <AnswerText>"present"</AnswerText>
+        <QuestionType>Tx221814</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2015-03-16T13:51:28.723Z</TimeIn>
+        <TimeOut>2015-03-16T13:51:29.88Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PA156</PathwayID>
+        <OrderNumber>100</OrderNumber>
+        <AdditionalText />
+        <ReportText>The individual was breathing and conscious at the time of the assessment.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>Is he breathing and conscious?</QuestionText>
+        <AnswerText>breathing AND conscious</AnswerText>
+        <QuestionType>Tx220110</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText>Breathing and conscious</DispositionRatText>
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2015-03-16T13:51:30Z</TimeIn>
+        <TimeOut>2015-03-16T13:51:31.593Z</TimeOut>
+        <AnswerNumber>3</AnswerNumber>
+        <PathwayID>PA156</PathwayID>
+        <OrderNumber>4700</OrderNumber>
+        <AdditionalText />
+        <ReportText>Heavy bleeding had not occurred in the previous 30 minutes.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>Has he been bleeding RED BLOOD very heavily IN THE LAST 30 MINUTES?</QuestionText>
+        <AnswerText>no</AnswerText>
+        <QuestionType>Tx221425</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>False</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2015-03-16T13:51:32.007Z</TimeIn>
+        <TimeOut>2015-03-16T13:51:32.007Z</TimeOut>
+        <AnswerNumber>2</AnswerNumber>
+        <PathwayID>PA156</PathwayID>
+        <OrderNumber>5100</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>SocialConcernsExcluded</QuestionText>
+        <AnswerText>*</AnswerText>
+        <QuestionType>Tx221343</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2015-03-16T13:51:32.12Z</TimeIn>
+        <TimeOut>2015-03-16T13:51:36.463Z</TimeOut>
+        <AnswerNumber>4</AnswerNumber>
+        <PathwayID>PA156</PathwayID>
+        <OrderNumber>6200</OrderNumber>
+        <AdditionalText>l</AdditionalText>
+        <ReportText>An illness or health problem was the main problem.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>What is the main problem?</QuestionText>
+        <AnswerText>illness or other health problem (specify)</AnswerText>
+        <QuestionType>Tx130011</QuestionType>
+        <SystemFlag>0</SystemFlag>
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText>Illness</DispositionRatText>
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2015-03-16T13:51:36.673Z</TimeIn>
+        <TimeOut>2015-03-16T13:51:38.457Z</TimeOut>
+        <AnswerNumber>3</AnswerNumber>
+        <PathwayID>PA158</PathwayID>
+        <OrderNumber>0</OrderNumber>
+        <AdditionalText />
+        <ReportText>The individual was not fighting for breath.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>Is he fighting desperately for every breath?</QuestionText>
+        <AnswerText>no</AnswerText>
+        <QuestionType>Tx140109</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>False</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2015-03-16T13:51:38.88Z</TimeIn>
+        <TimeOut>2015-03-16T13:51:38.88Z</TimeOut>
+        <AnswerNumber>2</AnswerNumber>
+        <PathwayID>PA158</PathwayID>
+        <OrderNumber>100</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>SYSTEM_FLUPANDEMIC</QuestionText>
+        <AnswerText>*</AnswerText>
+        <QuestionType>Tx220845</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2015-03-16T13:51:38.987Z</TimeIn>
+        <TimeOut>2015-03-16T13:51:41.56Z</TimeOut>
+        <AnswerNumber>5</AnswerNumber>
+        <PathwayID>PA158</PathwayID>
+        <OrderNumber>1700</OrderNumber>
+        <AdditionalText />
+        <ReportText>A probable allergic reaction, a fit within the previous 12 hours, successful resuscitation or ICD shock were not the main reason for the assessment.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>WHAT IS SAID TO BE THE MAIN REASON FOR THIS CONTACT?</QuestionText>
+        <AnswerText>none of the above</AnswerText>
+        <QuestionType>Tx140120</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2015-03-16T13:51:41.693Z</TimeIn>
+        <TimeOut>2015-03-16T13:51:43.153Z</TimeOut>
+        <AnswerNumber>3</AnswerNumber>
+        <PathwayID>PA158</PathwayID>
+        <OrderNumber>1900</OrderNumber>
+        <AdditionalText />
+        <ReportText>The child was not limp, floppy and/or unresponsive.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>Is he limp, floppy and/or unresponsive?</QuestionText>
+        <AnswerText>no</AnswerText>
+        <QuestionType>Tx220563</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2015-03-16T13:51:43.3Z</TimeIn>
+        <TimeOut>2015-03-16T13:51:44.993Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PA158</PathwayID>
+        <OrderNumber>2600</OrderNumber>
+        <AdditionalText />
+        <ReportText>The skin on the torso felt normal, warm or hot.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>Does the skin on the chest, back or abdomen feel a normal temperature?</QuestionText>
+        <AnswerText>yes - normal, warm or hot</AnswerText>
+        <QuestionType>Tx223142</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText>Warm to touch</DispositionRatText>
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2015-03-16T13:51:45.037Z</TimeIn>
+        <TimeOut>2015-03-16T13:51:45.037Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PA158</PathwayID>
+        <OrderNumber>2200</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>ShockAsked</QuestionText>
+        <AnswerText>"present"</AnswerText>
+        <QuestionType>Tx221724</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>7</InterfaceID>
+        <TimeIn>2015-03-16T13:51:45.087Z</TimeIn>
+        <TimeOut>2015-03-16T13:51:50.467Z</TimeOut>
+        <AnswerNumber>0</AnswerNumber>
+        <PathwayID>PW808</PathwayID>
+        <OrderNumber>0</OrderNumber>
+        <AdditionalText />
+        <ReportText>Pathway Selected: PW808, Unwell</ReportText>
+        <Action>Next</Action>
+        <QuestionText />
+        <AnswerText />
+        <QuestionType />
+        <SystemFlag>0</SystemFlag>
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>False</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2015-03-16T13:51:50.867Z</TimeIn>
+        <TimeOut>2015-03-16T13:51:50.867Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PW808</PathwayID>
+        <OrderNumber>0</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>SYSTEM_VHF</QuestionText>
+        <AnswerText>=="vhf"</AnswerText>
+        <QuestionType>Tx223272</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2015-03-16T13:51:50.89Z</TimeIn>
+        <TimeOut>2015-03-16T13:51:50.89Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PW808</PathwayID>
+        <OrderNumber>15100</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>VHFSymptom</QuestionText>
+        <AnswerText>"present"</AnswerText>
+        <QuestionType>Tx223273</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2015-03-16T13:51:51Z</TimeIn>
+        <TimeOut>2015-03-16T13:51:54.337Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PW808</PathwayID>
+        <OrderNumber>15000</OrderNumber>
+        <AdditionalText />
+        <ReportText>There was a fever at the time of assessment or within the previous 12 hours.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>Has he felt hot or feverish at any time in the last 12 hours?</QuestionText>
+        <AnswerText>yes - temperature not taken</AnswerText>
+        <QuestionType>Tx1122</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText>Fever at time of assessment or in last 12 hours</DispositionRatText>
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords>Fever|Medication, pain and/or fever</CxKeywords>
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2015-03-16T13:51:54.383Z</TimeIn>
+        <TimeOut>2015-03-16T13:51:54.383Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PW808</PathwayID>
+        <OrderNumber>14400</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>Fever</QuestionText>
+        <AnswerText>"present"</AnswerText>
+        <QuestionType>Tx222420</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2015-03-16T13:51:54.51Z</TimeIn>
+        <TimeOut>2015-03-16T13:51:56.297Z</TimeOut>
+        <AnswerNumber>3</AnswerNumber>
+        <PathwayID>PW808</PathwayID>
+        <OrderNumber>300</OrderNumber>
+        <AdditionalText />
+        <ReportText>There were no breathing problems.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>Has he got any breathing problems?</QuestionText>
+        <AnswerText>no</AnswerText>
+        <QuestionType>Tx221678</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>False</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2015-03-16T13:51:56.723Z</TimeIn>
+        <TimeOut>2015-03-16T13:51:56.723Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PW808</PathwayID>
+        <OrderNumber>200</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>SYSTEM_VHF</QuestionText>
+        <AnswerText>=="vhf"</AnswerText>
+        <QuestionType>Tx223272</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2015-03-16T13:51:56.74Z</TimeIn>
+        <TimeOut>2015-03-16T13:51:56.74Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PW808</PathwayID>
+        <OrderNumber>18500</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>VHFSymptom</QuestionText>
+        <AnswerText>"present"</AnswerText>
+        <QuestionType>Tx223273</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2015-03-16T13:51:56.863Z</TimeIn>
+        <TimeOut>2015-03-16T13:52:00.29Z</TimeOut>
+        <AnswerNumber>3</AnswerNumber>
+        <PathwayID>PW808</PathwayID>
+        <OrderNumber>18400</OrderNumber>
+        <AdditionalText />
+        <ReportText>Severe illness and a rash suggestive of septicaemia were not described.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>Is he severely ill AND got new marks, like bruising or bleeding under the skin?</QuestionText>
+        <AnswerText>no</AnswerText>
+        <QuestionType>Tx1054</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2015-03-16T13:52:00.443Z</TimeIn>
+        <TimeOut>2015-03-16T13:52:01.577Z</TimeOut>
+        <AnswerNumber>3</AnswerNumber>
+        <PathwayID>PW808</PathwayID>
+        <OrderNumber>1000</OrderNumber>
+        <AdditionalText />
+        <ReportText>There was no difficulty rousing.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>Is he difficult to rouse?</QuestionText>
+        <AnswerText>no</AnswerText>
+        <QuestionType>Tx221099</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2015-03-16T13:52:01.723Z</TimeIn>
+        <TimeOut>2015-03-16T13:52:04.473Z</TimeOut>
+        <AnswerNumber>5</AnswerNumber>
+        <PathwayID>PW808</PathwayID>
+        <OrderNumber>18800</OrderNumber>
+        <AdditionalText />
+        <ReportText>The individual had no redcurrant jelly stools, tarry, black stools or red bowel motions.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>Has he got any of these symptoms?</QuestionText>
+        <AnswerText>no</AnswerText>
+        <QuestionType>Tx63072</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>False</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2015-03-16T13:52:04.94Z</TimeIn>
+        <TimeOut>2015-03-16T13:52:04.94Z</TimeOut>
+        <AnswerNumber>2</AnswerNumber>
+        <PathwayID>PW808</PathwayID>
+        <OrderNumber>1600</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>Vomiting</QuestionText>
+        <AnswerText>*</AnswerText>
+        <QuestionType>Tx221277</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2015-03-16T13:52:05.103Z</TimeIn>
+        <TimeOut>2015-03-16T13:52:06.327Z</TimeOut>
+        <AnswerNumber>3</AnswerNumber>
+        <PathwayID>PW808</PathwayID>
+        <OrderNumber>3300</OrderNumber>
+        <AdditionalText />
+        <ReportText>There was no vomiting.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>Has he been vomiting?</QuestionText>
+        <AnswerText>no</AnswerText>
+        <QuestionType>Tx3491</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>False</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2015-03-16T13:52:06.723Z</TimeIn>
+        <TimeOut>2015-03-16T13:52:06.723Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PW808</PathwayID>
+        <OrderNumber>15500</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>VHFSymptom</QuestionText>
+        <AnswerText>=="present"</AnswerText>
+        <QuestionType>Tx223274</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2015-03-16T13:52:06.85Z</TimeIn>
+        <TimeOut>2015-03-16T13:52:08.57Z</TimeOut>
+        <AnswerNumber>3</AnswerNumber>
+        <PathwayID>PW808</PathwayID>
+        <OrderNumber>15600</OrderNumber>
+        <AdditionalText />
+        <ReportText>There had been no travel within the last 4 weeks from a country affected by the current Ebola outbreak.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>Has he been in a West African country affected by the Ebola outbreak, IN THE LAST 4 WEEKS?</QuestionText>
+        <AnswerText>no</AnswerText>
+        <QuestionType>Tx223275</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2015-03-16T13:52:08.733Z</TimeIn>
+        <TimeOut>2015-03-16T13:52:09.507Z</TimeOut>
+        <AnswerNumber>3</AnswerNumber>
+        <PathwayID>PW808</PathwayID>
+        <OrderNumber>15700</OrderNumber>
+        <AdditionalText />
+        <ReportText>Exposure to Ebola virus disease in the last 4 weeks was not declared.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>Has he been exposed to the Ebola virus IN THE LAST 4 WEEKS?</QuestionText>
+        <AnswerText>no</AnswerText>
+        <QuestionType>Tx223276</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>False</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2015-03-16T13:52:10.32Z</TimeIn>
+        <TimeOut>2015-03-16T13:52:10.32Z</TimeOut>
+        <AnswerNumber>2</AnswerNumber>
+        <PathwayID>PW808</PathwayID>
+        <OrderNumber>23700</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>PATIENT_AGEinDAYS</QuestionText>
+        <AnswerText>&lt;29</AnswerText>
+        <QuestionType>Tx222598</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2015-03-16T13:52:10.337Z</TimeIn>
+        <TimeOut>2015-03-16T13:52:10.337Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PW808</PathwayID>
+        <OrderNumber>23900</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>AgeUnder29days</QuestionText>
+        <AnswerText>"present"</AnswerText>
+        <QuestionType>Tx223366</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2015-03-16T13:52:10.483Z</TimeIn>
+        <TimeOut>2015-03-16T13:52:13.543Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PW808</PathwayID>
+        <OrderNumber>24000</OrderNumber>
+        <AdditionalText />
+        <ReportText>The baby was jaundiced.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>Does the baby's skin or eyes look yellow?</QuestionText>
+        <AnswerText>yes</AnswerText>
+        <QuestionType>Tx223335</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText>Jaundice</DispositionRatText>
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords>Baby feeding|Neonatal Jaundice</CxKeywords>
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>False</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2015-03-16T13:52:14.32Z</TimeIn>
+        <TimeOut>2015-03-16T13:52:14.32Z</TimeOut>
+        <AnswerNumber>2</AnswerNumber>
+        <PathwayID>PW808</PathwayID>
+        <OrderNumber>24200</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>PATIENT_AGEinDAYS</QuestionText>
+        <AnswerText>&lt;10</AnswerText>
+        <QuestionType>Tx223371</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2015-03-16T13:52:14.34Z</TimeIn>
+        <TimeOut>2015-03-16T13:52:14.34Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PW808</PathwayID>
+        <OrderNumber>25800</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>SDPCYellowSkin</QuestionText>
+        <AnswerText>"PC yellow skin"</AnswerText>
+        <QuestionType>Tx223381</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>4405</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>4</InterfaceID>
+        <TimeIn>2015-03-16T13:52:14.493Z</TimeIn>
+        <TimeOut>2015-03-16T13:52:20.6Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PW808</PathwayID>
+        <OrderNumber>25800</OrderNumber>
+        <AdditionalText />
+        <ReportText>The individual needs to speak to a midwife within 1 hour.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>Speak to Midwife within 1 hour</QuestionText>
+        <AnswerText>The individual needs to speak to a midwife within 1 hour.</AnswerText>
+        <QuestionType>Dx530</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode>Dx30</DispositionCode>
+          <DispositionRational>Midwives care for women throughout their pregnancy and for the mother and baby up to 28 days after the birth.
+In some areas women can self-refer to a midwife, in others referral is through the GP.</DispositionRational>
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>4</InterfaceID>
+        <TimeIn>2015-03-16T13:52:14.493Z</TimeIn>
+        <TimeOut>2015-03-16T13:52:20.6Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PW808</PathwayID>
+        <OrderNumber>25800</OrderNumber>
+        <AdditionalText />
+        <ReportText>You need to contact the individual's midwife within 1 hour.</ReportText>
+        <Action>Next</Action>
+        <QuestionText />
+        <AnswerText />
+        <QuestionType>Cx5782</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>4</InterfaceID>
+        <TimeIn>2015-03-16T13:52:14.493Z</TimeIn>
+        <TimeOut>2015-03-16T13:52:20.6Z</TimeOut>
+        <AnswerNumber>6</AnswerNumber>
+        <PathwayID>PW808</PathwayID>
+        <OrderNumber>25800</OrderNumber>
+        <AdditionalText />
+        <ReportText>Before you go, I will just check whether I need to give you any further instructions or advice.</ReportText>
+        <Action>Next</Action>
+        <QuestionText />
+        <AnswerText />
+        <QuestionType>Cx5782</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>12</InterfaceID>
+        <TimeIn>2015-03-16T13:52:20.953Z</TimeIn>
+        <TimeOut>2015-03-16T13:52:28.743Z</TimeOut>
+        <AnswerNumber>0</AnswerNumber>
+        <PathwayID>PW808</PathwayID>
+        <OrderNumber>25800</OrderNumber>
+        <AdditionalText />
+        <ReportText>DOS call</ReportText>
+        <Action>Next</Action>
+        <QuestionText />
+        <AnswerText />
+        <QuestionType>DOS</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>3</InterfaceID>
+        <TimeIn>2015-03-16T13:52:28.883Z</TimeIn>
+        <TimeOut>2015-03-16T14:03:59.177Z</TimeOut>
+        <AnswerNumber>2</AnswerNumber>
+        <PathwayID>PW808</PathwayID>
+        <OrderNumber>25800</OrderNumber>
+        <AdditionalText />
+        <ReportText>If there are any new symptoms, or if the condition gets worse, changes or you have any other concerns, call us back.</ReportText>
+        <Action>Next</Action>
+        <QuestionText />
+        <AnswerText />
+        <QuestionType>Cx1910</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>3</InterfaceID>
+        <TimeIn>2015-03-16T13:52:28.883Z</TimeIn>
+        <TimeOut>2015-03-16T14:03:59.177Z</TimeOut>
+        <AnswerNumber>4</AnswerNumber>
+        <PathwayID>PW808</PathwayID>
+        <OrderNumber>25800</OrderNumber>
+        <AdditionalText />
+        <ReportText>Remember to take a list of any current medications if you go to the out of hours surgery.</ReportText>
+        <Action>Next</Action>
+        <QuestionText />
+        <AnswerText />
+        <QuestionType>Cx1910</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>3</InterfaceID>
+        <TimeIn>2015-03-16T13:52:28.883Z</TimeIn>
+        <TimeOut>2015-03-16T14:03:59.177Z</TimeOut>
+        <AnswerNumber>4</AnswerNumber>
+        <PathwayID>PW808</PathwayID>
+        <OrderNumber>25800</OrderNumber>
+        <AdditionalText />
+        <ReportText>Consider alternating the medication ONLY if the symptoms continue or come back before the next dose is due.</ReportText>
+        <Action>Next</Action>
+        <QuestionText />
+        <AnswerText />
+        <QuestionType>Cx221018</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>3</InterfaceID>
+        <TimeIn>2015-03-16T13:52:28.883Z</TimeIn>
+        <TimeOut>2015-03-16T14:03:59.177Z</TimeOut>
+        <AnswerNumber>3</AnswerNumber>
+        <PathwayID>PW808</PathwayID>
+        <OrderNumber>25800</OrderNumber>
+        <AdditionalText />
+        <ReportText>Don't give both together unless recommended to do so by a health care professional.</ReportText>
+        <Action>Next</Action>
+        <QuestionText />
+        <AnswerText />
+        <QuestionType>Cx221018</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>3</InterfaceID>
+        <TimeIn>2015-03-16T13:52:28.883Z</TimeIn>
+        <TimeOut>2015-03-16T14:03:59.177Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PW808</PathwayID>
+        <OrderNumber>25800</OrderNumber>
+        <AdditionalText />
+        <ReportText>UNDER 12 WEEKS OLD: A baby under 12 weeks should not be given any medicine unless it has been prescribed or advised by a doctor, nurse, health visitor or pharmacist.</ReportText>
+        <Action>Next</Action>
+        <QuestionText />
+        <AnswerText />
+        <QuestionType>Cx221018</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>3</InterfaceID>
+        <TimeIn>2015-03-16T13:52:28.883Z</TimeIn>
+        <TimeOut>2015-03-16T14:03:59.177Z</TimeOut>
+        <AnswerNumber>5</AnswerNumber>
+        <PathwayID>PW808</PathwayID>
+        <OrderNumber>25800</OrderNumber>
+        <AdditionalText />
+        <ReportText>Follow the instructions in the pack. If in doubt ask a pharmacist.</ReportText>
+        <Action>Next</Action>
+        <QuestionText />
+        <AnswerText />
+        <QuestionType>Cx221018</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>3</InterfaceID>
+        <TimeIn>2015-03-16T13:52:28.883Z</TimeIn>
+        <TimeOut>2015-03-16T14:03:59.177Z</TimeOut>
+        <AnswerNumber>6</AnswerNumber>
+        <PathwayID>PW808</PathwayID>
+        <OrderNumber>25800</OrderNumber>
+        <AdditionalText />
+        <ReportText>Becoming severely ill WITH new marks, like bruising or bleeding under the skin - DIAL 999.</ReportText>
+        <Action>Next</Action>
+        <QuestionText />
+        <AnswerText />
+        <QuestionType>Cx221233</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>3</InterfaceID>
+        <TimeIn>2015-03-16T13:52:28.883Z</TimeIn>
+        <TimeOut>2015-03-16T14:03:59.177Z</TimeOut>
+        <AnswerNumber>5</AnswerNumber>
+        <PathwayID>PW808</PathwayID>
+        <OrderNumber>25800</OrderNumber>
+        <AdditionalText />
+        <ReportText>Becoming limp, floppy, unresponsive or having a fit - DIAL 999.</ReportText>
+        <Action>Next</Action>
+        <QuestionText />
+        <AnswerText />
+        <QuestionType>Cx221233</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>3</InterfaceID>
+        <TimeIn>2015-03-16T13:52:28.883Z</TimeIn>
+        <TimeOut>2015-03-16T14:03:59.177Z</TimeOut>
+        <AnswerNumber>3</AnswerNumber>
+        <PathwayID>PW808</PathwayID>
+        <OrderNumber>25800</OrderNumber>
+        <AdditionalText />
+        <ReportText>Don't try to cool down by cold sponging or fanning. Cooling down too quickly can cause shivering, which makes the temperature go up again.</ReportText>
+        <Action>Next</Action>
+        <QuestionText />
+        <AnswerText />
+        <QuestionType>Cx221233</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>3</InterfaceID>
+        <TimeIn>2015-03-16T13:52:28.883Z</TimeIn>
+        <TimeOut>2015-03-16T14:03:59.177Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PW808</PathwayID>
+        <OrderNumber>25800</OrderNumber>
+        <AdditionalText />
+        <ReportText>Give them plenty to drink, little and often is best. If breastfeeding, breast milk is best.</ReportText>
+        <Action>Next</Action>
+        <QuestionText />
+        <AnswerText />
+        <QuestionType>Cx221233</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>3</InterfaceID>
+        <TimeIn>2015-03-16T13:52:28.883Z</TimeIn>
+        <TimeOut>2015-03-16T14:03:59.177Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PW808</PathwayID>
+        <OrderNumber>25800</OrderNumber>
+        <AdditionalText />
+        <ReportText>Jaundice is common in newborn babies. It is not always serious but should be checked .</ReportText>
+        <Action>Next</Action>
+        <QuestionText />
+        <AnswerText />
+        <QuestionType>Cx221345</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>3</InterfaceID>
+        <TimeIn>2015-03-16T13:52:28.883Z</TimeIn>
+        <TimeOut>2015-03-16T14:03:59.177Z</TimeOut>
+        <AnswerNumber>2</AnswerNumber>
+        <PathwayID>PW808</PathwayID>
+        <OrderNumber>25800</OrderNumber>
+        <AdditionalText />
+        <ReportText>Bottle-fed babies should continue to be given their normal, full strength formula to prevent dehydration.</ReportText>
+        <Action>Next</Action>
+        <QuestionText />
+        <AnswerText />
+        <QuestionType>Cx221367</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>JW</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>3</InterfaceID>
+        <TimeIn>2015-03-16T13:52:28.883Z</TimeIn>
+        <TimeOut>2015-03-16T14:03:59.177Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PW808</PathwayID>
+        <OrderNumber>25800</OrderNumber>
+        <AdditionalText />
+        <ReportText>Breast-fed babies should continue to be breast-fed as normal to prevent dehydration.</ReportText>
+        <Action>Next</Action>
+        <QuestionText />
+        <AnswerText />
+        <QuestionType>Cx221367</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRational />
+          <DispositionOverrideID>0</DispositionOverrideID>
+          <DispositionOverrideText>False</DispositionOverrideText>
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+    </TriageLineDetails>
+  </PathwaysCase>
+</NHSPathways>

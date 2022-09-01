@@ -53,7 +53,7 @@ def process_zipfile(env, db_connection, bundle, filename, bundle_id):
             scenario_file = bundle_zip.read(name).decode("utf-8")
             try:
                 template_scenario = process_scenario_file(name, scenario_file, bundle_id, db_connection)
-                valid_template = validate_template_scenario(env, template_scenario, db_connection)
+                valid_template = validate_template_scenario(env, template_scenario)
                 if valid_template is True:
                     insert_template_scenario(db_connection, template_scenario)
                 else:
@@ -68,7 +68,7 @@ def process_zipfile(env, db_connection, bundle, filename, bundle_id):
     return processed
 
 
-def validate_template_scenario(env, template_scenario, db_connection):
+def validate_template_scenario(env, template_scenario):
     valid_template = True
     if template_scenario.disposition_id is None:
         logger.log_for_audit(
@@ -79,7 +79,6 @@ def validate_template_scenario(env, template_scenario, db_connection):
         logger.log_for_audit(
             env, "Scenario {} references unrecognised disposition group".format(template_scenario.scenario_id)
         )
-        valid_template = False
     return valid_template
 
 
@@ -223,9 +222,12 @@ def get_disposition_id(scenario_dict, db_connection):
 
 
 def get_disposition_group_uid(scenario_dict):
-    final_disposition_group_uid = scenario_dict["NHSPathways"]["PathwaysCase"]["FinalDispositionCMSID"][
-        "FinalDispositionCMSID"
-    ]
+    try:
+        final_disposition_group_uid = scenario_dict["NHSPathways"]["PathwaysCase"]["FinalDispositionCMSID"][
+        "FinalDispositionCMSID"]
+    except KeyError as e:
+        logger.log_for_audit("stt", "Scenario does not include FinalDispositionCMSID element -> {}".format(e))
+        final_disposition_group_uid = None
     return final_disposition_group_uid
 
 
@@ -238,10 +240,11 @@ def get_disposition_group_id_query(disposition_group_uid):
 def get_disposition_group_id(scenario_dict, db_connection):
     disposition_group_id = None
     disposition_code = get_disposition_group_uid(scenario_dict)
-    query, data = get_disposition_group_id_query(disposition_code)
-    result_set = database.execute_resultset_query(db_connection, query, data)
-    if len(result_set) > 0:
-        disposition_group_id = result_set[0]["id"]
+    if disposition_code is not None:
+        query, data = get_disposition_group_id_query(disposition_code)
+        result_set = database.execute_resultset_query(db_connection, query, data)
+        if len(result_set) > 0:
+            disposition_group_id = result_set[0]["id"]
     return disposition_group_id
 
 
