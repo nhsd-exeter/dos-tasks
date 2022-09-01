@@ -91,8 +91,12 @@ def insert_template_scenario(env, db_connection, template_scenario):
         )
     else:
         logger.log_for_audit(
-            env, "Scenario {} for bundle {} already exists".format(template_scenario.scenario_id, template_scenario.bundle_id)
+            env,
+            "Scenario {} for bundle {} already exists".format(
+                template_scenario.scenario_id, template_scenario.bundle_id
+            ),
         )
+
 
 def is_new_scenario(db_connection, template_scenario):
     """Returns true if scenario not already loaded to db; otherwise false"""
@@ -103,11 +107,16 @@ def is_new_scenario(db_connection, template_scenario):
         new_scenario = True
     return new_scenario
 
+
 def get_existing_scenario_check_query(template_scenario):
     query = """select s.id from pathwaysdos.scenarios s where s.bundleid = %s and
     s.scenarioid = %s"""
-    data = (template_scenario.bundle_id,template_scenario.scenario_id,)
+    data = (
+        template_scenario.bundle_id,
+        template_scenario.scenario_id,
+    )
     return query, data
+
 
 def get_scenario_insert_query(template_scenario):
     query = """insert into pathwaysdos.scenarios(bundleid, scenarioid, symptomgroupid, dispositionid,
