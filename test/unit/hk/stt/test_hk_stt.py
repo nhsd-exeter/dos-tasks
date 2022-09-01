@@ -354,7 +354,7 @@ def test_process_zipfile_valid_template(mock_validator, mock_disposition, mock_d
 def test_add_bundle(mock_new_bundle, mock_query, mock_execute, mock_db_connect):
     """Test function to add bundle to database"""
     bundle_file_name = "teamb/R32.2.3_stt.zip"
-    inserted_bundle_id = handler.add_bundle(mock_db_connect,bundle_file_name)
+    inserted_bundle_id = handler.add_bundle(env, mock_db_connect, bundle_file_name)
     assert inserted_bundle_id == 3
     assert mock_new_bundle.call_count == 1
 

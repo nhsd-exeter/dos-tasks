@@ -27,8 +27,8 @@ def request(event, context):
         # TODO will be a compressed file - testing on .zip -  rar?
         bundle = common.retrieve_compressed_file_from_bucket(bucket, filename, event, start)
         logger.log_for_audit(env, "action:bundle {} downloaded".format(filename))
-        bundle_id = add_bundle(db_connection, filename)
-        logger.log_for_audit(env, "action:bundle {} inserted".format(bundle_id))
+        bundle_id = add_bundle(env, db_connection, filename)
+        # logger.log_for_audit(env, "action:bundle {} inserted".format(bundle_id))
         processed = process_zipfile(env, db_connection, bundle, filename, bundle_id)
         if processed is True:
             message.send_success_slack_message(event, start, None)
@@ -174,7 +174,7 @@ def map_xml_to_json(file_as_string):
     return xmltodict.parse(file_as_string)
 
 
-def add_bundle(db_connection, zip_file_name):
+def add_bundle(env, db_connection, zip_file_name):
     bundle_name = get_bundle_name(zip_file_name)
     bundle_id = is_new_bundle(db_connection, bundle_name)
     if bundle_id is None:
@@ -182,6 +182,9 @@ def add_bundle(db_connection, zip_file_name):
         result_set = database.execute_resultset_query(db_connection, query, data)
         if result_set is not None:
             bundle_id = result_set[0]["id"]
+            logger.log_for_audit(env, "action:bundle {} inserted".format(bundle_id))
+    else:
+        logger.log_for_audit(env, "action:bundle {} found".format(bundle_id))
     return bundle_id
 
 
