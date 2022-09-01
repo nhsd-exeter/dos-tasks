@@ -211,14 +211,19 @@ def get_bundle_insert_query(bundle_id):
 
 
 def get_bundle_name(zip_file_name):
-    """Extract name of bundle from provided zip file assuming convention - R33.2.0_STT_Bundle_stt.zip"""
+    """Extract name of bundle from provided zip file assuming convention - R33.2.0_STT_Bundle_stt.zip
+    Checks if second char is a number to handle Repeat Prescriptions bundle"""
     bundle_parts = zip_file_name.split("_")
     bundle_path = bundle_parts[0]
     bundle_id_parts = bundle_path.split("/")
     bundle_id = bundle_id_parts[1]
-    start_at_position = 1
-    if bundle_id[0] != "R":
-        start_at_position = 0
+    start_at_position = 0
+    if bundle_id[0] == "R":
+        try:
+            int(bundle_id[1])
+            start_at_position = 1
+        except ValueError:
+            start_at_position = 0
     return bundle_id[start_at_position:]
 
 

@@ -134,6 +134,12 @@ def test_get_bundle_name_release_number():
     bundle_name = handler.get_bundle_name("teamb/R33.2.0_STT_Bundle_stt.zip")
     assert expected_bundle_name == bundle_name
 
+def test_get_bundle_name_repeat_prescription():
+    """Test function to extract bundle name from zip file with lead R but not release number"""
+    expected_bundle_name = "Repeat-Prescription"
+    bundle_name = handler.get_bundle_name("teamb/Repeat-Prescription_stt.zip")
+    assert expected_bundle_name == bundle_name
+
 def test_get_bundle_name_no_release_number():
     """Test function to extract bundle name from zip file provided"""
     expected_bundle_name = "Dental"
