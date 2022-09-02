@@ -17,7 +17,7 @@ expected_delete_count_query = """select count(*) removed_count from pathwaysdos.
 
 @patch("psycopg2.connect")
 @patch(f"{file_path}.cron_common.cron_cleanup")
-@patch(f"{file_path}.database.execute_cron_query", return_value="" )
+@patch(f"{file_path}.database.execute_cron_query_no_returning_rows" )
 @patch(f"{file_path}.database.execute_cron_query", return_value={})
 @patch(f"{file_path}.log_removed_changes", return_value={})
 @patch(f"{file_path}.database.connect_to_database", return_value="db_connection")
@@ -28,7 +28,7 @@ def test_handler_pass(mock_db_details,mock_log_removed_changes,mock_delete_count
     mock_cleanup.assert_called_once()
     mock_db_details.assert_called_once()
     # mock_delete_query.assert_called_once()
-    assert mock_delete_query.call_count == 2
+    assert mock_delete_query.call_count == 1
 
 def test_generate_delete_query():
     current_timestamp = datetime.now()
