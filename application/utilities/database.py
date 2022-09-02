@@ -127,7 +127,8 @@ class DB:
             else:
                 self.db_name = "pathwaysdos"
             logger.log_for_diagnostics(
-                env, "| DB name={} | password:secret | user:{} | host={}".format(self.db_name, self.db_user, self.db_host)
+                env,
+                "| DB name={} | password:secret | user:{} | host={}".format(self.db_name, self.db_user, self.db_host),
             )
         else:
             connection_details_set = False

@@ -10,8 +10,6 @@ from .. import handler
 file_path = "application.cron.removeoldchanges.handler"
 
 expected_delete_query = """delete from pathwaysdos.changes c where c.createdTimestamp < %s
-        returning
-        *
     """
 
 expected_delete_count_query = """select count(*) removed_count from pathwaysdos.changes c where c.createdTimestamp < %s

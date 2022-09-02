@@ -34,9 +34,6 @@ def remove_old_changes(env, db_connection):
 
 
 def log_removed_changes(env, db_connection, delete_count_result):
-    log_info = get_log_data(env, db_connection, delete_count_result)
-    log_text = get_log_entry(log_info)
-    logger.log_for_audit(env, log_text)
     deleted_count = delete_count_result[0]["removed_count"]
     format_data = "%b %d %Y %H:%M:%S"
     end_at = datetime.utcnow()
@@ -50,8 +47,6 @@ def log_removed_changes(env, db_connection, delete_count_result):
 
 def generate_delete_query(threshold_date):
     query = """delete from pathwaysdos.changes c where c.createdTimestamp < %s
-        returning
-        *
     """
     data = (threshold_date,)
     return query, data
@@ -68,22 +63,6 @@ def get_delete_count(env, db_connection, threshold_date):
     query, data = generate_delete_count_query(threshold_date)
     result_set = database.execute_cron_query(env, db_connection, query, data)
     return result_set
-
-
-def get_log_data(env, db_connection, delete_count_result):
-    log_info = {}
-    log_info["operation"] = "delete"
-    log_info["records to delete"] = delete_count_result[0]["removed_count"]
-    return log_info
-
-
-def get_log_entry(log_info):
-    log_text = ""
-    for key, value in log_info.items():
-        kv_pair = key + ":" + str(value)
-        log_text = log_text + "| " + kv_pair + " "
-    log_text = log_text + "|"
-    return log_text
 
 
 def getThresholdDate(threshold_in_days):
