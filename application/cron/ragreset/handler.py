@@ -32,7 +32,7 @@ def reset_rag_status(env, db_connection):
 
     try:
         update_query, data = generate_update_query()
-        updated_services = database.execute_cron_query(env, db_connection, update_query, data)
+        updated_services = database.execute_resultset_query(env, db_connection, update_query, data)
         log_updated_services(env, db_connection, updated_services)
     except KeyError as e:
         logger.log_for_error(env, "| Exception raised running rag reset job {}".format(e))
@@ -124,7 +124,7 @@ def log_updated_services(env, db_connection, updated_services):
 
 def get_service_data(env, db_connection, service_id):
     query, data = generate_service_query(service_id)
-    result_set = database.execute_cron_query(env, db_connection, query, data)
+    result_set = database.execute_resultset_query(env, db_connection, query, data)
     return result_set
 
 
@@ -139,7 +139,7 @@ def generate_service_query(service_id):
 
 def get_parent_uid(env, db_connection, service_id):
     query, data = generate_parent_uid_query(service_id)
-    result_set = database.execute_cron_query(env, db_connection, query, data)
+    result_set = database.execute_resultset_query(env, db_connection, query, data)
     return result_set
 
 
@@ -156,7 +156,7 @@ def generate_parent_uid_query(service_id):
 
 def get_region_name(env, db_connection, service_id):
     query, data = generate_region_name_query(service_id)
-    result_set = database.execute_cron_query(env, db_connection, query, data)
+    result_set = database.execute_resultset_query(env, db_connection, query, data)
     return result_set
 
 

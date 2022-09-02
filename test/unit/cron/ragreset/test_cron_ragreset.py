@@ -57,7 +57,7 @@ expected_region_name_query = """select s.uid, s.name,
 
 @patch("psycopg2.connect")
 @patch(f"{file_path}.cron_common.cron_cleanup")
-@patch(f"{file_path}.database.execute_cron_query", return_value="" )
+@patch(f"{file_path}.database.execute_resultset_query", return_value="" )
 @patch(f"{file_path}.database.connect_to_database", return_value="db_connection")
 def test_handler_pass(mock_db_details, mock_update_query, mock_cleanup, mock_db_connect):
     """Test top level request calls downstream functions - success"""
@@ -123,7 +123,7 @@ def test_log_updated_services_keyerror(mock_db_connect):
 
 @patch("psycopg2.connect")
 @patch(f"{file_path}.log_updated_services", return_value="" )
-@patch(f"{file_path}.database.execute_cron_query", side_effect=KeyError)
+@patch(f"{file_path}.database.execute_resultset_query", side_effect=KeyError)
 @patch(f"{file_path}.generate_update_query", side_effect=[{1:'',2:''}])
 def test_reset_rag_status(mock_update_query, mock_execute, mock_log, mock_db_connect):
     with pytest.raises(KeyError):

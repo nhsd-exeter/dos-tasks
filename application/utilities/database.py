@@ -71,7 +71,7 @@ def execute_db_query(db_connection, query, data, line, values, summary_count_dic
         cursor.close()
 
 
-def execute_cron_query(env, db_connection, query, data):
+def execute_resultset_query(env, db_connection, query, data):
     cursor = db_connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
     try:
         cursor.execute(query, data)
@@ -86,7 +86,7 @@ def execute_cron_query(env, db_connection, query, data):
         cursor.close()
 
 
-def execute_cron_query_no_returning_rows(env, db_connection, query, data):
+def execute_query(env, db_connection, query, data):
     cursor = db_connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
     try:
         cursor.execute(query, data)
