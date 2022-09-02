@@ -40,5 +40,5 @@ variable "splunk_firehose_role" {
 
 variable "schedule_removeoldchanges" {
   description = "Schedule for remove old changes job"
-  default     = "rate(5 minutes)"
+  default     = "cron(2 1 * * ? *)"
 }
