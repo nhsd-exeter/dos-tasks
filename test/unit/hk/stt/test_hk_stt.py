@@ -136,8 +136,14 @@ def test_get_bundle_name_release_number():
 
 def test_get_bundle_name_repeat_prescription():
     """Test function to extract bundle name from zip file with lead R but not release number"""
-    expected_bundle_name = "Repeat-Prescription"
+    expected_bundle_name = "Repeat Prescription"
     bundle_name = handler.get_bundle_name("teamb/Repeat-Prescription_stt.zip")
+    assert expected_bundle_name == bundle_name
+
+def test_get_bundle_name_multiple_hyphens():
+    """Test function to extract bundle name from zip file with lead R but not release number"""
+    expected_bundle_name = "Midwifery or Labour Suite"
+    bundle_name = handler.get_bundle_name("teamb/Midwifery-or-Labour-Suite_stt.zip")
     assert expected_bundle_name == bundle_name
 
 def test_get_bundle_name_no_release_number():
@@ -355,13 +361,24 @@ def test_process_zipfile_valid_template(mock_validator, mock_disposition, mock_d
 
 @patch("psycopg2.connect")
 @patch(f"{file_path}.database.execute_resultset_query", return_value=([{"id": 3}]))
-@patch(f"{file_path}.get_bundle_insert_query",return_value=("query", "data"))
+@patch(f"{file_path}.get_existing_bundle_check_query",return_value=("query", "data"))
 @patch(f"{file_path}.is_new_bundle", return_value=None)
-def test_add_bundle(mock_new_bundle, mock_query, mock_execute, mock_db_connect):
+def test_add_new_bundle(mock_new_bundle, mock_bundle_check_query, mock_execute, mock_db_connect):
     """Test function to add bundle to database"""
     bundle_file_name = "teamb/R32.2.3_stt.zip"
     inserted_bundle_id = handler.add_bundle(env, mock_db_connect, bundle_file_name)
     assert inserted_bundle_id == 3
+    assert mock_new_bundle.call_count == 1
+
+@patch("psycopg2.connect")
+@patch(f"{file_path}.database.execute_resultset_query", return_value=([{"id": 3}]))
+@patch(f"{file_path}.get_existing_bundle_check_query",return_value=("query", "data"))
+@patch(f"{file_path}.is_new_bundle", return_value=4)
+def test_add_existing_bundle(mock_new_bundle, mock_bundle_check_query, mock_execute, mock_db_connect):
+    """Test function to add bundle to database"""
+    bundle_file_name = "teamb/R32.2.3_stt.zip"
+    inserted_bundle_id = handler.add_bundle(env, mock_db_connect, bundle_file_name)
+    assert inserted_bundle_id == 4
     assert mock_new_bundle.call_count == 1
 
 def test_get_bundle_insert_query():

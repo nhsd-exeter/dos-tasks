@@ -224,7 +224,7 @@ def get_bundle_name(zip_file_name):
             start_at_position = 1
         except ValueError:
             start_at_position = 0
-    return bundle_id[start_at_position:]
+    return bundle_id[start_at_position:].replace("-", " ")
 
 
 def get_scenario_id(scenario_file_name):
