@@ -41,7 +41,7 @@ alt_expected_scenario_id = "1"
 expected_gender_id = "2"
 expected_age_id = "1"
 
-
+@patch(f"{file_path}.initialise_count",return_value={'added':0,'rejected':0,'nfa':0})
 @patch(f"{file_path}.common.archive_file")
 @patch(f"{file_path}.message.send_failure_slack_message")
 @patch(f"{file_path}.message.send_success_slack_message")
@@ -58,7 +58,8 @@ mock_db_connection,
 mock_close_connection,
 mock_send_success_slack_message,
 mock_send_failure_slack_message,
-mock_archive_file):
+mock_archive_file,
+mock_scenario_count):
     """Test top level request calls downstream functions - success"""
     payload = generate_event_payload()
     result = handler.request(event=payload, context=None)
@@ -72,6 +73,7 @@ mock_archive_file):
     mock_archive_file.assert_called_once()
     mock_send_success_slack_message.assert_called_once()
     assert mock_send_failure_slack_message.call_count == 0
+    assert mock_scenario_count.call_count == 1
 
 @patch(f"{file_path}.common.archive_file")
 @patch(f"{file_path}.message.send_failure_slack_message")
@@ -316,22 +318,34 @@ def test_process_malformed_scenario():
 @patch(f"{file_path}.get_disposition_group_id",return_value=5)
 @patch(f"{file_path}.get_disposition_id",return_value=5)
 def test_process_zipfile(mock_disposition, mock_disposition_group, mock_db_connect):
+    scenario_count = handler.initialise_count()
     bundle = get_compressed_object(sample_bundle_file_name)
-    processed = handler.process_zipfile(env, mock_db_connect, bundle,mock_zip_filename, bundle_id)
+    processed = handler.process_zipfile(env, mock_db_connect, bundle,mock_zip_filename, bundle_id, scenario_count)
     assert processed == True
     assert mock_disposition.call_count == 3
     assert mock_disposition_group.call_count == 3
+    assert scenario_count['added'] == 3
+    assert scenario_count['rejected'] == 0
+    assert scenario_count['nfa'] == 0
 
 @patch("psycopg2.connect")
 def test_process_non_zipfile(mock_db_connect):
-    processed = handler.process_zipfile(env, mock_db_connect, sample_scenario_file_name, alt_scenario_file_name, bundle_id)
+    scenario_count = handler.initialise_count()
+    processed = handler.process_zipfile(env, mock_db_connect, sample_scenario_file_name, alt_scenario_file_name, bundle_id, scenario_count)
     assert processed == False
+    assert scenario_count['added'] == 0
+    assert scenario_count['rejected'] == 0
+    assert scenario_count['nfa'] == 0
 
 @patch("psycopg2.connect")
 def test_process_malformed_xml_in_zipfile(mock_db_connect):
     bundle = get_compressed_object(malformed_bundle_file_name)
-    processed = handler.process_zipfile(env, mock_db_connect,bundle,malformed_bundle_file_name, bundle_id)
+    scenario_count = handler.initialise_count()
+    processed = handler.process_zipfile(env, mock_db_connect,bundle,malformed_bundle_file_name, bundle_id, scenario_count)
     assert processed == False
+    assert scenario_count['added'] == 0
+    assert scenario_count['rejected'] == 0
+    assert scenario_count['nfa'] == 0
 
 @patch("psycopg2.connect")
 @patch(f"{file_path}.logger.log_for_audit")
@@ -340,11 +354,15 @@ def test_process_malformed_xml_in_zipfile(mock_db_connect):
 @patch(f"{file_path}.validate_template_scenario",return_value=False)
 def test_process_zipfile_invalid_template(mock_validator, mock_disposition, mock_disposition_group, mock_logger, mock_db_connect):
     bundle = get_compressed_object(sample_bundle_file_name)
-    processed = handler.process_zipfile(env, mock_db_connect, bundle,mock_zip_filename, bundle_id)
+    scenario_count = handler.initialise_count()
+    processed = handler.process_zipfile(env, mock_db_connect, bundle,mock_zip_filename, bundle_id, scenario_count)
     assert processed == True
     assert mock_disposition.call_count == 3
     assert mock_disposition_group.call_count == 3
     assert mock_logger.call_count == 6
+    assert scenario_count['added'] == 0
+    assert scenario_count['rejected'] == 3
+    assert scenario_count['nfa'] == 0
 
 @patch("psycopg2.connect")
 @patch(f"{file_path}.logger.log_for_audit")
@@ -353,11 +371,15 @@ def test_process_zipfile_invalid_template(mock_validator, mock_disposition, mock
 @patch(f"{file_path}.validate_template_scenario",return_value=True)
 def test_process_zipfile_valid_template(mock_validator, mock_disposition, mock_disposition_group, mock_logger, mock_db_connect):
     bundle = get_compressed_object(sample_bundle_file_name)
-    processed = handler.process_zipfile(env, mock_db_connect, bundle,mock_zip_filename, bundle_id)
+    scenario_count = handler.initialise_count()
+    processed = handler.process_zipfile(env, mock_db_connect, bundle,mock_zip_filename, bundle_id, scenario_count)
     assert processed == True
     assert mock_disposition.call_count == 3
     assert mock_disposition_group.call_count == 3
     assert mock_logger.call_count == 6
+    assert scenario_count['added'] == 3
+    assert scenario_count['rejected'] == 0
+    assert scenario_count['nfa'] == 0
 
 @patch("psycopg2.connect")
 @patch(f"{file_path}.database.execute_resultset_query", return_value=([{"id": 3}]))
@@ -501,7 +523,8 @@ def test_get_existing_bundle_check_query(mock_db_connect):
 @patch(f"{file_path}.get_scenario_insert_query",return_value=("query", "data"))
 def test_insert_template_scenario(mock_insert, mock_execute, mock_logger, mock_is_new, mock_db_connect):
     template_scenario = handler.process_scenario_file(sample_scenario_file_name,convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
-    handler.insert_template_scenario(env, mock_db_connect, template_scenario)
+    scenario_count = handler.initialise_count()
+    handler.insert_template_scenario(env, mock_db_connect, template_scenario, scenario_count)
     assert mock_logger.call_count == 1
     assert mock_insert.call_count == 1
     assert mock_execute.call_count == 1
@@ -515,7 +538,8 @@ def test_insert_template_scenario(mock_insert, mock_execute, mock_logger, mock_i
 @patch(f"{file_path}.get_scenario_insert_query",return_value=("query", "data"))
 def test_insert_duplicate_template_scenario(mock_insert, mock_execute, mock_logger, mock_is_new, mock_db_connect):
     template_scenario = handler.process_scenario_file(sample_scenario_file_name,convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
-    handler.insert_template_scenario(env, mock_db_connect, template_scenario)
+    scenario_count = handler.initialise_count()
+    handler.insert_template_scenario(env, mock_db_connect, template_scenario, scenario_count)
     assert mock_logger.call_count == 1
     assert mock_insert.call_count == 0
     assert mock_execute.call_count == 0

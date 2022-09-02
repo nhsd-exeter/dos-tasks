@@ -12,6 +12,9 @@ from datetime import datetime
 ns = {"pathwayscase": "http://www.nhspathways.org/webservices/pathways/pathwaysCase"}
 
 task_description = "Import STT scenarios"
+added_subtotal = "added"
+rejected_subtotal = "rejected"
+nfa_subtotal = "nfa"
 
 
 def request(event, context):
@@ -22,14 +25,23 @@ def request(event, context):
     env = event["env"]
     db_connection = None
     logger.log_for_audit(event["env"], "action:task started")
+    scenario_count = initialise_count()
     try:
         db_connection = database.connect_to_database(env)
         # TODO will be a compressed file - testing on .zip -  rar?
         bundle = common.retrieve_compressed_file_from_bucket(bucket, filename, event, start)
         logger.log_for_audit(env, "action:bundle {} downloaded".format(filename))
         bundle_id = add_bundle(env, db_connection, filename)
-        # logger.log_for_audit(env, "action:bundle {} inserted".format(bundle_id))
-        processed = process_zipfile(env, db_connection, bundle, filename, bundle_id)
+        processed = process_zipfile(env, db_connection, bundle, filename, bundle_id, scenario_count)
+        logger.log_for_audit(
+            env,
+            "action:scenarios counts | filename:{} | added:{} | rejected:{} | nfa:{}".format(
+                filename,
+                scenario_count[added_subtotal],
+                scenario_count[rejected_subtotal],
+                scenario_count[nfa_subtotal],
+            ),
+        )
         if processed is True:
             message.send_success_slack_message(event, start, None)
         else:
@@ -44,7 +56,15 @@ def request(event, context):
     return task_description + " execution completed"
 
 
-def process_zipfile(env, db_connection, bundle, filename, bundle_id):
+def initialise_count():
+    scenario_count_dict = {}
+    scenario_count_dict[added_subtotal] = 0
+    scenario_count_dict[rejected_subtotal] = 0
+    scenario_count_dict[nfa_subtotal] = 0
+    return scenario_count_dict
+
+
+def process_zipfile(env, db_connection, bundle, filename, bundle_id, scenario_count):
     processed = True
     try:
         bundle_zip = zipfile.ZipFile(io.BytesIO(bundle))
@@ -55,9 +75,11 @@ def process_zipfile(env, db_connection, bundle, filename, bundle_id):
                 template_scenario = process_scenario_file(name, scenario_file, bundle_id, db_connection)
                 valid_template = validate_template_scenario(env, template_scenario)
                 if valid_template is True:
-                    insert_template_scenario(env, db_connection, template_scenario)
+                    insert_template_scenario(env, db_connection, template_scenario, scenario_count)
+                    # TODO summary_count_dict[action] = summary_count_dict[action] + 1
                 else:
                     logger.log_for_audit(env, "action:invalid scenario {}".format(name))
+                    scenario_count[rejected_subtotal] = scenario_count[rejected_subtotal] + 1
             except Exception as e:
                 processed = False
                 logger.log_for_error("stt", "Problem processing scenario file {0}: {1}".format(name, e))
@@ -82,14 +104,16 @@ def validate_template_scenario(env, template_scenario):
     return valid_template
 
 
-def insert_template_scenario(env, db_connection, template_scenario):
+def insert_template_scenario(env, db_connection, template_scenario, scenario_count):
     if is_new_scenario(db_connection, template_scenario):
         query, data = get_scenario_insert_query(template_scenario)
         database.execute_query(db_connection, query, data)
+        scenario_count[added_subtotal] = scenario_count[added_subtotal] + 1
         logger.log_for_audit(
             env, "Scenario {} for bundle {} uploaded".format(template_scenario.scenario_id, template_scenario.bundle_id)
         )
     else:
+        scenario_count[nfa_subtotal] = scenario_count[nfa_subtotal] + 1
         logger.log_for_audit(
             env,
             "Scenario {} for bundle {} already exists".format(
