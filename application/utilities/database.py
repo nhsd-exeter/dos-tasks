@@ -85,6 +85,7 @@ def execute_cron_query(env, db_connection, query, data):
     finally:
         cursor.close()
 
+
 def execute_cron_query_no_returning_rows(env, db_connection, query, data):
     cursor = db_connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
     try:
