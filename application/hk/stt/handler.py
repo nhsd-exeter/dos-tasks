@@ -33,17 +33,9 @@ def request(event, context):
         logger.log_for_audit(env, "action:bundle {} downloaded".format(filename))
         bundle_id = add_bundle(env, db_connection, filename)
         processed = process_zipfile(env, db_connection, bundle, filename, bundle_id, scenario_count)
-        logger.log_for_audit(
-            env,
-            "action:scenarios counts | filename:{} | added:{} | rejected:{} | nfa:{}".format(
-                filename,
-                scenario_count[added_subtotal],
-                scenario_count[rejected_subtotal],
-                scenario_count[nfa_subtotal],
-            ),
-        )
+        common.report_summary_counts(scenario_count, env)
         if processed is True:
-            message.send_success_slack_message(event, start, None)
+            message.send_success_slack_message(event, start, scenario_count)
         else:
             message.send_failure_slack_message(event, start)
         # TODO will need to unpack
