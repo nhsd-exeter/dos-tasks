@@ -32,7 +32,7 @@ def reset_rag_status(env, db_connection):
 
     try:
         update_query, data = generate_update_query()
-        updated_services = database.execute_cron_query(db_connection, update_query, data)
+        updated_services = database.execute_resultset_query(env, db_connection, update_query, data)
         log_updated_services(env, db_connection, updated_services)
     except KeyError as e:
         logger.log_for_error(env, "Exception raised running rag reset job {}".format(e))
@@ -77,10 +77,10 @@ def generate_update_query():
     return query, data
 
 
-def get_log_data(db_connection, service_id):
-    service_data = get_service_data(db_connection, service_id)
-    parent_data = get_parent_uid(db_connection, service_id)
-    region_data = get_region_name(db_connection, service_id)
+def get_log_data(env, db_connection, service_id):
+    service_data = get_service_data(env, db_connection, service_id)
+    parent_data = get_parent_uid(env, db_connection, service_id)
+    region_data = get_region_name(env, db_connection, service_id)
     log_info = {}
     log_info["operation"] = "update"
     log_info["capacity_status"] = "GREEN"
@@ -97,16 +97,16 @@ def get_log_entry(log_info):
     log_text = ""
     for key, value in log_info.items():
         kv_pair = key + ":" + str(value)
-        log_text = log_text + "|" + kv_pair
+        log_text = log_text + "| " + kv_pair + " "
     log_text = log_text + "|"
-    return log_text
+    return log_text[2:]
 
 
 def log_updated_services(env, db_connection, updated_services):
     for service in updated_services:
         try:
             service_id = service["serviceid"]
-            log_info = get_log_data(db_connection, service_id)
+            log_info = get_log_data(env, db_connection, service_id)
             log_text = get_log_entry(log_info)
             logger.log_for_audit(env, log_text)
         except KeyError as e:
@@ -116,15 +116,15 @@ def log_updated_services(env, db_connection, updated_services):
     end_at = datetime.utcnow()
     logger.log_for_audit(
         env,
-        "operation:AutoUpdateCapacityStatus|records updated:{0}|updated at:{1}".format(
+        "operation:AutoUpdateCapacityStatus | records updated:{0} | updated at:{1}".format(
             str(len(updated_services)), end_at.strftime(format_data)
         ),
     )
 
 
-def get_service_data(db_connection, service_id):
+def get_service_data(env, db_connection, service_id):
     query, data = generate_service_query(service_id)
-    result_set = database.execute_cron_query(db_connection, query, data)
+    result_set = database.execute_resultset_query(env, db_connection, query, data)
     return result_set
 
 
@@ -137,9 +137,9 @@ def generate_service_query(service_id):
     return query, data
 
 
-def get_parent_uid(db_connection, service_id):
+def get_parent_uid(env, db_connection, service_id):
     query, data = generate_parent_uid_query(service_id)
-    result_set = database.execute_cron_query(db_connection, query, data)
+    result_set = database.execute_resultset_query(env, db_connection, query, data)
     return result_set
 
 
@@ -154,9 +154,9 @@ def generate_parent_uid_query(service_id):
     return query, data
 
 
-def get_region_name(db_connection, service_id):
+def get_region_name(env, db_connection, service_id):
     query, data = generate_region_name_query(service_id)
-    result_set = database.execute_cron_query(db_connection, query, data)
+    result_set = database.execute_resultset_query(env, db_connection, query, data)
     return result_set
 
 

@@ -71,7 +71,7 @@ def execute_db_query(db_connection, query, data, line, values, summary_count_dic
         cursor.close()
 
 
-def execute_cron_query(db_connection, query, data):
+def execute_resultset_query(env, db_connection, query, data):
     cursor = db_connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
     try:
         cursor.execute(query, data)
@@ -80,7 +80,20 @@ def execute_cron_query(db_connection, query, data):
         return rows
         # TODO add logging as required
     except Exception as e:
-        logger.log_for_error("Transaction failed. Rolling back. Error: {}".format(e))
+        logger.log_for_error(env, "Transaction failed. Rolling back. Error: {}".format(e))
+        db_connection.rollback()
+    finally:
+        cursor.close()
+
+
+def execute_query(env, db_connection, query, data):
+    cursor = db_connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    try:
+        cursor.execute(query, data)
+        db_connection.commit()
+        # TODO add logging as required
+    except Exception as e:
+        logger.log_for_error(env, "Transaction failed. Rolling back. Error: {}".format(e))
         db_connection.rollback()
     finally:
         cursor.close()
@@ -127,7 +140,8 @@ class DB:
             else:
                 self.db_name = "pathwaysdos"
             logger.log_for_diagnostics(
-                env, "DB name={} | password:secret | user:{} | host={}".format(self.db_name, self.db_user, self.db_host)
+                env,
+                "DB name={} | password:secret | user:{} | host={}".format(self.db_name, self.db_user, self.db_host),
             )
         else:
             connection_details_set = False

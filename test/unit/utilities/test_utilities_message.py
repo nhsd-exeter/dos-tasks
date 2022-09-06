@@ -122,4 +122,3 @@ def test_calculate_execution_time(mock_datetime):
     finish, duration = message.calculate_execution_time(start)
     assert finish == "2022-04-26 19:09:06"
     assert str(duration) == "0:04:26"
-

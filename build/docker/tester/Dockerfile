@@ -7,6 +7,7 @@ RUN set -eux && \
         postgresql-libs \
         musl-dev \
         gcc \
+        g++ \
         libffi-dev \
         postgresql-dev
 # Copy Python requirements

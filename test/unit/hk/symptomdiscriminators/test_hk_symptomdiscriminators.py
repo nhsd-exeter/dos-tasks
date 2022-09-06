@@ -283,7 +283,6 @@ def test_process_extracted_data_multiple_records(mock_exist,mock_valid_action,mo
     row_data[0]=csv_dict
     csv_dict={csv_sd_id,csv_sd_desc,"CREATE"}
     row_data[1]=csv_dict
-    print(row_data[1])
     summary_count = {}
     handler.process_extracted_data(mock_db_connect, row_data, summary_count, mock_event)
     assert mock_valid_action.call_count == 2
