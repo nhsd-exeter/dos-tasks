@@ -98,6 +98,7 @@ def execute_query(env, db_connection, query, data):
     finally:
         cursor.close()
 
+
 class DB:
     def __init__(self) -> None:
         self.db_host = ""
