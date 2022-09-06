@@ -116,7 +116,7 @@ def log_updated_services(env, db_connection, updated_services):
     end_at = datetime.utcnow()
     logger.log_for_audit(
         env,
-        "operation:AutoUpdateCapacityStatus|records updated:{0}|updated at:{1}".format(
+        "operation:AutoUpdateCapacityStatus | records updated:{0} | updated at:{1}".format(
             str(len(updated_services)), end_at.strftime(format_data)
         ),
     )
