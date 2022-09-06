@@ -216,7 +216,7 @@ def test_get_disposition_group_id_query_empty_element():
 def test_get_valid_disposition_id(mock_execute, mock_query, mock_code, mock_db_connect):
     """Test function to derive id of disposition from db based on code"""
     scenario_dict = {}
-    disposition_id = handler.get_disposition_id(scenario_dict, mock_db_connect)
+    disposition_id = handler.get_disposition_id(env, scenario_dict, mock_db_connect)
     assert disposition_id == 1
     mock_code.assert_called_once()
     mock_query.assert_called_once()
@@ -229,7 +229,7 @@ def test_get_valid_disposition_id(mock_execute, mock_query, mock_code, mock_db_c
 def test_get_invalid_disposition_id(mock_execute, mock_query, mock_code, mock_db_connect):
     """Test function to derive id of disposition from db based on code"""
     scenario_dict = {}
-    disposition_id = handler.get_disposition_id(scenario_dict, mock_db_connect)
+    disposition_id = handler.get_disposition_id(env, scenario_dict, mock_db_connect)
     assert disposition_id is None
     mock_code.assert_called_once()
     mock_query.assert_called_once()
@@ -242,7 +242,7 @@ def test_get_invalid_disposition_id(mock_execute, mock_query, mock_code, mock_db
 def test_get_valid_disposition_group_id(mock_execute, mock_query, mock_code, mock_db_connect):
     """Test function to derive id of disposition from db based on code"""
     scenario_dict = {}
-    disposition_group_id = handler.get_disposition_group_id(scenario_dict, mock_db_connect)
+    disposition_group_id = handler.get_disposition_group_id(env, scenario_dict, mock_db_connect)
     assert disposition_group_id == 6
     mock_code.assert_called_once()
     mock_query.assert_called_once()
@@ -255,7 +255,7 @@ def test_get_valid_disposition_group_id(mock_execute, mock_query, mock_code, moc
 def test_get_invalid_disposition_group_id(mock_execute, mock_query, mock_code, mock_db_connect):
     """Test function to derive id of disposition from db based on code"""
     scenario_dict = {}
-    disposition_group_id = handler.get_disposition_group_id(scenario_dict, mock_db_connect)
+    disposition_group_id = handler.get_disposition_group_id(env, scenario_dict, mock_db_connect)
     assert disposition_group_id is None
     mock_code.assert_called_once()
     mock_query.assert_called_once()
@@ -299,7 +299,7 @@ def test_get_triage_line_data():
 @patch(f"{file_path}.get_disposition_group_id",return_value=5)
 @patch(f"{file_path}.get_disposition_id",return_value=6)
 def test_process_scenario(mock_disposition, mock_disposition_group, mock_db_connect):
-    scenario = handler.process_scenario_file(sample_scenario_file_name, convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
+    scenario = handler.process_scenario_file(env, sample_scenario_file_name, convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
     assert scenario.bundle_id == bundle_id
     assert scenario.scenario_id == expected_scenario_id
     assert scenario.symptom_group_id == expected_symptom_group_id
@@ -414,7 +414,7 @@ def test_get_bundle_insert_query():
 @patch(f"{file_path}.get_disposition_id",return_value=8)
 def test_get_scenario_insert_query( mock_disposition, mock_disposition_group, mock_db_connect):
     expected_triage_report = "One.Two.Three"
-    template_scenario = handler.process_scenario_file(sample_scenario_file_name,convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
+    template_scenario = handler.process_scenario_file(env, sample_scenario_file_name,convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
     template_scenario.triage_report = expected_triage_report
     query, data = handler.get_scenario_insert_query(template_scenario)
     assert query == """insert into pathwaysdos.scenarios(bundleid, scenarioid, symptomgroupid, dispositionid,
@@ -440,7 +440,7 @@ dispositiongroupid, symptomdiscriminatorid, ageid, genderid, triagereport, creat
 @patch(f"{file_path}.get_disposition_group_id",return_value=7)
 @patch(f"{file_path}.get_disposition_id",return_value=8)
 def test_validate_template_scenario_invalid_disposition(mock_disposition, mock_disposition_group, mock_logger, mock_db_connect):
-    template_scenario = handler.process_scenario_file(sample_scenario_file_name,convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
+    template_scenario = handler.process_scenario_file(env, sample_scenario_file_name,convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
     template_scenario.disposition_id = None
     valid_template = handler.validate_template_scenario(env, template_scenario)
     assert valid_template == False
@@ -453,7 +453,7 @@ def test_validate_template_scenario_invalid_disposition(mock_disposition, mock_d
 @patch(f"{file_path}.get_disposition_group_id",return_value=7)
 @patch(f"{file_path}.get_disposition_id",return_value=8)
 def test_validate_template_scenario_invalid_disposition_group(mock_disposition, mock_disposition_group, mock_logger, mock_db_connect):
-    template_scenario = handler.process_scenario_file(sample_scenario_file_name,convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
+    template_scenario = handler.process_scenario_file(env, sample_scenario_file_name,convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
     template_scenario.disposition_group_id = None
     valid_template = handler.validate_template_scenario(env, template_scenario)
     assert valid_template == True
@@ -466,14 +466,14 @@ def test_validate_template_scenario_invalid_disposition_group(mock_disposition, 
 @patch(f"{file_path}.database.execute_resultset_query")
 def test_get_disposition_group_id(mock_execute, mock_query, mock_db_connect):
     scenario_dict = handler.map_xml_to_json(convert_file_to_stream(original_scenario_file_name))
-    disposition_group_id = handler.get_disposition_group_id(scenario_dict,mock_db_connect)
+    disposition_group_id = handler.get_disposition_group_id(env, scenario_dict,mock_db_connect)
     assert disposition_group_id == None
     assert mock_execute.call_count == 0
     assert mock_query.call_count == 0
 
 @patch("psycopg2.connect")
 def test_get_existing_scenario_check_query(mock_db_connect):
-    template_scenario = handler.process_scenario_file(sample_scenario_file_name,convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
+    template_scenario = handler.process_scenario_file(env, sample_scenario_file_name,convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
     query, data = handler.get_existing_scenario_check_query(template_scenario)
     assert query == """select s.id from pathwaysdos.scenarios s where s.bundleid = %s and
     s.scenarioid = %s"""
@@ -482,22 +482,22 @@ def test_get_existing_scenario_check_query(mock_db_connect):
 @patch("psycopg2.connect")
 @patch(f"{file_path}.database.execute_resultset_query",return_value=([{"id": 3}]))
 def test_is_not_new_scenario(mock_execute, mock_db_connect):
-    template_scenario = handler.process_scenario_file(sample_scenario_file_name,convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
-    is_new_scenario = handler.is_new_scenario(mock_db_connect, template_scenario)
+    template_scenario = handler.process_scenario_file(env, sample_scenario_file_name,convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
+    is_new_scenario = handler.is_new_scenario(env, mock_db_connect, template_scenario)
     assert is_new_scenario == False
 
 @patch("psycopg2.connect")
 @patch(f"{file_path}.database.execute_resultset_query",return_value=[])
 def test_is_new_scenario(mock_execute, mock_db_connect):
-    template_scenario = handler.process_scenario_file(sample_scenario_file_name,convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
-    is_new_scenario = handler.is_new_scenario(mock_db_connect, template_scenario)
+    template_scenario = handler.process_scenario_file(env, sample_scenario_file_name,convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
+    is_new_scenario = handler.is_new_scenario(env, mock_db_connect, template_scenario)
     assert is_new_scenario == True
 # -----
 @patch("psycopg2.connect")
 @patch(f"{file_path}.database.execute_resultset_query",return_value=([{"id": 3}]))
 @patch(f"{file_path}.get_existing_bundle_check_query", return_value=("query", "data"))
 def test_is_not_new_bundle(mock_query, mock_execute, mock_db_connect):
-    is_new_bundle = handler.is_new_bundle(mock_db_connect, "Dental")
+    is_new_bundle = handler.is_new_bundle(env, mock_db_connect, "Dental")
     assert is_new_bundle == 3
     assert mock_query.call_count == 1
 
@@ -505,7 +505,7 @@ def test_is_not_new_bundle(mock_query, mock_execute, mock_db_connect):
 @patch(f"{file_path}.database.execute_resultset_query",return_value=([]))
 @patch(f"{file_path}.get_existing_bundle_check_query", return_value=("query", "data"))
 def test_is_new_bundle(mock_query, mock_execute, mock_db_connect):
-    is_new_bundle = handler.is_new_bundle(mock_db_connect, "Dental")
+    is_new_bundle = handler.is_new_bundle(env, mock_db_connect, "Dental")
     assert is_new_bundle == None
     assert mock_query.call_count == 1
 
@@ -522,7 +522,7 @@ def test_get_existing_bundle_check_query(mock_db_connect):
 @patch(f"{file_path}.database.execute_query")
 @patch(f"{file_path}.get_scenario_insert_query",return_value=("query", "data"))
 def test_insert_template_scenario(mock_insert, mock_execute, mock_logger, mock_is_new, mock_db_connect):
-    template_scenario = handler.process_scenario_file(sample_scenario_file_name,convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
+    template_scenario = handler.process_scenario_file(env, sample_scenario_file_name,convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
     scenario_count = handler.initialise_count()
     handler.insert_template_scenario(env, mock_db_connect, template_scenario, scenario_count)
     assert mock_logger.call_count == 1
@@ -537,7 +537,7 @@ def test_insert_template_scenario(mock_insert, mock_execute, mock_logger, mock_i
 @patch(f"{file_path}.database.execute_query")
 @patch(f"{file_path}.get_scenario_insert_query",return_value=("query", "data"))
 def test_insert_duplicate_template_scenario(mock_insert, mock_execute, mock_logger, mock_is_new, mock_db_connect):
-    template_scenario = handler.process_scenario_file(sample_scenario_file_name,convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
+    template_scenario = handler.process_scenario_file(env, sample_scenario_file_name,convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
     scenario_count = handler.initialise_count()
     handler.insert_template_scenario(env, mock_db_connect, template_scenario, scenario_count)
     assert mock_logger.call_count == 1

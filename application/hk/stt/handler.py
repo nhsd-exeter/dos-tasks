@@ -64,7 +64,7 @@ def process_zipfile(env, db_connection, bundle, filename, bundle_id, scenario_co
             logger.log_for_audit(env, "action:processing scenario {}".format(name))
             scenario_file = bundle_zip.read(name).decode("utf-8")
             try:
-                template_scenario = process_scenario_file(name, scenario_file, bundle_id, db_connection)
+                template_scenario = process_scenario_file(env, name, scenario_file, bundle_id, db_connection)
                 valid_template = validate_template_scenario(env, template_scenario)
                 if valid_template is True:
                     insert_template_scenario(env, db_connection, template_scenario, scenario_count)
@@ -97,9 +97,9 @@ def validate_template_scenario(env, template_scenario):
 
 
 def insert_template_scenario(env, db_connection, template_scenario, scenario_count):
-    if is_new_scenario(db_connection, template_scenario):
+    if is_new_scenario(env, db_connection, template_scenario):
         query, data = get_scenario_insert_query(template_scenario)
-        database.execute_query(db_connection, query, data)
+        database.execute_query(env, db_connection, query, data)
         scenario_count[added_subtotal] = scenario_count[added_subtotal] + 1
         logger.log_for_audit(
             env, "Scenario {} for bundle {} uploaded".format(template_scenario.scenario_id, template_scenario.bundle_id)
@@ -114,11 +114,11 @@ def insert_template_scenario(env, db_connection, template_scenario, scenario_cou
         )
 
 
-def is_new_scenario(db_connection, template_scenario):
+def is_new_scenario(env, db_connection, template_scenario):
     """Returns true if scenario not already loaded to db; otherwise false"""
     new_scenario = False
     query, data = get_existing_scenario_check_query(template_scenario)
-    result_set = database.execute_resultset_query(db_connection, query, data)
+    result_set = database.execute_resultset_query(env, db_connection, query, data)
     if len(result_set) == 0:
         new_scenario = True
     return new_scenario
@@ -154,15 +154,15 @@ dispositiongroupid, symptomdiscriminatorid, ageid, genderid, triagereport, creat
     return query, data
 
 
-def process_scenario_file(file_name, scenario_file, bundle_id, db_connection):
+def process_scenario_file(env, file_name, scenario_file, bundle_id, db_connection):
     try:
         scenario_dict = map_xml_to_json(scenario_file)
         scenario_id = get_scenario_id(file_name)
         age_id = get_age_id(scenario_dict)
         gender_id = get_gender_id(scenario_dict)
         symptom_group_id = get_symptom_group_id(scenario_dict)
-        disposition_id = get_disposition_id(scenario_dict, db_connection)
-        disposition_group_id = get_disposition_group_id(scenario_dict, db_connection)
+        disposition_id = get_disposition_id(env, scenario_dict, db_connection)
+        disposition_group_id = get_disposition_group_id(env, scenario_dict, db_connection)
         triage_report, symptom_discriminator_id = get_triage_line_data(scenario_dict)
 
         template_scenario = scenario.Scenario(
@@ -192,10 +192,10 @@ def map_xml_to_json(file_as_string):
 
 def add_bundle(env, db_connection, zip_file_name):
     bundle_name = get_bundle_name(zip_file_name)
-    bundle_id = is_new_bundle(db_connection, bundle_name)
+    bundle_id = is_new_bundle(env, db_connection, bundle_name)
     if bundle_id is None:
         query, data = get_bundle_insert_query(bundle_name)
-        result_set = database.execute_resultset_query(db_connection, query, data)
+        result_set = database.execute_resultset_query(env, db_connection, query, data)
         if result_set is not None:
             bundle_id = result_set[0]["id"]
             logger.log_for_audit(env, "action:bundle {} inserted".format(bundle_id))
@@ -204,11 +204,11 @@ def add_bundle(env, db_connection, zip_file_name):
     return bundle_id
 
 
-def is_new_bundle(db_connection, bundle_name):
+def is_new_bundle(env, db_connection, bundle_name):
     """Returns id of bundle if bundle with this name already loaded to db; otherwise None"""
     bundle_id = None
     query, data = get_existing_bundle_check_query(bundle_name)
-    result_set = database.execute_resultset_query(db_connection, query, data)
+    result_set = database.execute_resultset_query(env, db_connection, query, data)
     if len(result_set) > 0:
         bundle_id = result_set[0]["id"]
     return bundle_id
@@ -283,11 +283,11 @@ def get_disposition_id_query(disposition_code):
     return query, data
 
 
-def get_disposition_id(scenario_dict, db_connection):
+def get_disposition_id(env, scenario_dict, db_connection):
     disposition_id = None
     disposition_code = get_disposition_code(scenario_dict)
     query, data = get_disposition_id_query(disposition_code)
-    result_set = database.execute_resultset_query(db_connection, query, data)
+    result_set = database.execute_resultset_query(env, db_connection, query, data)
     if len(result_set) > 0:
         disposition_id = result_set[0]["id"]
     return disposition_id
@@ -310,12 +310,12 @@ def get_disposition_group_id_query(disposition_group_uid):
     return query, data
 
 
-def get_disposition_group_id(scenario_dict, db_connection):
+def get_disposition_group_id(env, scenario_dict, db_connection):
     disposition_group_id = None
     disposition_code = get_disposition_group_uid(scenario_dict)
     if disposition_code is not None:
         query, data = get_disposition_group_id_query(disposition_code)
-        result_set = database.execute_resultset_query(db_connection, query, data)
+        result_set = database.execute_resultset_query(env, db_connection, query, data)
         if len(result_set) > 0:
             disposition_group_id = result_set[0]["id"]
     return disposition_group_id
