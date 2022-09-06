@@ -54,7 +54,7 @@ def archive_file(bucket, filename, event, start):
 
 
 def retrieve_file_from_bucket(bucket, filename, event, start):
-    log_for_audit(event["env"], "| action:retrieve file | bucket:{} | file:{}".format(bucket, filename))
+    log_for_audit(event["env"], "action:retrieve file | bucket:{} | file:{}".format(bucket, filename))
     s3_bucket = utilities.s3.S3()
     return s3_bucket.get_object(bucket, filename, event, start)
 
