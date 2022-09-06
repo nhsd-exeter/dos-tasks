@@ -8,7 +8,7 @@ diagnostic_logger = getLogger("diagnostics")
 audit_logger.setLevel(INFO)
 diagnostic_logger.setLevel(DEBUG)
 
-log_structure = "| task-type:{} | task-name:{} | env:{} {}"
+log_structure = "| task-type:{} | task-name:{} | env:{} | {}"
 
 
 def log_for_audit(env, msg_log):

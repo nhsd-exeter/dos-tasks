@@ -1,7 +1,7 @@
 from unittest import result
 from unittest.mock import patch
 from datetime import datetime, timedelta
-from application.cron.removeoldchanges.handler import getThresholdDate
+from application.cron.removeoldchanges.handler import get_threshold_date
 import pytest
 
 
@@ -53,12 +53,12 @@ def test_generate_delete_count_query():
 
 #TODO  - will comeback to best method for this
 
-def test_getThresholdDate():
+def test_get_threshold_date():
         current_timestamp = datetime.now()
         threshold_in_days = 1
         threshold_date = current_timestamp - timedelta(days=threshold_in_days)
         threshold_date = threshold_date.strftime('%Y-%m-%d %H:%M:%S')
-        returned_date = getThresholdDate(threshold_in_days)
+        returned_date = get_threshold_date(threshold_in_days)
         assert returned_date == threshold_date
 
 @patch("psycopg2.connect")

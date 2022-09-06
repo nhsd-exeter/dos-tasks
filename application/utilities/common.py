@@ -17,7 +17,7 @@ def check_csv_format(csv_row, expected_col_count, env, count):
     else:
         log_for_audit(
             env,
-            "| action:validation | Incorrect line format | line:{0} | expected:{1} | actual:{2}".format(
+            "action:validation | Incorrect line format | line:{0} | expected:{1} | actual:{2}".format(
                 count, expected_col_count, len(csv_row)
             ),
         )
@@ -33,7 +33,7 @@ def valid_action(record_exists, row_data, env):
         valid_action = True
     if not valid_action:
         log_for_error(
-            env, "| validation:Invalid action {} for the record with ID {}".format(row_data["action"], row_data["id"])
+            env, "validation:Invalid action {} for the record with ID {}".format(row_data["action"], row_data["id"])
         )
     return valid_action
 
@@ -46,7 +46,7 @@ def archive_file(bucket, filename, event, start):
     s3_class.delete_object(bucket, filename, event, start)
     log_for_audit(
         event["env"],
-        "| action:archive file:{} | bucket:{}/archive/{}".format(
+        "action:archive file:{} | bucket:{}/archive/{}".format(
             filename, filename.split("/")[0], filename.split("/")[1]
         ),
     )
@@ -65,13 +65,13 @@ def check_csv_values(line, env):
     try:
         int(line[0])
     except ValueError:
-        log_for_audit(env, "| action:validation | Problem:Id {} must be a integer".format(line[0]))
+        log_for_audit(env, "action:validation | Problem:Id {} must be a integer".format(line[0]))
         valid_values = False
     if not str(line[0]):
-        log_for_audit(env, "| action:validation | Problem:Id {} can not be null or empty".format(line[0]))
+        log_for_audit(env, "action:validation | Problem:Id {} can not be null or empty".format(line[0]))
         valid_values = False
     if not line[1]:
-        log_for_audit(env, "| action:validation | Problem:Name/Description {} can not be null or empty".format(line[1]))
+        log_for_audit(env, "action:validation | Problem:Name/Description {} can not be null or empty".format(line[1]))
         valid_values = False
     return valid_values
 
@@ -91,12 +91,12 @@ def increment_summary_count(summary_count_dict, action, env):
         try:
             summary_count_dict[action] = summary_count_dict[action] + 1
         except (KeyError) as e:
-            log_for_error(env, "| Summary count does not have the key {0}".format(action))
+            log_for_error(env, "Summary count does not have the key {0}".format(action))
             raise e
     else:
         log_for_error(
             env,
-            "| Can't increment count for action {0}. Valid actions are {1},{2},{3},{4},{5}".format(
+            "Can't increment count for action {0}. Valid actions are {1},{2},{3},{4},{5}".format(
                 action, create_action, update_action, delete_action, blank_lines, error_lines
             ),
         )
@@ -125,7 +125,7 @@ def report_summary_counts(summary_count_dict, env):
 
 def slack_summary_counts(summary_count_dict):
     if summary_count_dict is not None:
-        report = "| updated:{0}, inserted:{1}, deleted:{2}, blank:{3}, errored:{4}".format(
+        report = "updated:{0}, inserted:{1}, deleted:{2}, blank:{3}, errored:{4}".format(
             summary_count_dict[update_action],
             summary_count_dict[create_action],
             summary_count_dict[delete_action],

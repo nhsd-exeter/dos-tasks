@@ -11,18 +11,18 @@ profile = os.environ.get("PROFILE")
 def close_connection(env, db_connection):
     # Close database connection
     if db_connection is not None:
-        logger.log_for_audit(env, "| action:close DB connection")
+        logger.log_for_audit(env, "action:close DB connection")
         db_connection.close()
     else:
-        logger.log_for_error(env, "| action:no DB connection to close")
+        logger.log_for_error(env, "action:no DB connection to close")
 
 
 # TODO move inside class later
 def connect_to_database(env):
     db = DB()
-    logger.log_for_audit(env, "| action:establish database connection")
+    logger.log_for_audit(env, "action:establish database connection")
     if not db.db_set_connection_details(env):
-        logger.log_for_error(env, "| Error DB Parameter(s) not found in secrets store.")
+        logger.log_for_error(env, "Error DB Parameter(s) not found in secrets store.")
         raise ValueError("DB Parameter(s) not found in secrets store")
     return db.db_connect(env)
 
@@ -43,7 +43,7 @@ def does_record_exist(db, row_dict, table_name, env):
     except (Exception, psycopg2.Error) as e:
         logger.log_for_error(
             env,
-            "| Select from table {0} by id failed - {1} => {2}".format(full_table_name, row_dict["id"], str(e)),
+            "Select from table {0} by id failed - {1} => {2}".format(full_table_name, row_dict["id"], str(e)),
         )
         raise e
     return record_exists
@@ -61,11 +61,11 @@ def execute_db_query(db_connection, query, data, line, values, summary_count_dic
             log = log + x + ":" + str(y) + " | "
         logger.log_for_audit(
             env,
-            "| action:Process row | {} | line number:{}".format(log[:-2], line),
+            "action:Process row | {} | line number:{}".format(log[:-2], line),
         ),
     except Exception as e:
-        logger.log_for_error(env, "| Line {} in transaction failed. Rolling back".format(line))
-        logger.log_for_error(env, "| Error: {}".format(e))
+        logger.log_for_error(env, "Line {} in transaction failed. Rolling back".format(line))
+        logger.log_for_error(env, "Error: {}".format(e))
         db_connection.rollback()
     finally:
         cursor.close()
@@ -80,7 +80,7 @@ def execute_resultset_query(env, db_connection, query, data):
         return rows
         # TODO add logging as required
     except Exception as e:
-        logger.log_for_error(env, "| Transaction failed. Rolling back. Error: {}".format(e))
+        logger.log_for_error(env, "Transaction failed. Rolling back. Error: {}".format(e))
         db_connection.rollback()
     finally:
         cursor.close()
@@ -93,7 +93,7 @@ def execute_query(env, db_connection, query, data):
         db_connection.commit()
         # TODO add logging as required
     except Exception as e:
-        logger.log_for_error(env, "| Transaction failed. Rolling back. Error: {}".format(e))
+        logger.log_for_error(env, "Transaction failed. Rolling back. Error: {}".format(e))
         db_connection.rollback()
     finally:
         cursor.close()
@@ -124,24 +124,24 @@ class DB:
                 self.db_host = formatted_secrets[db_host_key]
             else:
                 connection_details_set = False
-                logger.log_for_diagnostics(env, "| No DB_HOST secret var set")
+                logger.log_for_diagnostics(env, "No DB_HOST secret var set")
             if db_user_key in formatted_secrets:
                 self.db_user = formatted_secrets[db_user_key]
             else:
                 connection_details_set = False
-                logger.log_for_diagnostics(env, "| No DB_USER secret var set")
+                logger.log_for_diagnostics(env, "No DB_USER secret var set")
             if db_password_key in formatted_secrets:
                 self.db_password = formatted_secrets[db_password_key]
             else:
                 connection_details_set = False
-                logger.log_for_diagnostics(env, "| No DB_PASSWORD secret set")
+                logger.log_for_diagnostics(env, "No DB_PASSWORD secret set")
             if profile != "prod" and env != "performance":
                 self.db_name = "pathwaysdos_{}".format(env)
             else:
                 self.db_name = "pathwaysdos"
             logger.log_for_diagnostics(
                 env,
-                "| DB name={} | password:secret | user:{} | host={}".format(self.db_name, self.db_user, self.db_host),
+                "DB name={} | password:secret | user:{} | host={}".format(self.db_name, self.db_user, self.db_host),
             )
         else:
             connection_details_set = False
@@ -154,5 +154,5 @@ class DB:
                 host=self.db_host, dbname=self.db_name, user=self.db_user, password=self.db_password
             )
         except Exception as e:
-            logger.log_for_error(env, "| Connection parameters not set correctly")
+            logger.log_for_error(env, "Connection parameters not set correctly")
             raise psycopg2.InterfaceError(e)

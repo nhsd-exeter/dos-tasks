@@ -128,3 +128,16 @@ def test_log_updated_services_keyerror(mock_db_connect):
 def test_reset_rag_status(mock_update_query, mock_execute, mock_log, mock_db_connect):
     with pytest.raises(KeyError):
         handler.reset_rag_status('mockenv', mock_db_connect)
+
+def test_get_log_entry():
+    log_info = {}
+    log_info["operation"] = "update"
+    log_info["capacity_status"] = "GREEN"
+    log_info["modified_by"] = "unittest"
+    log_info["org_id"] = 123
+    log_info["org_name"] = "Test Unit"
+    log_info["org_type_id"] = 456
+    log_info["parent_org_id"] = 789
+    log_info["region"] = "SW"
+    log_entry = handler.get_log_entry(log_info)
+    assert log_entry == "operation:update | capacity_status:GREEN | modified_by:unittest | org_id:123 | org_name:Test Unit | org_type_id:456 | parent_org_id:789 | region:SW |"
