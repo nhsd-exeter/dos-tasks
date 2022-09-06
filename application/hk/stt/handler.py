@@ -2,14 +2,8 @@ import xml.etree.ElementTree as ET
 import zipfile
 import io
 import xmltodict
-
-#  works but not from docker
-# from . import scenario
 from utilities import logger, message, common, database, scenario
 from datetime import datetime
-
-
-ns = {"pathwayscase": "http://www.nhspathways.org/webservices/pathways/pathwaysCase"}
 
 task_description = "Import STT scenarios"
 added_subtotal = "added"
@@ -28,7 +22,6 @@ def request(event, context):
     scenario_count = initialise_count()
     try:
         db_connection = database.connect_to_database(env)
-        # TODO will be a compressed file - testing on .zip -  rar?
         bundle = common.retrieve_compressed_file_from_bucket(bucket, filename, event, start)
         logger.log_for_audit(env, "action:bundle {} downloaded".format(filename))
         bundle_id = add_bundle(env, db_connection, filename)
@@ -38,7 +31,6 @@ def request(event, context):
             message.send_success_slack_message(event, start, scenario_count)
         else:
             message.send_failure_slack_message(event, start)
-        # TODO will need to unpack
     except Exception as e:
         logger.log_for_error(env, "Problem {}".format(e))
         message.send_failure_slack_message(event, start)
@@ -68,7 +60,6 @@ def process_zipfile(env, db_connection, bundle, filename, bundle_id, scenario_co
                 valid_template = validate_template_scenario(env, template_scenario)
                 if valid_template is True:
                     insert_template_scenario(env, db_connection, template_scenario, scenario_count)
-                    # TODO summary_count_dict[action] = summary_count_dict[action] + 1
                 else:
                     logger.log_for_audit(env, "action:invalid scenario {}".format(name))
                     scenario_count[rejected_subtotal] = scenario_count[rejected_subtotal] + 1

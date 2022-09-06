@@ -22,22 +22,17 @@ sample_bundle_file_name = "test-files/R34.2.0_stt.zip"
 @mock_s3
 def test_get_compressed_object_success(aws_credentials):
     from ..s3 import S3
+    file_accessed = False
     s3_client = boto3.client("s3")
     s3_client.create_bucket(Bucket=mock_bucket, CreateBucketConfiguration={'LocationConstraint': 'antarctica'})
     s3_client.upload_file(Filename=sample_bundle_file_name, Bucket=mock_bucket, Key=mock_zip_filename)
     response_body = S3().get_compressed_object(mock_bucket, mock_zip_filename, mock_event, start)
-    # print (response_body)
-    # assert True == False
-    # contents = response["Body"].read()
-    # assert zipfile.is_zipfile(response_body)
     input_zip = zipfile.ZipFile(io.BytesIO(response_body))
 
     for name in input_zip.namelist():
-        # print("=========== " + name + "============")
         scenario_file = input_zip.read(name).decode("utf-8")
-        # print(scenario_file)
-        # TODO
-    assert True == True
+        file_accessed = True
+    assert file_accessed == True
 
 
 @patch(f"{file_path}.message.send_failure_slack_message")
