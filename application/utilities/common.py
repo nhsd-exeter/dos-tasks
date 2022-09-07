@@ -128,6 +128,7 @@ def process_file(csv_file, event, expected_col_count, summary_count_dict):
 def report_summary_counts(summary_count_dict, env):
     log_for_audit(env, slack_summary_counts(summary_count_dict))
 
+
 def slack_summary_counts(summary_count_dict):
     if summary_count_dict is not None:
         report = ""
