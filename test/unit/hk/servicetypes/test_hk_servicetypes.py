@@ -21,6 +21,20 @@ csv_st_name = "ST Automated Test"
 csv_st_rank = 1
 csv_st_action = "CREATE"
 
+def test_csv_line():
+    """Test data extracted from valid csv"""
+    csv_rows = {}
+    csv_rows["1"]={"id": csv_st_id, "name": csv_st_name, "nationalranking": csv_st_rank, "action": csv_st_action}
+    csv_dict = handler.extract_query_data_from_csv(csv_rows)
+    assert len(csv_dict) == 1
+    assert len(csv_dict["1"]) == 7
+    assert csv_dict["1"]["id"] == csv_st_id
+    assert csv_dict["1"]["name"] == str(csv_st_name)
+    assert csv_dict["1"]["nationalranking"] == csv_st_rank
+    assert csv_dict["1"]["searchcapacitystatus"] == v_searchcapacitystatus
+    assert csv_dict["1"]["capacitymodel"] == str(v_capacitymodel)
+    assert csv_dict["1"]["capacityreset"] == str(v_capacityreset)
+    assert csv_dict["1"]["action"] == str(csv_st_action).upper()
 
 def test_csv_line():
     """Test data extracted from valid csv"""
@@ -213,7 +227,6 @@ def test_process_extracted_data_error_check_exists_fails(mock_increment_count,mo
         handler.process_extracted_data(mock_db_connect, row_data, summary_count)
     mock_increment_count.called_once()
 
-
 @patch("psycopg2.connect")
 @patch(f"{file_path}.logger.log_for_error")
 @patch(f"{file_path}.database.does_record_exist", return_value=True)
@@ -236,6 +249,7 @@ def test_process_extracted_data_error_check_exists_passes(mock_exists,mock_logge
         handler.process_extracted_data(mock_db_connect, row_data, summary_count, event)
     assert mock_logger.call_count == 1
     assert mock_exists.call_count == 1
+    mock_increment_count.called_once()
 
 
 
