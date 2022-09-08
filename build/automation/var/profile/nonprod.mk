@@ -14,6 +14,8 @@ VULNERABILITY_LEVEL := CRITICAL,HIGH
 
 STACKS := secrets,s3,security-groups
 # TODO restore  referralroles - temp out to avoid cross-cutting other work
+TASKS := filter,referralroles,symptomgroups,symptomdiscriminators,servicetypes
+ENVIRONMENT_LIST := ["test","test1","test2","test3","test4","fix","performance","regression","teamb"]
 TASKS := filter,referralroles,symptomgroups,symptomdiscriminators,ragreset,removeoldchanges,stt
 ENVIRONMENT_LIST := ["test","test1","test2","test3","test4","fix","performance","regression","teamb","testtech"]
 TF_VAR_environment_list := $(ENVIRONMENT_LIST)
