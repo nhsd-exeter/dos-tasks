@@ -65,11 +65,11 @@ def extract_query_data_from_csv(lines):
 
 
 def generate_db_query(row_values, env):
-    if row_values["action"] in ("CREATE"):
+    if row_values["action"] in ("CREATE", "INSERT"):
         return create_query(row_values)
-    elif row_values["action"] in ("UPDATE"):
+    elif row_values["action"] in ("UPDATE", "MODIFY"):
         return update_query(row_values)
-    elif row_values["action"] in ("DELETE"):
+    elif row_values["action"] in ("DELETE", "REMOVE"):
         return delete_query(row_values)
     else:
         logger.log_for_error(env, "action:validation | {} not in approved list of actions".format(row_values["action"]))
@@ -137,9 +137,8 @@ def process_extracted_data(db_connection, row_data, summary_count_dict, event):
         except Exception as e:
             common.increment_summary_count(summary_count_dict, "ERROR", event["env"])
             logger.log_for_error(
-                event["env"],
-                "Processing {0} data failed with | {1} | {2} | {3} | => {4}".format(
-                    task_description, row_values["id"], row_values["name"], row_values["rank"], str(e)
+                "Processing {0} data failed with |{1}|{2}| => {3}".format(
+                    task_description, row_values["id"], row_values["name"], str(e)
                 ),
             )
             raise e
