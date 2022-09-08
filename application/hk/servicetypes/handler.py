@@ -45,11 +45,11 @@ def request(event, context):
 
 
 def generate_db_query(row_values, env):
-    if row_values["action"] in ("CREATE"):
+    if row_values["action"] in ("CREATE", "INSERT"):
         return create_query(row_values)
-    elif row_values["action"] in ("UPDATE"):
+    elif row_values["action"] in ("UPDATE", "MODIFY"):
         return update_query(row_values)
-    elif row_values["action"] in ("DELETE"):
+    elif row_values["action"] in ("DELETE", "REMOVE"):
         return delete_query(row_values)
     else:
         logger.log_for_error(env, "action:validation | {} not in approved list of actions".format(row_values["action"]))
