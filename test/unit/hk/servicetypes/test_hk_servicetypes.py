@@ -227,6 +227,7 @@ def test_process_extracted_data_error_check_exists_fails(mock_increment_count,mo
         handler.process_extracted_data(mock_db_connect, row_data, summary_count)
     mock_increment_count.called_once()
 
+
 @patch("psycopg2.connect")
 @patch(f"{file_path}.logger.log_for_error")
 @patch(f"{file_path}.database.does_record_exist", return_value=True)
@@ -249,7 +250,6 @@ def test_process_extracted_data_error_check_exists_passes(mock_exists,mock_logge
         handler.process_extracted_data(mock_db_connect, row_data, summary_count, event)
     assert mock_logger.call_count == 1
     assert mock_exists.call_count == 1
-    mock_increment_count.called_once()
 
 
 
