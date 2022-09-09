@@ -1,5 +1,5 @@
 output "servicetypes_lambda_arn" {
-  description = "ARN value for the HK Symptom Discriminators Lambda function"
+  description = "ARN value for the HK Service Types Lambda function"
   value       = module.servicetypes_lambda.lambda_arn
 }
 
