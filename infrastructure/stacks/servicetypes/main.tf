@@ -1,4 +1,4 @@
-module "symptomdiscriminators_lambda" {
+module "servicetypes_lambda" {
   source             = "../../modules/lambda"
   name               = "hk-servicetypes"
   image_uri          = "${var.aws_ecr}/${var.project_group_short}/${var.project_name_short}/hk-servicetypes:${var.image_version}"
