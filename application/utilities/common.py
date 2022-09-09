@@ -59,6 +59,12 @@ def retrieve_file_from_bucket(bucket, filename, event, start):
     return s3_bucket.get_object(bucket, filename, event, start)
 
 
+def retrieve_compressed_file_from_bucket(bucket, filename, event, start):
+    log_for_audit(event["env"], "action:retrieve file | bucket:{} | file:{}".format(bucket, filename))
+    s3_bucket = utilities.s3.S3()
+    return s3_bucket.get_compressed_object(bucket, filename, event, start)
+
+
 def check_csv_values(line, env):
     """Returns false if either id or name are null or empty string"""
     valid_values = True
@@ -125,13 +131,12 @@ def report_summary_counts(summary_count_dict, env):
 
 def slack_summary_counts(summary_count_dict):
     if summary_count_dict is not None:
-        report = "updated:{0}, inserted:{1}, deleted:{2}, blank:{3}, errored:{4}".format(
-            summary_count_dict[update_action],
-            summary_count_dict[create_action],
-            summary_count_dict[delete_action],
-            summary_count_dict[blank_lines] if summary_count_dict[blank_lines] > 0 else 0,
-            summary_count_dict[error_lines],
-        )
+        report = ""
+        report_text = ""
+        for key in summary_count_dict.keys():
+            count = summary_count_dict[key] if summary_count_dict[key] >= 0 else 0
+            report_text = report_text + str(key).lower() + ":" + str(count) + ", "
+        report = report_text[: len(report_text) - 2]
     else:
         report = ""
     return report

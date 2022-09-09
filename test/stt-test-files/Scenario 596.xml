@@ -1,0 +1,493 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<NHSPathways xsi:schemaLocation="http://www.nhspathways.org/webservices/pathways/pathwaysCase.xsd" xmlns="http://www.nhspathways.org/webservices/pathways/pathwaysCase" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <PathwaysCase>
+    <PathwaysReleaseID>15.0.0</PathwaysReleaseID>
+    <CaseID>a2fa8a08-212d-4066-b5d5-709ba16302ee</CaseID>
+    <CADCaseID>dd01ed9a-a3c5-463a-b617-9f71501083f5</CADCaseID>
+    <HostCaseID>eb2b2fd3-9bd9-4e4e-ab4b-576d48ce5e21</HostCaseID>
+    <CaseTriageStart>2017-12-28T09:43:46.45655Z</CaseTriageStart>
+    <CaseTriageEnd>2017-12-28T09:45:33.3906806Z</CaseTriageEnd>
+    <PostCode>DH1 2HP</PostCode>
+    <CallHandlerUserID />
+    <ClinicianUserID>AT</ClinicianUserID>
+    <SymptomGroup>1206</SymptomGroup>
+    <Trauma>
+      <TraumaID />
+      <TraumaDescription />
+    </Trauma>
+    <Skillset>
+      <SkillsetID>12</SkillsetID>
+      <SkillsetDescription>Senior Clinician Module</SkillsetDescription>
+    </Skillset>
+    <Party>
+      <Party>1</Party>
+    </Party>
+    <Patient>
+      <FirstName>Joe</FirstName>
+      <LastName>Bloggs</LastName>
+      <Telephone />
+      <GP />
+      <LocationNotes />
+      <Age>
+        <AgeID>1</AgeID>
+        <AgeDescription>Adult</AgeDescription>
+        <AgeHours>0</AgeHours>
+        <DOBorYear />
+      </Age>
+      <Gender>
+        <GenderID>2</GenderID>
+        <GenderDescription>Female</GenderDescription>
+      </Gender>
+    </Patient>
+    <TriageDisposition>
+      <DispositionCode>Dx47</DispositionCode>
+      <DispositionDescription>The disposition is: Refer to Community Healthcare Professional</DispositionDescription>
+    </TriageDisposition>
+    <FinalDisposition>
+      <DispositionCode>Dx47</DispositionCode>
+      <DispositionDescription>I will pass the information on to a Community Healthcare Professional.</DispositionDescription>
+    </FinalDisposition>
+    <FinalDispositionCMSID>
+      <FinalDispositionCMSID />
+    </FinalDispositionCMSID>
+    <CallReason>
+      <CallReason />
+    </CallReason>
+    <DOS>
+      <DOStransactionID />
+      <ServiceID />
+      <ServiceName />
+      <ContactDetails />
+      <Open24Hrs />
+      <AccessNotes />
+      <Address />
+      <Capacity />
+    </DOS>
+    <Pathway>
+      <PathwayID>PW1812</PathwayID>
+      <PathwayDescription>Senior Clinician Module Entry</PathwayDescription>
+    </Pathway>
+    <TriageLineDetails>
+      <TriageLine>
+        <UserID>AT</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2017-12-28T09:43:46.5974253Z</TimeIn>
+        <TimeOut>2017-12-28T09:43:52.0805661Z</TimeOut>
+        <AnswerNumber>5</AnswerNumber>
+        <PathwayID>PW1812</PathwayID>
+        <OrderNumber>0</OrderNumber>
+        <AdditionalText />
+        <ReportText>An ambulance response was not required.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>WHICH OF THE FOLLOWING IS REQUIRED?</QuestionText>
+        <AnswerText>none of the above</AnswerText>
+        <QuestionType>Tx223888</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>AT</UserID>
+        <IncludeInReport>False</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2017-12-28T09:43:52.2304668Z</TimeIn>
+        <TimeOut>2017-12-28T09:43:52.2304668Z</TimeOut>
+        <AnswerNumber>2</AnswerNumber>
+        <PathwayID>PW1812</PathwayID>
+        <OrderNumber>40400</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>PATIENT_GENDER</QuestionText>
+        <AnswerText>=="F"</AnswerText>
+        <QuestionType>Tx221017</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>AT</UserID>
+        <IncludeInReport>False</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2017-12-28T09:43:52.3678344Z</TimeIn>
+        <TimeOut>2017-12-28T09:43:52.3678344Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PW1812</PathwayID>
+        <OrderNumber>38300</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>PATIENT_AGEGROUP</QuestionText>
+        <AnswerText>=="ADULT"</AnswerText>
+        <QuestionType>Tx221039</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>AT</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2017-12-28T09:43:52.5172337Z</TimeIn>
+        <TimeOut>2017-12-28T09:44:07.5373439Z</TimeOut>
+        <AnswerNumber>4</AnswerNumber>
+        <PathwayID>PW1812</PathwayID>
+        <OrderNumber>40800</OrderNumber>
+        <AdditionalText />
+        <ReportText>Advice or information was given to  a healthcare professional.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>Which of the following is required?</QuestionText>
+        <AnswerText>responding to another healthcare professional</AnswerText>
+        <QuestionType>Tx224253</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText>Advice or information given to Healthcare Professional</DispositionRatText>
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>AT</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2017-12-28T09:44:07.7032878Z</TimeIn>
+        <TimeOut>2017-12-28T09:44:25.2962882Z</TimeOut>
+        <AnswerNumber>6</AnswerNumber>
+        <PathwayID>PW1812</PathwayID>
+        <OrderNumber>39800</OrderNumber>
+        <AdditionalText />
+        <ReportText>Ambulance dispatch, referral to Emergency Treatment Centre, primary care or home management was not considered appropriate.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>WHAT RESPONSE IS REQUIRED?</QuestionText>
+        <AnswerText>other</AnswerText>
+        <QuestionType>Tx224260</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>AT</UserID>
+        <IncludeInReport>False</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2017-12-28T09:44:25.4632331Z</TimeIn>
+        <TimeOut>2017-12-28T09:44:30.7699035Z</TimeOut>
+        <AnswerNumber>4</AnswerNumber>
+        <PathwayID>PW1812</PathwayID>
+        <OrderNumber>38800</OrderNumber>
+        <AdditionalText />
+        <ReportText>Referral to Community Healthcare Professional was required.</ReportText>
+        <Action>Change</Action>
+        <QuestionText>WHICH OF THE FOLLOWING IS REQUIRED?</QuestionText>
+        <AnswerText>referral to Community Healthcare Professional</AnswerText>
+        <QuestionType>Tx224212</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText>Referral to Community Healthcare Professional</DispositionRatText>
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>AT</UserID>
+        <IncludeInReport>False</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2017-12-28T09:44:30.9268229Z</TimeIn>
+        <TimeOut>2017-12-28T09:44:37.9651445Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PW1812</PathwayID>
+        <OrderNumber>23300</OrderNumber>
+        <AdditionalText>xxx</AdditionalText>
+        <ReportText>A community nurse was required.</ReportText>
+        <Action>Back</Action>
+        <QuestionText>WHICH COMMUNITY HEALTHCARE PROFESSIONAL IS REQUIRED?</QuestionText>
+        <AnswerText>Community Nurse (specify)</AnswerText>
+        <QuestionType>Tx224111</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText>Community nurse required</DispositionRatText>
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>AT</UserID>
+        <IncludeInReport>False</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2017-12-28T09:44:38.1596631Z</TimeIn>
+        <TimeOut>2017-12-28T09:44:43.4573147Z</TimeOut>
+        <AnswerNumber>2</AnswerNumber>
+        <PathwayID>PW1812</PathwayID>
+        <OrderNumber>23600</OrderNumber>
+        <AdditionalText />
+        <ReportText>The information enquiry was not urgent (within 24 hours).</ReportText>
+        <Action>Back</Action>
+        <QuestionText>HOW SOON IS THE RESPONSE REQUIRED?</QuestionText>
+        <AnswerText>a non-urgent response (within 24 hours)</AnswerText>
+        <QuestionType>Tx222824</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText>Information enquiry, not urgent (within 24 hours)</DispositionRatText>
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>AT</UserID>
+        <IncludeInReport>False</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2017-12-28T09:44:43.6102218Z</TimeIn>
+        <TimeOut>2017-12-28T09:44:43.6102218Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PW1812</PathwayID>
+        <OrderNumber>23700</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Back</Action>
+        <QuestionText>SDCNCommunityNurse</QuestionText>
+        <AnswerText>"CN community nurse"</AnswerText>
+        <QuestionType>Tx222810</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>4323</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>AT</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2017-12-28T09:45:09.6833778Z</TimeIn>
+        <TimeOut>2017-12-28T09:45:18.633779Z</TimeOut>
+        <AnswerNumber>4</AnswerNumber>
+        <PathwayID>PW1812</PathwayID>
+        <OrderNumber>38800</OrderNumber>
+        <AdditionalText />
+        <ReportText>Referral to Community Healthcare Professional was required.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>WHICH OF THE FOLLOWING IS REQUIRED?</QuestionText>
+        <AnswerText>referral to Community Healthcare Professional</AnswerText>
+        <QuestionType>Tx224212</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText>Referral to Community Healthcare Professional</DispositionRatText>
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>AT</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2017-12-28T09:45:18.7962106Z</TimeIn>
+        <TimeOut>2017-12-28T09:45:23.6371373Z</TimeOut>
+        <AnswerNumber>4</AnswerNumber>
+        <PathwayID>PW1812</PathwayID>
+        <OrderNumber>23300</OrderNumber>
+        <AdditionalText>xx</AdditionalText>
+        <ReportText>Another community healthcare professional was required.</ReportText>
+        <Action>Next</Action>
+        <QuestionText>WHICH COMMUNITY HEALTHCARE PROFESSIONAL IS REQUIRED?</QuestionText>
+        <AnswerText>other community healthcare professional (specify)</AnswerText>
+        <QuestionType>Tx224111</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText>Another healthcare professional required</DispositionRatText>
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>AT</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>0</InterfaceID>
+        <TimeIn>2017-12-28T09:45:23.81461Z</TimeIn>
+        <TimeOut>2017-12-28T09:45:23.81461Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PW1812</PathwayID>
+        <OrderNumber>39600</OrderNumber>
+        <AdditionalText />
+        <ReportText />
+        <Action>Next</Action>
+        <QuestionText>SDPCCommunityHealthcareProfessional</QuestionText>
+        <AnswerText>"PC community healthcare professional"</AnswerText>
+        <QuestionType>Tx222774</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>4316</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>AT</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>5</InterfaceID>
+        <TimeIn>2017-12-28T09:45:23.9178866Z</TimeIn>
+        <TimeOut>2017-12-28T09:45:33.3525788Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PW1812</PathwayID>
+        <OrderNumber>39600</OrderNumber>
+        <AdditionalText />
+        <ReportText>I will pass the information on to a Community Healthcare Professional.</ReportText>
+        <Action>Save and close</Action>
+        <QuestionText>The disposition is: Refer to Community Healthcare Professional</QuestionText>
+        <AnswerText>I will pass the information on to a Community Healthcare Professional.</AnswerText>
+        <QuestionType>Dx44186</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode>Dx47</DispositionCode>
+          <DispositionRationale />
+          <DispositionOverrideID>1</DispositionOverrideID>
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>AT</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>5</InterfaceID>
+        <TimeIn>2017-12-28T09:45:23.9178866Z</TimeIn>
+        <TimeOut>2017-12-28T09:45:33.3525788Z</TimeOut>
+        <AnswerNumber>1</AnswerNumber>
+        <PathwayID>PW1812</PathwayID>
+        <OrderNumber>39600</OrderNumber>
+        <AdditionalText />
+        <ReportText>I will pass your information on to them.</ReportText>
+        <Action>Next</Action>
+        <QuestionText />
+        <AnswerText />
+        <QuestionType>Cx170011</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+      <TriageLine>
+        <UserID>AT</UserID>
+        <IncludeInReport>True</IncludeInReport>
+        <InterfaceID>5</InterfaceID>
+        <TimeIn>2017-12-28T09:45:23.9178866Z</TimeIn>
+        <TimeOut>2017-12-28T09:45:33.3525788Z</TimeOut>
+        <AnswerNumber>2</AnswerNumber>
+        <PathwayID>PW1812</PathwayID>
+        <OrderNumber>39600</OrderNumber>
+        <AdditionalText />
+        <ReportText>If there are any new symptoms, or if the condition gets worse, changes or you have any other concerns call us back.</ReportText>
+        <Action>Next</Action>
+        <QuestionText />
+        <AnswerText />
+        <QuestionType>Cx170011</QuestionType>
+        <SystemFlag />
+        <Disposition>
+          <DispositionCode />
+          <DispositionRationale />
+          <DispositionOverrideID />
+          <DispositionOverrideText />
+          <DispositionRatText />
+        </Disposition>
+        <CareAdvice>
+          <CxKeywords />
+          <SymptomDiscriminator>0</SymptomDiscriminator>
+        </CareAdvice>
+      </TriageLine>
+    </TriageLineDetails>
+  </PathwaysCase>
+</NHSPathways>

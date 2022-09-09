@@ -3,6 +3,8 @@ from moto import mock_s3
 from unittest.mock import patch
 from botocore.exceptions import ClientError
 import boto3
+import io
+import zipfile
 
 file_path = "application.utilities.s3"
 mock_body = """1800,"Mock Create Role","CREATE"
@@ -13,6 +15,38 @@ mock_bucket = "mock_bucket"
 mock_filename = "mock_env/mock_file.csv"
 mock_event = {"filename": "mock_filename", "env": "mock_env", "bucket": "mock_bucket"}
 start = "20220527"
+mock_zip_filename = "mock_env/mock_file.zip"
+sample_bundle_file_name = "test-files/R34.2.0_stt.zip"
+
+
+@mock_s3
+def test_get_compressed_object_success(aws_credentials):
+    from ..s3 import S3
+    file_accessed = False
+    s3_client = boto3.client("s3")
+    s3_client.create_bucket(Bucket=mock_bucket, CreateBucketConfiguration={'LocationConstraint': 'antarctica'})
+    s3_client.upload_file(Filename=sample_bundle_file_name, Bucket=mock_bucket, Key=mock_zip_filename)
+    response_body = S3().get_compressed_object(mock_bucket, mock_zip_filename, mock_event, start)
+    input_zip = zipfile.ZipFile(io.BytesIO(response_body))
+
+    for name in input_zip.namelist():
+        scenario_file = input_zip.read(name).decode("utf-8")
+        file_accessed = True
+    assert file_accessed == True
+
+
+@patch(f"{file_path}.message.send_failure_slack_message")
+@mock_s3
+def test_get_compressed_object_raises_client_error(mock_send_failure_slack_message, aws_credentials):
+    from ..s3 import S3
+    s3_client = boto3.client("s3")
+    s3_client.create_bucket(Bucket=mock_bucket, CreateBucketConfiguration={'LocationConstraint': 'antarctica'})
+    with pytest.raises(ClientError) as assertion:
+        response = S3().get_compressed_object(mock_bucket, mock_filename, mock_event, start)
+    assert str(assertion.value) == "An error occurred (NoSuchKey) when calling the GetObject operation: The specified key does not exist."
+    mock_send_failure_slack_message.assert_called_once_with(mock_event, start)
+
+
 
 @mock_s3
 def test_get_object_success(aws_credentials):

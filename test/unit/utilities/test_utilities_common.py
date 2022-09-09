@@ -102,6 +102,16 @@ def test_retrieve_file_from_bucket(mock_s3_object):
     assert result == "Object returned"
     mock_s3_object().get_object.assert_called_once()
 
+@patch(f"{file_path}.utilities.s3.S3")
+def test_retrieve_compressed_file_from_bucket(mock_s3_object):
+    mock_s3_object().get_compressed_object = Mock(return_value="Object returned")
+    mock_bucket = ""
+    mock_filename = ""
+    result = common.retrieve_compressed_file_from_bucket(mock_bucket, mock_filename, mock_event, start)
+    assert result == "Object returned"
+    mock_s3_object().get_compressed_object.assert_called_once()
+
+
 
 def test_check_for_not_null_values():
     """Checks key values not null"""
@@ -430,9 +440,9 @@ def test_slack_summary_count():
 def test_slack_summary_count_blank_lines_negative():
     """Test slack report log output of summary count """
     summary_count = {}
-    summary_count={"BLANK": -1, "CREATE": 2,"DELETE": 8, "ERROR": 1,"UPDATE": 4}
+    summary_count={"blank": -1, "create": 2,"delete": 8, "error": 1,"update": 4}
     report=common.slack_summary_counts(summary_count)
-    assert report ==  "updated:4, inserted:2, deleted:8, blank:0, errored:1"
+    assert report ==  "blank:0, create:2, delete:8, error:1, update:4"
 
 def test_slack_summary_count():
     """Test slack report log output of null summary count """

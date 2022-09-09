@@ -53,3 +53,20 @@ class S3:
             logger.log_for_error(event["env"], "Error deleting object from bucket: {}".format(e))
             message.send_failure_slack_message(event, start)
             raise e
+
+    def get_compressed_object(self, bucket, filename, event, start):
+        try:
+            response = self.s3_client.get_object(
+                Bucket=bucket,
+                Key=filename,
+            )
+            file = response["Body"].read()
+            return file
+        except ClientError as e:
+            logger.log_for_error(event["env"], "Error retrieving object from bucket: {}".format(e))
+            message.send_failure_slack_message(event, start)
+            raise e
+        except Exception as e:
+            logger.log_for_error(event["env"], "Error retrieving object from bucket: {}".format(e))
+            message.send_failure_slack_message(event, start)
+            raise e

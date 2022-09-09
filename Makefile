@@ -245,8 +245,18 @@ build-tester: # Builds image used for testing - mandatory: PROFILE=[name]
 push-tester: # Pushes image used for testing - mandatory: PROFILE=[name]
 	make docker-push NAME=tester
 
+copy-stt-unit-test-files:
+	rm -rf $(APPLICATION_DIR)/hk/stt/test-files
+	mkdir $(APPLICATION_DIR)/hk/stt/test-files
+	cp $(APPLICATION_TEST_DIR)/stt-test-files/* $(APPLICATION_DIR)/hk/stt/test-files
+
+remove-temp-stt-unit-test-files:
+	rm -rf $(APPLICATION_DIR)/hk/stt/test-files
 
 unit-test-task: # Run task unit tests - mandatory: TASK=[name of task]
+	if [ "$(TASK)" = "stt" ]; then
+		make copy-stt-unit-test-files
+	fi
 	task_type=$$(make task-type NAME=$(TASK))
 	rm -rf $(APPLICATION_DIR)/$$task_type/$(TASK)/test
 	rm -rf $(APPLICATION_DIR)/$$task_type/$(TASK)/utilities
@@ -259,18 +269,34 @@ unit-test-task: # Run task unit tests - mandatory: TASK=[name of task]
 		CMD="python3 -m pytest test/"
 	rm -rf $(APPLICATION_DIR)/$$task_type/$(TASK)/test
 	rm -rf $(APPLICATION_DIR)/$$task_type/$(TASK)/utilities
-
+	if [ "$(TASK)" = "stt" ]; then
+		make remove-temp-stt-unit-test-files
+	fi
 
 unit-test-utilities: # Run utilities unit tests
+	rm -rf $(APPLICATION_DIR)/test-files
 	rm -rf $(APPLICATION_DIR)/utilities/test
 	mkdir $(APPLICATION_DIR)/utilities/test
+	mkdir $(APPLICATION_DIR)/test-files
+	cp $(APPLICATION_TEST_DIR)/stt-test-files/* $(APPLICATION_DIR)/test-files
 	cp $(APPLICATION_TEST_DIR)/unit/utilities/* $(APPLICATION_DIR)/utilities/test
 	make docker-run-tools IMAGE=$$(make _docker-get-reg)/tester:latest \
 		DIR=application \
 		CMD="python3 -m pytest utilities/test/"
 	rm -rf $(APPLICATION_DIR)/utilities/test
+	rm -rf $(APPLICATION_DIR)/test-files
+
+
+copy-stt-coverage-test-files:
+	rm -rf $(APPLICATION_DIR)/test-files
+	mkdir $(APPLICATION_DIR)/test-files
+	cp $(APPLICATION_TEST_DIR)/stt-test-files/* $(APPLICATION_DIR)/test-files
+
+remove-temp-stt-coverage-test-files:
+	rm -rf $(APPLICATION_DIR)/test-files
 
 coverage: ## Run test coverage - mandatory: PROFILE=[profile] TASK=[task] FORMAT=[xml/html]
+	make copy-stt-coverage-test-files
 	if [ "$(TASK)" = "" ]; then
 		tasks=$(TASKS)
 	else
@@ -300,6 +326,7 @@ coverage: ## Run test coverage - mandatory: PROFILE=[profile] TASK=[task] FORMAT
 		rm -rf $(APPLICATION_DIR)/$$task_type/$$task/utilities
 	done
 	rm -rf $(APPLICATION_DIR)/utilities/test
+	make remove-temp-stt-coverage-test-files
 
 python-code-coverage-format: ### Test Python code with 'coverage' - mandatory: CMD=[test program]; optional: DIR,FILES=[file or pattern],EXCLUDE=[comma-separated list],FORMAT=[xml,html]
 	if [ "$(FORMAT)" = "" ]; then
@@ -449,6 +476,7 @@ create-artefact-repositories: # Create ECR repositories to store the artefacts -
 	make docker-create-repository NAME=hk-referralroles
 	make docker-create-repository NAME=hk-symptomdiscriminators
 	make docker-create-repository NAME=hk-symptomgroups
+	make docker-create-repository NAME=hk-stt
 	make docker-create-repository NAME=cron-ragreset
 	make docker-create-repository NAME=cron-removeoldchanges
 
