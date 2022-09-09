@@ -55,6 +55,7 @@ def generate_db_query(row_values, env):
         logger.log_for_error(env, "action:validation | {} not in approved list of actions".format(row_values["action"]))
         raise psycopg2.DatabaseError("Database Action {} is invalid".format(row_values["action"]))
 
+
 def create_query(row_values):
     query = """
         insert into pathwaysdos.servicetypes
