@@ -4,6 +4,8 @@ import pytest
 from .. import handler
 
 file_path = "application.hk.servicetypes.handler"
+mock_filename = "test/st.csv"
+mock_bucket = "NoSuchBucket"
 mock_event = {"filename": "mock_filename", "env": "mock_env", "bucket": "mock_bucket"}
 mock_context = ""
 mock_env = "mock_env"
@@ -17,7 +19,7 @@ v_capacityreset = "interval"
 csv_st_id = 55
 csv_st_name = "ST Automated Test"
 csv_st_rank = 1
-csv_st_action = "INSERT"
+csv_st_action = "CREATE"
 
 def test_csv_line():
     """Test data extracted from valid csv"""
@@ -82,7 +84,7 @@ def test_csv_line_exception():
 @patch(f"{file_path}.common.retrieve_file_from_bucket", return_value="csv_file")
 @patch(f"{file_path}.process_servicetypes_file", return_value={})
 @patch(f"{file_path}.process_extracted_data")
-@patch(f"{file_path}.common.report_summary_counts", return_value="Symptom discriminators updated: 1, inserted: 1, deleted: 1")
+@patch(f"{file_path}.common.report_summary_counts", return_value="Service types updated: 1, inserted: 1, deleted: 1")
 @patch(f"{file_path}.message.send_start_message")
 def test_request_empty_file(mock_send_start_message,
 mock_report_summary_count ,
@@ -213,7 +215,8 @@ def test_generate_db_query_raises_error(mock_delete_query, mock_update_query, mo
     mock_create_query.assert_not_called()
 
 @patch("psycopg2.connect")
-def test_process_extracted_data_error_check_exists_fails(mock_db_connect):
+@patch(f"{file_path}.common.increment_summary_count")
+def test_process_extracted_data_error_check_exists_fails(mock_increment_count,mock_db_connect):
     """Test error handling when extracting data and record exist check fails"""
     row_data = {}
     csv_dict={csv_st_id,csv_st_name,csv_st_rank,"DELETE"}
@@ -222,11 +225,13 @@ def test_process_extracted_data_error_check_exists_fails(mock_db_connect):
     summary_count = {}
     with pytest.raises(Exception):
         handler.process_extracted_data(mock_db_connect, row_data, summary_count)
+    mock_increment_count.called_once()
+
 
 @patch("psycopg2.connect")
-@patch(f"{file_path}.database.does_record_exist", return_value=False)
-@patch(f"{file_path}.common.increment_summary_count")
-def test_process_extracted_data_error_check_exists_passes(mock_increment_count,mock_exists,mock_db_connect):
+@patch(f"{file_path}.logger.log_for_error")
+@patch(f"{file_path}.database.does_record_exist", return_value=True)
+def test_process_extracted_data_error_check_exists_passes(mock_exists,mock_logger,mock_db_connect):
     """Test error handling when extracting data and record exist check passes"""
     row_data = {}
     csv_dict = {}
@@ -238,12 +243,13 @@ def test_process_extracted_data_error_check_exists_passes(mock_increment_count,m
     csv_dict["capacityreset"] = v_capacityreset
     csv_dict["action"] = "UPDATE"
     row_data[0]=csv_dict
-    summary_count = {}
-    mock_db_connect=""
+    mock_db_connect = ""
+    summary_count = {"BLANK": 0, "CREATE": 0,"DELETE": 0, "ERROR": 0,"UPDATE": 0}
+    event = generate_event_payload()
     with pytest.raises(Exception):
-        handler.process_extracted_data(mock_db_connect, row_data, summary_count, mock_event)
+        handler.process_extracted_data(mock_db_connect, row_data, summary_count, event)
+    assert mock_logger.call_count == 1
     assert mock_exists.call_count == 1
-    mock_increment_count.called_once()
 
 
 

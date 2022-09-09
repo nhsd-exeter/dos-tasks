@@ -45,16 +45,15 @@ def request(event, context):
 
 
 def generate_db_query(row_values, env):
-    if row_values["action"] in ("CREATE", "INSERT"):
+    if row_values["action"] in ("CREATE"):
         return create_query(row_values)
-    elif row_values["action"] in ("UPDATE", "MODIFY"):
+    elif row_values["action"] in ("UPDATE"):
         return update_query(row_values)
-    elif row_values["action"] in ("DELETE", "REMOVE"):
+    elif row_values["action"] in ("DELETE"):
         return delete_query(row_values)
     else:
         logger.log_for_error(env, "action:validation | {} not in approved list of actions".format(row_values["action"]))
         raise psycopg2.DatabaseError("Database Action {} is invalid".format(row_values["action"]))
-
 
 def create_query(row_values):
     query = """
