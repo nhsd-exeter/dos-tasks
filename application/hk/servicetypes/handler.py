@@ -65,16 +65,15 @@ def extract_query_data_from_csv(lines):
 
 
 def generate_db_query(row_values, env):
-    if row_values["action"] in ("CREATE", "INSERT"):
+    if row_values["action"] in ("CREATE"):
         return create_query(row_values)
-    elif row_values["action"] in ("UPDATE", "MODIFY"):
+    elif row_values["action"] in ("UPDATE"):
         return update_query(row_values)
-    elif row_values["action"] in ("DELETE", "REMOVE"):
+    elif row_values["action"] in ("DELETE"):
         return delete_query(row_values)
     else:
         logger.log_for_error(env, "action:validation | {} not in approved list of actions".format(row_values["action"]))
         raise psycopg2.DatabaseError("Database Action {} is invalid".format(row_values["action"]))
-
 
 def create_query(row_values):
     query = """
@@ -137,8 +136,9 @@ def process_extracted_data(db_connection, row_data, summary_count_dict, event):
         except Exception as e:
             common.increment_summary_count(summary_count_dict, "ERROR", event["env"])
             logger.log_for_error(
-                "Processing {0} data failed with |{1}|{2}| => {3}".format(
-                    task_description, row_values["id"], row_values["name"], str(e)
+                event["env"],
+                "Processing {0} data failed with | {1} | {2} | {3} | => {4}".format(
+                    task_description, row_values["id"], row_values["name"], row_values["rank"], str(e)
                 ),
             )
             raise e
