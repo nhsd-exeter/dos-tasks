@@ -52,26 +52,33 @@ def process_zipfile(env, db_connection, bundle, filename, bundle_id, scenario_co
     processed = True
     try:
         bundle_zip = zipfile.ZipFile(io.BytesIO(bundle))
-        for name in bundle_zip.namelist():
+        for info in bundle_zip.infolist():
+            name = info.filename
             logger.log_for_audit(env, "action:processing scenario {}".format(name))
             scenario_file = bundle_zip.read(name).decode("utf-8")
-            try:
-                template_scenario = process_scenario_file(env, name, scenario_file, bundle_id, db_connection)
-                valid_template = validate_template_scenario(env, template_scenario)
-                if valid_template is True:
-                    insert_template_scenario(env, db_connection, template_scenario, scenario_count)
-                else:
-                    logger.log_for_audit(env, "action:invalid scenario {}".format(name))
-                    scenario_count[rejected_subtotal] = scenario_count[rejected_subtotal] + 1
-            except Exception as e:
-                processed = False
-                logger.log_for_error("stt", "Problem processing scenario file {0}: {1}".format(name, e))
-                raise e
+            if file_check(info):
+                try:
+                    template_scenario = process_scenario_file(env, name, scenario_file, bundle_id, db_connection)
+                    valid_template = validate_template_scenario(env, template_scenario)
+                    if valid_template is True:
+                        insert_template_scenario(env, db_connection, template_scenario, scenario_count)
+                    else:
+                        logger.log_for_audit(env, "action:invalid scenario {}".format(name))
+                        scenario_count[rejected_subtotal] = scenario_count[rejected_subtotal] + 1
+                except Exception as e:
+                    processed = False
+                    logger.log_for_error("stt", "Problem processing scenario file {0}: {1}".format(name, e))
+                    raise e
     except Exception as e:
         processed = False
         logger.log_for_error("stt", "Problem processing {0} -> {1}".format(filename, e))
     return processed
 
+def file_check(zipped_element):
+    if zipped_element.is_dir():
+        return False
+    else:
+        return True
 
 def validate_template_scenario(env, template_scenario):
     valid_template = True
