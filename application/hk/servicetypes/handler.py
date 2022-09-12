@@ -23,7 +23,7 @@ def request(event, context):
     logger.log_for_audit(event["env"], "action:task started")
     try:
         summary_count_dict = common.initialise_summary_count()
-        db_connection = database.connect_to_database(env, event)
+        db_connection = database.connect_to_database(env)
         csv_file = common.retrieve_file_from_bucket(bucket, filename, event, start)
         csv_data = common.process_file(csv_file, event, data_column_count, summary_count_dict)
         if csv_data == {}:
@@ -37,7 +37,7 @@ def request(event, context):
         logger.log_for_error(env, "Problem {}".format(e))
         message.send_failure_slack_message(event, start)
     finally:
-        database.close_connection(event, db_connection)
+        database.close_connection(env, db_connection)
         common.archive_file(bucket, filename, event, start)
     return task_description + " execution completed"
 
