@@ -102,6 +102,7 @@ def delete_query(row_values):
     data = (row_values["id"],)
     return query, data
 
+
 def process_servicetypes_file(csv_file, event, expected_col_count, summary_count_dict):
     """returns dictionary of row data keyed on row number col1=id, col2=description, col3=action"""
     lines = {}
@@ -112,11 +113,14 @@ def process_servicetypes_file(csv_file, event, expected_col_count, summary_count
         if len(line) == 0:
             common.increment_summary_count(summary_count_dict, "BLANK", event["env"])
             continue
-        if common.check_csv_format(line, expected_col_count, event["env"], count) and common.check_csv_values(line, event["env"]):
+        if common.check_csv_format(line, expected_col_count, event["env"], count) and common.check_csv_values(
+            line, event["env"]
+        ):
             lines[str(count)] = {"id": line[0], "name": line[1], "nationalranking": line[2], "action": line[3]}
         else:
             common.increment_summary_count(summary_count_dict, "ERROR", event["env"])
     return lines
+
 
 def extract_query_data_from_csv(lines, env):
     """
