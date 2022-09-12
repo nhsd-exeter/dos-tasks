@@ -74,11 +74,13 @@ def process_zipfile(env, db_connection, bundle, filename, bundle_id, scenario_co
         logger.log_for_error("stt", "Problem processing {0} -> {1}".format(filename, e))
     return processed
 
+
 def file_check(zipped_element):
     if zipped_element.is_dir():
         return False
     else:
         return True
+
 
 def validate_template_scenario(env, template_scenario):
     valid_template = True
