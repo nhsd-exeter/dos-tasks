@@ -102,6 +102,42 @@ def delete_query(row_values):
     data = (row_values["id"],)
     return query, data
 
+def process_servicetypes_file(csv_file, event, expected_col_count, summary_count_dict):
+    """returns dictionary of row data keyed on row number col1=id, col2=description, col3=action"""
+    lines = {}
+    count = 0
+    csv_reader = csv.reader(csv_file.split("\n"))
+    for line in csv_reader:
+        count += 1
+        if len(line) == 0:
+            common.increment_summary_count(summary_count_dict, "BLANK", event["env"])
+            continue
+        if common.check_csv_format(line, expected_col_count, event["env"], count) and common.check_csv_values(line, event["env"]):
+            lines[str(count)] = {"id": line[0], "name": line[1], "nationalranking": line[2], "action": line[3]}
+        else:
+            common.increment_summary_count(summary_count_dict, "ERROR", event["env"])
+    return lines
+
+def extract_query_data_from_csv(lines, env):
+    """
+    Maps data from csv and derives other items not in csv
+    """
+    query_data = {}
+    for row_number, row_data in lines.items():
+
+        data_dict = {}
+        try:
+            data_dict["id"] = row_data["id"]
+            data_dict["name"] = row_data["name"]
+            data_dict["nationalranking"] = row_data["nationalranking"]
+            data_dict["action"] = row_data["action"].upper()
+            data_dict["searchcapacitystatus"] = v_searchcapacitystatus
+            data_dict["capacitymodel"] = str(v_capacitymodel)
+            data_dict["capacityreset"] = str(v_capacityreset)
+        except Exception as ex:
+            logger.log_for_audit(env, "action:validation | CSV data invalid | " + ex)
+        query_data[str(row_number)] = data_dict
+    return query_data
 
 def process_servicetypes_file(csv_file, event, expected_col_count, summary_count_dict):
     """returns dictionary of row data keyed on row number col1=id, col2=description, col3=action"""
