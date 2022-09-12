@@ -3,8 +3,7 @@ import psycopg2.extras
 from utilities import logger, message, common, database
 from datetime import datetime
 
-csv_column_count = 4
-data_column_count = 7
+data_column_count = 4
 
 task_description = "Service types"
 v_searchcapacitystatus = True
