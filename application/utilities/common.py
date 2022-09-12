@@ -27,6 +27,8 @@ def check_csv_format(csv_row, expected_col_count, env, count):
 def valid_action(record_exists, row_data, env):
     """Returns True if action is valid; otherwise returns False"""
     valid_action = False
+    print("valid_action")
+    print(row_data["action"])
     if record_exists and row_data["action"] in ("UPDATE", "DELETE"):
         valid_action = True
     if not record_exists and row_data["action"] in ("CREATE"):

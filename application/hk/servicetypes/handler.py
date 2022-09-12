@@ -71,6 +71,8 @@ def create_query(row_values):
         row_values["capacitymodel"],
         row_values["capacityreset"],
     )
+    print(query)
+    print(data)
     return query, data
 
 
