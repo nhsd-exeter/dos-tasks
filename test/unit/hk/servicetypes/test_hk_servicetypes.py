@@ -21,37 +21,37 @@ csv_st_name = "ST Automated Test"
 csv_st_rank = 1
 csv_st_action = "CREATE"
 
+
 def test_csv_line():
     """Test data extracted from valid csv"""
     csv_rows = {}
     csv_rows["1"]={"id": csv_st_id, "name": csv_st_name, "nationalranking": csv_st_rank, "action": csv_st_action}
-    csv_dict = handler.extract_query_data_from_csv(csv_rows)
+    csv_dict = handler.extract_query_data_from_csv(csv_rows,mock_env)
     assert len(csv_dict) == 1
     assert len(csv_dict["1"]) == 7
     assert csv_dict["1"]["id"] == csv_st_id
     assert csv_dict["1"]["name"] == str(csv_st_name)
     assert csv_dict["1"]["nationalranking"] == csv_st_rank
+    assert csv_dict["1"]["action"] == str(csv_st_action)
     assert csv_dict["1"]["searchcapacitystatus"] == v_searchcapacitystatus
     assert csv_dict["1"]["capacitymodel"] == str(v_capacitymodel)
     assert csv_dict["1"]["capacityreset"] == str(v_capacityreset)
-    assert csv_dict["1"]["action"] == str(csv_st_action).upper()
-
 
 def test_csv_line_lc():
     """Test lower case action in csv is converted to u/c"""
     csv_rows = {}
     csv_st_action = "remove"
     csv_rows["1"]={"id": csv_st_id, "name": csv_st_name, "nationalranking": csv_st_rank, "action": csv_st_action}
-    csv_dict = handler.extract_query_data_from_csv(csv_rows)
+    csv_dict = handler.extract_query_data_from_csv(csv_rows, mock_env)
     assert len(csv_dict) == 1
     assert len(csv_dict["1"]) == 7
     assert csv_dict["1"]["id"] == csv_st_id
     assert csv_dict["1"]["name"] == str(csv_st_name)
     assert csv_dict["1"]["nationalranking"] == csv_st_rank
+    assert csv_dict["1"]["action"] == str(csv_st_action).upper()
     assert csv_dict["1"]["searchcapacitystatus"] == v_searchcapacitystatus
     assert csv_dict["1"]["capacitymodel"] == str(v_capacitymodel)
     assert csv_dict["1"]["capacityreset"] == str(v_capacityreset)
-    assert csv_dict["1"]["action"] == str(csv_st_action).upper()
 
 
 def test_csv_line_exception():
@@ -59,7 +59,7 @@ def test_csv_line_exception():
     csv_rows = {}
     csv_rows["1"]={"id": csv_st_id, "name": csv_st_name, "nationalranking": csv_st_rank, "action": 1}
     with pytest.raises(Exception):
-        handler.extract_query_data_from_csv(csv_rows)
+        handler.extract_query_data_from_csv(csv_rows, mock_env)
 
 
 @patch(f"{file_path}.common.archive_file")
@@ -68,7 +68,7 @@ def test_csv_line_exception():
 @patch(f"{file_path}.database.close_connection", return_value="")
 @patch(f"{file_path}.database.connect_to_database", return_value="db_connection")
 @patch(f"{file_path}.common.retrieve_file_from_bucket", return_value="csv_file")
-@patch(f"{file_path}.common.process_file", return_value={})
+@patch(f"{file_path}.process_servicetypes_file", return_value={})
 @patch(f"{file_path}.process_extracted_data")
 @patch(f"{file_path}.common.report_summary_counts", return_value="Service types updated: 1, inserted: 1, deleted: 1")
 @patch(f"{file_path}.message.send_start_message")
@@ -234,7 +234,7 @@ def test_process_extracted_data_error_check_exists_passes(mock_exists,mock_logge
     event = generate_event_payload()
     with pytest.raises(Exception):
         handler.process_extracted_data(mock_db_connect, row_data, summary_count, event)
-    assert mock_logger.call_count == 1
+    # assert mock_logger.call_count == 1
     assert mock_exists.call_count == 1
 
 
@@ -315,13 +315,15 @@ def test_handler_exception(mock_db,mock_failure_message,mock_message_start,mock_
 @patch(f"{file_path}.database.close_connection", return_value="")
 @patch(f"{file_path}.database.connect_to_database", return_value="db_connection")
 @patch(f"{file_path}.common.retrieve_file_from_bucket", return_value="csv_file")
-@patch(f"{file_path}.common.process_file", return_value={"1": {"id": "00001", "name": "Mock Delete ST", "nationalranking":1, "searchcapacitystatus":"true", "capacitymodel":"n/a", "capacityreset":"interval", "action": "DELETE"}, "2": {"id": "00002", "name": "Mock Delete ST", "nationalranking":1, "searchcapacitystatus":"true", "capacitymodel":"n/a", "capacityreset":"interval", "action": "UPDATE"}, "3": {"id": "00003", "name": "Mock Delete ST", "nationalranking":1, "searchcapacitystatus":"true", "capacitymodel":"n/a", "capacityreset":"interval", "action": "DELETE"}})
+@patch(f"{file_path}.process_servicetypes_file", return_value={"1": {"id": "00001", "name": "Mock Delete ST", "nationalranking":1 , "action": "DELETE"}, "2": {"id": "00002", "name": "Mock Delete ST", "nationalranking":1,  "action": "UPDATE"}, "3": {"id": "00003", "name": "Mock Delete ST", "nationalranking":1, "action": "DELETE"}})
+@patch(f"{file_path}.extract_query_data_from_csv", return_value={"1": {"id": "00001", "name": "Mock Delete ST", "nationalranking":1 ,"searchcapacitystatus":"true", "capacitymodel":"n/a", "capacityreset":"interval",  "action": "DELETE"}, "2": {"id": "00002", "name": "Mock Delete ST", "nationalranking":1, "searchcapacitystatus":"true", "capacitymodel":"n/a", "capacityreset":"interval", "action": "UPDATE"}, "3": {"id": "00003", "name": "Mock Delete ST", "nationalranking":1, "searchcapacitystatus":"true", "capacitymodel":"n/a", "capacityreset":"interval", "action": "DELETE"}})
 @patch(f"{file_path}.process_extracted_data")
 @patch(f"{file_path}.common.report_summary_counts", return_value="Service types updated: 1, inserted: 1, deleted: 1")
 @patch(f"{file_path}.message.send_start_message")
 def test_handler_pass(mock_send_start_message,
 mock_report_summary_count ,
 mock_process_extracted_data,
+mock_extra_query_data_from_file,
 mock_process_file,
 mock_retrieve_file_from_bucket,
 mock_db_connection,
@@ -336,6 +338,7 @@ mock_summary_count):
     assert result == "Service types execution completed"
     mock_send_start_message.assert_called_once()
     mock_process_extracted_data.assert_called_once()
+    mock_extra_query_data_from_file.assert_called_once()
     mock_summary_count.assert_called_once()
     mock_report_summary_count.assert_called_once()
     mock_process_file.assert_called_once()
@@ -354,13 +357,15 @@ mock_summary_count):
 @patch(f"{file_path}.database.close_connection", return_value="")
 @patch(f"{file_path}.database.connect_to_database", return_value="db_connection")
 @patch(f"{file_path}.common.retrieve_file_from_bucket", return_value="csv_file")
-@patch(f"{file_path}.common.process_file", return_value={})
+@patch(f"{file_path}.process_servicetypes_file", return_value={})
+@patch(f"{file_path}.extract_query_data_from_csv", return_value={})
 @patch(f"{file_path}.process_extracted_data")
 @patch(f"{file_path}.common.report_summary_counts", return_value="Service types updated: 1, inserted: 1, deleted: 1")
 @patch(f"{file_path}.message.send_start_message")
 def test_handler_empty_file(mock_send_start_message,
 mock_report_summary_count ,
 mock_process_extracted_data,
+mock_extract_query_data_from_csv,
 mock_process_file,
 mock_retrieve_file_from_bucket,
 mock_db_connection,
@@ -381,6 +386,7 @@ mock_summary_count):
     mock_db_connection.assert_called_once()
     mock_close_connection.assert_called_once()
     mock_archive_file.assert_called_once()
+    assert mock_extract_query_data_from_csv.call_count == 0
     assert mock_process_extracted_data.call_count == 0
     assert mock_send_success_slack_message.call_count == 0
     mock_send_failure_slack_message.assert_called_once()
@@ -407,7 +413,7 @@ mock_does_record_exist,mock_cleanup,mock_db_connect):
 @patch(f"{file_path}.database.close_connection", return_value="")
 @patch(f"{file_path}.database.connect_to_database", return_value="db_connection")
 @patch(f"{file_path}.common.retrieve_file_from_bucket", return_value="csv_file", side_effect=ValueError)
-@patch(f"{file_path}.common.process_file", return_value={"1": {"id": "00001", "name": "Mock Delete ST", "nationalranking":1, "searchcapacitystatus":"true", "capacitymodel":"n/a", "capacityreset":"interval", "action": "DELETE"}, "2": {"id": "00002", "name": "Mock Delete ST", "nationalranking":1, "searchcapacitystatus":"true", "capacitymodel":"n/a", "capacityreset":"interval", "action": "UPDATE"}, "3": {"id": "00003", "name": "Mock Delete ST", "nationalranking":1, "searchcapacitystatus":"true", "capacitymodel":"n/a", "capacityreset":"interval", "action": "DELETE"}})
+@patch(f"{file_path}.process_servicetypes_file", return_value={"1": {"id": "00001", "name": "Mock Delete ST", "nationalranking":1, "searchcapacitystatus":"true", "capacitymodel":"n/a", "capacityreset":"interval", "action": "DELETE"}, "2": {"id": "00002", "name": "Mock Delete ST", "nationalranking":1, "searchcapacitystatus":"true", "capacitymodel":"n/a", "capacityreset":"interval", "action": "UPDATE"}, "3": {"id": "00003", "name": "Mock Delete ST", "nationalranking":1, "searchcapacitystatus":"true", "capacitymodel":"n/a", "capacityreset":"interval", "action": "DELETE"}})
 @patch(f"{file_path}.process_extracted_data")
 @patch(f"{file_path}.common.report_summary_counts", return_value="Service types updated: 1, inserted: 1, deleted: 1")
 @patch(f"{file_path}.message.send_start_message")

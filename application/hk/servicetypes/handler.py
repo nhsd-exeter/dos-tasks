@@ -1,5 +1,6 @@
 import psycopg2
 import psycopg2.extras
+import csv
 from utilities import logger, message, common, database
 from datetime import datetime
 
@@ -24,11 +25,13 @@ def request(event, context):
         summary_count_dict = common.initialise_summary_count()
         db_connection = database.connect_to_database(env)
         csv_file = common.retrieve_file_from_bucket(bucket, filename, event, start)
-        csv_data = common.process_file(csv_file, event, data_column_count, summary_count_dict)
+        csv_data = process_servicetypes_file(csv_file, event, data_column_count, summary_count_dict)
         if csv_data == {}:
             message.send_failure_slack_message(event, start, summary_count_dict)
         else:
-            process_extracted_data(db_connection, csv_data, summary_count_dict, event)
+            extracted_data = extract_query_data_from_csv(csv_data, env)
+            process_extracted_data(db_connection, extracted_data, summary_count_dict, event)
+            # process_extracted_data(db_connection, csv_data, summary_count_dict, event)
             message.send_success_slack_message(event, start, summary_count_dict)
         common.report_summary_counts(summary_count_dict, env)
         logger.log_for_audit(event["env"], "action:task complete")
@@ -121,6 +124,42 @@ def delete_query(row_values):
     data = (row_values["id"],)
     return query, data
 
+def process_servicetypes_file(csv_file, event, expected_col_count, summary_count_dict):
+    """returns dictionary of row data keyed on row number col1=id, col2=description, col3=action"""
+    lines = {}
+    count = 0
+    csv_reader = csv.reader(csv_file.split("\n"))
+    for line in csv_reader:
+        count += 1
+        if len(line) == 0:
+            common.increment_summary_count(summary_count_dict, "BLANK", event["env"])
+            continue
+        if common.check_csv_format(line, expected_col_count, event["env"], count) and common.check_csv_values(line, event["env"]):
+            lines[str(count)] = {"id": line[0], "name": line[1], "nationalranking": line[2], "action": line[3]}
+        else:
+            common.increment_summary_count(summary_count_dict, "ERROR", event["env"])
+    return lines
+
+def extract_query_data_from_csv(lines, env):
+    """
+    Maps data from csv and derives other items not in csv
+    """
+    query_data = {}
+    for row_number, row_data in lines.items():
+
+        data_dict = {}
+        try:
+            data_dict["id"] = row_data["id"]
+            data_dict["name"] = row_data["name"]
+            data_dict["nationalranking"] = row_data["nationalranking"]
+            data_dict["action"] = row_data["action"].upper()
+            data_dict["searchcapacitystatus"] = v_searchcapacitystatus
+            data_dict["capacitymodel"] = str(v_capacitymodel)
+            data_dict["capacityreset"] = str(v_capacityreset)
+        except Exception as ex:
+            logger.log_for_audit(env, "action:validation | CSV data invalid | " + ex)
+        query_data[str(row_number)] = data_dict
+    return query_data
 
 def process_extracted_data(db_connection, row_data, summary_count_dict, event):
     for row_number, row_values in row_data.items():
@@ -138,7 +177,7 @@ def process_extracted_data(db_connection, row_data, summary_count_dict, event):
             logger.log_for_error(
                 event["env"],
                 "Processing {0} data failed with | {1} | {2} | {3} | => {4}".format(
-                    task_description, row_values["id"], row_values["name"], row_values["rank"], str(e)
+                    task_description, row_values["id"], row_values["name"], row_values["nationalranking"], str(e)
                 ),
             )
             raise e
