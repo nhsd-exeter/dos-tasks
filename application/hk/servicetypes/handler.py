@@ -60,7 +60,7 @@ def create_query(row_values):
     query = """
         insert into pathwaysdos.servicetypes
         (id, name, nationalranking, searchcapacitystatus, capacitymodel, capacityreset)
-        values (%s, %s, %s, %s, %s, %s, %s)
+        values (%s, %s, %s, %s, %s, %s)
         returning id, name, nationalranking, searchcapacitystatus, capacitymodel, capacityreset;
     """
     data = (

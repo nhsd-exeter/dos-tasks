@@ -110,7 +110,7 @@ def test_create_query():
     assert query == """
         insert into pathwaysdos.servicetypes
         (id, name, nationalranking, searchcapacitystatus, capacitymodel, capacityreset)
-        values (%s, %s, %s, %s, %s, %s, %s)
+        values (%s, %s, %s, %s, %s, %s)
         returning id, name, nationalranking, searchcapacitystatus, capacitymodel, capacityreset;
     """
     assert data == (1000, "Test Data", 1, "true", "n/a", "interval")
