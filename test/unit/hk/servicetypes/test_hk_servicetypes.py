@@ -249,7 +249,7 @@ def test_process_extracted_data_error_check_exists_passes(mock_exists,mock_logge
     event = generate_event_payload()
     with pytest.raises(Exception):
         handler.process_extracted_data(mock_db_connect, row_data, summary_count, event)
-    # assert mock_logger.call_count == 1
+    assert mock_logger.call_count == 1
     assert mock_exists.call_count == 1
 
 
