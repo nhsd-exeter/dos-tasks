@@ -223,7 +223,7 @@ def test_process_extracted_data_error_check_exists_passes(mock_exists,mock_logge
     csv_dict = {}
     csv_dict["id"] = csv_st_id
     csv_dict["name"] = csv_st_name
-    csv_dict["rank"] = csv_st_rank
+    csv_dict["nationalranking"] = csv_st_rank
     csv_dict["searchcapacitystatus"] = v_searchcapacitystatus
     csv_dict["capacitymodel"] = v_capacitymodel
     csv_dict["capacityreset"] = v_capacityreset
@@ -234,7 +234,7 @@ def test_process_extracted_data_error_check_exists_passes(mock_exists,mock_logge
     event = generate_event_payload()
     with pytest.raises(Exception):
         handler.process_extracted_data(mock_db_connect, row_data, summary_count, event)
-    # assert mock_logger.call_count == 1
+    assert mock_logger.call_count == 1
     assert mock_exists.call_count == 1
 
 
