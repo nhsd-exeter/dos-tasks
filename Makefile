@@ -545,9 +545,9 @@ create-tester-repository: # Create ECR repositories to store the artefacts
 #  temp poc
 return_code_test:### mandatory [PASS] True or anything
 	if [ "$(PASS)" == "True" ]; then
-		echo 0
+		exit 0
 	else
-		echo 1
+		exit 1
 	fi
 # ==============
 # ==============================================================================
