@@ -28,6 +28,8 @@ alt_scenario_file_name = "test-files/Scenario 1.xml"
 malformed_scenario_file_name = "test-files/Scenario_malformed.xml"
 # build by running unarchiver against .rar and then removing _MACOSX__ paths from output
 sample_bundle_file_name = "test-files/R34.2.0_stt.zip"
+sample_compressed_folder_file_name = "test-files/Rep-Prescription_stt.zip"
+sample_empty_compressed_folder_file_name="test-files/Empty_Scenarios_stt.zip"
 malformed_bundle_file_name = "test-files/Scenario_malformed.zip"
 expected_symptom_group_id = "1203"
 expected_disposition_code = "DX75"
@@ -327,6 +329,36 @@ def test_process_zipfile(mock_disposition, mock_disposition_group, mock_db_conne
     assert scenario_count['added'] == 3
     assert scenario_count['rejected'] == 0
     assert scenario_count['nfa'] == 0
+
+@patch("psycopg2.connect")
+@patch(f"{file_path}.get_disposition_group_id",return_value=5)
+@patch(f"{file_path}.get_disposition_id",return_value=5)
+def test_process_zipfile_with_folder(mock_disposition, mock_disposition_group, mock_db_connect):
+    scenario_count = handler.initialise_count()
+    bundle = get_compressed_object(sample_compressed_folder_file_name)
+    processed = handler.process_zipfile(env, mock_db_connect, bundle,mock_zip_filename, bundle_id, scenario_count)
+    assert processed == True
+    assert mock_disposition.call_count == 4
+    assert mock_disposition_group.call_count == 4
+    assert scenario_count['added'] == 4
+    assert scenario_count['rejected'] == 0
+    assert scenario_count['nfa'] == 0
+
+@patch("psycopg2.connect")
+@patch(f"{file_path}.get_disposition_group_id",return_value=5)
+@patch(f"{file_path}.get_disposition_id",return_value=5)
+def test_process_zipfile_with_empty_folder(mock_disposition, mock_disposition_group, mock_db_connect):
+    scenario_count = handler.initialise_count()
+    bundle = get_compressed_object(sample_empty_compressed_folder_file_name)
+    processed = handler.process_zipfile(env, mock_db_connect, bundle,mock_zip_filename, bundle_id, scenario_count)
+    assert processed == True
+    assert mock_disposition.call_count == 0
+    assert mock_disposition_group.call_count == 0
+    assert scenario_count['added'] == 0
+    assert scenario_count['rejected'] == 0
+    assert scenario_count['nfa'] == 0
+
+
 
 @patch("psycopg2.connect")
 def test_process_non_zipfile(mock_db_connect):
