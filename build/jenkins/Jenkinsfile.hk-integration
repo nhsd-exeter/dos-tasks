@@ -30,7 +30,7 @@ pipeline {
       steps {
         script {
             echo "Build and push"
-            make return_code_test PASS=True
+            sh "make return_code_test PASS=True"
         }
       }
     }
@@ -40,7 +40,7 @@ pipeline {
         script {
           echo "Provision hk infra"
           echo "Provision int test lambda"
-          make return_code_test PASS=True
+          sh "make return_code_test PASS=True"
         }
       }
     }
@@ -49,7 +49,7 @@ pipeline {
       steps {
         script {
           echo "Load file to s3"
-          make return_code_test PASS=False
+          sh "make return_code_test PASS=False"
         }
       }
     }
