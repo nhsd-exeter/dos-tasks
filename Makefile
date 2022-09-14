@@ -541,6 +541,15 @@ create-artefact-repositories: # Create ECR repositories to store the artefacts -
 create-tester-repository: # Create ECR repositories to store the artefacts
 	make docker-create-repository NAME=tester
 
+# ==============
+#  temp poc
+return_code_test:### mandatory [PASS] True or anything
+	if [ "$(PASS)" == "True" ]; then
+		echo 0
+	else
+		echo 1
+	fi
+# ==============
 # ==============================================================================
 
 .SILENT: \
@@ -549,4 +558,5 @@ create-tester-repository: # Create ECR repositories to store the artefacts
 	cron-task-check \
 	check_bucket_for_file \
 	poll_s3_for_file \
-	task-type
+	task-type \
+	return_code_test

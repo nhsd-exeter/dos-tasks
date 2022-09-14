@@ -28,7 +28,10 @@ pipeline {
     stage("Build and push") {
       when { expression { params.Task != "none" } }
       steps {
-        script { echo "Build and push" }
+        script {
+            echo "Build and push"
+            make return_code_test PASS=True
+        }
       }
     }
     stage("Provision integration test infrastructure") {
@@ -37,13 +40,17 @@ pipeline {
         script {
           echo "Provision hk infra"
           echo "Provision int test lambda"
+          make return_code_test PASS=True
         }
       }
     }
     stage("Load test file to s3") {
       when { expression { params.Task != "none" } }
       steps {
-        script { echo "Load file to s3" }
+        script {
+          echo "Load file to s3"
+          make return_code_test PASS=False
+        }
       }
     }
     stage("Check archive") {
