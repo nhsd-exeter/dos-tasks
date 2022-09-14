@@ -1,0 +1,80 @@
+pipeline {
+  agent any
+  parameters {
+    choice(name: 'Task', choices: ['none', 'all', 'filter', 'referralroles','symptomgroups','symptomdiscriminators'], description: 'Select which task to deploy')
+    choice(name: 'Database', choices: ['none', 'integration'], description: 'Select target database (cron jobs ONLY)')
+  }
+
+  options {
+    buildDiscarder(logRotator(daysToKeepStr: "7", numToKeepStr: "13"))
+    disableConcurrentBuilds()
+    parallelsAlwaysFailFast()
+    timeout(time: 25, unit: "MINUTES")
+  }
+  environment {
+    BUILD_DATE = sh(returnStdout: true, script: "date -u +'%Y-%m-%dT%H:%M:%S%z'").trim()
+    PROFILE = "integration"
+    ENVIRONMENT = "integration"
+    TASK = "${params.Task}"
+    DB_NAME = "${params.Database}"
+  }
+  triggers { pollSCM("* * * * *") }
+  stages {
+    stage("Show Configuration") {
+      steps {
+        script { sh "make show-configuration" }
+      }
+    }
+    stage("Build and push") {
+      when { expression { params.Task != "none" } }
+      steps {
+        script { echo "Build and push" }
+      }
+    }
+    stage("Provision integration test infrastructure") {
+      when { expression { params.Task != "none" } }
+      steps {
+        script {
+          echo "Provision hk infra"
+          echo "Provision int test lambda"
+        }
+      }
+    }
+    stage("Load test file to s3") {
+      when { expression { params.Task != "none" } }
+      steps {
+        script { echo "Load file to s3" }
+      }
+    }
+    stage("Check archive") {
+      when { expression { params.Task != "none" } }
+      steps {
+        script { echo "Check file archived" }
+      }
+    }
+    stage("Check results") {
+      when { expression { params.Task != "none" } }
+      steps {
+        script { echo "Check results" }
+      }
+    }
+
+    stage("Check and remove older versions") {
+      when { expression { params.Task != "none" } }
+      steps {
+        script { echo "Check and remove" }
+      }
+    }
+
+    stage("Teardown hk infrastructure") {
+      when { expression { params.Task != "none" } }
+      steps {
+        script { echo "Teardown infrastructure" }
+      }
+    }
+  }
+  post {
+    always { sh "make pipeline-send-notification PIPELINE_NAME='UEC DoS Tasks (NonProd)' BUILD_STATUS=${currentBuild.currentResult}" }
+    cleanup { sh "make clean" }
+  }
+}
