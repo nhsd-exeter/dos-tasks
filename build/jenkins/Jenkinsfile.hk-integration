@@ -49,7 +49,7 @@ pipeline {
       steps {
         script {
           echo "Load file to s3"
-          catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+          catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
               sh "make return_code_test PASS=False"
           }
         }
