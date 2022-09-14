@@ -3,6 +3,4 @@
 # ==============================================================================
 # Service variables
 
-TASKS := filter,referralroles,symptomgroups,symptomdiscriminators,ragreset,removeoldchanges,servicetypes
-TASKS := filter,referralroles,symptomgroups,symptomdiscriminators,servicetypes
-TASKS := filter,referralroles,symptomgroups,symptomdiscriminators,ragreset,removeoldchanges,stt
+TASKS := filter,referralroles,symptomgroups,symptomdiscriminators,ragreset,removeoldchanges,servicetypes,stt
