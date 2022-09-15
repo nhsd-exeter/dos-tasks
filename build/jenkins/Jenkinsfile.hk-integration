@@ -30,7 +30,9 @@ pipeline {
       steps {
         script {
             echo "Build and push"
-            sh "make return_code_test PASS=True"
+            catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+              sh "make return_code_test PASS=True"
+          }
         }
       }
     }
@@ -40,7 +42,9 @@ pipeline {
         script {
           echo "Provision hk infra"
           echo "Provision int test lambda"
-          sh "make return_code_test PASS=True"
+          catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+              sh "make return_code_test PASS=True"
+          }
         }
       }
     }
