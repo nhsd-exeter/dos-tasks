@@ -2,7 +2,7 @@ pipeline {
   agent any
   parameters {
     choice(name: 'Task', choices: ['none', 'all', 'filter', 'referralroles','symptomgroups','symptomdiscriminators'], description: 'Select which task to deploy')
-    choice(name: 'Database', choices: ['none', 'integration'], description: 'Select target database (cron jobs ONLY)')
+    choice(name: 'Test', choices: ['none', 'integration'], description: 'Select target database (cron jobs ONLY)')
   }
 
   options {
@@ -16,7 +16,7 @@ pipeline {
     PROFILE = "integration"
     ENVIRONMENT = "integration"
     TASK = "${params.Task}"
-    DB_NAME = "${params.Database}"
+    TEST_TASK = "${params.Test}"
   }
   triggers { pollSCM("* * * * *") }
   stages {
@@ -47,14 +47,13 @@ pipeline {
         }
       }
     }
-    stage("Provision integration test infrastructure") {
+    stage("Provision hk lambdas") {
       when { expression { params.Task != "none" } }
       steps {
         script {
-          echo "Provision hk infra"
-          echo "Provision int test lambda"
+          echo "Provision hk lambdas"
           catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
-              sh "make return_code_test PASS=True"
+              sh "make provision PROFILE=${PROFILE} TASK=${params.Task}"
           }
         }
       }
@@ -65,7 +64,7 @@ pipeline {
         script {
           echo "Load file to s3"
           catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
-              sh "make return_code_test PASS=False"
+              sh "make return_code_test PASS=True"
           }
         }
       }

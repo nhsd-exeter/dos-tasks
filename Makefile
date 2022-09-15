@@ -69,6 +69,7 @@ push: # Push project artefacts to the registry - mandatory: TASK=[task]
 
 # Provision
 provision: ## provision resources for hk and cron - mandatory PROFILE TASK  and DB_NAME (cron only)
+	make terraform-apply-auto-approve STACK=$(STACKS) PROFILE=$(PROFILE)
 	if [ "$(TASK)" == "all" ]; then
 		for task in $$(echo $(TASKS) | tr "," "\n"); do
 			task_type=$$(make task-type NAME=$$task)
@@ -96,7 +97,6 @@ provision: ## provision resources for hk and cron - mandatory PROFILE TASK  and 
 provision-hk: ## Provision environment - mandatory: PROFILE=[name], TASK=[task]
 	echo "Provisioning $(PROFILE) lambda for hk task $(TASK)"
 	eval "$$(make secret-fetch-and-export-variables)"
-	make terraform-apply-auto-approve STACK=$(STACKS) PROFILE=$(PROFILE)
 	make terraform-apply-auto-approve STACK=$(TASK) PROFILE=$(PROFILE)
 
 
@@ -104,7 +104,6 @@ provision-cron: ## cron specific version of provision PROFILE TASK DB_NAME
 	echo "Provisioning $(PROFILE) lambda $(TASK)-$(DB_NAME) for cron job"
 	make build-stack-for-cron-job TASK=$(TASK) DB_NAME=$(DB_NAME)
 	eval "$$(make secret-fetch-and-export-variables)"
-	make terraform-apply-auto-approve STACK=$(STACKS) PROFILE=$(PROFILE)
 	make terraform-apply-auto-approve STACK=$(TASK)-$(DB_NAME) PROFILE=$(PROFILE)
 	make delete-stack-for-cron-job TASK=$(TASK) DB_NAME=$(DB_NAME)
 
