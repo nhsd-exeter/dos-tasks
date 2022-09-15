@@ -108,6 +108,13 @@ provision-cron: ## cron specific version of provision PROFILE TASK DB_NAME
 	make terraform-apply-auto-approve STACK=$(TASK)-$(DB_NAME) PROFILE=$(PROFILE)
 	make delete-stack-for-cron-job TASK=$(TASK) DB_NAME=$(DB_NAME)
 
+plan-stacks: ### plan shared infrastructure defined in STACKS PROFILE
+	make terraform-plan-detailed STACK=$(STACKS) PROFILE=$(PROFILE)
+
+provision-stacks: ## Provision environment - mandatory: PROFILE=[name]
+	echo "Provisioning stack infrastrucure for $(PROFILE)"
+	make terraform-apply-auto-approve STACK=$(STACKS) PROFILE=$(PROFILE)
+
 # Plan targets
 plan: # Plan cron and hk lambdas - mandatory: PROFILE=[name], TASK=[hk task] DB_NAME
 	eval "$$(make secret-fetch-and-export-variables)"

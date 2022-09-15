@@ -36,6 +36,17 @@ pipeline {
         }
       }
     }
+    stage("Check key infrastructure exists") {
+      when { expression { params.Task != "none" } }
+      steps {
+        script {
+          echo "Checking infrastructure defined as STACKS"
+          catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+              sh "make plan-stacks PROFILE=${PROFILE}"
+          }
+        }
+      }
+    }
     stage("Provision integration test infrastructure") {
       when { expression { params.Task != "none" } }
       steps {
