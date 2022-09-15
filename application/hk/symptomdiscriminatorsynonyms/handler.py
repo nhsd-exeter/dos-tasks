@@ -20,13 +20,12 @@ def request(event, context):
     db_connection = database.connect_to_database(env, event, start)
     csv_file = common.retrieve_file_from_bucket(bucket, filename, event, start)
     csv_data = common.process_file(csv_file, event, start, data_column_count)
-    process_extracted_data(db_connection, csv_data, summary_count_dict, event, start)
+    process_extracted_data(env,db_connection, csv_data, summary_count_dict, event, start)
     common.report_summary_counts(task_description, summary_count_dict)
-    common.cleanup(db_connection, bucket, filename, event, start)
     return task_description + " execution successful"
 
 
-def generate_db_query(row_values, event, start):
+def generate_db_query(env,row_values, event, start):
     if row_values["action"] == ("CREATE"):
         return create_query(row_values)
     elif row_values["action"] == ("UPDATE"):
@@ -34,8 +33,7 @@ def generate_db_query(row_values, event, start):
     elif row_values["action"] == ("DELETE"):
         return delete_query(row_values)
     else:
-        logger.log_for_error("Action {} not in approved list of actions".format(row_values["action"]))
-        message.send_failure_slack_message(event, start)
+        logger.log_for_error(env, "action:validation | {} not in approved list of actions".format(row_values["action"]))
         raise psycopg2.DatabaseError("Database Action {} is invalid".format(row_values["action"]))
 
 
@@ -70,12 +68,12 @@ def delete_query(row_values):
     return query, data
 
 
-def process_extracted_data(db_connection, row_data, summary_count_dict, event, start):
+def process_extracted_data(env, db_connection, row_data, summary_count_dict, event, start):
     for row_number, row_values in row_data.items():
         try:
             record_exists = database.does_record_exist(db_connection, row_values, "symptomdiscriminatorsynonyms")
             if common.valid_action(record_exists, row_values):
-                query, data = generate_db_query(row_values, event, start)
+                query, data = generate_db_query(env,row_values, event, start)
                 database.execute_db_query(db_connection, query, data, row_number, row_values, summary_count_dict)
         except Exception as e:
             logger.log_for_error(

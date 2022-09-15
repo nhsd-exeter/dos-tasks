@@ -18,6 +18,8 @@ TASKS := filter,referralroles,symptomgroups,symptomdiscriminators,symptomdiscrim
 ENVIRONMENT_LIST := ["test","test1","test2","test3","test4","fix","performance","regression","teamb"]
 TASKS := filter,referralroles,symptomgroups,symptomdiscriminators,ragreset,removeoldchanges,stt,servicetypes
 ENVIRONMENT_LIST := ["test","test1","test2","test3","test4","fix","performance","regression","teamb","testtech"]
+TASKS := filter,referralroles,symptomgroups,symptomdiscriminators,symptomdiscriminatorsynonyms,ragreset,removeoldchanges,stt,servicetypes
+ENVIRONMENT_LIST := ["test","test1","test2","test3","test4","fix","performance","regression","teamb","testtech"]
 TF_VAR_environment_list := $(ENVIRONMENT_LIST)
 
 TF_VAR_deployment_secrets := $(DEPLOYMENT_SECRETS)

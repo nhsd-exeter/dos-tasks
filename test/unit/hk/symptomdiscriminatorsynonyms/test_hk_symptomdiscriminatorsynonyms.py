@@ -20,13 +20,11 @@ csv_sds_action = "INSERT"
 @patch(f"{file_path}.common.process_file", return_value={"1": {"id": "00001", "description": "Mock Create SDS", "action": "CREATE"}, "2": {"id": "00002", "description": "Mock Update SDS", "action": "UPDATE"}, "3": {"id": "00003", "description": "Mock Delete SDS", "action": "DELETE"}})
 @patch(f"{file_path}.process_extracted_data")
 @patch(f"{file_path}.common.report_summary_counts", return_value="Symptom discriminator synonyms updated: 1, inserted: 1, deleted: 1")
-@patch(f"{file_path}.common.cleanup")
 @patch(f"{file_path}.message.send_start_message")
-def test_request_success(mock_send_start_message, mock_cleanup,  mock_report_summary_count , mock_process_extracted_data, mock_process_file, mock_retrieve_file_from_bucket, mock_db_connection):
+def test_request_success(mock_send_start_message,   mock_report_summary_count , mock_process_extracted_data, mock_process_file, mock_retrieve_file_from_bucket, mock_db_connection):
     result = handler.request(mock_event, mock_context)
     assert result == "Symptom discriminator synonyms execution successful"
     mock_send_start_message.assert_called_once()
-    mock_cleanup.assert_called_once()
     mock_process_extracted_data.assert_called_once()
     mock_report_summary_count.assert_called_once()
     mock_process_file.assert_called_once()
@@ -79,7 +77,7 @@ def test_delete_query():
 @patch(f"{file_path}.delete_query", return_value="Delete Query")
 def test_generate_db_query_create(mock_delete_query, mock_update_query, mock_create_query):
     mock_row_values = {"id": "00001", "description": "Mock Create SDS", "action": "CREATE"}
-    result = handler.generate_db_query(mock_row_values,mock_event, start)
+    result = handler.generate_db_query(mock_env,mock_row_values,mock_event, start)
     assert result == "Create Query"
     mock_delete_query.assert_not_called()
     mock_update_query.assert_not_called()
@@ -90,7 +88,7 @@ def test_generate_db_query_create(mock_delete_query, mock_update_query, mock_cre
 @patch(f"{file_path}.delete_query", return_value="Delete Query")
 def test_generate_db_query_update(mock_delete_query, mock_update_query, mock_create_query):
     mock_row_values = {"id": "00002", "description": "Mock Update SDS", "action": "UPDATE"}
-    result = handler.generate_db_query(mock_row_values,mock_event, start)
+    result = handler.generate_db_query(mock_env,mock_row_values,mock_event, start)
     assert result == "Update Query"
     mock_delete_query.assert_not_called()
     mock_update_query.assert_called_once_with(mock_row_values)
@@ -102,7 +100,7 @@ def test_generate_db_query_update(mock_delete_query, mock_update_query, mock_cre
 @patch(f"{file_path}.delete_query", return_value="Delete Query")
 def test_generate_db_query_delete(mock_delete_query, mock_update_query, mock_create_query):
     mock_row_values = {"id": "00003", "description": "Mock Delete SDS", "action": "DELETE"}
-    result = handler.generate_db_query(mock_row_values,mock_event, start)
+    result = handler.generate_db_query(mock_env,mock_row_values,mock_event, start)
     assert result == "Delete Query"
     mock_delete_query.assert_called_once_with(mock_row_values)
     mock_update_query.assert_not_called()
@@ -112,13 +110,11 @@ def test_generate_db_query_delete(mock_delete_query, mock_update_query, mock_cre
 @patch(f"{file_path}.create_query", return_value="Create Query")
 @patch(f"{file_path}.update_query", return_value="Update Query")
 @patch(f"{file_path}.delete_query", return_value="Delete Query")
-@patch(f"{file_path}.message.send_failure_slack_message")
-def test_generate_db_query_raises_error(mock_send_failure_slack_message, mock_delete_query, mock_update_query, mock_create_query):
+def test_generate_db_query_raises_error(mock_delete_query, mock_update_query, mock_create_query):
     mock_row_values = {"id": "00001", "description": "Mock Create SDS", "action": "UNKNOWN"}
     with pytest.raises(psycopg2.DatabaseError) as assertion:
-        result = handler.generate_db_query(mock_row_values,mock_event, start)
+        result = handler.generate_db_query(mock_env,mock_row_values,mock_event, start)
     assert str(assertion.value) == "Database Action UNKNOWN is invalid"
-    mock_send_failure_slack_message.assert_called_once_with(mock_event, start)
     mock_delete_query.assert_not_called()
     mock_update_query.assert_not_called()
     mock_create_query.assert_not_called()
@@ -134,7 +130,7 @@ def test_process_extracted_data_error_check_exists_fails(mock_db_connect):
     mock_db_connect = ""
     summary_count = {}
     with pytest.raises(Exception):
-        handler.process_extracted_data(mock_db_connect, row_data, summary_count)
+        handler.process_extracted_data(mock_env,mock_db_connect, row_data, summary_count)
 
 @patch("psycopg2.connect")
 @patch(f"{file_path}.database.does_record_exist", return_value=True)
@@ -147,7 +143,7 @@ def test_process_extracted_data_error_check_exists_passes(mock_exists,mock_db_co
     mock_db_connect = ""
     summary_count = {}
     with pytest.raises(Exception):
-        handler.process_extracted_data(mock_db_connect, row_data, summary_count, mock_event, start)
+        handler.process_extracted_data(mock_env,mock_db_connect, row_data, summary_count, mock_event, start)
     assert mock_exists.call_count == 1
 
 @patch("psycopg2.connect")
@@ -162,7 +158,7 @@ def test_process_extracted_data_single_record(mock_exist,mock_valid_action,mock_
     row_data[0]=csv_dict
     summary_count = {}
     summary_count = {}
-    handler.process_extracted_data(mock_db_connect, row_data, summary_count, mock_event, start)
+    handler.process_extracted_data(mock_env,mock_db_connect, row_data, summary_count, mock_event, start)
     mock_valid_action.assert_called_once()
     mock_exist.assert_called_once()
     mock_generate.assert_called_once()
@@ -183,7 +179,7 @@ def test_process_extracted_data_multiple_records(mock_exist,mock_valid_action,mo
     row_data[1]=csv_dict
     print(row_data[1])
     summary_count = {}
-    handler.process_extracted_data(mock_db_connect, row_data, summary_count, mock_event, start)
+    handler.process_extracted_data(mock_env,mock_db_connect, row_data, summary_count, mock_event, start)
     assert mock_valid_action.call_count == 2
     assert mock_exist.call_count == 2
     assert mock_generate.call_count == 2
