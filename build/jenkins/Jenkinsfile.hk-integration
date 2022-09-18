@@ -38,7 +38,8 @@ pipeline {
     TASK = "${params.Task}"
     TEST_TASK = "${params.Test}"
     DB_BUILD_JOB_NAME = 'dos-parent-pipeline-tasks-integration'
-    PATHWAYSDOS_V4_BRANCH = 'task/DPTS-811-Poc-int-test'
+    // TODO eventually develop
+    PATHWAYSDOS_V4_BRANCH = 'task%2FDPTS-811-Poc-int-test'
   }
   triggers { pollSCM("* * * * *") }
   stages {
