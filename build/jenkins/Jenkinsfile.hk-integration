@@ -3,6 +3,26 @@ pipeline {
   parameters {
     choice(name: 'Task', choices: ['none', 'all', 'filter', 'referralroles','symptomgroups','symptomdiscriminators'], description: 'Select which task to deploy')
     choice(name: 'Test', choices: ['none', 'integration'], description: 'Select target database (cron jobs ONLY)')
+    string(
+      description: 'Housekeeping task to run',
+      name: 'Task',
+      defaultValue: 'all'
+    )
+    string(
+      description: 'Test use tba',
+      name: 'Test',
+      defaultValue: 'integration'
+    )
+    // string(
+    //   description: 'R53 record for RDS cluster',
+    //   name: 'DB_HOST',
+    //   defaultValue: ''
+    // )
+    // string(
+    //   description: 'Name of database on RDS instance',
+    //   name: 'PIPELINE_DATABASE',
+    //   defaultValue: ''
+    // )
   }
 
   options {
@@ -17,12 +37,22 @@ pipeline {
     ENVIRONMENT = "integration"
     TASK = "${params.Task}"
     TEST_TASK = "${params.Test}"
+    DB_BUILD_JOB_NAME = 'dos-parent-pipeline-tasks-integration'
+    PATHWAYSDOS_V4_BRANCH = 'develop'
   }
   triggers { pollSCM("* * * * *") }
   stages {
     stage("Show Configuration") {
       steps {
         script { sh "make show-configuration" }
+      }
+    }
+    stage('Triggering build of database') {
+      steps {
+        echo "Running pathwaysdos_v4 pipeline ${DB_BUILD_JOB_NAME}"
+        // echo "Passing DELETE parameter: ${params.DELETE}"
+        build job: "${DB_BUILD_JOB_NAME}/${PATHWAYSDOS_V4_BRANCH}", \
+        parameters: []
       }
     }
     stage("Build and push hk lambdas") {
