@@ -40,6 +40,7 @@ pipeline {
     DB_BUILD_JOB_NAME = 'dos-parent-pipeline-tasks-integration'
     // TODO eventually develop
     PATHWAYSDOS_V4_BRANCH = 'task%2FDPTS-811-Poc-int-test'
+    DELETE = 'false'
   }
   triggers { pollSCM("* * * * *") }
   stages {
@@ -53,7 +54,7 @@ pipeline {
         echo "Running pathwaysdos_v4 pipeline ${DB_BUILD_JOB_NAME}"
         // echo "Passing DELETE parameter: ${params.DELETE}"
         build job: "${DB_BUILD_JOB_NAME}/${PATHWAYSDOS_V4_BRANCH}"
-        // parameters: []
+        parameters: [booleanParam(name:'DELETE' , value:"${DELETE}".toBoolean())]
       }
     }
     stage("Build and push hk lambdas") {
