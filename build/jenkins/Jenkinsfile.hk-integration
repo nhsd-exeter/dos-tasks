@@ -53,7 +53,7 @@ pipeline {
       steps {
         echo "Running pathwaysdos_v4 pipeline ${DB_BUILD_JOB_NAME}"
         // echo "Passing DELETE parameter: ${params.DELETE}"
-        build job: "${DB_BUILD_JOB_NAME}/${PATHWAYSDOS_V4_BRANCH}"
+        build job: "${DB_BUILD_JOB_NAME}/${PATHWAYSDOS_V4_BRANCH}",\
         parameters: [booleanParam(name:'DELETE' , value:"${DELETE}".toBoolean())]
       }
     }
