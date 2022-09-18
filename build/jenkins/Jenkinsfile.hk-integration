@@ -1,8 +1,8 @@
 pipeline {
   agent any
   parameters {
-    choice(name: 'Task', choices: ['none', 'all', 'filter', 'referralroles','symptomgroups','symptomdiscriminators'], description: 'Select which task to deploy')
-    choice(name: 'Test', choices: ['none', 'integration'], description: 'Select target database (cron jobs ONLY)')
+    // choice(name: 'Task', choices: ['none', 'all', 'filter', 'referralroles','symptomgroups','symptomdiscriminators'], description: 'Select which task to deploy')
+    // choice(name: 'Test', choices: ['none', 'integration'], description: 'Select target database (cron jobs ONLY)')
     string(
       description: 'Housekeeping task to run',
       name: 'Task',
