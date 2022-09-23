@@ -25,7 +25,7 @@ def request(event, context):
     return task_description + " execution successful"
 
 
-def generate_db_query(env, row_values, event, start):
+def generate_db_query( row_values, env) :
     if row_values["action"] == ("CREATE"):
         return create_query(row_values)
     elif row_values["action"] == ("UPDATE"):
@@ -71,7 +71,9 @@ def delete_query(row_values):
 def process_extracted_data(env, db_connection, row_data, summary_count_dict, event, start):
     for row_number, row_values in row_data.items():
         try:
-            record_exists = database.does_record_exist(db_connection, row_values, "symptomdiscriminatorsynonyms", event["env"])
+            record_exists = database.does_record_exist(
+                db_connection, row_values, "symptomdiscriminatorsynonyms", event["env"]
+            )
             if common.valid_action(record_exists, row_values, event["env"]):
                 query, data = generate_db_query(row_values, event["env"])
                 database.execute_db_query(
@@ -80,7 +82,8 @@ def process_extracted_data(env, db_connection, row_data, summary_count_dict, eve
             else:
                 common.increment_summary_count(summary_count_dict, "ERROR", event["env"])
         except Exception as e:
-            logger.log_for_error(  event["env"],
+            logger.log_for_error(
+                event["env"],
                 "Processing {0} data failed with |{1}|{2}| => {3}".format(
                     task_description, row_values["id"], row_values["name"], str(e)
                 ),
