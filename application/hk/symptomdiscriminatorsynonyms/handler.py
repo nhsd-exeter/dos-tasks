@@ -21,11 +21,11 @@ def request(event, context):
     csv_file = common.retrieve_file_from_bucket(bucket, filename, event, start)
     csv_data = common.process_file(csv_file, event, csv_column_count, summary_count_dict)
     process_extracted_data(env, db_connection, csv_data, summary_count_dict, event, start)
-    common.report_summary_counts(task_description, env)
+    common.report_summary_counts(summary_count_dict, env)
     return task_description + " execution successful"
 
 
-def generate_db_query( row_values, env) :
+def generate_db_query(row_values, env):
     if row_values["action"] == ("CREATE"):
         return create_query(row_values)
     elif row_values["action"] == ("UPDATE"):
