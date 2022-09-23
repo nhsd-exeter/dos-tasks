@@ -71,12 +71,16 @@ def delete_query(row_values):
 def process_extracted_data(env, db_connection, row_data, summary_count_dict, event, start):
     for row_number, row_values in row_data.items():
         try:
-            record_exists = database.does_record_exist(db_connection, row_values, "symptomdiscriminatorsynonyms")
-            if common.valid_action(record_exists, row_values):
-                query, data = generate_db_query(env, row_values, event, start)
-                database.execute_db_query(db_connection, query, data, row_number, row_values, summary_count_dict,env)
+            record_exists = database.does_record_exist(db_connection, row_values, "symptomdiscriminatorsynonyms", event["env"])
+            if common.valid_action(record_exists, row_values, event["env"]):
+                query, data = generate_db_query(row_values, event["env"])
+                database.execute_db_query(
+                    db_connection, query, data, row_number, row_values, summary_count_dict, event["env"]
+                )
+            else:
+                common.increment_summary_count(summary_count_dict, "ERROR", event["env"])
         except Exception as e:
-            logger.log_for_error(
+            logger.log_for_error(  event["env"],
                 "Processing {0} data failed with |{1}|{2}| => {3}".format(
                     task_description, row_values["id"], row_values["name"], str(e)
                 ),
