@@ -7,7 +7,10 @@ file_path = "application.hk.symptomdiscriminatorsynonyms.handler"
 mock_event = {"filename": "mock_filename", "env": "mock_env", "bucket": "mock_bucket"}
 mock_context = ""
 mock_env = "mock_env"
+mock_bucket = "NoSuchBucket"
 start = ""
+mock_filename = "test/sds.csv"
+
 
 # example 2001,"Symptom discriminator description","DELETE"
 csv_sds_id = 2001
@@ -15,22 +18,55 @@ csv_sds_desc = "SDS Automated Test"
 csv_sds_action = "INSERT"
 
 
+
+@patch(f"{file_path}.database.connect_to_database", return_value="db_connection")
+@patch(f"{file_path}.message.send_failure_slack_message", return_value = None)
+@patch(f"{file_path}.message.send_start_message", return_value = None)
+@patch(f"{file_path}.common.retrieve_file_from_bucket", return_value = None)
+def test_handler_exception(mock_db,mock_failure_message,mock_message_start,mock_s3):
+    """Test clean up function handling exceptions from downstream functions"""
+    payload = generate_event_payload()
+    with pytest.raises(Exception):
+        handler.request(event=payload, context=None)
+
+
+@patch(f"{file_path}.common.initialise_summary_count")
+@patch(f"{file_path}.common.archive_file")
+@patch(f"{file_path}.message.send_failure_slack_message")
+@patch(f"{file_path}.message.send_success_slack_message")
+@patch(f"{file_path}.database.close_connection", return_value="")
 @patch(f"{file_path}.database.connect_to_database", return_value="db_connection")
 @patch(f"{file_path}.common.retrieve_file_from_bucket", return_value="csv_file")
 @patch(f"{file_path}.common.process_file", return_value={"1": {"id": "00001", "description": "Mock Create SDS", "action": "CREATE"}, "2": {"id": "00002", "description": "Mock Update SDS", "action": "UPDATE"}, "3": {"id": "00003", "description": "Mock Delete SDS", "action": "DELETE"}})
 @patch(f"{file_path}.process_extracted_data")
-@patch(f"{file_path}.common.report_summary_counts", return_value="Symptom discriminator synonyms updated: 1, inserted: 1, deleted: 1")
+@patch(f"{file_path}.common.report_summary_counts", return_value="SDS updated: 1, inserted: 1, deleted: 1")
 @patch(f"{file_path}.message.send_start_message")
-def test_request_success(mock_send_start_message,   mock_report_summary_count , mock_process_extracted_data, mock_process_file, mock_retrieve_file_from_bucket, mock_db_connection):
-    result = handler.request(mock_event, mock_context)
-    assert result == "Symptom discriminator synonyms execution successful"
+def test_handler_pass(mock_send_start_message,
+mock_report_summary_count ,
+mock_process_extracted_data,
+mock_process_file,
+mock_retrieve_file_from_bucket,
+mock_db_connection,
+mock_close_connection,
+mock_send_success_slack_message,
+mock_send_failure_slack_message,
+mock_archive_file,
+mock_summary_count):
+    """Test top level request calls downstream functions - success"""
+    payload = generate_event_payload()
+    result = handler.request(event=payload, context=None)
+    assert result == "Symptom discriminator synonyms execution completed"
     mock_send_start_message.assert_called_once()
     mock_process_extracted_data.assert_called_once()
+    mock_summary_count.assert_called_once()
     mock_report_summary_count.assert_called_once()
     mock_process_file.assert_called_once()
     mock_retrieve_file_from_bucket.assert_called_once()
     mock_db_connection.assert_called_once()
-
+    mock_close_connection.assert_called_once()
+    mock_archive_file.assert_called_once()
+    mock_send_success_slack_message.assert_called_once()
+    assert mock_send_failure_slack_message.call_count == 0
 
 def test_create_query():
     test_values = {
@@ -184,3 +220,8 @@ def test_process_extracted_data_multiple_records(mock_exist,mock_valid_action,mo
     assert mock_exist.call_count == 2
     assert mock_generate.call_count == 2
     assert mock_execute.call_count == 2
+
+
+def generate_event_payload():
+    """Utility function to generate dummy event data"""
+    return {"filename": mock_filename, "env": mock_env, "bucket": mock_bucket}

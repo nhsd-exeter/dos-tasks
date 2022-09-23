@@ -16,13 +16,28 @@ def request(event, context):
     env = event["env"]
     filename = event["filename"]
     bucket = event["bucket"]
-    summary_count_dict = common.initialise_summary_count()
-    db_connection = database.connect_to_database(env)
-    csv_file = common.retrieve_file_from_bucket(bucket, filename, event, start)
-    csv_data = common.process_file(csv_file, event, csv_column_count, summary_count_dict)
-    process_extracted_data(env, db_connection, csv_data, summary_count_dict, event, start)
-    common.report_summary_counts(summary_count_dict, env)
-    return task_description + " execution successful"
+    logger.log_for_audit(env, "action:task started")
+    try:
+        summary_count_dict = common.initialise_summary_count()
+        db_connection = database.connect_to_database(env)
+        csv_file = common.retrieve_file_from_bucket(bucket, filename, event, start)
+        csv_data = common.process_file(csv_file, event, csv_column_count, summary_count_dict)
+        if csv_data == {}:
+            message.send_failure_slack_message(event, start, summary_count_dict)
+        else:
+            process_extracted_data(env, db_connection, csv_data, summary_count_dict, event, start)
+            message.send_success_slack_message(event, start, summary_count_dict)
+        common.report_summary_counts(summary_count_dict, env)
+        logger.log_for_audit(env, "action:task complete")
+    except Exception as e:
+        logger.log_for_error(env, "Problem {}".format(e))
+        message.send_failure_slack_message(event, start)
+    finally:
+        if db_connection is not None:
+            database.close_connection(event, db_connection)
+        common.archive_file(bucket, filename, event, start)
+    return task_description + " execution completed"
+
 
 
 def generate_db_query(row_values, env):
