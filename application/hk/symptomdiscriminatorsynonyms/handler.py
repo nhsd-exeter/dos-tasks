@@ -17,11 +17,11 @@ def request(event, context):
     filename = event["filename"]
     bucket = event["bucket"]
     summary_count_dict = common.initialise_summary_count()
-    db_connection = database.connect_to_database(env, event, start)
+    db_connection = database.connect_to_database(env)
     csv_file = common.retrieve_file_from_bucket(bucket, filename, event, start)
     csv_data = common.process_file(csv_file, event, start, data_column_count)
     process_extracted_data(env, db_connection, csv_data, summary_count_dict, event, start)
-    common.report_summary_counts(task_description, summary_count_dict)
+    common.report_summary_counts(task_description, env)
     return task_description + " execution successful"
 
 
@@ -74,7 +74,7 @@ def process_extracted_data(env, db_connection, row_data, summary_count_dict, eve
             record_exists = database.does_record_exist(db_connection, row_values, "symptomdiscriminatorsynonyms")
             if common.valid_action(record_exists, row_values):
                 query, data = generate_db_query(env, row_values, event, start)
-                database.execute_db_query(db_connection, query, data, row_number, row_values, summary_count_dict)
+                database.execute_db_query(db_connection, query, data, row_number, row_values, summary_count_dict,env)
         except Exception as e:
             logger.log_for_error(
                 "Processing {0} data failed with |{1}|{2}| => {3}".format(
