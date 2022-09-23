@@ -19,7 +19,7 @@ def request(event, context):
     summary_count_dict = common.initialise_summary_count()
     db_connection = database.connect_to_database(env)
     csv_file = common.retrieve_file_from_bucket(bucket, filename, event, start)
-    csv_data = common.process_file(csv_file, event, start, data_column_count)
+    csv_data = common.process_file(csv_file, event, csv_column_count, summary_count_dict)
     process_extracted_data(env, db_connection, csv_data, summary_count_dict, event, start)
     common.report_summary_counts(task_description, env)
     return task_description + " execution successful"
