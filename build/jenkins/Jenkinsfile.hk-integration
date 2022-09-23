@@ -1,132 +1,158 @@
 pipeline {
-  agent any
-  parameters {
-    // choice(name: 'Task', choices: ['none', 'all', 'filter', 'referralroles','symptomgroups','symptomdiscriminators'], description: 'Select which task to deploy')
-    // choice(name: 'Test', choices: ['none', 'integration'], description: 'Select target database (cron jobs ONLY)')
-    string(
-      description: 'Housekeeping task to run',
-      name: 'Task',
-      defaultValue: 'all'
-    )
-    string(
-      description: 'Test use tba',
-      name: 'Test',
-      defaultValue: 'integration'
-    )
-    // string(
-    //   description: 'R53 record for RDS cluster',
-    //   name: 'DB_HOST',
-    //   defaultValue: ''
-    // )
-    // string(
-    //   description: 'Name of database on RDS instance',
-    //   name: 'PIPELINE_DATABASE',
-    //   defaultValue: ''
-    // )
-  }
-
-  options {
-    buildDiscarder(logRotator(daysToKeepStr: "7", numToKeepStr: "13"))
-    disableConcurrentBuilds()
-    parallelsAlwaysFailFast()
-    timeout(time: 25, unit: "MINUTES")
-  }
-  environment {
-    BUILD_DATE = sh(returnStdout: true, script: "date -u +'%Y-%m-%dT%H:%M:%S%z'").trim()
-    PROFILE = "integration"
-    ENVIRONMENT = "integration"
-    TASK = "${params.Task}"
-    TEST_TASK = "${params.Test}"
-    DB_BUILD_JOB_NAME = 'dos-parent-pipeline-tasks-integration'
-    // TODO eventually develop
-    PATHWAYSDOS_V4_BRANCH = 'task%2FDPTS-811-Poc-int-test'
-    DELETE = 'false'
-  }
-  triggers { pollSCM("* * * * *") }
-  stages {
-    stage("Show Configuration") {
-      steps {
-        script { sh "make show-configuration" }
-      }
-    }
-    stage('Triggering build of database') {
-      steps {
-        echo "Running pathwaysdos_v4 pipeline ${DB_BUILD_JOB_NAME}"
-        // echo "Passing DELETE parameter: ${params.DELETE}"
-        build job: "${DB_BUILD_JOB_NAME}/${PATHWAYSDOS_V4_BRANCH}",\
-        parameters: [booleanParam(name:'DELETE' , value:"${DELETE}".toBoolean())]
-      }
-    }
-    stage("Build and push hk lambdas") {
-      when { expression { params.Task != "none" } }
-      steps {
-        script { sh "make unit-test TASK=${params.Task}" }
-        script { sh "make build TASK=${params.Task}" }
-        script { sh "make push TASK=${params.Task}" }
-      }
-    }
-    stage("Check key infrastructure exists") {
-      when { expression { params.Task != "none" } }
-      steps {
-        script {
-          echo "Checking infrastructure defined as STACKS"
-          catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
-              sh "make plan-stacks PROFILE=${PROFILE}"
-          }
-        }
-      }
-    }
-    stage("Provision hk lambdas") {
-      when { expression { params.Task != "none" } }
-      steps {
-        script {
-          echo "Provision hk lambdas"
-          catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
-              sh "make provision PROFILE=${PROFILE} TASK=${params.Task}"
-          }
-        }
-      }
-    }
-    stage("Load test file to s3") {
-      when { expression { params.Task != "none" } }
-      steps {
-        script {
-          echo "Load file to s3"
-          catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
-              sh "make return_code_test PASS=True"
-          }
-        }
-      }
-    }
-    stage("Check archive") {
-      when { expression { params.Task != "none" } }
-      steps {
-        script { echo "Check file archived" }
-      }
-    }
-    stage("Check results") {
-      when { expression { params.Task != "none" } }
-      steps {
-        script { echo "Check results" }
-      }
+    agent any
+    parameters {
+        // choice(name: 'Task', choices: ['none', 'all', 'filter', 'referralroles','symptomgroups','symptomdiscriminators'], description: 'Select which task to deploy')
+        // choice(name: 'Test', choices: ['none', 'integration'], description: 'Select target database (cron jobs ONLY)')
+        string(
+            description: 'Housekeeping task to run',
+            name: 'Task',
+            defaultValue: 'all'
+        )
+        string(
+            description: 'Test use tba',
+            name: 'Test',
+            defaultValue: 'integration'
+        )
+        // string(
+        //   description: 'R53 record for RDS cluster',
+        //   name: 'DB_HOST',
+        //   defaultValue: ''
+        // )
+        // string(
+        //   description: 'Name of database on RDS instance',
+        //   name: 'PIPELINE_DATABASE',
+        //   defaultValue: ''
+        // )
     }
 
-    stage("Check and remove older versions") {
-      when { expression { params.Task != "none" } }
-      steps {
-        script { echo "Check and remove" }
-      }
+    options {
+        buildDiscarder(logRotator(daysToKeepStr: '7', numToKeepStr: '13'))
+        disableConcurrentBuilds()
+        parallelsAlwaysFailFast()
+        timeout(time: 25, unit: 'MINUTES')
     }
+    environment {
+        BUILD_DATE = sh(returnStdout: true, script: "date -u +'%Y-%m-%dT%H:%M:%S%z'").trim()
+        PROFILE = 'integration'
+        ENVIRONMENT = 'integration'
+        TASK = "${params.Task}"
+        TEST_TASK = "${params.Test}"
+        DB_BUILD_JOB_NAME = 'dos-parent-pipeline-tasks-integration'
+        DB_DROP_JOB_NAME = 'dos-functional-pipeline-delete'
+        NAMESPACE = ${ENVIRONMENT}
+        DB_PREFIX = 'integration'
+        DB_SUFFIX = 'tasks'
+        PIPELINE_DATABASE = "${DB_PREFIX}_db_${DB_SUFFIX}"
+        DB_HOST = ''
+        SLACK_CHANNEL = 'dos-tasks-pipeline-notifications-nonprod'
+        // TODO eventually develop
+        PATHWAYSDOS_V4_BRANCH = 'task%2FDPTS-811-Poc-int-test'
+        //TODO because we don't want to delete ns at start - not needed ?
+        DELETE = 'false'
+    }
+    triggers { pollSCM("* * * * *") }
+    stages {
+        stage('Show Configuration') {
+            steps {
+                script { sh 'make show-configuration' }
+            }
+        }
+        stage('Triggering build of database') {
+            steps {
+                echo "Running pathwaysdos_v4 pipeline ${DB_BUILD_JOB_NAME}"
+                // echo "Passing DELETE parameter: ${params.DELETE}"
+                build job: "${DB_BUILD_JOB_NAME}/${PATHWAYSDOS_V4_BRANCH}",\
+                parameters: [string(name:'NAMESPACE' , value:"${NAMESPACE}"),
+                string(name:'PIPELINE_DATABASE' , value:"${PIPELINE_DATABASE}"),
+                string(name:'DB_HOST' , value:"${DB_HOST}"),
+                string(name:'SLACK_CHANNEL' , value:"${SLACK_CHANNEL}")
+                ]
+            }
+        }
+        stage("Build and push hk lambdas") {
+            when { expression { params.Task != "none" } }
+            steps {
+                script { sh "make unit-test TASK=${params.Task}" }
+                script { sh "make build TASK=${params.Task}" }
+                script { sh "make push TASK=${params.Task}" }
+            }
+        }
+        stage('Check key infrastructure exists') {
+            when { expression { params.Task != "none" } }
+            steps {
+                script {
+                    echo 'Checking infrastructure defined as STACKS'
+                    catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                        sh "make plan-stacks PROFILE=${PROFILE}"
+                    }
+                }
+            }
+        }
+        stage('Provision hk lambdas') {
+            when { expression { params.Task != "none" } }
+            steps {
+                script {
+                    echo 'Provision hk lambdas'
+                    catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                        sh "make provision PROFILE=${PROFILE} TASK=${params.Task}"
+                    }
+                }
+            }
+        }
 
-    stage("Teardown hk infrastructure") {
-      when { expression { params.Task != "none" } }
-      steps {
-        script { echo "Teardown infrastructure" }
-      }
+        stage('Load test file to s3') {
+            when { expression { params.Task != "none" } }
+            steps {
+                script {
+                    echo 'Load file to s3'
+                    catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                        sh 'make return_code_test PASS=True'
+                    }
+                }
+            }
+        }
+
+        stage('Check archive') {
+            when { expression { params.Task != "none" } }
+            steps {
+                script { echo 'Check file archived' }
+            }
+        }
+
+        stage('Check results') {
+            when { expression { params.Task != "none" } }
+            steps {
+                script { echo 'Check results' }
+            }
+        }
+
+        stage('Check and remove older versions') {
+            when { expression { params.Task != "none" } }
+            steps {
+                script { echo 'Check and remove' }
+            }
+        }
+
+        stage('Teardown hk infrastructure') {
+            when { expression { params.Task != "none" } }
+            steps {
+                script { echo 'Teardown infrastructure' }
+            }
+        }
+// TODO restore later
+        // stage('Delete namespace and drop database') {
+        //     when { expression { params.Task != "none" } }
+        //     steps {
+        //         echo "Running pathwaysdos_v4 pipeline ${DB_DROP_JOB_NAME}"
+        //         // parameters required to use existing delete job
+        //         // NAMESPACE NAMESPACE_RD NAMESPACE_CRON PIPELINE_DATABASE DB_HOST SLACK_CHANNEL
+        //         build job: "${DB_DROP_JOB_NAME}/${PATHWAYSDOS_V4_BRANCH}",\
+        //         parameters: [booleanParam(name:'DELETE' , value:"${DELETE}".toBoolean())]
+        //     }
+        // }
     }
-  }
-  post {
-    always { sh "echo end" }
-    cleanup { sh "echo clean" }
-  }
+    post {
+        always { sh 'echo end' }
+        cleanup { sh 'echo clean' }
+    }
 }
