@@ -37,9 +37,9 @@ def test_handler_exception(mock_db,mock_failure_message,mock_message_start,mock_
 @patch(f"{file_path}.database.close_connection", return_value="")
 @patch(f"{file_path}.database.connect_to_database", return_value="db_connection")
 @patch(f"{file_path}.common.retrieve_file_from_bucket", return_value="csv_file")
-@patch(f"{file_path}.common.process_file", return_value={"1": {"id": "00001", "description": "Mock Create SDS", "action": "CREATE"}, "2": {"id": "00002", "description": "Mock Update SDS", "action": "UPDATE"}, "3": {"id": "00003", "description": "Mock Delete SDS", "action": "DELETE"}})
+@patch(f"{file_path}.common.process_file", return_value={"1": {"id": "00001", "description": "Mock Create SDS", "action": "CREATE"}, "2": {"id": "00002", "description": "Mock Delete SDS", "action": "DELETE"}})
 @patch(f"{file_path}.process_extracted_data")
-@patch(f"{file_path}.common.report_summary_counts", return_value="SDS updated: 1, inserted: 1, deleted: 1")
+@patch(f"{file_path}.common.report_summary_counts", return_value="SDS updated: 0, inserted: 1, deleted: 1")
 @patch(f"{file_path}.message.send_start_message")
 def test_handler_pass(mock_send_start_message,
 mock_report_summary_count ,
@@ -82,19 +82,6 @@ def test_create_query():
     assert data == (10, "Test Data")
 
 
-def test_update_query():
-    test_values = {
-        "id": 10,
-        "name": "Test Data",
-        "action": "UPDATE"
-    }
-    query, data = handler.update_query(test_values)
-    assert query == """
-        update pathwaysdos.symptomdiscriminatorsynonyms set name = (%s) where symptomdiscriminatorid = (%s);
-    """
-    assert data == ("Test Data", 10)
-
-
 def test_delete_query():
     test_values = {
         "id": 10,
@@ -109,50 +96,34 @@ def test_delete_query():
 
 
 @patch(f"{file_path}.create_query", return_value="Create Query")
-@patch(f"{file_path}.update_query", return_value="Update Query")
 @patch(f"{file_path}.delete_query", return_value="Delete Query")
-def test_generate_db_query_create(mock_delete_query, mock_update_query, mock_create_query):
+def test_generate_db_query_create(mock_delete_query,  mock_create_query):
     mock_row_values = {"id": "00001", "description": "Mock Create SDS", "action": "CREATE"}
     result = handler.generate_db_query(mock_row_values,mock_env)
     assert result == "Create Query"
     mock_delete_query.assert_not_called()
-    mock_update_query.assert_not_called()
     mock_create_query.assert_called_once_with(mock_row_values)
 
-@patch(f"{file_path}.create_query", return_value="Create Query")
-@patch(f"{file_path}.update_query", return_value="Update Query")
-@patch(f"{file_path}.delete_query", return_value="Delete Query")
-def test_generate_db_query_update(mock_delete_query, mock_update_query, mock_create_query):
-    mock_row_values = {"id": "00002", "description": "Mock Update SDS", "action": "UPDATE"}
-    result = handler.generate_db_query(mock_row_values,mock_env)
-    assert result == "Update Query"
-    mock_delete_query.assert_not_called()
-    mock_update_query.assert_called_once_with(mock_row_values)
-    mock_create_query.assert_not_called()
 
 
 @patch(f"{file_path}.create_query", return_value="Create Query")
-@patch(f"{file_path}.update_query", return_value="Update Query")
 @patch(f"{file_path}.delete_query", return_value="Delete Query")
-def test_generate_db_query_delete(mock_delete_query, mock_update_query, mock_create_query):
+def test_generate_db_query_delete(mock_delete_query,  mock_create_query):
     mock_row_values = {"id": "00003", "description": "Mock Delete SDS", "action": "DELETE"}
     result = handler.generate_db_query(mock_row_values,mock_env)
     assert result == "Delete Query"
     mock_delete_query.assert_called_once_with(mock_row_values)
-    mock_update_query.assert_not_called()
     mock_create_query.assert_not_called()
 
 
 @patch(f"{file_path}.create_query", return_value="Create Query")
-@patch(f"{file_path}.update_query", return_value="Update Query")
 @patch(f"{file_path}.delete_query", return_value="Delete Query")
-def test_generate_db_query_raises_error(mock_delete_query, mock_update_query, mock_create_query):
-    mock_row_values = {"id": "00001", "description": "Mock Create SDS", "action": "UNKNOWN"}
+def test_generate_db_query_raises_error(mock_delete_query, mock_create_query):
+    mock_row_values = {"id": "00001", "description": "Mock Create SDS", "action": "UPDATE"}
     with pytest.raises(psycopg2.DatabaseError) as assertion:
         result = handler.generate_db_query(mock_row_values,mock_env)
-    assert str(assertion.value) == "Database Action UNKNOWN is invalid"
+    assert str(assertion.value) == "Database Action UPDATE is invalid"
     mock_delete_query.assert_not_called()
-    mock_update_query.assert_not_called()
     mock_create_query.assert_not_called()
 
 

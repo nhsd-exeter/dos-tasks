@@ -39,12 +39,9 @@ def request(event, context):
     return task_description + " execution completed"
 
 
-
 def generate_db_query(row_values, env):
     if row_values["action"] == ("CREATE"):
         return create_query(row_values)
-    elif row_values["action"] == ("UPDATE"):
-        return update_query(row_values)
     elif row_values["action"] == ("DELETE"):
         return delete_query(row_values)
     else:
@@ -60,17 +57,6 @@ def create_query(row_values):
     data = (
         row_values["id"],
         row_values["name"],
-    )
-    return query, data
-
-
-def update_query(row_values):
-    query = """
-        update pathwaysdos.symptomdiscriminatorsynonyms set name = (%s) where symptomdiscriminatorid = (%s);
-    """
-    data = (
-        row_values["name"],
-        row_values["id"],
     )
     return query, data
 
