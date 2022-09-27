@@ -69,12 +69,21 @@ def delete_query(row_values):
     return query, data
 
 
+def record_exists_query(row_values):
+    query = """
+        select * from pathwaysdos.symptomdiscriminatorsynonyms where symptomdiscriminatorid = (%s) and name = (%s)
+    """
+    data = (
+        row_values["id"],
+        row_values["name"],
+    )
+    return query, data
+
+
 def process_extracted_data(env, db_connection, row_data, summary_count_dict, event, start):
     for row_number, row_values in row_data.items():
         try:
-            record_exists = database.does_record_exist(
-                db_connection, row_values, "symptomdiscriminatorsynonyms", event["env"]
-            )
+            record_exists = does_sds_record_exist(db_connection, row_values, event["env"])
             if common.valid_action(record_exists, row_values, event["env"]):
                 query, data = generate_db_query(row_values, event["env"])
                 database.execute_db_query(
@@ -90,3 +99,25 @@ def process_extracted_data(env, db_connection, row_data, summary_count_dict, eve
                 ),
             )
             raise e
+
+
+def does_sds_record_exist(db_connection, row_values, env):
+    """
+    Checks to see if record already exists in db table with the symptomdiscriminatorid and name
+    """
+    record_exists = False
+    try:
+        with db_connection.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
+            query, data = generate_db_query(row_values, env)
+            database.execute_resultset_query(env, db_connection, query, data)
+            if cursor.rowcount != 0:
+                record_exists = True
+    except (Exception, psycopg2.Error) as e:
+        logger.log_for_error(
+            env,
+            "Select from symptomdiscriminatorsynonyms by sdid and name failed - {0} , {1} => {2}".format(
+                data["id"], data["name"], str(e)
+            ),
+        )
+        raise e
+    return record_exists
