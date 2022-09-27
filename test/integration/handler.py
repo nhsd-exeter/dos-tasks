@@ -1,15 +1,20 @@
 # import psycopg2
 # import psycopg2.extras
-from utilities import logger, message, common, database
+# from utilities import logger, message, common, database
 from datetime import datetime
 import os
+#  subprocess import only needed if i can get psql sub process example to work from here
+# https://gist.github.com/valferon/4d6ebfa8a7f3d4e84085183609d10f14
+# import subprocess
 
-# Handler called after all hk lambdas in list of lambdas have been triggered
-# Iterates thru same list of hk lambdas run and for each one executes a bespoke query
-# Checks result of query against expected results - eg should be a new record with id of x
-# If tests pass for hk job A proceed to check job B otherwise fail fast
+# Handler to
+# create database with name passed in as a parameter eg DB_NAME=integration
+# run data set up sql script - one for all hk jobs
+# Checks result of individual hk job against expected results - eg should be a new record with id of x
+# Currently call individually per hk job to check results
 # Need to pass db_name as per cron
 # Need function per hk job
+# Needs to know the database
 
 
 def request(event, context):
@@ -29,6 +34,8 @@ def request(event, context):
         database.close_connection(event, db_connection)
     return success
 
+def create_db_from_template(user, db_master_password, db_host, port, database_name):
+    return True
 
 def create_symptomgroup_query(row_values):
     query = """

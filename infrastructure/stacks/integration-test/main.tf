@@ -1,4 +1,4 @@
-module "referralroles_lambda" {
+module "integration_test_lambda" {
   source             = "../../modules/lambda"
   name               = "integrationtest"
   image_uri          = "${var.aws_ecr}/${var.project_group_short}/${var.project_name_short}/integrationtest:${var.image_version}"

@@ -314,6 +314,15 @@ copy-stt-unit-test-files:
 remove-temp-stt-unit-test-files:
 	rm -rf $(APPLICATION_DIR)/hk/stt/test-files
 
+unit-test-integration-test: #Run unit tests for the integration test lambda
+	rm -rf $(APPLICATION_TEST_DIR)/integration/test/utilities
+	mkdir $(APPLICATION_TEST_DIR)/integration/test/utilities
+	cp $(APPLICATION_DIR)/utilities/*.py $(APPLICATION_TEST_DIR)/integration/test/utilities
+	make docker-run-tools IMAGE=$$(make _docker-get-reg)/tester:latest \
+		DIR=test/integration/ \
+		CMD="python3 -m pytest test/"
+	rm -rf $(APPLICATION_TEST_DIR)/integration/test/utilities
+
 unit-test-task: # Run task unit tests - mandatory: TASK=[name of task]
 	if [ "$(TASK)" = "stt" ]; then
 		make copy-stt-unit-test-files
@@ -543,6 +552,7 @@ create-artefact-repositories: # Create ECR repositories to store the artefacts -
 	make docker-create-repository NAME=cron-removeoldchanges
 	make docker-create-repository NAME=hk-symptomdiscriminatorsynonyms
 	make docker-create-repository NAME=hk-symptomgroupdiscriminators
+	make docker-create-repository NAME=integration-test-lambda
 
 create-tester-repository: # Create ECR repositories to store the artefacts
 	make docker-create-repository NAME=tester
@@ -555,6 +565,12 @@ return_code_test:### mandatory [PASS] True or anything
 	else
 		exit 1
 	fi
+
+run_integration_unit_test:
+		make docker-run-tools IMAGE=$$(make _docker-get-reg)/tester:latest \
+		DIR=test/integration/ \
+		CMD="python3 -m pytest test/"
+
 # ==============
 # ==============================================================================
 
