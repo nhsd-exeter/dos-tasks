@@ -83,10 +83,11 @@ def record_exists_query(row_values):
     return query, data
 
 
-def process_extracted_data( db_connection, row_data, summary_count_dict, event):
+def process_extracted_data(db_connection, row_data, summary_count_dict, event):
     for row_number, row_values in row_data.items():
         try:
             record_exists = does_sds_record_exist(db_connection, row_values, event["env"])
+            print(record_exists)
             if common.valid_action(record_exists, row_values, event["env"]):
                 query, data = generate_db_query(row_values, event["env"])
                 database.execute_db_query(
