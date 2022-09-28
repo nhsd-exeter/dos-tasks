@@ -243,29 +243,6 @@ unit-test: # Runs unit tests for task - mandatory: TASK=[task]
 clean: # Clean up project
 	make docker-network-remove
 
-# --------------------------------------
-# Integration test targets
-load_integration_test_files_to_s3:  ### Upload all test csv files to bucket - mandatory: FILEPATH=[local path (inside container)],BUCKET=[name of folder in bucket]
-	args="--recursive --include 'int_*.csv'"
-	make aws-s3-upload FILE=$(FILEPATH) URI=$(BUCKET) ARGS=$$args
-
-check_integration_test_files:## iterate over integration test folder mandatory: [MAX_ATTEMPTS]  BUCKET=[name of folder in bucket]
-	int_test_folder="test/integration/test-files/*"
-	for f in $$int_test_folder
-	do
-		filename=`basename "$$f"`
-		make poll_s3_for_file MAX_ATTEMPTS=$(MAX_ATTEMPTS) BUCKET=$(BUCKET) FILENAME=$$filename
-	done
-
-load_single_integration_test_file_to_s3:  ### Upload single file to bucket - mandatory: FILENAME=[name of file],BUCKET=[name of folder in bucket]
-	path="test/integration/test-files"
-	make aws-s3-upload FILE=$$path/$(FILENAME) URI=$(BUCKET)/$(FILENAME)
-
-check_single_integration_test_file:## check if file has been archived mandatory: [MAX_ATTEMPTS]  BUCKET=[name of folder in bucket], FILENAME=[name of file]
-	# path="test/integration/test-files"
-	filename=`basename "$(FILENAME)"`
-	make poll_s3_for_file MAX_ATTEMPTS=$(MAX_ATTEMPTS) BUCKET=$(BUCKET) FILENAME=$$filename
-
 poll_s3_for_file: ## retries look up for file in bucket [MAX_ATTEMPTS] mandatory [BUCKET] [FILENAME]
 	echo "Checking bucket $(BUCKET) for file $(FILENAME)"
 	for i in {1..$(MAX_ATTEMPTS)}
@@ -313,15 +290,6 @@ copy-stt-unit-test-files:
 
 remove-temp-stt-unit-test-files:
 	rm -rf $(APPLICATION_DIR)/hk/stt/test-files
-
-unit-test-integration-test: #Run unit tests for the integration test lambda
-	rm -rf $(APPLICATION_TEST_DIR)/integration/test/utilities
-	mkdir $(APPLICATION_TEST_DIR)/integration/test/utilities
-	cp $(APPLICATION_DIR)/utilities/*.py $(APPLICATION_TEST_DIR)/integration/test/utilities
-	make docker-run-tools IMAGE=$$(make _docker-get-reg)/tester:latest \
-		DIR=test/integration/ \
-		CMD="python3 -m pytest test/"
-	rm -rf $(APPLICATION_TEST_DIR)/integration/test/utilities
 
 unit-test-task: # Run task unit tests - mandatory: TASK=[name of task]
 	if [ "$(TASK)" = "stt" ]; then
@@ -550,6 +518,7 @@ create-artefact-repositories: # Create ECR repositories to store the artefacts -
 	make docker-create-repository NAME=hk-stt
 	make docker-create-repository NAME=cron-ragreset
 	make docker-create-repository NAME=cron-removeoldchanges
+	make docker-create-repository NAME=hk-integration-test
 	make docker-create-repository NAME=hk-symptomdiscriminatorsynonyms
 	make docker-create-repository NAME=hk-symptomgroupdiscriminators
 	make docker-create-repository NAME=integration-test-lambda
@@ -559,6 +528,62 @@ create-tester-repository: # Create ECR repositories to store the artefacts
 
 # ==============
 #  temp poc
+# --------------------------------------
+# Integration test targets
+
+copy-temp-integration-test-files:
+	rm -rf $(APPLICATION_DIR)/hk/integration
+	mkdir $(APPLICATION_DIR)/hk/integration
+	mkdir $(APPLICATION_DIR)/hk/integration/model
+	mkdir $(APPLICATION_DIR)/hk/integration/test
+	mkdir $(APPLICATION_DIR)/hk/integration/utilities
+	cp $(APPLICATION_DIR)/utilities/*.py $(APPLICATION_DIR)/hk/integration/utilities
+	cp $(APPLICATION_TEST_DIR)/integration/lambda/* $(APPLICATION_DIR)/hk/integration
+	cp $(APPLICATION_TEST_DIR)/integration/model/* $(APPLICATION_DIR)/hk/integration/model
+	cp $(APPLICATION_TEST_DIR)/integration/test/* $(APPLICATION_DIR)/hk/integration/test
+
+remove-temp-integration-test-files:
+	rm -rf $(APPLICATION_DIR)/hk/integration
+
+unit-test-integration-test: #Run unit tests for the integration test lambda
+	make copy-temp-integration-test-files
+	make docker-run-tools IMAGE=$$(make _docker-get-reg)/tester:latest \
+		DIR=application/hk/integration/ \
+		CMD="python3 -m pytest test/"
+	make remove-temp-integration-test-files
+
+coverage-integration: ## Run test coverage - mandatory: PROFILE=[profile] TASK=[task] FORMAT=[xml/html]
+	make copy-temp-integration-test-files
+	pythonpath=/tmp/.packages:/project/application/utilities
+	pythonpath+=:/project/application/hk/
+	make python-code-coverage-format IMAGE=$$(make _docker-get-reg)/tester:latest \
+		EXCLUDE=*/test/*,hk/*/utilities/*,cron/*/utilities/* \
+		ARGS="--env TASK=utilities --env SLACK_WEBHOOK_URL=https://slackmockurl.com/ --env PROFILE=local \
+			--env PYTHONPATH=$$pythonpath"
+	make remove-temp-integration-test-files
+
+
+load_integration_test_files_to_s3:  ### Upload all test csv files to bucket - mandatory: FILEPATH=[local path (inside container)],BUCKET=[name of folder in bucket]
+	args="--recursive --include 'int_*.csv'"
+	make aws-s3-upload FILE=$(FILEPATH) URI=$(BUCKET) ARGS=$$args
+
+check_integration_test_files:## iterate over integration test folder mandatory: [MAX_ATTEMPTS]  BUCKET=[name of folder in bucket]
+	int_test_folder="test/integration/test-files/*"
+	for f in $$int_test_folder
+	do
+		filename=`basename "$$f"`
+		make poll_s3_for_file MAX_ATTEMPTS=$(MAX_ATTEMPTS) BUCKET=$(BUCKET) FILENAME=$$filename
+	done
+
+load_single_integration_test_file_to_s3:  ### Upload single file to bucket - mandatory: FILENAME=[name of file],BUCKET=[name of folder in bucket]
+	path="test/integration/test-files"
+	make aws-s3-upload FILE=$$path/$(FILENAME) URI=$(BUCKET)/$(FILENAME)
+
+check_single_integration_test_file:## check if file has been archived mandatory: [MAX_ATTEMPTS]  BUCKET=[name of folder in bucket], FILENAME=[name of file]
+	# path="test/integration/test-files"
+	filename=`basename "$(FILENAME)"`
+	make poll_s3_for_file MAX_ATTEMPTS=$(MAX_ATTEMPTS) BUCKET=$(BUCKET) FILENAME=$$filename
+
 return_code_test:### mandatory [PASS] True or anything
 	if [ "$(PASS)" == "True" ]; then
 		exit 0
@@ -570,6 +595,13 @@ run_integration_unit_test:
 		make docker-run-tools IMAGE=$$(make _docker-get-reg)/tester:latest \
 		DIR=test/integration/ \
 		CMD="python3 -m pytest test/"
+
+run-integration-test-data-set: # [PROFILE]
+	echo Running $(TF_VAR_db_check_login_lambda_function_name) for $(USERNAME) against $(ENDPOINT_TYPE)
+	aws lambda invoke --function-name $(TF_VAR_db_check_login_lambda_function_name) --log-type Tail --payload '{ "task": "data", "endpoint_type": "$(ENDPOINT_TYPE)","database_name": "$(DATABASE_TO_MIGRATE)", "username": "$(USERNAME)", "passkey": "$(PASSKEY)" }' $(ENDPOINT_TYPE)-$(USERNAME)-response.json | jq -r .LogResult - | base64 -d | tee $(ENDPOINT_TYPE)-$(USERNAME)-response.log
+	echo "== Response output =="
+	cat $(ENDPOINT_TYPE)-$(USERNAME)-response.json
+	echo
 
 # ==============
 # ==============================================================================

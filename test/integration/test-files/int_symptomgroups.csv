@@ -1,4 +1,3 @@
-2000,"First New Symptom Group","CREATE"
-2001,"Second New Symptom Group Created","CREATE"
-2001,"Second Symptom Group Updated","UPDATE"
-2000,"First New Symptom Group","DELETE"
+2000,"Integration Test Create","CREATE"
+2001,"Integration Test Update","UPDATE"
+2002,"Skin Problems","DELETE"
