@@ -150,7 +150,7 @@ def test_process_extracted_data_error_check_exists_passes(mock_exists,mock_db_co
     mock_db_connect = ""
     summary_count = {}
     with pytest.raises(Exception):
-        handler.process_extracted_data(mock_env,mock_db_connect, row_data, summary_count, mock_event, start)
+        handler.process_extracted_data(mock_db_connect, row_data, summary_count, mock_event)
     assert mock_exists.call_count == 1
 
 @patch("psycopg2.connect")
@@ -165,7 +165,7 @@ def test_process_extracted_data_single_record(mock_exist,mock_valid_action,mock_
     row_data[0]=csv_dict
     summary_count = {}
     summary_count = {}
-    handler.process_extracted_data(mock_env,mock_db_connect, row_data, summary_count, mock_event, start)
+    handler.process_extracted_data(mock_db_connect, row_data, summary_count, mock_event)
     mock_valid_action.assert_called_once()
     mock_exist.assert_called_once()
     mock_generate.assert_called_once()
@@ -186,7 +186,7 @@ def test_process_extracted_data_multiple_records(mock_exist,mock_valid_action,mo
     row_data[1]=csv_dict
     print(row_data[1])
     summary_count = {}
-    handler.process_extracted_data(mock_env,mock_db_connect, row_data, summary_count, mock_event, start)
+    handler.process_extracted_data(mock_db_connect, row_data, summary_count, mock_event)
     assert mock_valid_action.call_count == 2
     assert mock_exist.call_count == 2
     assert mock_generate.call_count == 2

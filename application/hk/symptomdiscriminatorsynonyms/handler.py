@@ -25,7 +25,7 @@ def request(event, context):
         if csv_data == {}:
             message.send_failure_slack_message(event, start, summary_count_dict)
         else:
-            process_extracted_data(env, db_connection, csv_data, summary_count_dict, event, start)
+            process_extracted_data(db_connection, csv_data, summary_count_dict, event)
             message.send_success_slack_message(event, start, summary_count_dict)
         common.report_summary_counts(summary_count_dict, env)
         logger.log_for_audit(env, "action:task complete")
@@ -83,7 +83,7 @@ def record_exists_query(row_values):
     return query, data
 
 
-def process_extracted_data(env, db_connection, row_data, summary_count_dict, event, start):
+def process_extracted_data( db_connection, row_data, summary_count_dict, event):
     for row_number, row_values in row_data.items():
         try:
             record_exists = does_sds_record_exist(db_connection, row_values, event["env"])
@@ -111,12 +111,13 @@ def does_sds_record_exist(db_connection, row_values, env):
     record_exists = False
     try:
         with db_connection.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
-            query, data = generate_db_query(row_values, env)
+            query, data = record_exists_query(row_values)
             database.execute_resultset_query(env, db_connection, query, data)
             if cursor.rowcount != 0:
                 record_exists = True
     except (Exception, psycopg2.Error) as e:
-        logger.log_for_error( env,
+        logger.log_for_error(
+            env,
             "Select from symptomdiscriminatorsynonyms by sdid and name failed - {0} , {1} => {2}".format(
                 data["id"], data["name"], str(e)
             ),
