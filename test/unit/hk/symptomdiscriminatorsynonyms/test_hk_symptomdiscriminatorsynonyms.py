@@ -90,9 +90,9 @@ def test_delete_query():
     }
     query, data = handler.delete_query(test_values)
     assert query == """
-        delete from pathwaysdos.symptomdiscriminatorsynonyms where symptomdiscriminatorid = (%s)
+        delete from pathwaysdos.symptomdiscriminatorsynonyms where symptomdiscriminatorid = (%s) and name = (%s)
     """
-    assert data == (10,)
+    assert data == (10, "Test Data")
 
 
 @patch(f"{file_path}.create_query", return_value="Create Query")

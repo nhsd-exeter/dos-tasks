@@ -63,9 +63,12 @@ def create_query(row_values):
 
 def delete_query(row_values):
     query = """
-        delete from pathwaysdos.symptomdiscriminatorsynonyms where symptomdiscriminatorid = (%s)
+        delete from pathwaysdos.symptomdiscriminatorsynonyms where symptomdiscriminatorid = (%s) and name = (%s)
     """
-    data = (row_values["id"],)
+    data = (
+        row_values["id"],
+        row_values["name"],
+    )
     return query, data
 
 
@@ -113,8 +116,7 @@ def does_sds_record_exist(db_connection, row_values, env):
             if cursor.rowcount != 0:
                 record_exists = True
     except (Exception, psycopg2.Error) as e:
-        logger.log_for_error(
-            env,
+        logger.log_for_error( env,
             "Select from symptomdiscriminatorsynonyms by sdid and name failed - {0} , {1} => {2}".format(
                 data["id"], data["name"], str(e)
             ),
