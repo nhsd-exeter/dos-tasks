@@ -112,15 +112,15 @@ def does_sds_record_exist(db_connection, row_values, env):
     record_exists = False
     try:
         with db_connection.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
-            query, data = record_exists_query(row_values)
-            database.execute_resultset_query(env, db_connection, query, data)
+            cursor.execute(record_exists_query(row_values))
+            print(cursor.rowcount)
             if cursor.rowcount != 0:
                 record_exists = True
     except (Exception, psycopg2.Error) as e:
         logger.log_for_error(
             env,
             "Select from symptomdiscriminatorsynonyms by sdid and name failed - {0} , {1} => {2}".format(
-                data["id"], data["name"], str(e)
+                row_values["id"], row_values["name"], str(e)
             ),
         )
         raise e
