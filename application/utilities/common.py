@@ -31,10 +31,8 @@ def valid_action(record_exists, row_data, env, invalid_action_type="false"):
         valid_action = True
     if not record_exists and row_data["action"] in ("CREATE"):
         valid_action = True
-    if invalid_action_type == "UPDATE" and record_exists and row_data["action"] in ( "DELETE"):
+    if invalid_action_type == "UPDATE" and record_exists and row_data["action"] in ("DELETE"):
         valid_action = True
-    if invalid_action_type == "UPDATE":
-        valid_action = False
     if not valid_action:
         log_for_error(
             env, "validation:Invalid action {} for the record with ID {}".format(row_data["action"], row_data["id"])
