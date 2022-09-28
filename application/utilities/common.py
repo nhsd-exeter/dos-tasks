@@ -24,13 +24,15 @@ def check_csv_format(csv_row, expected_col_count, env, count):
         return False
 
 
-def valid_action(record_exists, row_data, env):
+def valid_action(record_exists, row_data, env, invalid_action_type="false"):
     """Returns True if action is valid; otherwise returns False"""
     valid_action = False
-    if record_exists and row_data["action"] in ("UPDATE", "DELETE"):
+    if invalid_action_type == "false" and record_exists and row_data["action"] in ("UPDATE", "DELETE"):
         valid_action = True
-    if not record_exists and row_data["action"] in ("CREATE"):
+    if not record_exists and invalid_action_type == "false" and row_data["action"] in ("CREATE"):
         valid_action = True
+    if invalid_action_type == "UPDATE":
+        valid_action = False
     if not valid_action:
         log_for_error(
             env, "validation:Invalid action {} for the record with ID {}".format(row_data["action"], row_data["id"])

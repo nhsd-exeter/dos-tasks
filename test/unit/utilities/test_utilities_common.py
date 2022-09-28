@@ -80,6 +80,20 @@ def test_invalid_action_lower_case():
     csv_dict["action"] = "delete"
     assert not common.valid_action(True,csv_dict, 'test')
 
+def test_invalid_action_parameter():
+    """Test validation of additional parameter that sets invalid action"""
+    csv_dict = {}
+    csv_dict["id"] = csv_id
+    csv_dict["action"] = "DELETE"
+    assert not common.valid_action(True,csv_dict, 'test', "DELETE")
+
+def test_invalid_action_parameter_lowercase():
+    """Test validation of additional parameter that sets invalid action"""
+    csv_dict = {}
+    csv_dict["id"] = csv_id
+    csv_dict["action"] = "delete"
+    assert not common.valid_action(True,csv_dict, 'test', "delete")
+
 
 @patch(f"{file_path}.utilities.s3.S3")
 @patch(f"{file_path}.utilities.logger")
