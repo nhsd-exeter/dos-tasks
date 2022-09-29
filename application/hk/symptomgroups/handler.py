@@ -36,7 +36,7 @@ def request(event, context):
         message.send_failure_slack_message(event, start)
     finally:
         if db_connection is not None:
-            database.close_connection(event, db_connection)
+            database.close_connection(env, db_connection)
         common.archive_file(bucket, filename, event, start)
     return task_description + " execution completed"
 
