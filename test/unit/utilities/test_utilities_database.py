@@ -253,8 +253,9 @@ def test_execute_db_query_success(mock_db_connect,mock_summary):
 
 
 # TODO move inside class later
+@patch(f"{file_path}.common.increment_summary_count")
 @patch("psycopg2.connect")
-def test_execute_db_query_failure(mock_db_connect):
+def test_execute_db_query_failure(mock_db_connect,mock_summary):
     """Test code to handle exception and rollback when executing query"""
     line = """2001,"New Symptom Group","CREATE"\n"""
     data = ("New Symptom Group", "None", 2001)
@@ -267,6 +268,7 @@ def test_execute_db_query_failure(mock_db_connect):
     # TODO the loop in logging parameters seems to break this test
     # mock_db_connect.rollback.assert_called_once()
     mock_db_connect.cursor().close.assert_called_once()
+    mock_summary.assert_called_once()
 
 
 # TODO move inside class later
