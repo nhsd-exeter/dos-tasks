@@ -99,6 +99,7 @@ def execute_query(env, db_connection, query, data):
     finally:
         cursor.close()
 
+
 def execute_script(env, db_connection, script):
     cursor = db_connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
     try:
