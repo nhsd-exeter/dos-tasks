@@ -35,13 +35,9 @@ def get_symptom_groups_data(env, db_connection):
         )
     return result_set
 
-def create_symptom_group_query(row_values):
-    query = """
-        select id, name, zcodeexists from pathwaysdos.symptomgroups where id in (%s) order by id asc;
-    """
-    data = (
-        row_values["id"],
-    )
+def create_symptom_group_query(symptom_group_ids):
+    query = """select id, name, zcodeexists from pathwaysdos.symptomgroups where id in (%s) order by id asc;"""
+    data = symptom_group_ids
     return query, data
 
 # That a new record exists with id of 2000 and description of "Integration Test Create"

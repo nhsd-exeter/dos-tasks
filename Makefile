@@ -232,6 +232,7 @@ delete-stack-for-cron-job: ## create a stack for cron and db - cron tasks only m
 
 unit-test: # Runs unit tests for task - mandatory: TASK=[task]
 	make unit-test-utilities
+	make unit-test-integration-test
 	if [ "$(TASK)" == "all" ]; then
 		for task in $$(echo $(TASKS) | tr "," "\n"); do
 			make unit-test-task TASK="$$task"
@@ -278,6 +279,9 @@ run-integration-result-check: # PROFILE SQL_FILE - name of SQL file to run INSTA
 
 
 build-tester: # Builds image used for testing - mandatory: PROFILE=[name]
+	mkdir $(DOCKER_DIR)/tester/assets/integration
+	mkdir $(DOCKER_DIR)/tester/assets/integration/data-files
+	cp $(APPLICATION_TEST_DIR)/integration/data-files/* $(DOCKER_DIR)/tester/assets/integration/data-files
 	make docker-image NAME=tester
 
 push-tester: # Pushes image used for testing - mandatory: PROFILE=[name]
@@ -522,6 +526,7 @@ create-artefact-repositories: # Create ECR repositories to store the artefacts -
 	make docker-create-repository NAME=hk-symptomdiscriminatorsynonyms
 	make docker-create-repository NAME=hk-symptomgroupdiscriminators
 	make docker-create-repository NAME=integration-test-lambda
+	make docker-create-repository NAME=hk-integration-tester
 
 create-tester-repository: # Create ECR repositories to store the artefacts
 	make docker-create-repository NAME=tester
@@ -530,6 +535,30 @@ create-tester-repository: # Create ECR repositories to store the artefacts
 #  temp poc
 # --------------------------------------
 # Integration test targets
+
+build-hk-integration-tester-image: # Builds integration test image
+	rm -rf $(DOCKER_DIR)/hk-integration-tester/assets/*
+	rm -rf $(DOCKER_DIR)/hk-integration-tester/Dockerfile.effective
+	rm -rf $(DOCKER_DIR)/hk-integration-tester/.version
+	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/utilities
+	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/model
+	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/data-files
+
+	cp -r $(APPLICATION_TEST_DIR)/integration/lambda/*.py $(DOCKER_DIR)/hk-integration-tester/assets/
+	cp -r $(APPLICATION_TEST_DIR)/integration/lambda/requirements.txt $(DOCKER_DIR)/hk-integration-tester/assets/
+	cp -r $(APPLICATION_TEST_DIR)/integration/model/*.py $(DOCKER_DIR)/hk-integration-tester/assets/model/
+	cp -r $(APPLICATION_TEST_DIR)/integration/data-files/*.sql $(DOCKER_DIR)/hk-integration-tester/assets/data-files/
+	cp -r $(APPLICATION_DIR)/utilities/*.py $(DOCKER_DIR)/hk-integration-tester/assets/utilities/
+	make docker-image NAME=hk-integration-tester
+	rm -rf $(DOCKER_DIR)/hk-integration-tester/assets/*
+
+push-hk-integration-tester-image: #
+	make docker-push NAME=hk-integration-tester
+
+provision-hk-integration-tester: ## mandatory: PROFILE=[name], TASK=[integration-test]
+	echo "Provisioning $(PROFILE) lambda for hk-integration tester"
+	eval "$$(make secret-fetch-and-export-variables)"
+	make terraform-apply-auto-approve STACK=$(TASK) PROFILE=$(PROFILE)
 
 copy-temp-integration-test-files:
 	rm -rf $(APPLICATION_DIR)/hk/integration
@@ -544,6 +573,42 @@ copy-temp-integration-test-files:
 
 remove-temp-integration-test-files:
 	rm -rf $(APPLICATION_DIR)/hk/integration
+	rm -rf $(APPLICATION_DIR)/hk/integration-data-files
+
+coverage-full:	### Run test coverage - mandatory: PROFILE=[profile] TASK=[task] FORMAT=[xml/html]
+	make copy-stt-coverage-test-files
+	make copy-temp-integration-test-files
+	if [ "$(TASK)" = "" ]; then
+		tasks=$(TASKS)
+	else
+		tasks=$(TASK)
+	fi
+	pythonpath=/tmp/.packages:/project/application/utilities
+	for task in $$(echo $$tasks | tr "," "\n"); do
+		task_type=$$(make task-type NAME=$$task)
+		pythonpath+=:/project/application/$$task_type/
+		rm -rf $(APPLICATION_DIR)/$$task_type/$$task/test
+		rm -rf $(APPLICATION_DIR)/$$task_type/$$task/utilities
+		mkdir $(APPLICATION_DIR)/$$task_type/$$task/test
+		mkdir $(APPLICATION_DIR)/$$task_type/$$task/utilities
+		cp $(APPLICATION_TEST_DIR)/unit/$$task_type/$$task/* $(APPLICATION_DIR)/$$task_type/$$task/test
+		cp $(APPLICATION_DIR)/utilities/*.py $(APPLICATION_DIR)/$$task_type/$$task/utilities
+	done
+	rm -rf $(APPLICATION_DIR)/utilities/test
+	mkdir $(APPLICATION_DIR)/utilities/test
+	cp $(APPLICATION_TEST_DIR)/unit/utilities/* $(APPLICATION_DIR)/utilities/test
+	make python-code-coverage-format IMAGE=$$(make _docker-get-reg)/tester:latest \
+		EXCLUDE=*/test/*,hk/*/utilities/*,cron/*/utilities/* \
+		ARGS="--env TASK=utilities --env SLACK_WEBHOOK_URL=https://slackmockurl.com/ --env PROFILE=local \
+			--env PYTHONPATH=$$pythonpath"
+	for task in $$(echo $$tasks | tr "," "\n"); do
+		task_type=$$(make task-type NAME=$$task)
+		rm -rf $(APPLICATION_DIR)/$$task_type/$$task/test
+		rm -rf $(APPLICATION_DIR)/$$task_type/$$task/utilities
+	done
+	rm -rf $(APPLICATION_DIR)/utilities/test
+	make remove-temp-stt-coverage-test-files
+	make remove-temp-integration-test-files
 
 unit-test-integration-test: #Run unit tests for the integration test lambda
 	make copy-temp-integration-test-files
@@ -552,15 +617,16 @@ unit-test-integration-test: #Run unit tests for the integration test lambda
 		CMD="python3 -m pytest test/"
 	make remove-temp-integration-test-files
 
-coverage-integration: ## Run test coverage - mandatory: PROFILE=[profile] TASK=[task] FORMAT=[xml/html]
-	make copy-temp-integration-test-files
-	pythonpath=/tmp/.packages:/project/application/utilities
-	pythonpath+=:/project/application/hk/
-	make python-code-coverage-format IMAGE=$$(make _docker-get-reg)/tester:latest \
-		EXCLUDE=*/test/*,hk/*/utilities/*,cron/*/utilities/* \
-		ARGS="--env TASK=utilities --env SLACK_WEBHOOK_URL=https://slackmockurl.com/ --env PROFILE=local \
-			--env PYTHONPATH=$$pythonpath"
-	make remove-temp-integration-test-files
+# TODO remove see coverage-full and eventually coverage
+# coverage-integration: ## Run test coverage - mandatory: PROFILE=[profile] TASK=[task] FORMAT=[xml/html]
+# 	make copy-temp-integration-test-files
+# 	pythonpath=/tmp/.packages:/project/application/utilities
+# 	pythonpath+=:/project/application/hk/
+# 	make python-code-coverage-format IMAGE=$$(make _docker-get-reg)/tester:latest \
+# 		EXCLUDE=*/test/*,hk/*/utilities/*,cron/*/utilities/* \
+# 		ARGS="--env TASK=utilities --env SLACK_WEBHOOK_URL=https://slackmockurl.com/ --env PROFILE=local \
+# 			--env PYTHONPATH=$$pythonpath"
+# 	make remove-temp-integration-test-files
 
 
 load_integration_test_files_to_s3:  ### Upload all test csv files to bucket - mandatory: FILEPATH=[local path (inside container)],BUCKET=[name of folder in bucket]

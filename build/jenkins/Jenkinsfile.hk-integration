@@ -45,6 +45,8 @@ pipeline {
         DB_PREFIX = 'integration'
         DB_SUFFIX = 'tasks'
         PIPELINE_DATABASE = "${DB_PREFIX}_db_${DB_SUFFIX}"
+        BUCKET = "uec-dos-tasks-nonprod-housekeeping-bucket/${ENVIRONMENT}"
+        MAX_ATTEMPTS = 3
         DB_HOST = 'uec-core-dos-pipeline-primary.dos-db-rds'
         SLACK_CHANNEL = 'dos-tasks-pipeline-notifications-nonprod'
         // TODO eventually develop
@@ -81,6 +83,13 @@ pipeline {
                 script { sh "make push TASK=${params.Task}" }
             }
         }
+        stage('Build and push integration test lambda') {
+            when { expression { params.Task != "none" } }
+            steps {
+                script { sh "make build-hk-integration-tester-image" }
+                script { sh "make push-hk-integration-tester-image" }
+            }
+        }
         stage('Check key infrastructure exists') {
             when { expression { params.Task != "none" } }
             steps {
@@ -90,6 +99,13 @@ pipeline {
                         sh "make plan-stacks PROFILE=${PROFILE}"
                     }
                 }
+            }
+        }
+        stage('Provision integration test lambda') {
+            when { expression { params.Task != "none" } }
+            steps {
+                script { echo 'Provision integration test lambda' }
+                script { sh "make provision-hk-integration-tester TASK=integration-test" }
             }
         }
         stage('Provision hk lambdas') {
@@ -103,23 +119,26 @@ pipeline {
                 }
             }
         }
-
-        stage('Load test file to s3') {
+        stage('Load symptomgroup test file to s3') {
             when { expression { params.Task != "none" } }
             steps {
                 script {
                     echo 'Load file to s3'
                     catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
-                        sh 'make return_code_test PASS=True'
+                        sh "make load_single_integration_test_file_to_s3 FILENAME=int_symptomgroups.csv BUCKET=${BUCKET}"
                     }
                 }
             }
         }
-
-        stage('Check archive') {
+        stage('Check archive for symptomgroup') {
             when { expression { params.Task != "none" } }
             steps {
-                script { echo 'Check file archived' }
+                script {
+                  echo 'Check file archived'
+                  catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                        sh "make check_single_integration_test_file MAX_ATTEMPTS=${MAX_ATTEMPTS} FILENAME=int_symptomgroups.csv BUCKET=${BUCKET}"
+                    }
+                }
             }
         }
 

@@ -12,5 +12,6 @@ RUN set -eux && \
         postgresql-dev
 # Copy Python requirements
 COPY assets/requirements.txt /
+COPY assets/integration/data-files /data-files
 # Install Python requirements
 RUN python -m pip install -r /requirements.txt --upgrade

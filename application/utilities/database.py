@@ -99,6 +99,17 @@ def execute_query(env, db_connection, query, data):
     finally:
         cursor.close()
 
+def execute_script(env, db_connection, script):
+    cursor = db_connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    try:
+        cursor.execute(open(script, "r").read())
+        db_connection.commit()
+    except Exception as e:
+        logger.log_for_error(env, "Script {} failed. Rolling back. Error: {}".format(script, e))
+        db_connection.rollback()
+    finally:
+        cursor.close()
+
 
 class DB:
     def __init__(self) -> None:
