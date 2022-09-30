@@ -37,21 +37,6 @@ def test_csv_line():
     assert csv_dict["1"]["capacitymodel"] == str(v_capacitymodel)
     assert csv_dict["1"]["capacityreset"] == str(v_capacityreset)
 
-def test_csv_line():
-    """Test data extracted from valid csv"""
-    csv_rows = {}
-    csv_rows["1"]={"id": csv_st_id, "name": csv_st_name, "nationalranking": csv_st_rank, "action": csv_st_action}
-    csv_dict = handler.extract_query_data_from_csv(csv_rows,mock_env)
-    assert len(csv_dict) == 1
-    assert len(csv_dict["1"]) == 7
-    assert csv_dict["1"]["id"] == csv_st_id
-    assert csv_dict["1"]["name"] == str(csv_st_name)
-    assert csv_dict["1"]["nationalranking"] == csv_st_rank
-    assert csv_dict["1"]["action"] == str(csv_st_action)
-    assert csv_dict["1"]["searchcapacitystatus"] == v_searchcapacitystatus
-    assert csv_dict["1"]["capacitymodel"] == str(v_capacitymodel)
-    assert csv_dict["1"]["capacityreset"] == str(v_capacityreset)
-
 def test_csv_line_lc():
     """Test lower case action in csv is converted to u/c"""
     csv_rows = {}

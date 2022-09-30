@@ -77,7 +77,6 @@ def execute_resultset_query(env, db_connection, query, data):
     try:
         cursor.execute(query, data)
         rows = cursor.fetchall()
-        print(rows)
         db_connection.commit()
         return rows
         # TODO add logging as required
