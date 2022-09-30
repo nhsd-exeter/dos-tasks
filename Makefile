@@ -643,6 +643,7 @@ check_integration_test_files:## iterate over integration test folder mandatory: 
 	done
 
 load_single_integration_test_file_to_s3:  ### Upload single file to bucket - mandatory: FILENAME=[name of file],BUCKET=[name of folder in bucket]
+	eval "$$(make aws-assume-role-export-variables)"
 	path="test/integration/test-files"
 	make aws-s3-upload FILE=$$path/$(FILENAME) URI=$(BUCKET)/$(FILENAME)
 
