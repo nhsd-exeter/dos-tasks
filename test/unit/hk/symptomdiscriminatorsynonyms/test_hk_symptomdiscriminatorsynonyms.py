@@ -29,6 +29,17 @@ def test_handler_exception(mock_db,mock_failure_message,mock_message_start,mock_
     with pytest.raises(Exception):
         handler.request(event=payload, context=None)
 
+@patch(f"{file_path}.database.connect_to_database", return_value="db_connection")
+@patch(f"{file_path}.message.send_failure_slack_message", return_value = None)
+@patch(f"{file_path}.message.send_start_message", return_value = None)
+@patch(f"{file_path}.common.retrieve_file_from_bucket", return_value = None)
+@patch(f"{file_path}.common.process_file", return_value = {})
+def test_handler_empty_file(mock_db,mock_failure_message,mock_message_start,mock_s3, mock_csv_file):
+    """Test clean up function handling exceptions from downstream functions"""
+    payload = generate_event_payload()
+    with pytest.raises(Exception):
+        handler.request(event=payload, context=None)
+    mock_failure_message.assert_called_once()
 
 @patch(f"{file_path}.common.initialise_summary_count")
 @patch(f"{file_path}.common.archive_file")
@@ -95,6 +106,19 @@ def test_delete_query():
     assert data == (10, "Test Data")
 
 
+def test_record_exists_query():
+    test_values = {
+        "id": 10,
+        "name": "Test Data",
+        "action": "DELETE"
+    }
+    query, data = handler.record_exists_query(test_values)
+    assert query == """
+        select * from pathwaysdos.symptomdiscriminatorsynonyms where symptomdiscriminatorid = (%s) and name = (%s)
+    """
+    assert data == (10, "Test Data")
+
+
 @patch(f"{file_path}.create_query", return_value="Create Query")
 @patch(f"{file_path}.delete_query", return_value="Delete Query")
 def test_generate_db_query_create(mock_delete_query,  mock_create_query):
@@ -126,7 +150,24 @@ def test_generate_db_query_raises_error(mock_delete_query, mock_create_query):
     mock_delete_query.assert_not_called()
     mock_create_query.assert_not_called()
 
-
+@patch("psycopg2.connect")
+@patch(f"{file_path}.common.increment_summary_count")
+@patch(f"{file_path}.does_sds_record_exist", return_value=True)
+@patch(f"{file_path}.common.valid_action", return_value=False)
+def test_process_extracted_data_valid_action_fails(mock_valid_action,mock_exists,mock_increment,mock_db_connect):
+    """Test error handling when extracting data and record exist check fails"""
+    row_data = {}
+    csv_dict = {}
+    csv_dict["id"] = csv_sds_id
+    csv_dict["name"] = csv_sds_desc
+    csv_dict["action"] = "INVALID"
+    row_data[0]=csv_dict
+    summary_count = {}
+    event = generate_event_payload()
+    handler.process_extracted_data(mock_db_connect, row_data, summary_count,event)
+    assert mock_exists.call_count == 1
+    assert mock_valid_action.call_count == 1
+    assert mock_increment.call_count == 1
 
 @patch("psycopg2.connect")
 def test_process_extracted_data_error_check_exists_fails(mock_db_connect):
@@ -191,6 +232,40 @@ def test_process_extracted_data_multiple_records(mock_exist,mock_valid_action,mo
     assert mock_exist.call_count == 2
     assert mock_generate.call_count == 2
     assert mock_execute.call_count == 2
+
+
+
+@patch("psycopg2.connect")
+def test_sds_record_exists_true(mock_db_connect):
+    """Test correct data passed to check record exists - returning true"""
+    csv_dict = {}
+    csv_dict["id"] = csv_sds_id
+    csv_dict["name"] = csv_sds_desc
+    csv_dict["action"] = csv_sds_action
+    csv_dict["zcode"] = None
+    mock_db_connect.cursor.return_value.__enter__.return_value.rowcount = 1
+    assert handler.does_sds_record_exist(mock_db_connect,csv_dict,'test')
+
+@patch("psycopg2.connect")
+def test_does_sds_record_exist_false(mock_db_connect):
+    """Test correct data passed to check record exists - returning false"""
+    csv_dict = {}
+    csv_dict["id"] = csv_sds_id
+    csv_dict["name"] = csv_sds_desc
+    csv_dict["action"] = "DELETE"
+    mock_db_connect.cursor.return_value.__enter__.return_value.rowcount = 0
+    assert not handler.does_sds_record_exist(mock_db_connect,csv_dict,'test')
+
+@patch("psycopg2.connect")
+def test_does_sds_record_exist_exception(mock_db_connect):
+    """Test throwing of exception """
+    csv_dict = {}
+    csv_dict["id"] = csv_sds_id
+    csv_dict["name"] = csv_sds_desc
+    csv_dict["action"] = csv_sds_action
+    mock_db_connect = ""
+    with pytest.raises(Exception):
+        handler.does_sds_record_exist(mock_db_connect,csv_dict,'test')
 
 
 def generate_event_payload():

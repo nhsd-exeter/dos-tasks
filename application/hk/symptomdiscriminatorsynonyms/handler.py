@@ -93,6 +93,7 @@ def process_extracted_data(db_connection, row_data, summary_count_dict, event):
                     db_connection, query, data, row_number, row_values, summary_count_dict, event["env"]
                 )
             else:
+                print("here")
                 common.increment_summary_count(summary_count_dict, "ERROR", event["env"])
         except Exception as e:
             logger.log_for_error(
