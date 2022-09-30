@@ -6,7 +6,7 @@ from datetime import datetime
 csv_column_count = 3
 data_column_count = 3
 
-task_description = "Symptom group discriminators"
+task_description = "Symptom group symptom discriminators"
 
 
 def request(event, context):
@@ -54,7 +54,7 @@ def create_query(row_values):
     query = """
         insert into pathwaysdos.symptomgroupsymptomdiscriminators
         (symptomgroupid, symptomdiscriminatorid) values (%s, %s)
-        returning id1, id2;
+        returning symptomgroupid, symptomdiscriminatorid;
     """
     data = (
         row_values["id1"],

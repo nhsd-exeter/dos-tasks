@@ -481,7 +481,7 @@ create-artefact-repositories: # Create ECR repositories to store the artefacts -
 	make docker-create-repository NAME=cron-ragreset
 	make docker-create-repository NAME=cron-removeoldchanges
 	make docker-create-repository NAME=hk-symptomdiscriminatorsynonyms
-	make docker-create-repository NAME=hk-symptomgroupdiscriminators
+	make docker-create-repository NAME=hk-symptomgroupsymptomdiscriminators
 
 create-tester-repository: # Create ECR repositories to store the artefacts
 	make docker-create-repository NAME=tester

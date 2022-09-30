@@ -3,7 +3,7 @@ import psycopg2
 import pytest
 from .. import handler
 
-file_path = "application.hk.symptomgroupdiscriminators.handler"
+file_path = "application.hk.symptomgroupsymptomdiscriminators.handler"
 mock_event = {"filename": "mock_filename", "env": "mock_env", "bucket": "mock_bucket"}
 mock_context = ""
 mock_env = "mock_env"
@@ -66,7 +66,7 @@ mock_summary_count):
     """Test top level request calls downstream functions - success"""
     payload = generate_event_payload()
     result = handler.request(event=payload, context=None)
-    assert result == "Symptom group discriminators execution completed"
+    assert result == "Symptom group symptom discriminators execution completed"
     mock_send_start_message.assert_called_once()
     mock_process_extracted_data.assert_called_once()
     mock_summary_count.assert_called_once()
@@ -89,7 +89,7 @@ def test_create_query():
     assert query == """
         insert into pathwaysdos.symptomgroupsymptomdiscriminators
         (symptomgroupid, symptomdiscriminatorid) values (%s, %s)
-        returning id1, id2;
+        returning symptomgroupid, symptomdiscriminatorid;
     """
     assert data == (10, 123)
 
