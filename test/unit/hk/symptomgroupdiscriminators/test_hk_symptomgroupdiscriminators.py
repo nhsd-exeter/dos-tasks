@@ -87,7 +87,8 @@ def test_create_query():
     }
     query, data = handler.create_query(test_values)
     assert query == """
-        insert into pathwaysdos.symptomgroupsymptomdiscriminators (symptomgroupid, symptomdiscriminatorid) values (%s, %s)
+        insert into pathwaysdos.symptomgroupsymptomdiscriminators
+        (symptomgroupid, symptomdiscriminatorid) values (%s, %s)
         returning id1, id2;
     """
     assert data == (10, 123)
@@ -101,7 +102,8 @@ def test_delete_query():
     }
     query, data = handler.delete_query(test_values)
     assert query == """
-        delete from pathwaysdos.symptomgroupsymptomdiscriminators where symptomgroupid = (%s) and symptomdiscriminatorid = (%s)
+        delete from pathwaysdos.symptomgroupsymptomdiscriminators
+        where symptomgroupid = (%s) and symptomdiscriminatorid = (%s)
     """
     assert data == (10, 123)
 
@@ -114,7 +116,8 @@ def test_record_exists_query():
     }
     query, data = handler.record_exists_query(test_values)
     assert query == """
-        select * from pathwaysdos.symptomgroupsymptomdiscriminators where symptomgroupid = (%s) and symptomdiscriminatorid = (%s)
+        select * from pathwaysdos.symptomgroupsymptomdiscriminators
+        where symptomgroupid = (%s) and symptomdiscriminatorid = (%s)
     """
     assert data == (10, 123)
 
