@@ -630,6 +630,7 @@ unit-test-integration-test: #Run unit tests for the integration test lambda
 
 
 load_integration_test_files_to_s3:  ### Upload all test csv files to bucket - mandatory: FILEPATH=[local path (inside container)],BUCKET=[name of folder in bucket]
+	eval "$$(make aws-assume-role-export-variables)"
 	args="--recursive --include 'int_*.csv'"
 	make aws-s3-upload FILE=$(FILEPATH) URI=$(BUCKET) ARGS=$$args
 
