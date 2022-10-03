@@ -37,6 +37,8 @@ def valid_action(record_exists, row_data, env, invalid_action_type="false"):
         log_for_error(
             env, "validation:Invalid action {} for the record with ID {}".format(row_data["action"], row_data["id"])
         )
+    print('valid action')
+    print(valid_action)
     return valid_action
 
 
