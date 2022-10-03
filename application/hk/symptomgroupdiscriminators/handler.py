@@ -1,6 +1,6 @@
 import psycopg2
 import psycopg2.extras
-from utilities import logger, message, common, database
+from utilities import logger, message, common, database, common_file_processing
 from datetime import datetime
 
 csv_column_count = 3
@@ -21,7 +21,7 @@ def request(event, context):
         summary_count_dict = common.initialise_summary_count()
         db_connection = database.connect_to_database(env)
         csv_file = common.retrieve_file_from_bucket(bucket, filename, event, start)
-        csv_data = common.process_ids_file(csv_file, event, csv_column_count, summary_count_dict)
+        csv_data = common_file_processing.process_ids_file(csv_file, event, csv_column_count, summary_count_dict)
         if csv_data == {}:
             print("here")
             message.send_failure_slack_message(start, summary_count_dict)
@@ -91,6 +91,7 @@ def process_extracted_data(db_connection, row_data, summary_count_dict, event):
     for row_number, row_values in row_data.items():
         try:
             record_exists = does_sgd_record_exist(db_connection, row_values, event["env"])
+
             if common.valid_action(record_exists, row_values, event["env"], "UPDATE"):
                 query, data = generate_db_query(row_values, event["env"])
                 database.execute_db_query(
@@ -118,7 +119,9 @@ def does_sgd_record_exist(db_connection, row_values, env):
         with db_connection.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
             query, data = record_exists_query(row_values)
             print(data)
+            print(query)
             cursor.execute(query, data)
+            print(cursor.rowcount)
             if cursor.rowcount != 0:
                 record_exists = True
     except (Exception, psycopg2.Error) as e:

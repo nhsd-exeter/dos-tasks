@@ -33,7 +33,7 @@ def test_handler_exception(mock_db,mock_failure_message,mock_message_start,mock_
 @patch(f"{file_path}.message.send_failure_slack_message", return_value = None)
 @patch(f"{file_path}.message.send_start_message", return_value = None)
 @patch(f"{file_path}.common.retrieve_file_from_bucket", return_value = None)
-@patch(f"{file_path}.common.process_ids_file", return_value = {})
+@patch(f"{file_path}.common_file_processing.process_ids_file", return_value = {})
 def test_handler_empty_file(mock_db,mock_failure_message,mock_message_start,mock_s3, mock_csv_file):
     """Test clean up function handling exceptions from downstream functions"""
     payload = generate_event_payload()
@@ -48,7 +48,7 @@ def test_handler_empty_file(mock_db,mock_failure_message,mock_message_start,mock
 @patch(f"{file_path}.database.close_connection", return_value="")
 @patch(f"{file_path}.database.connect_to_database", return_value="db_connection")
 @patch(f"{file_path}.common.retrieve_file_from_bucket", return_value="csv_file")
-@patch(f"{file_path}.common.process_ids_file", return_value={"1": {"id1": "00001", "id2": "100001", "action": "CREATE"}, "2": {"id1": "00002", "sgid": "110001", "action": "DELETE"}})
+@patch(f"{file_path}.common_file_processing.process_ids_file", return_value={"1": {"id1": "00001", "id2": "100001", "action": "CREATE"}, "2": {"id1": "00002", "sgid": "110001", "action": "DELETE"}})
 @patch(f"{file_path}.process_extracted_data")
 @patch(f"{file_path}.common.report_summary_counts", return_value="SGD updated: 0, inserted: 1, deleted: 1")
 @patch(f"{file_path}.message.send_start_message")

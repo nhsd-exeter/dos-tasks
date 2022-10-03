@@ -127,23 +127,6 @@ def process_file(csv_file, event, expected_col_count, summary_count_dict):
     return lines
 
 
-def process_ids_file(csv_file, event, expected_col_count, summary_count_dict):
-    """returns dictionary of row data keyed on row number col1=id1, col2=id2, col3=action"""
-    lines = {}
-    count = 0
-    csv_reader = csv.reader(csv_file.split("\n"))
-    for line in csv_reader:
-        count += 1
-        if len(line) == 0:
-            increment_summary_count(summary_count_dict, "BLANK", event["env"])
-            continue
-        if check_csv_format(line, expected_col_count, event["env"], count) and check_csv_values(line, event["env"]):
-            lines[str(count)] = {"id1": line[0], "id2": line[1], "action": line[2]}
-        else:
-            increment_summary_count(summary_count_dict, "ERROR", event["env"])
-    return lines
-
-
 def report_summary_counts(summary_count_dict, env):
     log_for_audit(env, slack_summary_counts(summary_count_dict))
 
