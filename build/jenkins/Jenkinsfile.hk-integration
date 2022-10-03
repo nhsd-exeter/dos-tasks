@@ -163,21 +163,21 @@ pipeline {
             }
         }
 // TODO restore later
-        stage('Delete namespace and drop database') {
-            when { expression { params.Task != "none" } }
-            steps {
-                echo "Running pathwaysdos_v4 pipeline ${DB_DROP_JOB_NAME}"
-                // parameters required to use existing delete job
-                // NAMESPACE NAMESPACE_RD NAMESPACE_CRON PIPELINE_DATABASE DB_HOST SLACK_CHANNEL
-                build job: "${DB_DROP_JOB_NAME}/${PATHWAYSDOS_V4_BRANCH}",\
-                parameters: [string(name:'NAMESPACE' , value:"${NAMESPACE}"),\
-                string(name:'NAMESPACE_RD' , value:"${NAMESPACE_RD}"),\
-                string(name:'NAMESPACE_CRON' , value:"${NAMESPACE_CRON}"),\
-                string(name:'SLACK_CHANNEL' , value:"${SLACK_CHANNEL}"),\
-                string(name:'PIPELINE_DATABASE' , value:"${PIPELINE_DATABASE}"),\
-                string(name:'DB_HOST' , value:"${DB_HOST}")]
-            }
-        }
+        // stage('Delete namespace and drop database') {
+        //     when { expression { params.Task != "none" } }
+        //     steps {
+        //         echo "Running pathwaysdos_v4 pipeline ${DB_DROP_JOB_NAME}"
+        //         // parameters required to use existing delete job
+        //         // NAMESPACE NAMESPACE_RD NAMESPACE_CRON PIPELINE_DATABASE DB_HOST SLACK_CHANNEL
+        //         build job: "${DB_DROP_JOB_NAME}/${PATHWAYSDOS_V4_BRANCH}",\
+        //         parameters: [string(name:'NAMESPACE' , value:"${NAMESPACE}"),\
+        //         string(name:'NAMESPACE_RD' , value:"${NAMESPACE_RD}"),\
+        //         string(name:'NAMESPACE_CRON' , value:"${NAMESPACE_CRON}"),\
+        //         string(name:'SLACK_CHANNEL' , value:"${SLACK_CHANNEL}"),\
+        //         string(name:'PIPELINE_DATABASE' , value:"${PIPELINE_DATABASE}"),\
+        //         string(name:'DB_HOST' , value:"${DB_HOST}")]
+        //     }
+        // }
     }
     post {
         always { sh 'echo end' }
