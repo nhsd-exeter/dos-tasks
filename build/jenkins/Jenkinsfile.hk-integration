@@ -61,20 +61,21 @@ pipeline {
                 script { sh 'make show-configuration' }
             }
         }
-        stage('Triggering build of database') {
-            steps {
-                echo "Running pathwaysdos_v4 pipeline ${DB_BUILD_JOB_NAME}"
-                // echo "Passing DELETE parameter: ${params.DELETE}"
-                build job: "${DB_BUILD_JOB_NAME}/${PATHWAYSDOS_V4_BRANCH}",\
-                parameters: [string(name:'NAMESPACE' , value:"${NAMESPACE}"),\
-                string(name:'NAMESPACE_CRON' , value:"${NAMESPACE_CRON}"),\
-                string(name:'NAMESPACE_RD' , value:"${NAMESPACE_RD}"),\
-                string(name:'PIPELINE_DATABASE' , value:"${PIPELINE_DATABASE}"),\
-                string(name:'DB_HOST' , value:"${DB_HOST}"),\
-                string(name:'SLACK_CHANNEL' , value:"${SLACK_CHANNEL}")
-                ]
-            }
-        }
+        // TODO Develop broken 031022
+        // stage('Triggering build of database') {
+        //     steps {
+        //         echo "Running pathwaysdos_v4 pipeline ${DB_BUILD_JOB_NAME}"
+        //         // echo "Passing DELETE parameter: ${params.DELETE}"
+        //         build job: "${DB_BUILD_JOB_NAME}/${PATHWAYSDOS_V4_BRANCH}",\
+        //         parameters: [string(name:'NAMESPACE' , value:"${NAMESPACE}"),\
+        //         string(name:'NAMESPACE_CRON' , value:"${NAMESPACE_CRON}"),\
+        //         string(name:'NAMESPACE_RD' , value:"${NAMESPACE_RD}"),\
+        //         string(name:'PIPELINE_DATABASE' , value:"${PIPELINE_DATABASE}"),\
+        //         string(name:'DB_HOST' , value:"${DB_HOST}"),\
+        //         string(name:'SLACK_CHANNEL' , value:"${SLACK_CHANNEL}")
+        //         ]
+        //     }
+        // }
         stage("Build and push hk lambdas") {
             when { expression { params.Task != "none" } }
             steps {
