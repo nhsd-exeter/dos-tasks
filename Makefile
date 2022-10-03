@@ -666,11 +666,11 @@ run_integration_unit_test:
 
 run-integration-test-data-set: ###Run hk integration test lambda to set up data - Mandatory [PROFILE]
 	echo Running $(TF_VAR_db_data_setup_lambda_function_name)
-	aws lambda invoke --function-name $(TF_VAR_db_data_setup_lambda_function_name), InvocationType="Event", --payload '{ "task": "data" }' \
+	aws lambda invoke --function-name $(TF_VAR_db_data_setup_lambda_function_name) --payload '{ "task": "data" }' \
 	data_setup_response.json | jq -r .StatusCode - | tee data_setup_response.log
 	cat data_setup_response.json
 
-# ==============
+# ============== --invocation-type Event
 # ==============================================================================
 
 .SILENT: \
