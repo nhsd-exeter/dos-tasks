@@ -1,7 +1,7 @@
-module "symptomgroupsymptomdiscriminators_lambda" {
+module "symptomgroupdiscriminators_lambda" {
   source             = "../../modules/lambda"
-  name               = "hk-symptomgroupsymptomdiscriminators"
-  image_uri          = "${var.aws_ecr}/${var.project_group_short}/${var.project_name_short}/hk-symptomgroupsymptomdiscriminators:${var.image_version}"
+  name               = "hk-symptomgroupdiscriminators"
+  image_uri          = "${var.aws_ecr}/${var.project_group_short}/${var.project_name_short}/hk-symptomgroupdiscriminators:${var.image_version}"
   subnet_ids         = [data.terraform_remote_state.vpc.outputs.private_subnets[0], data.terraform_remote_state.vpc.outputs.private_subnets[1], data.terraform_remote_state.vpc.outputs.private_subnets[2]]
   security_group_ids = [data.terraform_remote_state.security_groups.outputs.lambda_security_group_id]
   s3_bucket_arn      = data.terraform_remote_state.s3.outputs.s3_bucket_arn
@@ -16,7 +16,7 @@ module "symptomgroupsymptomdiscriminators_lambda" {
   tags           = local.standard_tags
 
   env_vars = {
-    "TASK"              = "symptomgroupsymptomdiscriminators"
+    "TASK"              = "symptomgroupdiscriminators"
     "PROFILE"           = var.profile,
     "SERVICE"           = var.service_tag_common,
     "SECRET_STORE"      = var.deployment_secrets,

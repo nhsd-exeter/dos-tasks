@@ -3,7 +3,7 @@ import psycopg2
 import pytest
 from .. import handler
 
-file_path = "application.hk.symptomgroupsymptomdiscriminators.handler"
+file_path = "application.hk.symptomgroupdiscriminators.handler"
 mock_event = {"filename": "mock_filename", "env": "mock_env", "bucket": "mock_bucket"}
 mock_context = ""
 mock_env = "mock_env"
