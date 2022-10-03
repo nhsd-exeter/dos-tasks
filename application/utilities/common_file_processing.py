@@ -1,5 +1,5 @@
 from utilities.logger import log_for_audit
-import common
+from utilities import common
 import csv
 
 create_action = "CREATE"
