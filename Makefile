@@ -540,6 +540,7 @@ build-hk-integration-tester-image: # Builds integration test image
 	rm -rf $(DOCKER_DIR)/hk-integration-tester/assets/*
 	rm -rf $(DOCKER_DIR)/hk-integration-tester/Dockerfile.effective
 	rm -rf $(DOCKER_DIR)/hk-integration-tester/.version
+	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/app
 	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/utilities
 	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/model
 	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/data-files
@@ -664,11 +665,11 @@ run_integration_unit_test:
 		DIR=test/integration/ \
 		CMD="python3 -m pytest test/"
 
-# run-integration-test-data-set: ###Run hk integration test lambda to set up data - Mandatory [PROFILE]
-# 	echo Running $(TF_VAR_db_data_setup_lambda_function_name)
-# 	aws lambda invoke --function-name $(TF_VAR_db_data_setup_lambda_function_name) --payload '{ "task": "data" }' \
-# 	data_setup_response.json | jq -r .StatusCode - | tee data_setup_response.log
-# 	cat data_setup_response.json
+run-integration-test-data-set: ###Run hk integration test lambda to set up data - Mandatory [PROFILE]
+	echo Running $(TF_VAR_db_data_setup_lambda_function_name)
+	aws lambda invoke --function-name $(TF_VAR_db_data_setup_lambda_function_name), InvocationType="Event", --payload '{ "task": "data" }' \
+	data_setup_response.json | jq -r .StatusCode - | tee data_setup_response.log
+	cat data_setup_response.json
 
 # ==============
 # ==============================================================================
