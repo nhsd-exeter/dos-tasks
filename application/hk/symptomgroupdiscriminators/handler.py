@@ -90,7 +90,6 @@ def process_extracted_data(db_connection, row_data, summary_count_dict, event):
     for row_number, row_values in row_data.items():
         try:
             record_exists = does_sgd_record_exist(db_connection, row_values, event["env"])
-            print(record_exists)
             if common_file_processing.ids_valid_action(record_exists, row_values, event["env"], "UPDATE"):
                 query, data = generate_db_query(row_values, event["env"])
                 database.execute_db_query(
@@ -116,9 +115,7 @@ def does_sgd_record_exist(db_connection, row_values, env):
     try:
         with db_connection.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
             query, data = record_exists_query(row_values)
-            print(query)
             cursor.execute(query, data)
-            print(cursor.rowcount)
             if cursor.rowcount != 0:
                 record_exists = True
     except (Exception, psycopg2.Error) as e:

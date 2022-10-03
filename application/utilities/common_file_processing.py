@@ -52,7 +52,6 @@ def process_ids_file(csv_file, event, expected_col_count, summary_count_dict):
 
 def ids_valid_action(record_exists, row_data, env, invalid_action_type="false"):
     """Returns True if action is valid; otherwise returns False"""
-    print(row_data["action"])
     valid_action = False
     if invalid_action_type == "false" and record_exists and row_data["action"] in ("UPDATE", "DELETE"):
         valid_action = True
@@ -60,9 +59,7 @@ def ids_valid_action(record_exists, row_data, env, invalid_action_type="false"):
         valid_action = True
     if invalid_action_type == "UPDATE" and record_exists and row_data["action"] in ("DELETE"):
         valid_action = True
-    elif not valid_action:
-        print("valid_action")
-        print(valid_action)
+    if not valid_action:
         log_for_error(
             env,
             "validation:Invalid action {} for the record with IDs {} and {}".format(
