@@ -91,7 +91,7 @@ def process_extracted_data(db_connection, row_data, summary_count_dict, event):
         try:
             record_exists = does_sgd_record_exist(db_connection, row_values, event["env"])
             print(record_exists)
-            if common.valid_action(record_exists, row_values, event["env"], "UPDATE"):
+            if common_file_processing.ids_valid_action(record_exists, row_values, event["env"], "UPDATE"):
                 query, data = generate_db_query(row_values, event["env"])
                 database.execute_db_query(
                     db_connection, query, data, row_number, row_values, summary_count_dict, event["env"]
