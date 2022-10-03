@@ -544,11 +544,11 @@ build-hk-integration-tester-image: # Builds integration test image
 	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/model
 	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/data-files
 
-	cp -r $(APPLICATION_TEST_DIR)/integration/lambda/*.py $(DOCKER_DIR)/hk-integration-tester/assets/
-	cp -r $(APPLICATION_TEST_DIR)/integration/lambda/requirements.txt $(DOCKER_DIR)/hk-integration-tester/assets/
-	cp -r $(APPLICATION_TEST_DIR)/integration/model/*.py $(DOCKER_DIR)/hk-integration-tester/assets/model/
-	cp -r $(APPLICATION_TEST_DIR)/integration/data-files/*.sql $(DOCKER_DIR)/hk-integration-tester/assets/data-files/
-	cp -r $(APPLICATION_DIR)/utilities/*.py $(DOCKER_DIR)/hk-integration-tester/assets/utilities/
+	cp -r $(APPLICATION_TEST_DIR)/integration/lambda/*.py $(DOCKER_DIR)/hk-integration-tester/assets/app/
+	cp -r $(APPLICATION_TEST_DIR)/integration/lambda/requirements.txt $(DOCKER_DIR)/hk-integration-tester/assets/app/
+	cp -r $(APPLICATION_TEST_DIR)/integration/model/*.py $(DOCKER_DIR)/hk-integration-tester/assets/app/model/
+	cp -r $(APPLICATION_TEST_DIR)/integration/data-files/*.sql $(DOCKER_DIR)/hk-integration-tester/assets/app/data-files/
+	cp -r $(APPLICATION_DIR)/utilities/*.py $(DOCKER_DIR)/hk-integration-tester/assets/app/utilities/
 	make docker-image NAME=hk-integration-tester
 	rm -rf $(DOCKER_DIR)/hk-integration-tester/assets/*
 
@@ -664,12 +664,11 @@ run_integration_unit_test:
 		DIR=test/integration/ \
 		CMD="python3 -m pytest test/"
 
-run-integration-test-data-set: # [PROFILE]
-	echo Running $(TF_VAR_db_check_login_lambda_function_name) for $(USERNAME) against $(ENDPOINT_TYPE)
-	aws lambda invoke --function-name $(TF_VAR_db_check_login_lambda_function_name) --log-type Tail --payload '{ "task": "data", "endpoint_type": "$(ENDPOINT_TYPE)","database_name": "$(DATABASE_TO_MIGRATE)", "username": "$(USERNAME)", "passkey": "$(PASSKEY)" }' $(ENDPOINT_TYPE)-$(USERNAME)-response.json | jq -r .LogResult - | base64 -d | tee $(ENDPOINT_TYPE)-$(USERNAME)-response.log
-	echo "== Response output =="
-	cat $(ENDPOINT_TYPE)-$(USERNAME)-response.json
-	echo
+# run-integration-test-data-set: ###Run hk integration test lambda to set up data - Mandatory [PROFILE]
+# 	echo Running $(TF_VAR_db_data_setup_lambda_function_name)
+# 	aws lambda invoke --function-name $(TF_VAR_db_data_setup_lambda_function_name) --payload '{ "task": "data" }' \
+# 	data_setup_response.json | jq -r .StatusCode - | tee data_setup_response.log
+# 	cat data_setup_response.json
 
 # ==============
 # ==============================================================================
