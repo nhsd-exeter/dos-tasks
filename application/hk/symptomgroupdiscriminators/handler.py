@@ -23,7 +23,7 @@ def request(event, context):
         csv_file = common.retrieve_file_from_bucket(bucket, filename, event, start)
         csv_data = common_file_processing.process_ids_file(csv_file, event, csv_column_count, summary_count_dict)
         if csv_data == {}:
-            message.send_failure_slack_message(start, summary_count_dict)
+            message.send_failure_slack_message(event, start, summary_count_dict)
         else:
             process_extracted_data(db_connection, csv_data, summary_count_dict, event)
             message.send_success_slack_message(event, start, summary_count_dict)
