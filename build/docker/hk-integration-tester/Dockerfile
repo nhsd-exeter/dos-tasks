@@ -5,7 +5,7 @@ ENV PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
 
 COPY assets/ .
 
-RUN pip3 install -r ./hk/integration/requirements.txt --target "${LAMBDA_TASK_ROOT}"
+RUN pip3 install -r ./application/hk/integration/requirements.txt --target "${LAMBDA_TASK_ROOT}"
 RUN pip3 install pytest
 
 EXPOSE 8080
