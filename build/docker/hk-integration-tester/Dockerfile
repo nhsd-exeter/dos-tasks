@@ -10,7 +10,7 @@ RUN pip3 install pytest
 
 EXPOSE 8080
 
-CMD [ "hk.integration.handler.request" ]
+CMD [ "application.hk.integration.handler.request" ]
 
 # FROM python:3
 
