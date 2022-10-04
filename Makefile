@@ -540,7 +540,6 @@ build-hk-integration-tester-image: # Builds integration test image
 	rm -rf $(DOCKER_DIR)/hk-integration-tester/assets/*
 	rm -rf $(DOCKER_DIR)/hk-integration-tester/Dockerfile.effective
 	rm -rf $(DOCKER_DIR)/hk-integration-tester/.version
-	mkdir $(DOCKER_DIR)/hk-integration-tester/assets
 	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/utilities
 	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/model
 	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/data-files
