@@ -540,16 +540,18 @@ build-hk-integration-tester-image: # Builds integration test image
 	rm -rf $(DOCKER_DIR)/hk-integration-tester/assets/*
 	rm -rf $(DOCKER_DIR)/hk-integration-tester/Dockerfile.effective
 	rm -rf $(DOCKER_DIR)/hk-integration-tester/.version
-	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/hk
-	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/hk/integration
-	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/hk/integration/model
-	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/hk/integration/test
-	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/hk/integration/utilities
-	cp $(APPLICATION_DIR)/utilities/*.py $(DOCKER_DIR)/hk-integration-tester/assets//hk/integration/utilities
-	cp $(APPLICATION_TEST_DIR)/integration/*.py $(DOCKER_DIR)/hk-integration-tester/assets/hk/integration
-	cp $(APPLICATION_TEST_DIR)/integration/requirements.txt $(DOCKER_DIR)/hk-integration-tester/assets/hk/integration
-	cp $(APPLICATION_TEST_DIR)/integration/model/* $(DOCKER_DIR)/hk-integration-tester/assets/hk/integration/model
-	cp $(APPLICATION_TEST_DIR)/integration/test/* $(DOCKER_DIR)/hk-integration-tester/assets/hk/integration/test
+	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/application/hk
+	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/application/hk/integration
+	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/application/hk/integration/model
+	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/application/hk/integration/test
+	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/application/hk/integration/utilities
+	cp $(APPLICATION_DIR)/*.py $(DOCKER_DIR)/hk-integration-tester/assets/application
+	cp $(APPLICATION_DIR)/hk/*.py $(DOCKER_DIR)/hk-integration-tester/assets/application/hk
+	cp $(APPLICATION_DIR)/utilities/*.py $(DOCKER_DIR)/hk-integration-tester/assets/application/hk/integration/utilities
+	cp $(APPLICATION_TEST_DIR)/integration/*.py $(DOCKER_DIR)/hk-integration-tester/assets/application/hk/integration
+	cp $(APPLICATION_TEST_DIR)/integration/requirements.txt $(DOCKER_DIR)/hk-integration-tester/assets/application/hk/integration
+	cp $(APPLICATION_TEST_DIR)/integration/model/* $(DOCKER_DIR)/hk-integration-tester/assets/application/hk/integration/model
+	cp $(APPLICATION_TEST_DIR)/integration/test/* $(DOCKER_DIR)/hk-integration-tester/assets/application/hk/integration/test
 	# mkdir $(DOCKER_DIR)/hk-integration-tester/assets/utilities
 	# mkdir $(DOCKER_DIR)/hk-integration-tester/assets/model
 	# mkdir $(DOCKER_DIR)/hk-integration-tester/assets/data-files
