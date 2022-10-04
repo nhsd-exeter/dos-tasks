@@ -540,15 +540,25 @@ build-hk-integration-tester-image: # Builds integration test image
 	rm -rf $(DOCKER_DIR)/hk-integration-tester/assets/*
 	rm -rf $(DOCKER_DIR)/hk-integration-tester/Dockerfile.effective
 	rm -rf $(DOCKER_DIR)/hk-integration-tester/.version
-	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/utilities
-	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/model
-	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/data-files
+	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/hk
+	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/hk/integration
+	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/hk/integration/model
+	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/hk/integration/test
+	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/hk/integration/utilities
+	cp $(APPLICATION_DIR)/utilities/*.py $(DOCKER_DIR)/hk-integration-tester/assets//hk/integration/utilities
+	cp $(APPLICATION_TEST_DIR)/integration/*.py $(DOCKER_DIR)/hk-integration-tester/assets/hk/integration
+	cp $(APPLICATION_TEST_DIR)/integration/requirements.txt $(DOCKER_DIR)/hk-integration-tester/assets/hk/integration
+	cp $(APPLICATION_TEST_DIR)/integration/model/* $(DOCKER_DIR)/hk-integration-tester/assets/hk/integration/model
+	cp $(APPLICATION_TEST_DIR)/integration/test/* $(DOCKER_DIR)/hk-integration-tester/assets/hk/integration/test
+	# mkdir $(DOCKER_DIR)/hk-integration-tester/assets/utilities
+	# mkdir $(DOCKER_DIR)/hk-integration-tester/assets/model
+	# mkdir $(DOCKER_DIR)/hk-integration-tester/assets/data-files
 
-	cp -r $(APPLICATION_TEST_DIR)/integration/lambda/*.py $(DOCKER_DIR)/hk-integration-tester/assets/
-	cp -r $(APPLICATION_TEST_DIR)/integration/lambda/requirements.txt $(DOCKER_DIR)/hk-integration-tester/assets/
-	cp -r $(APPLICATION_TEST_DIR)/integration/model/*.py $(DOCKER_DIR)/hk-integration-tester/assets/model/
-	cp -r $(APPLICATION_TEST_DIR)/integration/data-files/*.sql $(DOCKER_DIR)/hk-integration-tester/assets/data-files/
-	cp -r $(APPLICATION_DIR)/utilities/*.py $(DOCKER_DIR)/hk-integration-tester/assets/utilities/
+	# cp -r $(APPLICATION_TEST_DIR)/integration/lambda/*.py $(DOCKER_DIR)/hk-integration-tester/assets/
+	# cp -r $(APPLICATION_TEST_DIR)/integration/lambda/requirements.txt $(DOCKER_DIR)/hk-integration-tester/assets/
+	# cp -r $(APPLICATION_TEST_DIR)/integration/model/*.py $(DOCKER_DIR)/hk-integration-tester/assets/model/
+	# cp -r $(APPLICATION_TEST_DIR)/integration/data-files/*.sql $(DOCKER_DIR)/hk-integration-tester/assets/data-files/
+	# cp -r $(APPLICATION_DIR)/utilities/*.py $(DOCKER_DIR)/hk-integration-tester/assets/utilities/
 	make docker-image NAME=hk-integration-tester
 	rm -rf $(DOCKER_DIR)/hk-integration-tester/assets/*
 

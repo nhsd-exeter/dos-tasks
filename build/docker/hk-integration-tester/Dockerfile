@@ -10,4 +10,15 @@ RUN pip3 install pytest
 
 EXPOSE 8080
 
-CMD [ "handler.request" ]
+CMD [ "hk.integration.handler.request" ]
+
+# FROM python:3
+
+# WORKDIR /usr/src/app
+
+# COPY assets/hk/integration/requirements.txt ./
+# RUN pip install --no-cache-dir -r requirements.txt
+
+# COPY assets/ .
+
+# CMD [ "python", "./handler.py" ]
