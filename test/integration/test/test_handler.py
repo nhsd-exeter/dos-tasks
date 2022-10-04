@@ -3,7 +3,7 @@ import pytest
 import string
 import psycopg2
 
-from .. import handler
+from application.hk.integration import handler
 
 file_path = "application.hk.integration.handler"
 env = 'integration'

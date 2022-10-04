@@ -567,7 +567,8 @@ copy-temp-integration-test-files:
 	mkdir $(APPLICATION_DIR)/hk/integration/test
 	mkdir $(APPLICATION_DIR)/hk/integration/utilities
 	cp $(APPLICATION_DIR)/utilities/*.py $(APPLICATION_DIR)/hk/integration/utilities
-	cp $(APPLICATION_TEST_DIR)/integration/lambda/* $(APPLICATION_DIR)/hk/integration
+	cp $(APPLICATION_TEST_DIR)/integration/*.py $(APPLICATION_DIR)/hk/integration
+	cp $(APPLICATION_TEST_DIR)/integration/requirements.txt $(APPLICATION_DIR)/hk/integration
 	cp $(APPLICATION_TEST_DIR)/integration/model/* $(APPLICATION_DIR)/hk/integration/model
 	cp $(APPLICATION_TEST_DIR)/integration/test/* $(APPLICATION_DIR)/hk/integration/test
 
@@ -613,8 +614,8 @@ coverage-full:	### Run test coverage - mandatory: PROFILE=[profile] TASK=[task] 
 unit-test-integration-test: #Run unit tests for the integration test lambda
 	make copy-temp-integration-test-files
 	make docker-run-tools IMAGE=$$(make _docker-get-reg)/tester:latest \
-		DIR=application/hk/integration/ \
-		CMD="python3 -m pytest test/"
+		DIR=application \
+		CMD="python3 -m pytest hk/integration/test/"
 	make remove-temp-integration-test-files
 
 # TODO remove see coverage-full and eventually coverage
