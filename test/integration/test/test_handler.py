@@ -59,23 +59,23 @@ def test_run_data_checks_for_hk_task_old(mock_db_connect, mock_audit_logger):
     handler.run_data_checks_for_hk_task(env, task, mock_db_connect)
     assert mock_audit_logger.call_count == 1
 
-@patch(f"{file_path}.symptomgroup.get_symptom_groups_data", return_value = ({'id':2002,'name':'Integration Test Update','zcodeexists':None},))
-@patch(f"{file_path}.logger.log_for_audit")
-@patch("psycopg2.connect")
-def test_run_data_checks_for_hk_deleted_true(mock_db_connect, mock_audit_logger, mock_get_data):
-    task = 'symptomgroups'
-    handler.run_data_checks_for_hk_task(env, task, mock_db_connect)
-    assert mock_audit_logger.call_count == 2
-    assert mock_get_data.call_count == 1
+# @patch(f"{file_path}.symptomgroup.get_symptom_groups_data", return_value = ({'id':2002,'name':'Integration Test Update','zcodeexists':None},))
+# @patch(f"{file_path}.logger.log_for_audit")
+# @patch("psycopg2.connect")
+# def test_run_data_checks_for_hk_deleted_true(mock_db_connect, mock_audit_logger, mock_get_data):
+#     task = 'symptomgroups'
+#     handler.run_data_checks_for_hk_task(env, task, mock_db_connect)
+#     assert mock_audit_logger.call_count == 2
+#     assert mock_get_data.call_count == 1
 
-@patch(f"{file_path}.symptomgroup.get_symptom_groups_data", return_value = ({'id':2002,'name':'Integration Test Updat','zcodeexists':None},))
-@patch(f"{file_path}.logger.log_for_audit")
-@patch("psycopg2.connect")
-def test_run_data_checks_for_hk_deleted_false(mock_db_connect, mock_audit_logger, mock_get_data):
-    task = 'symptomgroups'
-    handler.run_data_checks_for_hk_task(env, task, mock_db_connect)
-    assert mock_audit_logger.call_count == 2
-    assert mock_get_data.call_count == 1
+# @patch(f"{file_path}.symptomgroup.get_symptom_groups_data", return_value = ({'id':2002,'name':'Integration Test Updat','zcodeexists':None},))
+# @patch(f"{file_path}.logger.log_for_audit")
+# @patch("psycopg2.connect")
+# def test_run_data_checks_for_hk_deleted_false(mock_db_connect, mock_audit_logger, mock_get_data):
+#     task = 'symptomgroups'
+#     handler.run_data_checks_for_hk_task(env, task, mock_db_connect)
+#     assert mock_audit_logger.call_count == 2
+#     assert mock_get_data.call_count == 1
 
 # @patch(f"{file_path}.symptomgroup.check_symptom_group_record", return_value = True)
 @patch(f"{file_path}.symptomgroup.get_symptom_groups_data", return_value = ({'id':2000,'name':'Integration Test Update','zcodeexists':'None'},))

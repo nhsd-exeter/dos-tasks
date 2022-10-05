@@ -1,4 +1,4 @@
-from utilities import logger, message, common, database
+from application.hk.integration.utilities import logger, message, common, database
 from datetime import datetime
 import os
 import boto3
