@@ -1,7 +1,6 @@
 from utilities import logger, database
 import os
 
-# from integration.models import symptomgroup
 from models import symptomgroup
 
 data_sql_scripts = ("/data-files/test-data.sql",)
@@ -11,14 +10,14 @@ valid_tasks = ("data", "symptomgroups")
 
 def request(event, context):
     success = False
-    env = os.getenv("DB_NAME")
+    env = os.getenv("TASK")
     # where task could be data or name of hk job eg symptomgroup
     task = event["task"]
     db_connection = None
     logger.log_for_audit(env, "action:task started")
     if is_valid_task(env, task):
         try:
-            db_connection = database.connect_to_database(env, event)
+            db_connection = database.connect_to_database(env)
             if task.lower() == valid_tasks[0]:
                 insert_test_data(env, db_connection)
             else:
