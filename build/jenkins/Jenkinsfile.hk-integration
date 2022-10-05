@@ -84,13 +84,14 @@ pipeline {
                 script { sh "make push TASK=${params.Task}" }
             }
         }
-        stage('Build and push integration test lambda') {
-            when { expression { params.Task != "none" } }
-            steps {
-                script { sh "make build-hk-integration-tester-image" }
-                script { sh "make push-hk-integration-tester-image" }
-            }
-        }
+        // integration now built and pushed with other tasks above
+        // stage('Build and push integration test lambda') {
+        //     when { expression { params.Task != "none" } }
+        //     steps {
+        //         script { sh "make build-hk-integration-tester-image" }
+        //         script { sh "make push-hk-integration-tester-image" }
+        //     }
+        // }
         stage('Check key infrastructure exists') {
             when { expression { params.Task != "none" } }
             steps {

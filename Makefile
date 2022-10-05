@@ -33,16 +33,20 @@ build: # Build project - mandatory: TASK=[task]
 	fi
 
 build-image: # Builds images - mandatory: NAME=[name]
-	task_type=$$(make task-type NAME=$(NAME))
-	rm -rf $(DOCKER_DIR)/task/assets/*
-	rm -rf $(DOCKER_DIR)/task/Dockerfile.effective
-	rm -rf $(DOCKER_DIR)/task/.version
-	mkdir $(DOCKER_DIR)/task/assets/utilities
-	cp -r $(APPLICATION_DIR)/$$task_type/$(NAME)/*.py $(DOCKER_DIR)/task/assets/
-	cp -r $(APPLICATION_DIR)/$$task_type/$(NAME)/requirements.txt $(DOCKER_DIR)/task/assets/
-	cp -r $(APPLICATION_DIR)/utilities/*.py $(DOCKER_DIR)/task/assets/utilities/
-	make docker-image NAME=$$task_type-$(NAME)
-	rm -rf $(DOCKER_DIR)/task/assets/*
+	if [ "$(NAME)" == "integration" ]; then
+		make build-hk-integration-tester-image
+	else
+		task_type=$$(make task-type NAME=$(NAME))
+		rm -rf $(DOCKER_DIR)/task/assets/*
+		rm -rf $(DOCKER_DIR)/task/Dockerfile.effective
+		rm -rf $(DOCKER_DIR)/task/.version
+		mkdir $(DOCKER_DIR)/task/assets/utilities
+		cp -r $(APPLICATION_DIR)/$$task_type/$(NAME)/*.py $(DOCKER_DIR)/task/assets/
+		cp -r $(APPLICATION_DIR)/$$task_type/$(NAME)/requirements.txt $(DOCKER_DIR)/task/assets/
+		cp -r $(APPLICATION_DIR)/utilities/*.py $(DOCKER_DIR)/task/assets/utilities/
+		make docker-image NAME=$$task_type-$(NAME)
+		rm -rf $(DOCKER_DIR)/task/assets/*
+	fi
 
 start: project-start # Start project
 
@@ -59,9 +63,15 @@ test: # Test project
 push: # Push project artefacts to the registry - mandatory: TASK=[task]
 	if [ "$(TASK)" == "all" ]; then
 		for task in $$(echo $(TASKS) | tr "," "\n"); do
-			task_type=$$(make task-type NAME=$$task)
-			make docker-push NAME=$$task_type-$$task
+			make push-image TASK=$$task
 		done
+	else
+		make push-image TASK=$(TASK)
+	fi
+
+push-image: # Push project artefact to the registry - mandatory: TASK=[task]
+	if [ "$(TASK)" == "integration" ]; then
+		make push-hk-integration-tester-image
 	else
 		task_type=$$(make task-type NAME=$(TASK))
 		make docker-push NAME=$$task_type-$(TASK)
@@ -545,7 +555,7 @@ build-hk-integration-tester-image: # Builds images - mandatory: NAME=[name]
 	cp -r $(APPLICATION_DIR)/hk/integration/*.py $(DOCKER_DIR)/hk-integration-tester/assets/
 	cp -r $(APPLICATION_DIR)/hk/integration/requirements.txt $(DOCKER_DIR)/hk-integration-tester/assets/
 	cp -r $(APPLICATION_DIR)/hk/integration/data-files/ $(DOCKER_DIR)/hk-integration-tester/assets/data-files
-	cp -r $(APPLICATION_DIR)/hk/integration/model/ $(DOCKER_DIR)/hk-integration-tester/assets/model
+	cp -r $(APPLICATION_DIR)/hk/integration/models/ $(DOCKER_DIR)/hk-integration-tester/assets/models
 	make docker-image NAME=hk-integration-tester
 	rm -rf $(DOCKER_DIR)/hk-integration-tester/assets/*
 
