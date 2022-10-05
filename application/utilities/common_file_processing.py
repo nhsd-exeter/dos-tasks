@@ -60,10 +60,11 @@ def ids_valid_action(record_exists, row_data, env, invalid_action_type="false"):
     if invalid_action_type == "UPDATE" and record_exists and row_data["action"] in ("DELETE"):
         valid_action = True
     if not valid_action:
+        log = ""
+        for x, y in row_data.items():
+            log = log + x + ":" + str(y) + " | "
         log_for_error(
             env,
-            "validation:Invalid action {} for the record with IDs {} and {}".format(
-                row_data["action"], row_data["id1"], row_data["id2"]
-            ),
-        )
+            "validation:Invalid action {} for  row | {} ".format(row_data["action"], log[:-2]),
+            )
     return valid_action
