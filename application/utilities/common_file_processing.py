@@ -62,11 +62,9 @@ def ids_valid_action(record_exists, row_data, env, invalid_action_type="false"):
     if not valid_action:
         log = ""
         for x, y in row_data.items():
-            log = log + x + ":" + str(y) + " | "
+            log = log + x + ":" + str(y) + " , "
         log_for_error(
             env,
-            "validation:Invalid action for line {}".format(log[:-2]),
+            "validation:Invalid action for line {}".format(log),
         )
-        print(log)
-        print(row_data)
     return valid_action
