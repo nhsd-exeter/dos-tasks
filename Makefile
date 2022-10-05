@@ -535,8 +535,21 @@ create-tester-repository: # Create ECR repositories to store the artefacts
 #  temp poc
 # --------------------------------------
 # Integration test targets
+build-hk-integration-tester-image: # Builds images - mandatory: NAME=[name]
+# task_type=$$(make task-type NAME=$(NAME))
+	rm -rf $(DOCKER_DIR)/hk-integration-tester/assets/*
+	rm -rf $(DOCKER_DIR)/hk-integration-tester/Dockerfile.effective
+	rm -rf $(DOCKER_DIR)/hk-integration-tester/.version
+	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/utilities
+	cp -r $(APPLICATION_DIR)/utilities/*.py $(DOCKER_DIR)/hk-integration-tester/assets/utilities/
+	cp -r $(APPLICATION_DIR)/hk/integration/*.py $(DOCKER_DIR)/hk-integration-tester/assets/
+	cp -r $(APPLICATION_DIR)/hk/integration/requirements.txt $(DOCKER_DIR)/hk-integration-tester/assets/
+	cp -r $(APPLICATION_DIR)/hk/integration/data-files/ $(DOCKER_DIR)/hk-integration-tester/assets/data-files
+	cp -r $(APPLICATION_DIR)/hk/integration/model/ $(DOCKER_DIR)/hk-integration-tester/assets/model
+	make docker-image NAME=hk-integration-tester
+	rm -rf $(DOCKER_DIR)/hk-integration-tester/assets/*
 
-build-hk-integration-tester-image: # Builds integration test image
+build-hk-integration-tester-image-original: # Builds integration test image
 	rm -rf $(DOCKER_DIR)/hk-integration-tester/assets/*
 	rm -rf $(DOCKER_DIR)/hk-integration-tester/Dockerfile.effective
 	rm -rf $(DOCKER_DIR)/hk-integration-tester/.version
