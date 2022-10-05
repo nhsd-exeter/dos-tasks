@@ -7,7 +7,7 @@ import psycopg2
 import json
 # from . import model
 # from . import model.symptomgroup
-from application.hk.integration.model import symptomgroup
+from application.hk.integration.models import symptomgroup
 
 data_sql_scripts = ("/data-files/test-data.sql",)
 # List of tasks handled by this code DO NOT change the order

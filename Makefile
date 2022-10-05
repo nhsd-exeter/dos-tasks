@@ -232,7 +232,7 @@ delete-stack-for-cron-job: ## create a stack for cron and db - cron tasks only m
 
 unit-test: # Runs unit tests for task - mandatory: TASK=[task]
 	make unit-test-utilities
-	make unit-test-integration-test
+#	make unit-test-integration-test
 	if [ "$(TASK)" == "all" ]; then
 		for task in $$(echo $(TASKS) | tr "," "\n"); do
 			make unit-test-task TASK="$$task"
@@ -604,7 +604,7 @@ remove-temp-integration-test-files:
 
 coverage-full:	### Run test coverage - mandatory: PROFILE=[profile] TASK=[task] FORMAT=[xml/html]
 	make copy-stt-coverage-test-files
-	make copy-temp-integration-test-files
+# make copy-temp-integration-test-files
 	if [ "$(TASK)" = "" ]; then
 		tasks=$(TASKS)
 	else

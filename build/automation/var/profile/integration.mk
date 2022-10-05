@@ -14,7 +14,7 @@ VULNERABILITY_LEVEL := CRITICAL,HIGH
 
 STACKS := secrets,s3,security-groups
 # TODO check full list ,symptomgroups,symptomdiscriminators
-TASKS := filter,referralroles,symptomgroups
+TASKS := integration,filter,referralroles,symptomgroups
 ENVIRONMENT_LIST := ["integration"]
 TF_VAR_environment_list := $(ENVIRONMENT_LIST)
 
