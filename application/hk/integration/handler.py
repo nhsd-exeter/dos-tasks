@@ -1,7 +1,8 @@
 from utilities import logger, database
 import os
 
-from integration.models import symptomgroup
+# from integration.models import symptomgroup
+from .models import symptomgroup
 
 data_sql_scripts = ("/data-files/test-data.sql",)
 # List of tasks handled by this code DO NOT change the order
