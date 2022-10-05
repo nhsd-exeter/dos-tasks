@@ -312,10 +312,15 @@ unit-test-task: # Run task unit tests - mandatory: TASK=[name of task]
 	task_type=$$(make task-type NAME=$(TASK))
 	rm -rf $(APPLICATION_DIR)/$$task_type/$(TASK)/test
 	rm -rf $(APPLICATION_DIR)/$$task_type/$(TASK)/utilities
+	rm -rf $(APPLICATION_DIR)/$$task_type/$(TASK)/models
 	mkdir $(APPLICATION_DIR)/$$task_type/$(TASK)/test
-	mkdir $(APPLICATION_DIR)/$$task_type/$(TASK)/utilities
 	cp $(APPLICATION_TEST_DIR)/unit/$$task_type/$(TASK)/* $(APPLICATION_DIR)/$$task_type/$(TASK)/test
+	mkdir $(APPLICATION_DIR)/$$task_type/$(TASK)/utilities
 	cp $(APPLICATION_DIR)/utilities/*.py $(APPLICATION_DIR)/$$task_type/$(TASK)/utilities
+	if [ "$(TASK)" = "integration" ]; then
+		mkdir $(APPLICATION_DIR)/$$task_type/$(TASK)/models
+		cp $(APPLICATION_DIR)/models/*.py $(APPLICATION_DIR)/$$task_type/$(TASK)/models
+	fi
 	make docker-run-tools IMAGE=$$(make _docker-get-reg)/tester:latest \
 		DIR=application/$$task_type/$(TASK) \
 		CMD="python3 -m pytest test/"
@@ -323,6 +328,9 @@ unit-test-task: # Run task unit tests - mandatory: TASK=[name of task]
 	rm -rf $(APPLICATION_DIR)/$$task_type/$(TASK)/utilities
 	if [ "$(TASK)" = "stt" ]; then
 		make remove-temp-stt-unit-test-files
+	fi
+	if [ "$(TASK)" = "integration" ]; then
+		rm -rf $(APPLICATION_DIR)/$$task_type/$(TASK)/models
 	fi
 
 unit-test-utilities: # Run utilities unit tests
@@ -552,10 +560,11 @@ build-hk-integration-tester-image: # Builds images - mandatory: NAME=[name]
 	rm -rf $(DOCKER_DIR)/hk-integration-tester/.version
 	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/utilities
 	cp -r $(APPLICATION_DIR)/utilities/*.py $(DOCKER_DIR)/hk-integration-tester/assets/utilities/
+	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/models
+	cp -r $(APPLICATION_DIR)/models/*.py $(DOCKER_DIR)/hk-integration-tester/assets/models/
 	cp -r $(APPLICATION_DIR)/hk/integration/*.py $(DOCKER_DIR)/hk-integration-tester/assets/
 	cp -r $(APPLICATION_DIR)/hk/integration/requirements.txt $(DOCKER_DIR)/hk-integration-tester/assets/
 	cp -r $(APPLICATION_DIR)/hk/integration/data-files/ $(DOCKER_DIR)/hk-integration-tester/assets/data-files
-	cp -r $(APPLICATION_DIR)/hk/integration/models/ $(DOCKER_DIR)/hk-integration-tester/assets/models
 	make docker-image NAME=hk-integration-tester
 	rm -rf $(DOCKER_DIR)/hk-integration-tester/assets/*
 

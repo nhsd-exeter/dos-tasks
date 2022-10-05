@@ -3,7 +3,7 @@ import pytest
 import string
 import psycopg2
 
-from ..models import symptomgroup
+from models import symptomgroup
 
 file_path = "application.hk.integration.model.symptomgroup"
 
