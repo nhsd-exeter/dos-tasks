@@ -1,6 +1,6 @@
 # import psycopg2
 # import psycopg2.extras
-from utilities import logger, message, common, database
+from application.hk.integration.utilities import logger, message, common, database
 from datetime import datetime
 import os
 import boto3
