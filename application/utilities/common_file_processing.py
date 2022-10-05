@@ -65,6 +65,6 @@ def ids_valid_action(record_exists, row_data, env, invalid_action_type="false"):
             log = log + x + ":" + str(y) + " | "
         log_for_error(
             env,
-            "validation:Invalid action {} for  row | {} ".format(row_data["action"], log[:-2]),
+            "validation:Invalid action for line".format(row_data["action"], log[:-2], row_data),
             )
     return valid_action
