@@ -107,7 +107,7 @@ pipeline {
             when { expression { params.Task != "none" } }
             steps {
                 script { echo 'Provision integration test lambda' }
-                script { sh "make provision-hk-integration-tester TASK=integration" }
+                script { sh "make provision-hk-integration-tester TASK=integration-test" }
             }
         }
         stage('Provision hk lambdas') {
