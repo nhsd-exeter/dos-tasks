@@ -120,6 +120,15 @@ pipeline {
                 }
             }
         }
+        stage('Set up data conditions') {
+            when { expression { params.Task != "none" } }
+            steps {
+                script {
+                    echo 'Run set up test'
+                    sh "make run-integration-test-data-set PROFILE=${PROFILE}"
+                }
+            }
+        }
         stage('Load symptomgroup test file to s3') {
             when { expression { params.Task != "none" } }
             steps {
