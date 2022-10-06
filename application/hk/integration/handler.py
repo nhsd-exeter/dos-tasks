@@ -30,6 +30,7 @@ def request(event, context):
             database.close_connection(event, db_connection)
 
     status_code = 200 if success else 500
+    logger.log_for_audit(env, "status code {}".format(status_code))
     return {"statusCode": status_code, "body": str(success)}
 
 
@@ -44,6 +45,7 @@ def run_data_checks_for_hk_task(env, task, db_connection):
     if checks_pass is None:
         logger.log_for_audit(env, "No function to handle task {}".format(task))
         checks_pass = False
+    logger.log_for_audit(env, "Checks for {} passed {}".format(task,checks_pass))
     return checks_pass
 
 
