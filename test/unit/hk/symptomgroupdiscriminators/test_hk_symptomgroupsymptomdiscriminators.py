@@ -156,7 +156,7 @@ def test_generate_db_query_raises_error(mock_delete_query, mock_create_query):
 @patch("psycopg2.connect")
 @patch(f"{file_path}.common.increment_summary_count")
 @patch(f"{file_path}.does_sgd_record_exist", return_value=True)
-@patch(f"{file_path}.common_file_processing.ids_valid_action", return_value=False)
+@patch(f"{file_path}.common.valid_action", return_value=False)
 def test_process_extracted_data_valid_action_fails(mock_valid_action,mock_exists,mock_increment,mock_db_connect):
     """Test error handling when extracting data and record exist check fails"""
     row_data = {}
@@ -200,7 +200,7 @@ def test_process_extracted_data_error_check_exists_passes(mock_exists,mock_db_co
 @patch("psycopg2.connect")
 @patch(f"{file_path}.database.execute_db_query")
 @patch(f"{file_path}.generate_db_query",return_value=("query", "data"))
-@patch(f"{file_path}.common_file_processing.ids_valid_action", return_value=True)
+@patch(f"{file_path}.common.valid_action", return_value=True)
 @patch(f"{file_path}.does_sgd_record_exist", return_value=True)
 def test_process_extracted_data_single_record(mock_exist,mock_valid_action,mock_generate,mock_execute, mock_db_connect):
     """Test extracting data calls each downstream functions once for one record"""
@@ -218,7 +218,7 @@ def test_process_extracted_data_single_record(mock_exist,mock_valid_action,mock_
 @patch("psycopg2.connect")
 @patch(f"{file_path}.database.execute_db_query")
 @patch(f"{file_path}.generate_db_query",return_value=("query", "data"))
-@patch(f"{file_path}.common_file_processing.ids_valid_action", return_value=True)
+@patch(f"{file_path}.common.valid_action", return_value=True)
 @patch(f"{file_path}.does_sgd_record_exist", return_value=True)
 def test_process_extracted_data_multiple_records(mock_exist,mock_valid_action,mock_generate,mock_execute, mock_db_connect):
     """Test extracting data calls each downstream functions once for each record"""

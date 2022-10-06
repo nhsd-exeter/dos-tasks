@@ -1,4 +1,4 @@
-from utilities.logger import log_for_audit, log_for_error
+from utilities.logger import log_for_audit
 from utilities import common
 import csv
 
@@ -48,23 +48,3 @@ def process_ids_file(csv_file, event, expected_col_count, summary_count_dict):
         else:
             common.increment_summary_count(summary_count_dict, "ERROR", event["env"])
     return lines
-
-
-def ids_valid_action(record_exists, row_data, env, invalid_action_type="false"):
-    """Returns True if action is valid; otherwise returns False"""
-    valid_action = False
-    if invalid_action_type == "false" and record_exists and row_data["action"] in ("UPDATE", "DELETE"):
-        valid_action = True
-    if not record_exists and row_data["action"] in ("CREATE"):
-        valid_action = True
-    if invalid_action_type == "UPDATE" and record_exists and row_data["action"] in ("DELETE"):
-        valid_action = True
-    if not valid_action:
-        log = ""
-        for x, y in row_data.items():
-            log = log + x + ":" + str(y) + ", "
-        log_for_error(
-            env,
-            "validation:Invalid action for line {}".format(log[:-2], ),
-        )
-    return valid_action

@@ -14,110 +14,6 @@ csv_id1 = 2001
 csv_id2 = 20001
 csv_action = "DELETE"
 
-def test_valid_create_action():
-    """Test valid condition for create action"""
-    csv_dict = {}
-    csv_dict["id1"] = csv_id1
-    csv_dict["id2"] = csv_id2
-    csv_dict["action"] = "CREATE"
-    assert common_file_processing.ids_valid_action(False,csv_dict, 'test')
-
-def test_invalid_create_action():
-    """Test invalid condition for create action"""
-    csv_dict = {}
-    csv_dict["id1"] = csv_id1
-    csv_dict["id2"] = csv_id2
-    csv_dict["action"] = "CREATE"
-    assert not common_file_processing.ids_valid_action(True,csv_dict, 'test')
-
-# def test_invalid_create_action():
-#     """Test invalid condition for create action"""
-#     csv_dict = {}
-#     csv_dict["id1"] = csv_id
-#     csv_dict["id2"] = csv_id
-#     csv_dict["action"] = "INSERT"
-#     assert not common_file_processing.ids_valid_action(False,csv_dict, 'test')
-
-def test_valid_update_action():
-    """Test valid condition for update action"""
-    csv_dict = {}
-    csv_dict["id1"] = csv_id1
-    csv_dict["id2"] = csv_id2
-    csv_dict["action"] = "UPDATE"
-    assert common_file_processing.ids_valid_action(True,csv_dict, 'test')
-
-def test_invalid_update_action():
-    """Test invalid condition for update action"""
-    csv_dict = {}
-    csv_dict["id1"] = csv_id1
-    csv_dict["id2"] = csv_id2
-    csv_dict["action"] = "UPDATE"
-    assert not common_file_processing.ids_valid_action(False,csv_dict, 'test')
-
-def test_valid_delete_action():
-    """Test valid condition for delete action"""
-    csv_dict = {}
-    csv_dict["id1"] = csv_id1
-    csv_dict["id2"] = csv_id2
-    csv_dict["action"] = "DELETE"
-    assert common_file_processing.ids_valid_action(True,csv_dict, 'test')
-
-def test_invalid_delete_action():
-    """Test invalid condition for delete action"""
-    csv_dict = {}
-    csv_dict["id1"] = csv_id1
-    csv_dict["id2"] = csv_id2
-    csv_dict["action"] = "DELETE"
-    assert not common_file_processing.ids_valid_action(False,csv_dict, 'test')
-
-def test_inids_valid_action():
-    """Test validation of unrecognized action"""
-    csv_dict = {}
-    csv_dict["id1"] = csv_id1
-    csv_dict["id2"] = csv_id2
-    csv_dict["action"] = "NOSUCH"
-    assert not common_file_processing.ids_valid_action(True,csv_dict, 'test')
-
-def test_invalid_action_lower_case():
-    """Test validation of lower case action"""
-    csv_dict = {}
-    csv_dict["id1"] = csv_id1
-    csv_dict["id2"] = csv_id2
-    csv_dict["action"] = "delete"
-    assert not common_file_processing.ids_valid_action(True,csv_dict, 'test')
-
-def test_invalid_action_parameter():
-    """Test validation of additional parameter that sets invalid action"""
-    csv_dict = {}
-    csv_dict["id1"] = csv_id1
-    csv_dict["id2"] = csv_id2
-    csv_dict["action"] = "DELETE"
-    assert not common_file_processing.ids_valid_action(True,csv_dict, 'test', "DELETE")
-
-def test_invalid_action_parameter_lowercase():
-    """Test validation of additional parameter that sets invalid action"""
-    csv_dict = {}
-    csv_dict["id1"] = csv_id1
-    csv_dict["id2"] = csv_id2
-    csv_dict["action"] = "delete"
-    assert not common_file_processing.ids_valid_action(True,csv_dict, 'test', "delete")
-
-def test_valid_create_action_parameter_set():
-    """Test valid condition for create action with invalid action parameter set"""
-    csv_dict = {}
-    csv_dict["id1"] = csv_id1
-    csv_dict["id2"] = csv_id2
-    csv_dict["action"] = "CREATE"
-    assert common_file_processing.ids_valid_action(False,csv_dict, 'test', "UPDATE")
-
-def test_valid_delete_action_parameter_set():
-    """Test valid condition for create action with invalid action parameter set"""
-    csv_dict = {}
-    csv_dict["id1"] = csv_id1
-    csv_dict["id2"] = csv_id2
-    csv_dict["action"] = "DELETE"
-    assert common_file_processing.ids_valid_action(True,csv_dict, 'test', "UPDATE")
-
 def test_check_for_not_null_values():
     """Checks key values not null"""
     csv_line = [2001,20002,"DELETE"]
@@ -137,7 +33,6 @@ def test_check_for_alpha_id():
     """Checks is id1 is not int"""
     csv_line = ["abc","","UPDATE"]
     assert not common_file_processing.check_ids_csv_values(csv_line,'env')
-
 
 def test_process_file_success():
     summary_count_dict = {}
