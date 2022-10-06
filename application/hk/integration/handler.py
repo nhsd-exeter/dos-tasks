@@ -20,6 +20,7 @@ def request(event, context):
             db_connection = database.connect_to_database(env)
             if task.lower() == valid_tasks[0]:
                 insert_test_data(env, db_connection)
+                success = True
             else:
                 success = run_data_checks_for_hk_task(env, task, db_connection)
                 logger.log_for_audit(env, "action:integration test complete for {}".format(task))
@@ -27,7 +28,9 @@ def request(event, context):
             logger.log_for_error(env, "Problem {}".format(e))
         finally:
             database.close_connection(event, db_connection)
-    return success
+    return {
+        'success' : success
+    }
 
 
 def run_data_checks_for_hk_task(env, task, db_connection):
