@@ -27,7 +27,7 @@ def test_check_symptom_group_record_false_zcode():
 
 def test_create_symptom_group_query():
     symptom_group_ids = '(2000,2001,2002)'
-    expected_query_string = "select id, name, zcodeexists from pathwaysdos.symptomgroups where id in (%s) order by id asc;"
+    expected_query_string = "select id, name, zcodeexists from pathwaysdos.symptomgroups where id in %s order by id asc;"
     expected_data = symptom_group_ids
     query, data = symptomgroup.create_symptom_group_query(symptom_group_ids)
     assert query == expected_query_string
