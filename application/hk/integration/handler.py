@@ -3,7 +3,7 @@ import os
 
 from models import symptomgroup
 
-data_sql_scripts = ("/data-files/test-data.sql",)
+data_sql_scripts = ("./data-files/test-data.sql",)
 # List of tasks handled by this code DO NOT change the order
 valid_tasks = ("data", "symptomgroups")
 
