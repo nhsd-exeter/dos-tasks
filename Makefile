@@ -718,8 +718,19 @@ run-integration-test-data-set: ###Run hk integration test lambda to set up data 
 	aws lambda invoke --function-name $(TF_VAR_db_data_setup_lambda_function_name) \
 	--invocation-type Event \
 	--payload '{ "task": "data" }' \
+	data_setup_response.json | jq -r .StatusCode
+#	- | tee data_setup_response.log
+# cat data_setup_response.json
+
+# TODO rename db_data_setup_lambda_function_name
+run-integration-test-check: ###Run hk integration test lambda to check result of task - Mandatory [PROFILE] [TASK]
+	echo Running $(TF_VAR_db_data_setup_lambda_function_name) for $(TASK)
+	aws lambda invoke --function-name $(TF_VAR_db_data_setup_lambda_function_name) \
+	--invocation-type Event \
+	--payload '{ "task": "data" }' \
 	data_setup_response.json | jq -r .StatusCode - | tee data_setup_response.log
 	cat data_setup_response.json
+
 
 # ============== --invocation-type Event
 # ==============================================================================
