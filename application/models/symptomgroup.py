@@ -30,7 +30,7 @@ def get_symptom_groups_data(env, db_connection):
 
 
 def create_symptom_group_query(symptom_group_ids):
-    query = """select id, name, zcodeexists from pathwaysdos.symptomgroups where id in %s order by id asc;"""
+    query = """select id, name, zcodeexists from pathwaysdos.symptomgroups where id in (2000,2001,2002) order by id asc;"""
     data = symptom_group_ids
     return query, data
 
