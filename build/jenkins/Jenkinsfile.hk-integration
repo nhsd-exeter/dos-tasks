@@ -151,7 +151,7 @@ pipeline {
                 }
             }
         }
-        stage('Set up data conditions') {
+        stage('Check results of uploaded file') {
             when { expression { params.Task != "none" } }
             steps {
                 script {
