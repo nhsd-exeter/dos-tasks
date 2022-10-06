@@ -50,7 +50,8 @@ def check_symptom_groups_data(env, db_connection):
     result_set = get_symptom_groups_data(env, db_connection)
     for symptom_group in result_set:
         sg_id = symptom_group["id"]
-        if sg_id == deleted_record_id:
+        # TODO deliberately breaking unit test restore deleted_record_id
+        if sg_id == created_record_id:
             delete_pass = False
             logger.log_for_audit(
                 env,
