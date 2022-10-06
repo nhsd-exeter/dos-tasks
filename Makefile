@@ -723,13 +723,21 @@ run-integration-test-data-set: ###Run hk integration test lambda to set up data 
 # cat data_setup_response.json
 
 # TODO rename db_data_setup_lambda_function_name
-run-integration-test-check: ###Run hk integration test lambda to check result of task - Mandatory [PROFILE] [TASK]
-	echo Running $(TF_VAR_db_data_setup_lambda_function_name) for $(TASK)
+invoke-test-check: ###Run hk integration test lambda to check result of task - Mandatory [PROFILE] [TASK]
+# echo Running $(TF_VAR_db_data_setup_lambda_function_name) for task $(TASK)
 	aws lambda invoke --function-name $(TF_VAR_db_data_setup_lambda_function_name) \
-	--invocation-type Event \
-	--payload '{ "task": "data" }' \
-	data_setup_response.json | jq -r .StatusCode - | tee data_setup_response.log
-	cat data_setup_response.json
+	--payload '{ "task": "$(TASK)" }' \
+	data_setup_response.json | jq -r .StatusCode
+
+run-integration-test-check: # - Mandatory [PROFILE] [TASK]
+	result=$$(make invoke-test-check PROFILE=$(PROFILE) TASK=$(TASK))
+	if [ $$result = 200 ]; then
+		echo pass
+		exit 0
+	else
+		echo fail
+		exit 1
+	fi
 
 
 # ============== --invocation-type Event
@@ -742,4 +750,5 @@ run-integration-test-check: ###Run hk integration test lambda to check result of
 	check_bucket_for_file \
 	poll_s3_for_file \
 	task-type \
-	return_code_test
+	return_code_test \
+	invoke-test-check

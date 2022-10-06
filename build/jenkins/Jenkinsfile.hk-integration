@@ -151,14 +151,15 @@ pipeline {
                 }
             }
         }
-
-        stage('Check results') {
+        stage('Set up data conditions') {
             when { expression { params.Task != "none" } }
             steps {
-                script { echo 'Check results' }
+                script {
+                    echo 'Check results of uploaded file'
+                    sh "make run-integration-test-check PROFILE=${PROFILE} TASK=symptomgroups"
+                }
             }
         }
-
         stage('Check and remove older versions') {
             when { expression { params.Task != "none" } }
             steps {

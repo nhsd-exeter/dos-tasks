@@ -28,9 +28,9 @@ def request(event, context):
             logger.log_for_error(env, "Problem {}".format(e))
         finally:
             database.close_connection(event, db_connection)
-    return {
-        'success' : success
-    }
+
+    status_code = 200 if success else 500
+    return {"statusCode": status_code, "body": str(success)}
 
 
 def run_data_checks_for_hk_task(env, task, db_connection):
