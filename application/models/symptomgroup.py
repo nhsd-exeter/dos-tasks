@@ -17,7 +17,7 @@ expected_zcode_exists = None
 def get_symptom_groups_data(env, db_connection):
     """Returns symptomgroups under test"""
     result_set = {}
-    symptom_group_ids = "2000,2001,2002"
+    symptom_group_ids = "(2000,2001,2002)"
     try:
         query, data = create_symptom_group_query(symptom_group_ids)
         result_set = database.execute_resultset_query(env, db_connection, query, data)
@@ -30,7 +30,7 @@ def get_symptom_groups_data(env, db_connection):
 
 
 def create_symptom_group_query(symptom_group_ids):
-    query = """select id, name, zcodeexists from pathwaysdos.symptomgroups where id in (%s) order by id asc;"""
+    query = """select id, name, zcodeexists from pathwaysdos.symptomgroups where id in %s order by id asc;"""
     data = symptom_group_ids
     return query, data
 
