@@ -124,8 +124,8 @@ pipeline {
             when { expression { params.Task != "none" } }
             steps {
                 script {
-                    echo 'Run set up test'
-                    sh "make run-integration-test-data-set PROFILE=${PROFILE}"
+                    echo 'Run set up test data conditions'
+                    sh "make run-integration-test-lambda PROFILE=${PROFILE} TASK=data"
                 }
             }
         }
@@ -156,7 +156,7 @@ pipeline {
             steps {
                 script {
                     echo 'Check results of uploaded file'
-                    sh "make run-integration-test-check PROFILE=${PROFILE} TASK=symptomgroups"
+                    sh "make run-integration-test-lambda PROFILE=${PROFILE} TASK=symptomgroups"
                 }
             }
         }
