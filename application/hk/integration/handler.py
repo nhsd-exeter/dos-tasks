@@ -54,7 +54,7 @@ def insert_test_data(env, db_connection):
 def set_up_test_data(env, db_connection, sql_file):
     """Runs individual data set up script"""
     logger.log_for_audit(env, "Running SQL script {}".format(sql_file))
-    db_connection.execute_script(env, db_connection, sql_file)
+    database.execute_script(env, db_connection, sql_file)
     # open(sql_file, "r").read())
 
 
