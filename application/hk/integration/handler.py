@@ -1,5 +1,6 @@
 from utilities import logger, database
 import os
+import json
 
 from models import symptomgroup
 
@@ -31,7 +32,16 @@ def request(event, context):
 
     status_code = 200 if success else 500
     logger.log_for_audit(env, "status code {}".format(status_code))
-    return {"StatusCode": status_code, "body": str(success)}
+    # return {"StatusCode": status_code, "body": str(success)}
+    return {
+        "statusCode": status_code,
+        "headers": {
+            "Content-Type": "application/json"
+        },
+        "body": json.dumps({
+            "success ": success
+        })
+    }
 
 
 def run_data_checks_for_hk_task(env, task, db_connection):
