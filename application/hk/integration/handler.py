@@ -31,9 +31,7 @@ def request(event, context):
 
     status_code = 200 if success else 500
     logger.log_for_audit(env, "status code {}".format(status_code))
-    if status_code == 500:
-        raise Exception("{} tests failed - return value {}".format(status_code,success))
-    return {"statusCode": status_code, "body": str(success)}
+    return {"StatusCode": status_code, "body": str(success)}
 
 
 def run_data_checks_for_hk_task(env, task, db_connection):
