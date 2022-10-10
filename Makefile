@@ -727,9 +727,9 @@ run_integration_unit_test:
 invoke-test-check: ###Run hk integration test lambda to check result of task - Mandatory [PROFILE] [TASK]
 # echo Running $(TF_VAR_db_data_setup_lambda_function_name) for task $(TASK)
 	eval "$$(make aws-assume-role-export-variables)"
-	aws lambda invoke --function-name $(TF_VAR_db_data_setup_lambda_function_name) \
+	aws lambda invoke --function-name uec-dos-tasks-integration-hk-integration-tester-zip-lambda \
 	--payload '{ "task": "$(TASK)" }' \
-	data_setup_response.json | jq -r .StatusCode
+	data_setup_response.json | jq -r .
 
 run-integration-test-lambda: # - Mandatory [PROFILE] [TASK]
 	result=$$(make invoke-test-check PROFILE=$(PROFILE) TASK=$(TASK))
@@ -741,6 +741,58 @@ run-integration-test-lambda: # - Mandatory [PROFILE] [TASK]
 		exit 1
 	fi
 
+
+plan-integration-test-zip-lambda: # PROFILE
+	make remove-files-for-hk-integration-zip-lambda
+	make copy-files-for-hk-integration-zip-lambda
+	eval "$$(make secret-fetch-and-export-variables)"
+	make plan-hk PROFILE=$(PROFILE) TASK=integration-zip
+	make remove-files-for-hk-integration-zip-lambda
+
+provision-integration-test-zip-lambda: # PROFILE
+	make remove-files-for-hk-integration-zip-lambda
+	make copy-files-for-hk-integration-zip-lambda
+	eval "$$(make secret-fetch-and-export-variables)"
+	make terraform-apply PROFILE=$(PROFILE) STACK=integration-zip
+	make remove-files-for-hk-integration-zip-lambda
+
+destroy-integration-test-zip-lambda: # PROFILE
+	make remove-files-for-hk-integration-zip-lambda
+	make copy-files-for-hk-integration-zip-lambda
+	eval "$$(make secret-fetch-and-export-variables)"
+	make terraform-destroy PROFILE=$(PROFILE) STACK=integration-zip
+	make remove-files-for-hk-integration-zip-lambda
+
+
+remove-files-for-hk-integration-zip-lambda: # Removes files copied for zipping int test code
+	rm -rf $(TERRAFORM_DIR_REL)/integration-zip/function
+
+copy-files-for-hk-integration-zip-lambda: # Copies integration-test code for zipping
+	mkdir $(TERRAFORM_DIR_REL)/integration-zip/function/
+	mkdir $(TERRAFORM_DIR_REL)/integration-zip/function/utilities
+	cp -r $(APPLICATION_DIR)/utilities/*.py $(TERRAFORM_DIR_REL)/integration-zip/function/utilities/
+	mkdir $(TERRAFORM_DIR_REL)/integration-zip/function/models
+	cp -r $(APPLICATION_DIR)/models/*.py $(TERRAFORM_DIR_REL)/integration-zip/function/models
+	cp -r $(APPLICATION_DIR)/hk/integration/*.py $(TERRAFORM_DIR_REL)/integration-zip/function/
+	cp -r $(APPLICATION_DIR)/hk/integration/requirements.txt $(TERRAFORM_DIR_REL)/integration-zip/function/
+	cp -r $(APPLICATION_DIR)/hk/integration/data-files/ $(TERRAFORM_DIR_REL)/integration-zip/function/data-files
+
+
+build-lambda-layer-zip: # build lambda layer
+	cd infrastructure/stacks/lambda-layer/python
+	pip install requests -t ./
+
+plan-lambda-layer: # [STACK] [PROFILE]
+	make build-lambda-layer-zip
+	make terraform-plan STACK=$(STACK) PROFILE=$(PROFILE)
+
+provision-lambda-layer: # [STACK] [PROFILE]
+	make build-lambda-layer-zip
+	make terraform-apply STACK=$(STACK) PROFILE=$(PROFILE)
+
+destroy-lambda-layer: # [STACK] [PROFILE]
+	make build-lambda-layer-zip
+	make terraform-destroy STACK=$(STACK) PROFILE=$(PROFILE)
 
 # ============== --invocation-type Event
 # ==============================================================================

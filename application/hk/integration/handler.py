@@ -35,12 +35,8 @@ def request(event, context):
     # return {"StatusCode": status_code, "body": str(success)}
     return {
         "statusCode": status_code,
-        "headers": {
-            "Content-Type": "application/json"
-        },
-        "body": json.dumps({
-            "success ": success
-        })
+        "headers": {"Content-Type": "application/json"},
+        "body": json.dumps({"success ": success}),
     }
 
 
