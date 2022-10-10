@@ -38,13 +38,13 @@ def test_invalid_create_action():
     csv_dict["action"] = "CREATE"
     assert not common.valid_action(True,csv_dict, 'test')
 
-# def test_invalid_create_action():
-#     """Test invalid condition for create action"""
-#     csv_dict = {}
-#     csv_dict["id1"] = csv_id
-#     csv_dict["id2"] = csv_id
-#     csv_dict["action"] = "INSERT"
-#     assert not common.valid_action(False,csv_dict, 'test')
+def test_invalid_insert_action():
+    """Test invalid condition for create action"""
+    csv_dict = {}
+    csv_dict["id1"] = csv_id
+    csv_dict["id2"] = csv_id
+    csv_dict["action"] = "INSERT"
+    assert not common.valid_action(False,csv_dict, 'test')
 
 def test_valid_update_action():
     """Test valid condition for update action"""
