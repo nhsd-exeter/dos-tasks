@@ -777,20 +777,28 @@ copy-files-for-hk-integration-zip-lambda: # Copies integration-test code for zip
 	cp -r $(APPLICATION_DIR)/hk/integration/requirements.txt $(TERRAFORM_DIR_REL)/integration-zip/function/
 	cp -r $(APPLICATION_DIR)/hk/integration/data-files/ $(TERRAFORM_DIR_REL)/integration-zip/function/data-files
 
-
+#TODO automate build of zip as this below doesnt; work
 build-lambda-layer-zip: # build lambda layer
-	cd infrastructure/stacks/lambda-layer/python
-	pip install requests -t ./
+	cd $(TERRAFORM_DIR_REL)/lambda-layer/python
+# pip install requests -t ./
+	pip install -r ../requirements.txt -t ./
+#	cd .. && tar -czf ./python.zip python/
+
+remove-lambda-layer-files: # cleardown the result of importing for lambda layer
+	rm -rf $(TERRAFORM_DIR_REL)/lambda-layer/python/*
 
 plan-lambda-layer: # [STACK] [PROFILE]
+	make remove-lambda-layer-files
 	make build-lambda-layer-zip
 	make terraform-plan STACK=$(STACK) PROFILE=$(PROFILE)
 
 provision-lambda-layer: # [STACK] [PROFILE]
+	make remove-lambda-layer-files
 	make build-lambda-layer-zip
 	make terraform-apply STACK=$(STACK) PROFILE=$(PROFILE)
 
 destroy-lambda-layer: # [STACK] [PROFILE]
+	make remove-lambda-layer-files
 	make build-lambda-layer-zip
 	make terraform-destroy STACK=$(STACK) PROFILE=$(PROFILE)
 
