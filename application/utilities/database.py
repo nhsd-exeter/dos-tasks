@@ -66,6 +66,7 @@ def execute_db_query(db_connection, query, data, line, values, summary_count_dic
     except Exception as e:
         logger.log_for_error(env, "Line {} in transaction failed. Rolling back".format(line))
         logger.log_for_error(env, "Error: {}".format(e))
+        common.increment_summary_count(summary_count_dict, "ERROR", env)
         db_connection.rollback()
     finally:
         cursor.close()

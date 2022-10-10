@@ -38,6 +38,14 @@ def test_invalid_create_action():
     csv_dict["action"] = "CREATE"
     assert not common.valid_action(True,csv_dict, 'test')
 
+def test_invalid_insert_action():
+    """Test invalid condition for create action"""
+    csv_dict = {}
+    csv_dict["id1"] = csv_id
+    csv_dict["id2"] = csv_id
+    csv_dict["action"] = "INSERT"
+    assert not common.valid_action(False,csv_dict, 'test')
+
 def test_valid_update_action():
     """Test valid condition for update action"""
     csv_dict = {}
@@ -80,6 +88,33 @@ def test_invalid_action_lower_case():
     csv_dict["action"] = "delete"
     assert not common.valid_action(True,csv_dict, 'test')
 
+def test_invalid_action_parameter():
+    """Test validation of additional parameter that sets invalid action"""
+    csv_dict = {}
+    csv_dict["id"] = csv_id
+    csv_dict["action"] = "DELETE"
+    assert not common.valid_action(True,csv_dict, 'test', "DELETE")
+
+def test_invalid_action_parameter_lowercase():
+    """Test validation of additional parameter that sets invalid action"""
+    csv_dict = {}
+    csv_dict["id"] = csv_id
+    csv_dict["action"] = "delete"
+    assert not common.valid_action(True,csv_dict, 'test', "delete")
+
+def test_valid_create_action_parameter_set():
+    """Test valid condition for create action with invalid action parameter set"""
+    csv_dict = {}
+    csv_dict["id"] = csv_id
+    csv_dict["action"] = "CREATE"
+    assert common.valid_action(False,csv_dict, 'test', "UPDATE")
+
+def test_valid_delete_action_parameter_set():
+    """Test valid condition for create action with invalid action parameter set"""
+    csv_dict = {}
+    csv_dict["id"] = csv_id
+    csv_dict["action"] = "DELETE"
+    assert common.valid_action(True,csv_dict, 'test', "UPDATE")
 
 @patch(f"{file_path}.utilities.s3.S3")
 @patch(f"{file_path}.utilities.logger")

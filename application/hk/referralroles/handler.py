@@ -34,7 +34,7 @@ def request(event, context):
         logger.log_for_error(env, "Problem {}".format(e))
         message.send_failure_slack_message(event, start)
     finally:
-        database.close_connection(event, db_connection)
+        database.close_connection(env, db_connection)
         common.archive_file(bucket, filename, event, start)
     return task_description + " execution completed"
 

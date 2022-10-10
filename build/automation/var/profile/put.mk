@@ -11,7 +11,7 @@ SERVICE_PREFIX := $(PROJECT_ID)-$(ENV)
 # Infrastructure variables
 
 STACKS := secrets,s3,security-groups
-TASKS := filter,referralroles,symptomgroups,symptomdiscriminators,servicetypes
+TASKS := filter,referralroles,symptomgroups,symptomdiscriminators,servicetypes,symptomdiscriminatorsynonyms,symptomgroupdiscriminators
 ENVIRONMENT_LIST := ["uat1","uat2","uat3","uat4","ut"]
 TF_VAR_environment_list := $(ENVIRONMENT_LIST)
 

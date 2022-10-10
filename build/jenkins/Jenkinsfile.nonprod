@@ -1,7 +1,7 @@
 pipeline {
   agent any
   parameters {
-    choice(name: 'Task', choices: ['none', 'all', 'filter', 'referralroles','servicetypes','stt','symptomgroups','symptomdiscriminators','ragreset','removeoldchanges'], description: 'Select which task to deploy')
+    choice(name: 'Task', choices: ['none', 'all', 'filter', 'referralroles','servicetypes','stt','symptomgroups','symptomdiscriminators','symptomdiscriminatorsynonyms','symptomgroupdiscriminators','ragreset','removeoldchanges'], description: 'Select which task to deploy')
     choice(name: 'Database', choices: ['none', 'fix', 'teamb', 'test1','testtech', 'performance'], description: 'Select target database (cron jobs ONLY)')
   }
 
