@@ -30,6 +30,6 @@ TF_VAR_splunk_firehose_role := dos_cw_w_events_firehose_access_role
 LAMBDA_VERSIONS_TO_RETAIN = 5
 
 TF_VAR_hk_integration_tester_name = hk-integration-tester
-TF_VAR_db_data_setup_lambda_function_name = $(PROJECT_ID)-$(ENV)-$(TF_VAR_hk_integration_tester_name)-lambda
+TF_VAR_hk_integration_tester_lambda_function_name = $(PROJECT_ID)-$(ENV)-$(TF_VAR_hk_integration_tester_name)-lambda
 # Lambda layer
 TF_VAR_uec_dos_tasks_python_libs = uec-dos-tasks-python-libs

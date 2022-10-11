@@ -781,12 +781,10 @@ run_integration_unit_test:
 # targets to test results of hk job
 #=================
 
-# TODO rename db_data_setup_lambda_function_name
-# | jq [.success]
 invoke-test-check: ###Run hk integration test lambda to check result of task - Mandatory [PROFILE] [TASK]
-# echo Running $(TF_VAR_db_data_setup_lambda_function_name) for task $(TASK)
+	echo Running $(TF_VAR_hk_integration_tester_lambda_function_name) for task $(TASK)
 	eval "$$(make aws-assume-role-export-variables)"
-	aws lambda invoke --function-name uec-dos-tasks-integration-hk-integration-tester-zip-lambda \
+	aws lambda invoke --function-name $(TF_VAR_hk_integration_tester_lambda_function_name) \
 	--payload '{ "task": "$(TASK)" }' \
 	/dev/stdout
 
