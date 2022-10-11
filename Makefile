@@ -724,16 +724,24 @@ run_integration_unit_test:
 # cat data_setup_response.json
 
 # TODO rename db_data_setup_lambda_function_name
+# | jq [.success]
 invoke-test-check: ###Run hk integration test lambda to check result of task - Mandatory [PROFILE] [TASK]
 # echo Running $(TF_VAR_db_data_setup_lambda_function_name) for task $(TASK)
 	eval "$$(make aws-assume-role-export-variables)"
 	aws lambda invoke --function-name uec-dos-tasks-integration-hk-integration-tester-zip-lambda \
 	--payload '{ "task": "$(TASK)" }' \
-	data_setup_response.json | jq -r .
+	/dev/stdout
 
+# lambda returns
+# eg {"success": "False"}{ "StatusCode": 200, "ExecutedVersion": "$LATEST" }
+# want to extract the value of success
 run-integration-test-lambda: # - Mandatory [PROFILE] [TASK]
-	result=$$(make invoke-test-check PROFILE=$(PROFILE) TASK=$(TASK))
-	if [ $$result = 200 ]; then
+	lambda_result=$$(make invoke-test-check PROFILE=$(PROFILE) TASK=$(TASK))
+	result_array=(`echo $$lambda_result | tr '}' ' '`)
+	result=$${result_array[1]}
+	result=$${result#?}
+	result=$${result%?}
+	if [ $$result == "True" ]; then
 		echo pass
 		exit 0
 	else

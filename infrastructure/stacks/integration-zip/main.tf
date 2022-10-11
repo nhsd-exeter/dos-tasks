@@ -11,6 +11,7 @@ module "integration_test_lambda" {
   aws_account_id               = var.aws_account_id
   service_prefix               = var.service_prefix
   tags                         = local.standard_tags
+  layers                       = [data.aws_lambda_layer_version.uec_dos_tasks_python_libs.arn]
   env_vars = {
     "TASK"              = "integration",
     "PROFILE"           = var.profile,

@@ -37,3 +37,7 @@ variable "splunk_firehose_subscription" {
 variable "splunk_firehose_role" {
   description = "Name of splunk firehose IAM role"
 }
+
+variable "uec_dos_tasks_python_libs" {
+  description = "Python library layer for uec-dos-tasks integratin tester"
+}

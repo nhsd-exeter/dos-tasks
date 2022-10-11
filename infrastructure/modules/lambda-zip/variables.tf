@@ -92,3 +92,7 @@ variable "memory_size" {
   description = "Amount of memory in MB your Lambda Function can use at runtime"
   default     = "128"
 }
+
+variable "layers" {
+  description = "ARN of any lambda layers to be linked"
+}

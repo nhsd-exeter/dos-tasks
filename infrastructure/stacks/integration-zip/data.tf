@@ -24,3 +24,7 @@ data "terraform_remote_state" "security_groups" {
     region = var.aws_region
   }
 }
+
+data "aws_lambda_layer_version" "uec_dos_tasks_python_libs" {
+  layer_name = var.uec_dos_tasks_python_libs
+}
