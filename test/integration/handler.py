@@ -31,13 +31,9 @@ def request(event, context):
             database.close_connection(event, db_connection)
 
     status_code = 200 if success else 500
-    logger.log_for_audit(env, "status code {}".format(status_code))
-    # return {"StatusCode": status_code, "body": str(success)}
-    return {
-        "statusCode": status_code,
-        "headers": {"Content-Type": "application/json"},
-        "body": json.dumps({"success ": success}),
-    }
+    logger.log_for_audit(env, "status code: {}".format(status_code))
+
+    return {"success":str(success)}
 
 
 def run_data_checks_for_hk_task(env, task, db_connection):
