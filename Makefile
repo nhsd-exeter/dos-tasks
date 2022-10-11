@@ -861,10 +861,10 @@ run-integration-test-lambda: # - Mandatory [PROFILE] [TASK]
 # 	mkdir $(TERRAFORM_DIR_REL)/integration-zip/function/utilities
 # 	cp -r $(APPLICATION_DIR)/utilities/*.py $(TERRAFORM_DIR_REL)/integration-zip/function/utilities/
 # 	mkdir $(TERRAFORM_DIR_REL)/integration-zip/function/models
-# 	cp -r $(APPLICATION_DIR)/models/*.py $(TERRAFORM_DIR_REL)/integration-zip/function/models
-# 	cp -r $(APPLICATION_DIR)/hk/integration/*.py $(TERRAFORM_DIR_REL)/integration-zip/function/
-# 	cp -r $(APPLICATION_DIR)/hk/integration/requirements.txt $(TERRAFORM_DIR_REL)/integration-zip/function/
-# 	cp -r $(APPLICATION_DIR)/hk/integration/data-files/ $(TERRAFORM_DIR_REL)/integration-zip/function/data-files
+# 	cp -r $(APPLICATION_DIR)/models-temp/*.py $(TERRAFORM_DIR_REL)/integration-zip/function/models
+# 	cp -r $(APPLICATION_DIR)/hk/integration-temp/*.py $(TERRAFORM_DIR_REL)/integration-zip/function/
+# 	cp -r $(APPLICATION_DIR)/hk/integration-temp/requirements.txt $(TERRAFORM_DIR_REL)/integration-zip/function/
+# 	cp -r $(APPLICATION_DIR)/hk/integration-temp/data-files/ $(TERRAFORM_DIR_REL)/integration-zip/function/data-files
 
 #TODO automate build of zip as this below doesnt; work
 # build-lambda-layer-zip: # build lambda layer

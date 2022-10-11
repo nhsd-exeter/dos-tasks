@@ -98,7 +98,7 @@ def test_run_data_checks_for_hk_task_old(mock_db_connect, mock_audit_logger):
 def test_run_data_checks_for_hk_created(mock_db_connect, mock_audit_logger, mock_get_data):
     task = 'symptomgroups'
     handler.run_data_checks_for_hk_task(env, task, mock_db_connect)
-    assert mock_audit_logger.call_count == 2
+    assert mock_audit_logger.call_count == 3
     assert mock_get_data.call_count == 1
     # assert mock_check_data.call_count == 1
 

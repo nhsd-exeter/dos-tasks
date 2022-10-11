@@ -11,6 +11,7 @@ updated_record_id = 2001
 updated_record_name = "Integration Test Update"
 created_record_id = 2000
 created_record_name = "Integration Test Create"
+# should be false
 expected_zcode_exists = None
 
 
@@ -57,16 +58,20 @@ def check_symptom_groups_data(env, db_connection):
                 "Record with id {0} not deleted".format(sg_id),
             )
         if sg_id == created_record_id:
-            create_pass = check_symptom_group_record(symptom_group, created_record_name, expected_zcode_exists)
+            create_pass = check_symptom_group_record(env, symptom_group, created_record_name, expected_zcode_exists)
         if sg_id == updated_record_id:
-            update_pass = check_symptom_group_record(symptom_group, updated_record_name, expected_zcode_exists)
+            update_pass = check_symptom_group_record(env, symptom_group, updated_record_name, expected_zcode_exists)
     all_pass = delete_pass and update_pass and create_pass
     return all_pass
 
 
-def check_symptom_group_record(symptom_group, expected_name, expected_zcode_exists):
+def check_symptom_group_record(env, symptom_group, expected_name, expected_zcode_exists):
     """Returns true if data persisted is as expected"""
     if symptom_group["name"] == expected_name and symptom_group["zcodeexists"] == expected_zcode_exists:
         return True
     else:
+        logger.log_for_audit(
+                env,
+                "Record with id:{0}, name:{1}, zcodeexists:{2} not correct".format(symptom_group["id"],symptom_group["name"],symptom_group["zcodeexists"]),
+            )
         return False
