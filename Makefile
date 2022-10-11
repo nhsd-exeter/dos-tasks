@@ -79,6 +79,7 @@ push-image: # Push project artefact to the registry - mandatory: TASK=[task]
 
 # Provision
 provision: ## provision resources for hk and cron - mandatory PROFILE TASK  and DB_NAME (cron only)
+	make copy-temp-integration-test-files
 	make terraform-apply-auto-approve STACK=$(STACKS) PROFILE=$(PROFILE)
 	if [ "$(TASK)" == "all" ]; then
 		for task in $$(echo $(TASKS) | tr "," "\n"); do
@@ -103,6 +104,7 @@ provision: ## provision resources for hk and cron - mandatory PROFILE TASK  and 
 			make provision-hk PROFILE=$(PROFILE) TASK=$(TASK)
 		fi
 	fi
+	make remove-temp-integration-test-files
 
 provision-hk: ## Provision environment - mandatory: PROFILE=[name], TASK=[task]
 	if [ "$(TASK)" != 'integration' ]; then
@@ -763,6 +765,8 @@ check_single_integration_test_file:## check if file has been archived mandatory:
 	filename=`basename "$(FILENAME)"`
 	make poll_s3_for_file MAX_ATTEMPTS=$(MAX_ATTEMPTS) BUCKET=$(BUCKET) FILENAME=$$filename
 
+
+
 # TEMP placeholder code for use in jenkins file can be removed later
 return_code_test:### mandatory [PASS] True or anything
 	if [ "$(PASS)" == "True" ]; then
@@ -782,7 +786,6 @@ run_integration_unit_test:
 #=================
 
 invoke-test-check: ###Run hk integration test lambda to check result of task - Mandatory [PROFILE] [TASK]
-	echo Running $(TF_VAR_hk_integration_tester_lambda_function_name) for task $(TASK)
 	eval "$$(make aws-assume-role-export-variables)"
 	aws lambda invoke --function-name $(TF_VAR_hk_integration_tester_lambda_function_name) \
 	--payload '{ "task": "$(TASK)" }' \
