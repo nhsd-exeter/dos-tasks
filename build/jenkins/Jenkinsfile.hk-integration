@@ -1,8 +1,6 @@
 pipeline {
     agent any
     parameters {
-        // choice(name: 'Task', choices: ['none', 'all', 'filter', 'referralroles','symptomgroups','symptomdiscriminators'], description: 'Select which task to deploy')
-        // choice(name: 'Test', choices: ['none', 'integration'], description: 'Select target database (cron jobs ONLY)')
         string(
             description: 'Housekeeping task to run',
             name: 'Task',
@@ -13,16 +11,6 @@ pipeline {
             name: 'Test',
             defaultValue: 'integration'
         )
-        // string(
-        //   description: 'R53 record for RDS cluster',
-        //   name: 'DB_HOST',
-        //   defaultValue: ''
-        // )
-        // string(
-        //   description: 'Name of database on RDS instance',
-        //   name: 'PIPELINE_DATABASE',
-        //   defaultValue: ''
-        // )
     }
 
     options {
@@ -83,7 +71,6 @@ pipeline {
                 script { sh "make push TASK=${params.Task}" }
             }
         }
-        // integration now built and pushed with other tasks above
         // stage('Build and push integration test lambda') {
         //     when { expression { params.Task != "none" } }
         //     steps {
@@ -144,8 +131,8 @@ pipeline {
             when { expression { params.Task != "none" } }
             steps {
                 script {
-                  echo 'Check file archived'
-                  catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                    echo 'Check file archived'
+                    catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
                         sh "make check_single_integration_test_file MAX_ATTEMPTS=${MAX_ATTEMPTS} FILENAME=int_symptomgroups.csv BUCKET=${BUCKET}"
                     }
                 }
@@ -156,7 +143,9 @@ pipeline {
             steps {
                 script {
                     echo 'Check results of uploaded file'
-                    sh "make run-integration-test-lambda PROFILE=${PROFILE} TASK=symptomgroups"
+                    catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                        sh "make run-integration-test-lambda PROFILE=${PROFILE} TASK=symptomgroups"
+                    }
                 }
             }
         }
