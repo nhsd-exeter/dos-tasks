@@ -672,22 +672,21 @@ provision-hk-integration-tester: ## mandatory: PROFILE=[name], TASK=[integration
 copy-temp-integration-test-files:
 	rm -rf $(APPLICATION_DIR)/hk/integration
 	mkdir $(APPLICATION_DIR)/hk/integration
-	mkdir $(APPLICATION_DIR)/hk/integration/model
+	mkdir $(APPLICATION_DIR)/hk/integration/models
 	mkdir $(APPLICATION_DIR)/hk/integration/test
 	mkdir $(APPLICATION_DIR)/hk/integration/utilities
 	cp $(APPLICATION_DIR)/utilities/*.py $(APPLICATION_DIR)/hk/integration/utilities
 	cp $(APPLICATION_TEST_DIR)/integration/*.py $(APPLICATION_DIR)/hk/integration
 	cp $(APPLICATION_TEST_DIR)/integration/requirements.txt $(APPLICATION_DIR)/hk/integration
-	cp $(APPLICATION_TEST_DIR)/integration/model/* $(APPLICATION_DIR)/hk/integration/model
+	cp $(APPLICATION_TEST_DIR)/integration/models/* $(APPLICATION_DIR)/hk/integration/models
 	cp $(APPLICATION_TEST_DIR)/integration/test/* $(APPLICATION_DIR)/hk/integration/test
 
 remove-temp-integration-test-files:
 	rm -rf $(APPLICATION_DIR)/hk/integration
-	rm -rf $(APPLICATION_DIR)/hk/integration-data-files
 
 coverage-full:	### Run test coverage - mandatory: PROFILE=[profile] TASK=[task] FORMAT=[xml/html]
 	make copy-stt-coverage-test-files
-# make copy-temp-integration-test-files
+	make copy-temp-integration-test-files
 	if [ "$(TASK)" = "" ]; then
 		tasks=$(TASKS)
 	else
@@ -780,6 +779,27 @@ run_integration_unit_test:
 		DIR=test/integration/ \
 		CMD="python3 -m pytest test/"
 
+#============
+# tidy up post testing
+#==============
+clear_integration_archive:  ## clear out all files in archive folder at end of integration test BUCKET=[name of folder in bucket]
+	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
+		$(AWSCLI) s3api delete-objects \
+			--bucket s3://$(BUCKET) \
+			--delete "$(aws s3api list-object-versions \
+			--output=json \
+			--query='{Objects: Versions[].{Key:Key,VersionId:VersionId}}')"
+			2>&1  \
+	" > /dev/null 2>&1 && echo true || echo false
+
+get_s3_object_versions: # BUCKET=[name of folder in bucket]
+	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
+		$(AWSCLI) s3api list-object-versions \
+			--bucket s3://$(BUCKET) \
+			--output=json \
+			--query='{Objects: Versions[].{Key:Key,VersionId:VersionId}}'"
+			2>&1  \
+	" > /dev/null 2>&1 && echo true || echo false
 
 #=================
 # targets to test results of hk job
@@ -811,65 +831,65 @@ run-integration-test-lambda: # - Mandatory [PROFILE] [TASK]
 #===================
 # zip lambda and layer targets - to be removed later
 #===================
-plan-integration-test-zip-lambda: # PROFILE
-	make remove-files-for-hk-integration-zip-lambda
-	make copy-files-for-hk-integration-zip-lambda
-	eval "$$(make secret-fetch-and-export-variables)"
-	make plan-hk PROFILE=$(PROFILE) TASK=integration-zip
-	make remove-files-for-hk-integration-zip-lambda
+# plan-integration-test-zip-lambda: # PROFILE
+# 	make remove-files-for-hk-integration-zip-lambda
+# 	make copy-files-for-hk-integration-zip-lambda
+# 	eval "$$(make secret-fetch-and-export-variables)"
+# 	make plan-hk PROFILE=$(PROFILE) TASK=integration-zip
+# 	make remove-files-for-hk-integration-zip-lambda
 
-provision-integration-test-zip-lambda: # PROFILE
-	make remove-files-for-hk-integration-zip-lambda
-	make copy-files-for-hk-integration-zip-lambda
-	eval "$$(make secret-fetch-and-export-variables)"
-	make terraform-apply PROFILE=$(PROFILE) STACK=integration-zip
-	make remove-files-for-hk-integration-zip-lambda
+# provision-integration-test-zip-lambda: # PROFILE
+# 	make remove-files-for-hk-integration-zip-lambda
+# 	make copy-files-for-hk-integration-zip-lambda
+# 	eval "$$(make secret-fetch-and-export-variables)"
+# 	make terraform-apply PROFILE=$(PROFILE) STACK=integration-zip
+# 	make remove-files-for-hk-integration-zip-lambda
 
-destroy-integration-test-zip-lambda: # PROFILE
-	make remove-files-for-hk-integration-zip-lambda
-	make copy-files-for-hk-integration-zip-lambda
-	eval "$$(make secret-fetch-and-export-variables)"
-	make terraform-destroy PROFILE=$(PROFILE) STACK=integration-zip
-	make remove-files-for-hk-integration-zip-lambda
+# destroy-integration-test-zip-lambda: # PROFILE
+# 	make remove-files-for-hk-integration-zip-lambda
+# 	make copy-files-for-hk-integration-zip-lambda
+# 	eval "$$(make secret-fetch-and-export-variables)"
+# 	make terraform-destroy PROFILE=$(PROFILE) STACK=integration-zip
+# 	make remove-files-for-hk-integration-zip-lambda
 
 
-remove-files-for-hk-integration-zip-lambda: # Removes files copied for zipping int test code
-	rm -rf $(TERRAFORM_DIR_REL)/integration-zip/function
+# remove-files-for-hk-integration-zip-lambda: # Removes files copied for zipping int test code
+# 	rm -rf $(TERRAFORM_DIR_REL)/integration-zip/function
 
-copy-files-for-hk-integration-zip-lambda: # Copies integration-test code for zipping
-	mkdir $(TERRAFORM_DIR_REL)/integration-zip/function/
-	mkdir $(TERRAFORM_DIR_REL)/integration-zip/function/utilities
-	cp -r $(APPLICATION_DIR)/utilities/*.py $(TERRAFORM_DIR_REL)/integration-zip/function/utilities/
-	mkdir $(TERRAFORM_DIR_REL)/integration-zip/function/models
-	cp -r $(APPLICATION_DIR)/models/*.py $(TERRAFORM_DIR_REL)/integration-zip/function/models
-	cp -r $(APPLICATION_DIR)/hk/integration/*.py $(TERRAFORM_DIR_REL)/integration-zip/function/
-	cp -r $(APPLICATION_DIR)/hk/integration/requirements.txt $(TERRAFORM_DIR_REL)/integration-zip/function/
-	cp -r $(APPLICATION_DIR)/hk/integration/data-files/ $(TERRAFORM_DIR_REL)/integration-zip/function/data-files
+# copy-files-for-hk-integration-zip-lambda: # Copies integration-test code for zipping
+# 	mkdir $(TERRAFORM_DIR_REL)/integration-zip/function/
+# 	mkdir $(TERRAFORM_DIR_REL)/integration-zip/function/utilities
+# 	cp -r $(APPLICATION_DIR)/utilities/*.py $(TERRAFORM_DIR_REL)/integration-zip/function/utilities/
+# 	mkdir $(TERRAFORM_DIR_REL)/integration-zip/function/models
+# 	cp -r $(APPLICATION_DIR)/models/*.py $(TERRAFORM_DIR_REL)/integration-zip/function/models
+# 	cp -r $(APPLICATION_DIR)/hk/integration/*.py $(TERRAFORM_DIR_REL)/integration-zip/function/
+# 	cp -r $(APPLICATION_DIR)/hk/integration/requirements.txt $(TERRAFORM_DIR_REL)/integration-zip/function/
+# 	cp -r $(APPLICATION_DIR)/hk/integration/data-files/ $(TERRAFORM_DIR_REL)/integration-zip/function/data-files
 
 #TODO automate build of zip as this below doesnt; work
-build-lambda-layer-zip: # build lambda layer
-	cd $(TERRAFORM_DIR_REL)/lambda-layer/python
-# pip install requests -t ./
-	pip install -r ../requirements.txt -t ./
-#	cd .. && tar -czf ./python.zip python/
+# build-lambda-layer-zip: # build lambda layer
+# 	cd $(TERRAFORM_DIR_REL)/lambda-layer/python
+# # pip install requests -t ./
+# 	pip install -r ../requirements.txt -t ./
+# #	cd .. && tar -czf ./python.zip python/
 
-remove-lambda-layer-files: # cleardown the result of importing for lambda layer
-	rm -rf $(TERRAFORM_DIR_REL)/lambda-layer/python/*
+# remove-lambda-layer-files: # cleardown the result of importing for lambda layer
+# 	rm -rf $(TERRAFORM_DIR_REL)/lambda-layer/python/*
 
-plan-lambda-layer: # [STACK] [PROFILE]
-	make remove-lambda-layer-files
-	make build-lambda-layer-zip
-	make terraform-plan STACK=$(STACK) PROFILE=$(PROFILE)
+# plan-lambda-layer: # [STACK] [PROFILE]
+# 	make remove-lambda-layer-files
+# 	make build-lambda-layer-zip
+# 	make terraform-plan STACK=$(STACK) PROFILE=$(PROFILE)
 
-provision-lambda-layer: # [STACK] [PROFILE]
-	make remove-lambda-layer-files
-	make build-lambda-layer-zip
-	make terraform-apply STACK=$(STACK) PROFILE=$(PROFILE)
+# provision-lambda-layer: # [STACK] [PROFILE]
+# 	make remove-lambda-layer-files
+# 	make build-lambda-layer-zip
+# 	make terraform-apply STACK=$(STACK) PROFILE=$(PROFILE)
 
-destroy-lambda-layer: # [STACK] [PROFILE]
-	make remove-lambda-layer-files
-	make build-lambda-layer-zip
-	make terraform-destroy STACK=$(STACK) PROFILE=$(PROFILE)
+# destroy-lambda-layer: # [STACK] [PROFILE]
+# 	make remove-lambda-layer-files
+# 	make build-lambda-layer-zip
+# 	make terraform-destroy STACK=$(STACK) PROFILE=$(PROFILE)
 
 # ==============
 # ==============================================================================
