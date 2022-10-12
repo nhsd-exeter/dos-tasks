@@ -172,6 +172,7 @@ plan-cron: # Plan cron job - mandatory: PROFILE=[name], TASK=[hk task] DB_NAME
 #  Destroy targets
 
 destroy: # To destroy cron and hk lambdas - mandatory: PROFILE=[name], TASK=[hk task] DB_NAME
+	make copy-temp-integration-test-files
 	if [ "$(TASK)" == "all" ]; then
 		for task in $$(echo $(TASKS) | tr "," "\n"); do
 			task_type=$$(make task-type NAME=$$task)
@@ -195,6 +196,7 @@ destroy: # To destroy cron and hk lambdas - mandatory: PROFILE=[name], TASK=[hk 
 			make destroy-hk PROFILE=$(PROFILE) TASK=$(TASK)
 		fi
 	fi
+	make remove-temp-integration-test-files
 
 # eg make destroy PROFILE=nonprod TASK=symptomgroups
 destroy-hk: # Destroy housekeeping lambda - mandatory: PROFILE=[name], TASK=[hk task]
