@@ -782,24 +782,11 @@ run_integration_unit_test:
 #============
 # tidy up post testing
 #==============
-clear_integration_archive:  ## clear out all files in archive folder at end of integration test BUCKET=[name of folder in bucket]
-	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
-		$(AWSCLI) s3api delete-objects \
-			--bucket s3://$(BUCKET) \
-			--delete "$(aws s3api list-object-versions \
-			--output=json \
-			--query='{Objects: Versions[].{Key:Key,VersionId:VersionId}}')"
-			2>&1  \
-	" > /dev/null 2>&1 && echo true || echo false
 
-get_s3_object_versions: # BUCKET=[name of folder in bucket]
+clear-integration-archive: # BUCKET=[name of folder in bucket]
+	eval "$$(make aws-assume-role-export-variables)"
 	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
-		$(AWSCLI) s3api list-object-versions \
-			--bucket s3://$(BUCKET) \
-			--output=json \
-			--query='{Objects: Versions[].{Key:Key,VersionId:VersionId}}'"
-			2>&1  \
-	" > /dev/null 2>&1 && echo true || echo false
+		$(AWSCLI) s3 rm s3://$(BUCKET)/archive/ --recursive --exclude '*' --include '*.csv'"
 
 #=================
 # targets to test results of hk job

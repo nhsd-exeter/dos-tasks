@@ -155,11 +155,19 @@ pipeline {
                 script { echo 'Check and remove' }
             }
         }
-
+        stage('Clear S3 archive') {
+            when { expression { params.Task != "none" } }
+            steps {
+                script {
+                    echo 'Remove test files from archive'
+                    sh "make clear-integration-archive BUCKET=${BUCKET}"
+                }
+            }
+        }
         stage('Teardown hk infrastructure') {
             when { expression { params.Task != "none" } }
             steps {
-                script { echo 'Teardown infrastructure' }
+                script { echo 'Teardown hk lambdas and integration test infrastructure' }
             }
         }
 // TODO restore later
