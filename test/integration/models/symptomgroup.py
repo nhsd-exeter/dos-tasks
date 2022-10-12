@@ -12,7 +12,7 @@ updated_record_name = "Integration Test Update"
 created_record_id = 2000
 created_record_name = "Integration Test Create"
 # should be false
-expected_zcode_exists = None
+expected_zcode_exists = 'false'
 
 
 def get_symptom_groups_data(env, db_connection):

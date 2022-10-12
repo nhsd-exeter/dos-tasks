@@ -89,18 +89,18 @@ pipeline {
                 }
             }
         }
-        stage('Provision integration test lambda') {
-            when { expression { params.Task != "none" } }
-            steps {
-                script { echo 'Provision integration test lambda' }
-                script { sh "make provision-hk-integration-tester TASK=integration-test" }
-            }
-        }
-        stage('Provision hk lambdas') {
+        // stage('Provision integration test lambda') {
+        //     when { expression { params.Task != "none" } }
+        //     steps {
+        //         script { echo 'Provision integration test lambda' }
+        //         script { sh "make provision-hk-integration-tester TASK=integration-test" }
+        //     }
+        // }
+        stage('Provision hk and integration test lambdas') {
             when { expression { params.Task != "none" } }
             steps {
                 script {
-                    echo 'Provision hk lambdas'
+                    echo 'Provision hk and integration test lambdas'
                     catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
                         sh "make provision PROFILE=${PROFILE} TASK=${params.Task}"
                     }

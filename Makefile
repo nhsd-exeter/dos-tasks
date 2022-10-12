@@ -107,9 +107,11 @@ provision: ## provision resources for hk and cron - mandatory PROFILE TASK  and 
 	make remove-temp-integration-test-files
 
 provision-hk: ## Provision environment - mandatory: PROFILE=[name], TASK=[task]
-	if [ "$(TASK)" != 'integration' ]; then
-		echo "Provisioning $(PROFILE) lambda for hk task $(TASK)"
-		eval "$$(make secret-fetch-and-export-variables)"
+	eval "$$(make secret-fetch-and-export-variables)"
+	echo "Provisioning $(PROFILE) lambda for hk task $(TASK)"
+	if [ "$(TASK)" == 'integration' ]; then
+		make provision-hk-integration-tester TASK=integration-test
+	else
 		make terraform-apply-auto-approve STACK=$(TASK) PROFILE=$(PROFILE)
 	fi
 
@@ -133,6 +135,7 @@ provision-stacks: ## Provision environment - mandatory: PROFILE=[name]
 plan: # Plan cron and hk lambdas - mandatory: PROFILE=[name], TASK=[hk task] DB_NAME
 	eval "$$(make secret-fetch-and-export-variables)"
 	make terraform-plan STACK=$(STACKS) PROFILE=$(PROFILE)
+	make copy-temp-integration-test-files
 	if [ "$(TASK)" == "all" ]; then
 		for task in $$(echo $(TASKS) | tr "," "\n"); do
 			task_type=$$(make task-type NAME=$$task)
@@ -156,11 +159,16 @@ plan: # Plan cron and hk lambdas - mandatory: PROFILE=[name], TASK=[hk task] DB_
 			make plan-hk PROFILE=$(PROFILE) TASK=$(TASK)
 		fi
 	fi
+	make remove-temp-integration-test-files
 
 plan-hk: # Plan housekeeping lambda - mandatory: PROFILE=[name], TASK=[hk task]
 	echo "Planning for hk task $(TASK)"
 	eval "$$(make secret-fetch-and-export-variables)"
-	make terraform-plan STACK=$(TASK) PROFILE=$(PROFILE)
+	if [ "$(TASK)" == 'integration' ]; then
+			make plan-hk-integration-tester STACK=integration-test PROFILE=$(PROFILE)
+	else
+			make terraform-plan STACK=$(TASK) PROFILE=$(PROFILE)
+	fi
 
 plan-cron: # Plan cron job - mandatory: PROFILE=[name], TASK=[hk task] DB_NAME
 	echo "Planning for cron job $(TASK)-$(DB_NAME)"
@@ -203,7 +211,11 @@ destroy-hk: # Destroy housekeeping lambda - mandatory: PROFILE=[name], TASK=[hk 
 	task_type=$$(make task-type NAME=$(TASK))
 	if [ "$$task_type" == 'hk' ]; then
 		eval "$$(make secret-fetch-and-export-variables)"
-		make terraform-destroy-auto-approve STACK=$(TASK) PROFILE=$(PROFILE)
+		if [ "$(TASK)" == 'integration' ]; then
+			make destroy-hk-integration-tester STACK=integration-test PROFILE=$(PROFILE)
+		else
+			make terraform-destroy-auto-approve STACK=$(TASK) PROFILE=$(PROFILE)
+		fi
 	else
 		echo $(TASK) is not an hk job
 	fi
@@ -280,20 +292,6 @@ check_bucket_for_file: ## returns true if filename exists in bucket  - mandatory
 			2>&1 | grep -q $(FILENAME) \
 	" > /dev/null 2>&1 && echo true || echo false
 
-# run-integration-result-check: # PROFILE SQL_FILE - name of SQL file to run INSTANCE_PAIR AB or BC
-# 	echo Running $(TF_VAR_db_checks_lambda_function_name) for $(SQL_FILE) against $(INSTANCE_PAIR)
-# 	if [ "$(INSTANCE_PAIR)" == "AB" ] || \
-# 	[ "$(INSTANCE_PAIR)" == "BC" ] ; then
-# 		aws lambda invoke --function-name $(TF_VAR_db_checks_lambda_function_name) --log-type Tail --payload '{ "sql-file": "$(SQL_FILE)","database_name": "$(DATABASE_TO_MIGRATE)", "instance_pair": "$(INSTANCE_PAIR)" }' $(SQL_FILE)-$(INSTANCE_PAIR)-response.json | jq -r .LogResult - | base64 -d | tee $(SQL_FILE)-$(INSTANCE_PAIR)-response.log
-# 		echo "== Response output =="
-# 		cat $(SQL_FILE)-$(INSTANCE_PAIR)-response.json
-# 		echo
-# 	else
-# 		echo INSTANCE_PAIR parameter must be AB or BA not $(INSTANCE_PAIR)
-# 	fi
-# --------------------------------------
-
-
 build-tester: # Builds image used for testing - mandatory: PROFILE=[name]
 	mkdir $(DOCKER_DIR)/tester/assets/integration
 	mkdir $(DOCKER_DIR)/tester/assets/integration/data-files
@@ -355,7 +353,6 @@ unit-test-utilities: # Run utilities unit tests
 		CMD="python3 -m pytest utilities/test/"
 	rm -rf $(APPLICATION_DIR)/utilities/test
 	rm -rf $(APPLICATION_DIR)/test-files
-
 
 copy-stt-coverage-test-files:
 	rm -rf $(APPLICATION_DIR)/test-files
@@ -437,7 +434,6 @@ remove-old-versions-for-task: ## Prune old versions of hk and/or cron lambdas - 
 				make remove-old-versions-for-cron-task PROFILE=$(PROFILE) TASK=$(TASK) DB_NAME=$(DB_NAME)
 			fi
 	fi
-
 
 remove-old-versions-for-hk-task: ## Prune old versions of hk task lambdas - Mandatory; [PROFILE] [TASK]
 	eval "$$(make aws-assume-role-export-variables)"
@@ -562,7 +558,7 @@ create-tester-repository: # Create ECR repositories to store the artefacts
 	make docker-create-repository NAME=tester
 
 # ==============
-#  temp poc integration test related targets
+# integration test related targets
 # --------------------------------------
 create-temp-hk-integration-test-files: # copy integration code from test/integration to new application/hk/integration folder
 	echo TODO
@@ -579,43 +575,6 @@ create-temp-hk-integration-test-files: # copy integration code from test/integra
 remove-temp-hk-integration-test-files:
 	rm -rf $(APPLICATION_DIR)/hk/integration
 	rm -rf $(APPLICATION_DIR)/models
-
-# not needed
-# unit-test-integration-test: #Run unit tests for the integration test lambda
-# 	make create-temp-hk-integration-test-files
-# 	make unit-test-task TASK="integration"
-# 	make remove-temp-hk-integration-test-files
-
-# build-hk-integration-tester-image-original: # Builds integration test image
-# 	rm -rf $(DOCKER_DIR)/hk-integration-tester/assets/*
-# 	rm -rf $(DOCKER_DIR)/hk-integration-tester/Dockerfile.effective
-# 	rm -rf $(DOCKER_DIR)/hk-integration-tester/.version
-# 	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/application
-# 	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/application/hk
-# 	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/application/hk/integration
-# 	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/application/hk/integration/model
-# 	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/application/hk/integration/test
-# 	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/application/hk/integration/utilities
-# 	cp $(APPLICATION_DIR)/*.py $(DOCKER_DIR)/hk-integration-tester/assets/application
-# 	cp $(APPLICATION_DIR)/hk/*.py $(DOCKER_DIR)/hk-integration-tester/assets/application/hk
-# 	cp $(APPLICATION_DIR)/utilities/*.py $(DOCKER_DIR)/hk-integration-tester/assets/application/hk/integration/utilities
-# 	cp $(APPLICATION_TEST_DIR)/integration/*.py $(DOCKER_DIR)/hk-integration-tester/assets/application/hk/integration
-# 	cp $(APPLICATION_TEST_DIR)/integration/requirements.txt $(DOCKER_DIR)/hk-integration-tester/assets/application/hk/integration
-# 	cp $(APPLICATION_TEST_DIR)/integration/model/* $(DOCKER_DIR)/hk-integration-tester/assets/application/hk/integration/model
-# 	cp $(APPLICATION_TEST_DIR)/integration/test/* $(DOCKER_DIR)/hk-integration-tester/assets/application/hk/integration/test
-# 	# mkdir $(DOCKER_DIR)/hk-integration-tester/assets/utilities
-# 	# mkdir $(DOCKER_DIR)/hk-integration-tester/assets/model
-# 	# mkdir $(DOCKER_DIR)/hk-integration-tester/assets/data-files
-
-# 	# cp -r $(APPLICATION_TEST_DIR)/integration/lambda/*.py $(DOCKER_DIR)/hk-integration-tester/assets/
-# 	# cp -r $(APPLICATION_TEST_DIR)/integration/lambda/requirements.txt $(DOCKER_DIR)/hk-integration-tester/assets/
-# 	# cp -r $(APPLICATION_TEST_DIR)/integration/model/*.py $(DOCKER_DIR)/hk-integration-tester/assets/model/
-# 	# cp -r $(APPLICATION_TEST_DIR)/integration/data-files/*.sql $(DOCKER_DIR)/hk-integration-tester/assets/data-files/
-# 	# cp -r $(APPLICATION_DIR)/utilities/*.py $(DOCKER_DIR)/hk-integration-tester/assets/utilities/
-# 	make docker-image NAME=hk-integration-tester
-# 	rm -rf $(DOCKER_DIR)/hk-integration-tester/assets/*
-
-# Integration test targets
 
 build-hk-integration-tester-image: # Builds images - mandatory: NAME=[name]
 	make create-temp-hk-integration-test-files
@@ -634,35 +593,6 @@ build-hk-integration-tester-image: # Builds images - mandatory: NAME=[name]
 	rm -rf $(DOCKER_DIR)/hk-integration-tester/assets/*
 	make remove-temp-hk-integration-test-files
 
-# build-hk-integration-tester-image-original: # Builds integration test image
-# 	rm -rf $(DOCKER_DIR)/hk-integration-tester/assets/*
-# 	rm -rf $(DOCKER_DIR)/hk-integration-tester/Dockerfile.effective
-# 	rm -rf $(DOCKER_DIR)/hk-integration-tester/.version
-# 	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/application
-# 	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/application/hk
-# 	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/application/hk/integration
-# 	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/application/hk/integration/model
-# 	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/application/hk/integration/test
-# 	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/application/hk/integration/utilities
-# 	cp $(APPLICATION_DIR)/*.py $(DOCKER_DIR)/hk-integration-tester/assets/application
-# 	cp $(APPLICATION_DIR)/hk/*.py $(DOCKER_DIR)/hk-integration-tester/assets/application/hk
-# 	cp $(APPLICATION_DIR)/utilities/*.py $(DOCKER_DIR)/hk-integration-tester/assets/application/hk/integration/utilities
-# 	cp $(APPLICATION_TEST_DIR)/integration/*.py $(DOCKER_DIR)/hk-integration-tester/assets/application/hk/integration
-# 	cp $(APPLICATION_TEST_DIR)/integration/requirements.txt $(DOCKER_DIR)/hk-integration-tester/assets/application/hk/integration
-# 	cp $(APPLICATION_TEST_DIR)/integration/model/* $(DOCKER_DIR)/hk-integration-tester/assets/application/hk/integration/model
-# 	cp $(APPLICATION_TEST_DIR)/integration/test/* $(DOCKER_DIR)/hk-integration-tester/assets/application/hk/integration/test
-# 	# mkdir $(DOCKER_DIR)/hk-integration-tester/assets/utilities
-# 	# mkdir $(DOCKER_DIR)/hk-integration-tester/assets/model
-# 	# mkdir $(DOCKER_DIR)/hk-integration-tester/assets/data-files
-
-# 	# cp -r $(APPLICATION_TEST_DIR)/integration/lambda/*.py $(DOCKER_DIR)/hk-integration-tester/assets/
-# 	# cp -r $(APPLICATION_TEST_DIR)/integration/lambda/requirements.txt $(DOCKER_DIR)/hk-integration-tester/assets/
-# 	# cp -r $(APPLICATION_TEST_DIR)/integration/model/*.py $(DOCKER_DIR)/hk-integration-tester/assets/model/
-# 	# cp -r $(APPLICATION_TEST_DIR)/integration/data-files/*.sql $(DOCKER_DIR)/hk-integration-tester/assets/data-files/
-# 	# cp -r $(APPLICATION_DIR)/utilities/*.py $(DOCKER_DIR)/hk-integration-tester/assets/utilities/
-# 	make docker-image NAME=hk-integration-tester
-# 	rm -rf $(DOCKER_DIR)/hk-integration-tester/assets/*
-
 push-hk-integration-tester-image: #
 	make docker-push NAME=hk-integration-tester
 
@@ -670,6 +600,16 @@ provision-hk-integration-tester: ## mandatory: PROFILE=[name], TASK=[integration
 	echo "Provisioning $(PROFILE) lambda for hk-integration tester"
 	eval "$$(make secret-fetch-and-export-variables)"
 	make terraform-apply-auto-approve STACK=$(TASK) PROFILE=$(PROFILE)
+
+destroy-hk-integration-tester: ## mandatory: PROFILE=[name], TASK=[integration-test]
+	echo "Destroying $(PROFILE) lambda for hk-integration tester"
+	eval "$$(make secret-fetch-and-export-variables)"
+	make terraform-destroy-auto-approve STACK=$(TASK) PROFILE=$(PROFILE)
+
+plan-hk-integration-tester: ## mandatory: PROFILE=[name], TASK=[integration-test]
+	echo "Provisioning $(PROFILE) lambda for hk-integration tester"
+	eval "$$(make secret-fetch-and-export-variables)"
+	make terraform-plan STACK=$(TASK) PROFILE=$(PROFILE)
 
 copy-temp-integration-test-files:
 	rm -rf $(APPLICATION_DIR)/hk/integration
