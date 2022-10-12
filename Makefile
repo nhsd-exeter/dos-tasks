@@ -601,10 +601,10 @@ provision-hk-integration-tester: ## mandatory: PROFILE=[name], TASK=[integration
 	eval "$$(make secret-fetch-and-export-variables)"
 	make terraform-apply-auto-approve STACK=$(TASK) PROFILE=$(PROFILE)
 
-destroy-hk-integration-tester: ## mandatory: PROFILE=[name], TASK=[integration-test]
+destroy-hk-integration-tester: ## mandatory: PROFILE=[name], STACK=[integration-test]
 	echo "Destroying $(PROFILE) lambda for hk-integration tester"
 	eval "$$(make secret-fetch-and-export-variables)"
-	make terraform-destroy-auto-approve STACK=$(TASK) PROFILE=$(PROFILE)
+	make terraform-destroy-auto-approve STACK=$(STACK) PROFILE=$(PROFILE)
 
 plan-hk-integration-tester: ## mandatory: PROFILE=[name], TASK=[integration-test]
 	echo "Provisioning $(PROFILE) lambda for hk-integration tester"
