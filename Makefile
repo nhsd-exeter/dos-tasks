@@ -60,6 +60,7 @@ test: # Test project
 	make start
 	make stop
 
+# Push targets
 push: # Push project artefacts to the registry - mandatory: TASK=[task]
 	if [ "$(TASK)" == "all" ]; then
 		for task in $$(echo $(TASKS) | tr "," "\n"); do
@@ -77,7 +78,7 @@ push-image: # Push project artefact to the registry - mandatory: TASK=[task]
 		make docker-push NAME=$$task_type-$(TASK)
 	fi
 
-# Provision
+# Provision targets
 provision: ## provision resources for hk and cron - mandatory PROFILE TASK  and DB_NAME (cron only)
 	make copy-temp-integration-test-files
 	make terraform-apply-auto-approve STACK=$(STACKS) PROFILE=$(PROFILE)
@@ -115,17 +116,12 @@ provision-hk: ## Provision environment - mandatory: PROFILE=[name], TASK=[task]
 		make terraform-apply-auto-approve STACK=$(TASK) PROFILE=$(PROFILE)
 	fi
 
-
-
 provision-cron: ## cron specific version of provision PROFILE TASK DB_NAME
 	echo "Provisioning $(PROFILE) lambda $(TASK)-$(DB_NAME) for cron job"
 	make build-stack-for-cron-job TASK=$(TASK) DB_NAME=$(DB_NAME)
 	eval "$$(make secret-fetch-and-export-variables)"
 	make terraform-apply-auto-approve STACK=$(TASK)-$(DB_NAME) PROFILE=$(PROFILE)
 	make delete-stack-for-cron-job TASK=$(TASK) DB_NAME=$(DB_NAME)
-
-plan-stacks: ### plan shared infrastructure defined in STACKS PROFILE
-	make terraform-plan-detailed STACK=$(STACKS) PROFILE=$(PROFILE)
 
 provision-stacks: ## Provision environment - mandatory: PROFILE=[name]
 	echo "Provisioning stack infrastrucure for $(PROFILE)"
@@ -177,8 +173,10 @@ plan-cron: # Plan cron job - mandatory: PROFILE=[name], TASK=[hk task] DB_NAME
 	make terraform-plan STACK=$(TASK)-$(DB_NAME) PROFILE=$(PROFILE)
 	make delete-stack-for-cron-job TASK=$(TASK) DB_NAME=$(DB_NAME)
 
-#  Destroy targets
+plan-stacks: ### plan shared infrastructure defined in STACKS PROFILE
+	make terraform-plan-detailed STACK=$(STACKS) PROFILE=$(PROFILE)
 
+#  Destroy targets
 destroy: # To destroy cron and hk lambdas - mandatory: PROFILE=[name], TASK=[hk task] DB_NAME
 	make copy-temp-integration-test-files
 	if [ "$(TASK)" == "all" ]; then
@@ -272,11 +270,11 @@ unit-test: # Runs unit tests for task - mandatory: TASK=[task]
 clean: # Clean up project
 	make docker-network-remove
 
-poll_s3_for_file: ## retries look up for file in bucket [MAX_ATTEMPTS] mandatory [BUCKET] [FILENAME]
+poll-s3-for-file: ## retries look up for file in bucket [MAX_ATTEMPTS] mandatory [BUCKET] [FILENAME]
 	echo "Checking bucket $(BUCKET) for file $(FILENAME)"
 	for i in {1..$(MAX_ATTEMPTS)}
 	do
-		archived=$$(make check_bucket_for_file BUCKET=$(BUCKET) FILENAME=$(FILENAME))
+		archived=$$(make check-bucket-for-file BUCKET=$(BUCKET) FILENAME=$(FILENAME))
 		echo $$archived
 		if [ $$archived == true ]; then
 			break
@@ -285,7 +283,7 @@ poll_s3_for_file: ## retries look up for file in bucket [MAX_ATTEMPTS] mandatory
 		sleep 1
 	done
 
-check_bucket_for_file: ## returns true if filename exists in bucket  - mandatory [BUCKET] [ENV] [FILENAME]
+check-bucket-for-file: ## returns true if filename exists in bucket  - mandatory [BUCKET] [ENV] [FILENAME]
 	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
 		$(AWSCLI) s3 ls \
 			s3://$(BUCKET) \
@@ -561,7 +559,6 @@ create-tester-repository: # Create ECR repositories to store the artefacts
 # integration test related targets
 # --------------------------------------
 create-temp-hk-integration-test-files: # copy integration code from test/integration to new application/hk/integration folder
-	echo TODO
 	rm -rf $(APPLICATION_DIR)/hk/integration/*
 	mkdir $(APPLICATION_DIR)/hk/integration
 	mkdir $(APPLICATION_DIR)/hk/integration/data-files
@@ -661,65 +658,31 @@ coverage-full:	### Run test coverage - mandatory: PROFILE=[profile] TASK=[task] 
 	make remove-temp-stt-coverage-test-files
 	make remove-temp-integration-test-files
 
-# unit-test-integration-test: #Run unit tests for the integration test lambda make unit-test-task TASK="$$task"
-# 	make copy-temp-integration-test-files
-# 	make docker-run-tools IMAGE=$$(make _docker-get-reg)/tester:latest \
-# 		DIR=application \
-# 		CMD="python3 -m pytest hk/integration/test/"
-# 	make remove-temp-integration-test-files
-
-# TODO remove see coverage-full and eventually coverage
-# coverage-integration: ## Run test coverage - mandatory: PROFILE=[profile] TASK=[task] FORMAT=[xml/html]
-# 	make copy-temp-integration-test-files
-# 	pythonpath=/tmp/.packages:/project/application/utilities
-# 	pythonpath+=:/project/application/hk/
-# 	make python-code-coverage-format IMAGE=$$(make _docker-get-reg)/tester:latest \
-# 		EXCLUDE=*/test/*,hk/*/utilities/*,cron/*/utilities/* \
-# 		ARGS="--env TASK=utilities --env SLACK_WEBHOOK_URL=https://slackmockurl.com/ --env PROFILE=local \
-# 			--env PYTHONPATH=$$pythonpath"
-# 	make remove-temp-integration-test-files
-
 #====
 # targets to upload test files to s3 bucket and check in archive folder
-# TODO check if bulk operations are used - don't think they are
 #====
-load_integration_test_files_to_s3:  ### Upload all test csv files to bucket - mandatory: FILEPATH=[local path (inside container)],BUCKET=[name of folder in bucket]
+load-integration-test-files-to-s3:  ### Upload all test csv files to bucket - mandatory: FILEPATH=[local path (inside container)],BUCKET=[name of folder in bucket]
 	eval "$$(make aws-assume-role-export-variables)"
 	args="--recursive --include 'int_*.csv'"
 	make aws-s3-upload FILE=$(FILEPATH) URI=$(BUCKET) ARGS=$$args
 
-check_integration_test_files:## iterate over integration test folder mandatory: [MAX_ATTEMPTS]  BUCKET=[name of folder in bucket]
+check-integration-test-files:## iterate over integration test folder mandatory: [MAX_ATTEMPTS]  BUCKET=[name of folder in bucket]
 	int_test_folder="test/integration/test-files/*"
 	for f in $$int_test_folder
 	do
 		filename=`basename "$$f"`
-		make poll_s3_for_file MAX_ATTEMPTS=$(MAX_ATTEMPTS) BUCKET=$(BUCKET) FILENAME=$$filename
+		make poll-s3-for-file MAX_ATTEMPTS=$(MAX_ATTEMPTS) BUCKET=$(BUCKET) FILENAME=$$filename
 	done
 
-load_single_integration_test_file_to_s3:  ### Upload single file to bucket - mandatory: FILENAME=[name of file],BUCKET=[name of folder in bucket]
+load-single-integration-test-file-to-s3:  ### Upload single file to bucket - mandatory: FILENAME=[name of file],BUCKET=[name of folder in bucket]
 	eval "$$(make aws-assume-role-export-variables)"
 	path="test/integration/test-files"
 	make aws-s3-upload FILE=$$path/$(FILENAME) URI=$(BUCKET)/$(FILENAME)
 
-check_single_integration_test_file:## check if file has been archived mandatory: [MAX_ATTEMPTS]  BUCKET=[name of folder in bucket], FILENAME=[name of file]
+check-single-integration-test-file:## check if file has been archived mandatory: [MAX_ATTEMPTS]  BUCKET=[name of folder in bucket], FILENAME=[name of file]
 	# path="test/integration/test-files"
 	filename=`basename "$(FILENAME)"`
-	make poll_s3_for_file MAX_ATTEMPTS=$(MAX_ATTEMPTS) BUCKET=$(BUCKET) FILENAME=$$filename
-
-
-
-# TEMP placeholder code for use in jenkins file can be removed later
-return_code_test:### mandatory [PASS] True or anything
-	if [ "$(PASS)" == "True" ]; then
-		exit 0
-	else
-		exit 1
-	fi
-
-run_integration_unit_test:
-		make docker-run-tools IMAGE=$$(make _docker-get-reg)/tester:latest \
-		DIR=test/integration/ \
-		CMD="python3 -m pytest test/"
+	make poll-s3-for-file MAX_ATTEMPTS=$(MAX_ATTEMPTS) BUCKET=$(BUCKET) FILENAME=$$filename
 
 #============
 # tidy up post testing
@@ -757,78 +720,13 @@ run-integration-test-lambda: # - Mandatory [PROFILE] [TASK]
 		exit 1
 	fi
 
-#===================
-# zip lambda and layer targets - to be removed later
-#===================
-# plan-integration-test-zip-lambda: # PROFILE
-# 	make remove-files-for-hk-integration-zip-lambda
-# 	make copy-files-for-hk-integration-zip-lambda
-# 	eval "$$(make secret-fetch-and-export-variables)"
-# 	make plan-hk PROFILE=$(PROFILE) TASK=integration-zip
-# 	make remove-files-for-hk-integration-zip-lambda
-
-# provision-integration-test-zip-lambda: # PROFILE
-# 	make remove-files-for-hk-integration-zip-lambda
-# 	make copy-files-for-hk-integration-zip-lambda
-# 	eval "$$(make secret-fetch-and-export-variables)"
-# 	make terraform-apply PROFILE=$(PROFILE) STACK=integration-zip
-# 	make remove-files-for-hk-integration-zip-lambda
-
-# destroy-integration-test-zip-lambda: # PROFILE
-# 	make remove-files-for-hk-integration-zip-lambda
-# 	make copy-files-for-hk-integration-zip-lambda
-# 	eval "$$(make secret-fetch-and-export-variables)"
-# 	make terraform-destroy PROFILE=$(PROFILE) STACK=integration-zip
-# 	make remove-files-for-hk-integration-zip-lambda
-
-
-# remove-files-for-hk-integration-zip-lambda: # Removes files copied for zipping int test code
-# 	rm -rf $(TERRAFORM_DIR_REL)/integration-zip/function
-
-# copy-files-for-hk-integration-zip-lambda: # Copies integration-test code for zipping
-# 	mkdir $(TERRAFORM_DIR_REL)/integration-zip/function/
-# 	mkdir $(TERRAFORM_DIR_REL)/integration-zip/function/utilities
-# 	cp -r $(APPLICATION_DIR)/utilities/*.py $(TERRAFORM_DIR_REL)/integration-zip/function/utilities/
-# 	mkdir $(TERRAFORM_DIR_REL)/integration-zip/function/models
-# 	cp -r $(APPLICATION_DIR)/models-temp/*.py $(TERRAFORM_DIR_REL)/integration-zip/function/models
-# 	cp -r $(APPLICATION_DIR)/hk/integration-temp/*.py $(TERRAFORM_DIR_REL)/integration-zip/function/
-# 	cp -r $(APPLICATION_DIR)/hk/integration-temp/requirements.txt $(TERRAFORM_DIR_REL)/integration-zip/function/
-# 	cp -r $(APPLICATION_DIR)/hk/integration-temp/data-files/ $(TERRAFORM_DIR_REL)/integration-zip/function/data-files
-
-#TODO automate build of zip as this below doesnt; work
-# build-lambda-layer-zip: # build lambda layer
-# 	cd $(TERRAFORM_DIR_REL)/lambda-layer/python
-# # pip install requests -t ./
-# 	pip install -r ../requirements.txt -t ./
-# #	cd .. && tar -czf ./python.zip python/
-
-# remove-lambda-layer-files: # cleardown the result of importing for lambda layer
-# 	rm -rf $(TERRAFORM_DIR_REL)/lambda-layer/python/*
-
-# plan-lambda-layer: # [STACK] [PROFILE]
-# 	make remove-lambda-layer-files
-# 	make build-lambda-layer-zip
-# 	make terraform-plan STACK=$(STACK) PROFILE=$(PROFILE)
-
-# provision-lambda-layer: # [STACK] [PROFILE]
-# 	make remove-lambda-layer-files
-# 	make build-lambda-layer-zip
-# 	make terraform-apply STACK=$(STACK) PROFILE=$(PROFILE)
-
-# destroy-lambda-layer: # [STACK] [PROFILE]
-# 	make remove-lambda-layer-files
-# 	make build-lambda-layer-zip
-# 	make terraform-destroy STACK=$(STACK) PROFILE=$(PROFILE)
-
-# ==============
 # ==============================================================================
 
 .SILENT: \
 	aws-lambda-get-versions-to-remove \
 	parse-profile-from-tag \
 	cron-task-check \
-	check_bucket_for_file \
-	poll_s3_for_file \
+	check-bucket-for-file \
+	poll-s3-for-file \
 	task-type \
-	return_code_test \
 	invoke-test-check
