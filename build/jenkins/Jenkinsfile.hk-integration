@@ -17,7 +17,7 @@ pipeline {
         buildDiscarder(logRotator(daysToKeepStr: '7', numToKeepStr: '13'))
         disableConcurrentBuilds()
         parallelsAlwaysFailFast()
-        timeout(time: 45, unit: 'MINUTES')
+        timeout(time: 60, unit: 'MINUTES')
     }
     environment {
         BUILD_DATE = sh(returnStdout: true, script: "date -u +'%Y-%m-%dT%H:%M:%S%z'").trim()
@@ -47,6 +47,15 @@ pipeline {
         stage('Show Configuration') {
             steps {
                 script { sh 'make show-configuration' }
+            }
+        }
+        stage('Teardown hk infrastructure') {
+            when { expression { params.Task != "none" } }
+            steps {
+                script {
+                    echo 'Precautionary cleardown hk lambdas and integration test infrastructure'
+                    sh "make destroy PROFILE=${PROFILE} TASK=${params.Task}"
+                }
             }
         }
         stage('Triggering build of database') {
