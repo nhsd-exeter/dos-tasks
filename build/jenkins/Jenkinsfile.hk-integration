@@ -42,7 +42,7 @@ pipeline {
         PATHWAYSDOS_V4_BRANCH = 'task%2FDPTS-811-Poc-int-test'
         //TODO because we don't want to delete ns at start - not needed ?
         DELETE = 'false'
-        BRANCH_NAME = "${env.BRANCH_NAME}"
+        BRANCH_NAME = sh(returnStdout: true, script: "make git-branch-format BRANCH_NAME=${GIT_BRANCH}").trim()
     }
     triggers { pollSCM("* * * * *") }
     stages {

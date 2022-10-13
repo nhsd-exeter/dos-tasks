@@ -722,6 +722,10 @@ run-integration-test-lambda: # - Mandatory [PROFILE] [TASK]
 
 # ==============================================================================
 
+git-branch-format:  ## DOS version of [BRANCH_NAME]
+	echo ${BRANCH_NAME} | sed 's;/;%2F;g'
+
+
 .SILENT: \
 	aws-lambda-get-versions-to-remove \
 	parse-profile-from-tag \
@@ -729,4 +733,5 @@ run-integration-test-lambda: # - Mandatory [PROFILE] [TASK]
 	check-bucket-for-file \
 	poll-s3-for-file \
 	task-type \
-	invoke-test-check
+	invoke-test-check \
+	git-branch-format
