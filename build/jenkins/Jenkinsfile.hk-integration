@@ -116,11 +116,13 @@ pipeline {
         stage('Run symptomgroup tests') {
             steps {
                 echo 'Running tests for symptomgroups'
-                build job: "${SINGLE_HK_TEST_JOB_NAME}/${BRANCH_NAME}",\
-                parameters: [string(name:'Task' , value:"symptomgroups"),\
-                string(name:'Bucket' , value:"${BUCKET}"),\
-                string(name:'Profile' , value:"${PROFILE}")
-                ]
+                catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                    build job: "${SINGLE_HK_TEST_JOB_NAME}/${BRANCH_NAME}",\
+                    parameters: [string(name:'Task' , value:"symptomgroups"),\
+                    string(name:'Bucket' , value:"${BUCKET}"),\
+                    string(name:'Profile' , value:"${PROFILE}")
+                    ]
+                }
             }
         }
         // stage('Load symptomgroup test file to s3') {
