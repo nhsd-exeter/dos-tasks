@@ -27,6 +27,7 @@ pipeline {
         TEST_TASK = "${params.Test}"
         DB_BUILD_JOB_NAME = 'dos-functional-pipeline-tasks-int-deploy'
         DB_DROP_JOB_NAME = 'dos-functional-pipeline-delete'
+        SINGLE_HK_TEST_JOB_NAME = 'uec-dos-tasks-hk-integration-test'
         NAMESPACE = "${ENVIRONMENT}"
         NAMESPACE_RD = "${NAMESPACE}-rd"
         NAMESPACE_CRON = "${NAMESPACE}-cron"
@@ -41,6 +42,7 @@ pipeline {
         PATHWAYSDOS_V4_BRANCH = 'task%2FDPTS-811-Poc-int-test'
         //TODO because we don't want to delete ns at start - not needed ?
         DELETE = 'false'
+        BRANCH_NAME = env.BRANCH_NAME
     }
     triggers { pollSCM("* * * * *") }
     stages {
@@ -111,39 +113,49 @@ pipeline {
                 }
             }
         }
-        stage('Load symptomgroup test file to s3') {
-            when { expression { params.Task != "none" } }
+        stage('Run symptomgroup tests') {
             steps {
-                script {
-                    echo 'Load file to s3'
-                    catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
-                        sh "make load-single-integration-test-file-to-s3 FILENAME=int_symptomgroups.csv BUCKET=${BUCKET}"
-                    }
-                }
+                echo 'Running tests for symptomgroups'
+                build job: "${SINGLE_HK_TEST_JOB_NAME}/${BRANCH_NAME}",\
+                parameters: [string(name:'Task' , value:"symptomgroups"),\
+                string(name:'Bucket' , value:"${BUCKET}"),\
+                string(name:'Profile' , value:"${PROFILE}")
+                ]
             }
         }
-        stage('Check archive for symptomgroup') {
-            when { expression { params.Task != "none" } }
-            steps {
-                script {
-                    echo 'Check file archived'
-                    catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
-                        sh "make check-single-integration-test-file MAX_ATTEMPTS=${MAX_ATTEMPTS} FILENAME=int_symptomgroups.csv BUCKET=${BUCKET}"
-                    }
-                }
-            }
-        }
-        stage('Check results of uploaded file') {
-            when { expression { params.Task != "none" } }
-            steps {
-                script {
-                    echo 'Check results of uploaded file'
-                    catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
-                        sh "make run-integration-test-lambda PROFILE=${PROFILE} TASK=symptomgroups"
-                    }
-                }
-            }
-        }
+        // stage('Load symptomgroup test file to s3') {
+        //     when { expression { params.Task != "none" } }
+        //     steps {
+        //         script {
+        //             echo 'Load file to s3'
+        //             catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+        //                 sh "make load-single-integration-test-file-to-s3 FILENAME=int_symptomgroups.csv BUCKET=${BUCKET}"
+        //             }
+        //         }
+        //     }
+        // }
+        // stage('Check archive for symptomgroup') {
+        //     when { expression { params.Task != "none" } }
+        //     steps {
+        //         script {
+        //             echo 'Check file archived'
+        //             catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+        //                 sh "make check-single-integration-test-file MAX_ATTEMPTS=${MAX_ATTEMPTS} FILENAME=int_symptomgroups.csv BUCKET=${BUCKET}"
+        //             }
+        //         }
+        //     }
+        // }
+        // stage('Check results of uploaded file') {
+        //     when { expression { params.Task != "none" } }
+        //     steps {
+        //         script {
+        //             echo 'Check results of uploaded file'
+        //             catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+        //                 sh "make run-integration-test-lambda PROFILE=${PROFILE} TASK=symptomgroups"
+        //             }
+        //         }
+        //     }
+        // }
         stage('Check and remove older versions') {
             when { expression { params.Task != "none" } }
             steps {
