@@ -49,7 +49,7 @@ pipeline {
                 script { sh 'make show-configuration' }
             }
         }
-        stage('Teardown hk infrastructure') {
+        stage('Precautionary teardown hk infrastructure') {
             when { expression { params.Task != "none" } }
             steps {
                 script {
