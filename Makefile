@@ -362,6 +362,7 @@ remove-temp-stt-coverage-test-files:
 
 coverage: ## Run test coverage - mandatory: PROFILE=[profile] TASK=[task] FORMAT=[xml/html]
 	make copy-stt-coverage-test-files
+	make remove-temp-hk-integration-test-files
 	make create-temp-hk-integration-test-files
 	if [ "$(TASK)" = "" ]; then
 		tasks=$(TASKS)
