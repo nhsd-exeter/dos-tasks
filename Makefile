@@ -161,7 +161,7 @@ plan-hk: # Plan housekeeping lambda - mandatory: PROFILE=[name], TASK=[hk task]
 	echo "Planning for hk task $(TASK)"
 	eval "$$(make secret-fetch-and-export-variables)"
 	if [ "$(TASK)" == 'integration' ]; then
-			make plan-hk-integration-tester STACK=integration-test PROFILE=$(PROFILE)
+			make plan-hk-integration-tester STACK=integration-test :PROFILE=$(PROFILE)
 	else
 			make terraform-plan STACK=$(TASK) PROFILE=$(PROFILE)
 	fi
@@ -593,70 +593,35 @@ build-hk-integration-tester-image: # Builds images - mandatory: NAME=[name]
 push-hk-integration-tester-image: #
 	make docker-push NAME=hk-integration-tester
 
-provision-hk-integration-tester: ## mandatory: PROFILE=[name], TASK=[integration-test]
+provision-hk-integration-tester: ## mandatory: PROFILE=[name], STACK=[integration-test]
 	echo "Provisioning $(PROFILE) lambda for hk-integration tester"
 	eval "$$(make secret-fetch-and-export-variables)"
-	make terraform-apply-auto-approve STACK=$(TASK) PROFILE=$(PROFILE)
+	make terraform-apply-auto-approve STACK=$(STACK) PROFILE=$(PROFILE)
 
 destroy-hk-integration-tester: ## mandatory: PROFILE=[name], STACK=[integration-test]
 	echo "Destroying $(PROFILE) lambda for hk-integration tester"
 	eval "$$(make secret-fetch-and-export-variables)"
 	make terraform-destroy-auto-approve STACK=$(STACK) PROFILE=$(PROFILE)
 
-plan-hk-integration-tester: ## mandatory: PROFILE=[name], TASK=[integration-test]
-	echo "Provisioning $(PROFILE) lambda for hk-integration tester"
+plan-hk-integration-tester: ## mandatory: PROFILE=[name], STACK=[integration-test]
+	echo "Planning $(PROFILE) lambda for $(STACK)"
 	eval "$$(make secret-fetch-and-export-variables)"
-	make terraform-plan STACK=$(TASK) PROFILE=$(PROFILE)
+	make terraform-plan STACK=$(STACK) PROFILE=$(PROFILE)
 
 copy-temp-integration-test-files:
 	rm -rf $(APPLICATION_DIR)/hk/integration
 	mkdir $(APPLICATION_DIR)/hk/integration
 	mkdir $(APPLICATION_DIR)/hk/integration/models
-	mkdir $(APPLICATION_DIR)/hk/integration/test
+#	mkdir $(APPLICATION_DIR)/hk/integration/test
 	mkdir $(APPLICATION_DIR)/hk/integration/utilities
 	cp $(APPLICATION_DIR)/utilities/*.py $(APPLICATION_DIR)/hk/integration/utilities
 	cp $(APPLICATION_TEST_DIR)/integration/*.py $(APPLICATION_DIR)/hk/integration
 	cp $(APPLICATION_TEST_DIR)/integration/requirements.txt $(APPLICATION_DIR)/hk/integration
 	cp $(APPLICATION_TEST_DIR)/integration/models/* $(APPLICATION_DIR)/hk/integration/models
-	cp $(APPLICATION_TEST_DIR)/integration/test/* $(APPLICATION_DIR)/hk/integration/test
+# cp $(APPLICATION_TEST_DIR)/integration/test/* $(APPLICATION_DIR)/hk/integration/test
 
 remove-temp-integration-test-files:
 	rm -rf $(APPLICATION_DIR)/hk/integration
-
-coverage-full:	### Run test coverage - mandatory: PROFILE=[profile] TASK=[task] FORMAT=[xml/html]
-	make copy-stt-coverage-test-files
-	make copy-temp-integration-test-files
-	if [ "$(TASK)" = "" ]; then
-		tasks=$(TASKS)
-	else
-		tasks=$(TASK)
-	fi
-	pythonpath=/tmp/.packages:/project/application/utilities
-	for task in $$(echo $$tasks | tr "," "\n"); do
-		task_type=$$(make task-type NAME=$$task)
-		pythonpath+=:/project/application/$$task_type/
-		rm -rf $(APPLICATION_DIR)/$$task_type/$$task/test
-		rm -rf $(APPLICATION_DIR)/$$task_type/$$task/utilities
-		mkdir $(APPLICATION_DIR)/$$task_type/$$task/test
-		mkdir $(APPLICATION_DIR)/$$task_type/$$task/utilities
-		cp $(APPLICATION_TEST_DIR)/unit/$$task_type/$$task/* $(APPLICATION_DIR)/$$task_type/$$task/test
-		cp $(APPLICATION_DIR)/utilities/*.py $(APPLICATION_DIR)/$$task_type/$$task/utilities
-	done
-	rm -rf $(APPLICATION_DIR)/utilities/test
-	mkdir $(APPLICATION_DIR)/utilities/test
-	cp $(APPLICATION_TEST_DIR)/unit/utilities/* $(APPLICATION_DIR)/utilities/test
-	make python-code-coverage-format IMAGE=$$(make _docker-get-reg)/tester:latest \
-		EXCLUDE=*/test/*,hk/*/utilities/*,cron/*/utilities/* \
-		ARGS="--env TASK=utilities --env SLACK_WEBHOOK_URL=https://slackmockurl.com/ --env PROFILE=local \
-			--env PYTHONPATH=$$pythonpath"
-	for task in $$(echo $$tasks | tr "," "\n"); do
-		task_type=$$(make task-type NAME=$$task)
-		rm -rf $(APPLICATION_DIR)/$$task_type/$$task/test
-		rm -rf $(APPLICATION_DIR)/$$task_type/$$task/utilities
-	done
-	rm -rf $(APPLICATION_DIR)/utilities/test
-	make remove-temp-stt-coverage-test-files
-	make remove-temp-integration-test-files
 
 #====
 # targets to upload test files to s3 bucket and check in archive folder
