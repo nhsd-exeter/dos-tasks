@@ -30,7 +30,7 @@ def get_referral_roles_data(env, db_connection):
 
 def create_referral_role_query(referral_role_ids):
     query = (
-        """select id, name from pathwaysdos.referralrole where id in """+str(referral_role_ids)+""" order by id asc;"""
+        """select id, name from pathwaysdos.referralroles where id in """+str(referral_role_ids)+""" order by id asc;"""
     )
     data = str(referral_role_ids)
     return query, data

@@ -150,7 +150,7 @@ pipeline {
         }
         // params.DEBUG == true
         stage('Clear S3 archive') {
-            when { expression { params.DEBUG == false  && params.Task != "none" } }
+            when { expression { params.Debug == false  && params.Task != "none" } }
             steps {
                 script {
                     echo 'Remove test files from archive'
@@ -159,7 +159,7 @@ pipeline {
             }
         }
         stage('Teardown hk infrastructure') {
-            when { expression { params.DEBUG == false  && params.Task != "none" } }
+            when { expression { params.Debug == false  && params.Task != "none" } }
             steps {
                 script {
                     echo 'Teardown hk lambdas and integration test infrastructure'
@@ -168,7 +168,7 @@ pipeline {
             }
         }
         stage('Delete namespace and drop database') {
-            when { expression { params.DEBUG == false  && params.Task != "none" } }
+            when { expression { params.Debug == false  && params.Task != "none" } }
             steps {
                 echo "Running pathwaysdos_v4 pipeline ${DB_DROP_JOB_NAME}"
                 // parameters required to use existing delete job
