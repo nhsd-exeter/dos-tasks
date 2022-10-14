@@ -612,13 +612,15 @@ copy-temp-integration-test-files:
 	rm -rf $(APPLICATION_DIR)/hk/integration
 	mkdir $(APPLICATION_DIR)/hk/integration
 	mkdir $(APPLICATION_DIR)/hk/integration/models
-#	mkdir $(APPLICATION_DIR)/hk/integration/test
+# mkdir $(APPLICATION_DIR)/hk/integration/test
+	mkdir $(APPLICATION_DIR)/hk/integration/data-files
 	mkdir $(APPLICATION_DIR)/hk/integration/utilities
 	cp $(APPLICATION_DIR)/utilities/*.py $(APPLICATION_DIR)/hk/integration/utilities
 	cp $(APPLICATION_TEST_DIR)/integration/*.py $(APPLICATION_DIR)/hk/integration
 	cp $(APPLICATION_TEST_DIR)/integration/requirements.txt $(APPLICATION_DIR)/hk/integration
 	cp $(APPLICATION_TEST_DIR)/integration/models/* $(APPLICATION_DIR)/hk/integration/models
 # cp $(APPLICATION_TEST_DIR)/integration/test/* $(APPLICATION_DIR)/hk/integration/test
+	cp $(APPLICATION_TEST_DIR)/integration/data-files/* $(APPLICATION_DIR)/hk/integration/data-files
 
 remove-temp-integration-test-files:
 	rm -rf $(APPLICATION_DIR)/hk/integration
