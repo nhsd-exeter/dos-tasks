@@ -8,7 +8,7 @@ from .. import handler
 
 file_path = "application.hk.integration.handler"
 env = 'integration'
-valid_tasks = ("data","symptomgroups")
+valid_tasks = ("data","symptomgroups","referralroles")
 
 @patch(f"{file_path}.logger.log_for_audit")
 def test_is_valid_task_invalid_lc(mock_logger):
@@ -33,8 +33,10 @@ def test_valid_task_list():
     for i in range(len(handler.valid_tasks)):
         assert handler.valid_tasks[i]==valid_tasks[i]
 
+# This may be hard to maintain as nothing in this list can be in its actual position
+# add any new task as penultimate in list
 def test_invalid_task_list():
-    temp_valid_tasks = ("symptomgroups","data")
+    temp_valid_tasks = ("symptomgroups","referralroles","data")
     assert len(handler.valid_tasks) == len(temp_valid_tasks)
     for i in range(len(handler.valid_tasks)):
         assert handler.valid_tasks[i] != temp_valid_tasks[i]
@@ -95,7 +97,7 @@ def test_run_data_checks_for_hk_task_old(mock_db_connect, mock_audit_logger):
 @patch(f"{file_path}.symptomgroup.get_symptom_groups_data", return_value = ({'id':2001,'name':'Int SG','zcodeexists':'None'},))
 @patch(f"{file_path}.logger.log_for_audit")
 @patch("psycopg2.connect")
-def test_run_data_checks_for_hk_created(mock_db_connect, mock_audit_logger, mock_get_data):
+def test_run_data_checks_for_symptomgroups(mock_db_connect, mock_audit_logger, mock_get_data):
     task = 'symptomgroups'
     handler.run_data_checks_for_hk_task(env, task, mock_db_connect)
     assert mock_audit_logger.call_count == 3
@@ -103,15 +105,23 @@ def test_run_data_checks_for_hk_created(mock_db_connect, mock_audit_logger, mock
     # assert mock_check_data.call_count == 1
 
 # @patch(f"{file_path}.symptomgroup.check_symptom_group_record", return_value = False)
-@patch(f"{file_path}.symptomgroup.get_symptom_groups_data", return_value = ({'id':2001,'name':'Int SG','zcodeexists':'None'},))
+@patch(f"{file_path}.referralrole.get_referral_roles_data", return_value = ({'id':2001,'name':'Int RR'},))
 @patch(f"{file_path}.logger.log_for_audit")
 @patch("psycopg2.connect")
-def test_run_data_checks_for_invalid_hk_task(mock_db_connect, mock_audit_logger, mock_get_data):
+def test_run_data_checks_for_referralroles(mock_db_connect, mock_audit_logger, mock_get_data):
     task = 'referralroles'
     handler.run_data_checks_for_hk_task(env, task, mock_db_connect)
     assert mock_audit_logger.call_count == 3
+    assert mock_get_data.call_count == 1
+
+@patch(f"{file_path}.referralrole.get_referral_roles_data", return_value = ({'id':2001,'name':'Int RR'},))
+@patch(f"{file_path}.logger.log_for_audit")
+@patch("psycopg2.connect")
+def test_run_data_checks_for_invalid_hk_task(mock_db_connect, mock_audit_logger, mock_get_data):
+    task = 'nosuch'
+    handler.run_data_checks_for_hk_task(env, task, mock_db_connect)
+    assert mock_audit_logger.call_count == 3
     assert mock_get_data.call_count == 0
-    # assert mock_check_data.call_count == 1
 
 # TODO restore
 # @patch(f"{file_path}.logger.log_for_audit")

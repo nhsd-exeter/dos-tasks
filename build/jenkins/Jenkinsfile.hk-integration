@@ -113,7 +113,7 @@ pipeline {
                 }
             }
         }
-        stage('Run symptomgroup tests') {
+        stage('Run symptom group tests') {
             steps {
                 echo 'Running tests for symptomgroups'
                 catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
@@ -125,39 +125,18 @@ pipeline {
                 }
             }
         }
-        // stage('Load symptomgroup test file to s3') {
-        //     when { expression { params.Task != "none" } }
-        //     steps {
-        //         script {
-        //             echo 'Load file to s3'
-        //             catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
-        //                 sh "make load-single-integration-test-file-to-s3 FILENAME=int_symptomgroups.csv BUCKET=${BUCKET}"
-        //             }
-        //         }
-        //     }
-        // }
-        // stage('Check archive for symptomgroup') {
-        //     when { expression { params.Task != "none" } }
-        //     steps {
-        //         script {
-        //             echo 'Check file archived'
-        //             catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
-        //                 sh "make check-single-integration-test-file MAX_ATTEMPTS=${MAX_ATTEMPTS} FILENAME=int_symptomgroups.csv BUCKET=${BUCKET}"
-        //             }
-        //         }
-        //     }
-        // }
-        // stage('Check results of uploaded file') {
-        //     when { expression { params.Task != "none" } }
-        //     steps {
-        //         script {
-        //             echo 'Check results of uploaded file'
-        //             catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
-        //                 sh "make run-integration-test-lambda PROFILE=${PROFILE} TASK=symptomgroups"
-        //             }
-        //         }
-        //     }
-        // }
+        stage('Run referral role tests') {
+            steps {
+                echo 'Running tests for referral rolels'
+                catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                    build job: "${SINGLE_HK_TEST_JOB_NAME}/${BRANCH_NAME}",\
+                    parameters: [string(name:'Task' , value:"referralroles"),\
+                    string(name:'Bucket' , value:"${BUCKET}"),\
+                    string(name:'Profile' , value:"${PROFILE}")
+                    ]
+                }
+            }
+        }
         stage('Check and remove older versions') {
             when { expression { params.Task != "none" } }
             steps {
