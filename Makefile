@@ -34,7 +34,7 @@ build: # Build project - mandatory: TASK=[task]
 
 build-image: # Builds images - mandatory: NAME=[name]
 	if [ "$(NAME)" == "integration" ]; then
-		make build-hk-integration-tester-image
+		make build-hk-integration-tester-image NAME=$(NAME)
 	else
 		task_type=$$(make task-type NAME=$(NAME))
 		rm -rf $(DOCKER_DIR)/task/assets/*
@@ -575,6 +575,7 @@ remove-temp-hk-integration-test-files:
 	rm -rf $(APPLICATION_DIR)/models
 
 build-hk-integration-tester-image: # Builds integration test image [NAME]
+	make remove-temp-hk-integration-test-files
 	make create-temp-hk-integration-test-files
 	task_type=$$(make task-type NAME=$(NAME))
 	rm -rf $(DOCKER_DIR)/hk-integration-tester/assets/*

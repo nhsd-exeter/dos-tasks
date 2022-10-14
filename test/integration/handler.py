@@ -20,8 +20,7 @@ def request(event, context):
         try:
             db_connection = database.connect_to_database(env)
             if task.lower() == valid_tasks[0]:
-                insert_test_data(env, db_connection)
-                success = True
+                success = insert_test_data(env, db_connection)
             else:
                 success = run_data_checks_for_hk_task(env, task, db_connection)
                 logger.log_for_audit(env, "action:integration test complete for {}".format(task))
@@ -55,9 +54,12 @@ def run_data_checks_for_hk_task(env, task, db_connection):
 
 def insert_test_data(env, db_connection):
     """iterate over data set up scripts"""
+    script_run = False
     for script in data_sql_scripts:
+        script_run = True
         logger.log_for_audit(env, "Inserting test data from file {}".format(script))
         set_up_test_data(env, db_connection, script)
+    return script_run
 
 
 def set_up_test_data(env, db_connection, sql_file):

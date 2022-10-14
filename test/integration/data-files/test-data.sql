@@ -10,9 +10,9 @@ values ('2002', 'Integration Test - Delete', False);
 --for referralroles integration testing
 -- create record for referralroles job to update later
 insert into pathwaysdos.referralroles (id, name)
-values ('2001','TBC')
+values ('2001','TBC');
 -- create record for referralroles job to delete later
 insert into pathwaysdos.referralroles (id, name)
-values ('2002','Integration Test Delete')
+values ('2002','Integration Test Delete');
 
 
