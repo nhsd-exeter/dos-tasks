@@ -111,7 +111,7 @@ provision-hk: ## Provision environment - mandatory: PROFILE=[name], TASK=[task]
 	eval "$$(make secret-fetch-and-export-variables)"
 	echo "Provisioning $(PROFILE) lambda for hk task $(TASK)"
 	if [ "$(TASK)" == 'integration' ]; then
-		make provision-hk-integration-tester TASK=integration-test
+		make provision-hk-integration-tester STACK=integration-test
 	else
 		make terraform-apply-auto-approve STACK=$(TASK) PROFILE=$(PROFILE)
 	fi
