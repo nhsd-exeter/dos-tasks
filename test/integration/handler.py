@@ -6,7 +6,7 @@ from models import symptomgroup, referralrole
 
 data_sql_scripts = ("./data-files/test-data.sql",)
 # List of tasks handled by this code DO NOT change the order
-valid_tasks = ("data", "symptomgroups", "referralroles")
+valid_tasks = ("data", "symptomgroups", "referralroles",)
 
 
 def request(event, context):

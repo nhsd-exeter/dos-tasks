@@ -161,7 +161,7 @@ plan-hk: # Plan housekeeping lambda - mandatory: PROFILE=[name], TASK=[hk task]
 	echo "Planning for hk task $(TASK)"
 	eval "$$(make secret-fetch-and-export-variables)"
 	if [ "$(TASK)" == 'integration' ]; then
-			make plan-hk-integration-tester STACK=integration-test :PROFILE=$(PROFILE)
+			make plan-hk-integration-tester STACK=integration-test PROFILE=$(PROFILE)
 	else
 			make terraform-plan STACK=$(TASK) PROFILE=$(PROFILE)
 	fi
@@ -574,7 +574,7 @@ remove-temp-hk-integration-test-files:
 	rm -rf $(APPLICATION_DIR)/hk/integration
 	rm -rf $(APPLICATION_DIR)/models
 
-build-hk-integration-tester-image: # Builds images - mandatory: NAME=[name]
+build-hk-integration-tester-image: # Builds integration test image [NAME]
 	make create-temp-hk-integration-test-files
 	task_type=$$(make task-type NAME=$(NAME))
 	rm -rf $(DOCKER_DIR)/hk-integration-tester/assets/*
