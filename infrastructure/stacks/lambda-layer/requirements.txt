@@ -1,2 +1,0 @@
-aws-psycopg2==1.2.1
-requests
