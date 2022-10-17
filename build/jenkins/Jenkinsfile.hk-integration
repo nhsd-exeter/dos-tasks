@@ -14,7 +14,7 @@ pipeline {
         booleanParam(
             description: 'Debug mode - true will not tear down hk lambdas or database',
             name: 'Debug',
-            defaultValue: true
+            defaultValue: false
         )
     }
 
