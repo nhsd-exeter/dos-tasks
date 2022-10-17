@@ -63,38 +63,27 @@ def test_run_data_checks_for_hk_task_old(mock_db_connect, mock_audit_logger):
     handler.run_data_checks_for_hk_task(env, task, mock_db_connect)
     assert mock_audit_logger.call_count == 2
 
-# @patch(f"{file_path}.symptomgroup.get_symptom_groups_data", return_value = ({'id':2002,'name':'Integration Test Update','zcodeexists':None},))
-# @patch(f"{file_path}.logger.log_for_audit")
-# @patch("psycopg2.connect")
-# def test_run_data_checks_for_hk_deleted_true(mock_db_connect, mock_audit_logger, mock_get_data):
-#     task = 'symptomgroups'
-#     handler.run_data_checks_for_hk_task(env, task, mock_db_connect)
-#     assert mock_audit_logger.call_count == 2
-#     assert mock_get_data.call_count == 1
+@patch(f"{file_path}.symptomgroup.get_symptom_groups_data", return_value = ({'id':2000,'name':'Wrong name','zcodeexists':False},))
+@patch(f"{file_path}.logger.log_for_audit")
+@patch("psycopg2.connect")
+def test_run_data_checks_for_symptomgroups_created_record(mock_db_connect, mock_audit_logger, mock_get_data):
+    task = 'symptomgroups'
+    result = handler.run_data_checks_for_hk_task(env, task, mock_db_connect)
+    assert result == False
+    assert mock_audit_logger.call_count == 3
+    assert mock_get_data.call_count == 1
 
-# @patch(f"{file_path}.symptomgroup.get_symptom_groups_data", return_value = ({'id':2002,'name':'Integration Test Updat','zcodeexists':None},))
-# @patch(f"{file_path}.logger.log_for_audit")
-# @patch("psycopg2.connect")
-# def test_run_data_checks_for_hk_deleted_false(mock_db_connect, mock_audit_logger, mock_get_data):
-#     task = 'symptomgroups'
-#     handler.run_data_checks_for_hk_task(env, task, mock_db_connect)
-#     assert mock_audit_logger.call_count == 2
-#     assert mock_get_data.call_count == 1
+@patch(f"{file_path}.symptomgroup.get_symptom_groups_data", return_value = ({'id':2001,'name':'Integration Test Update','zcodeexists':False},))
+@patch(f"{file_path}.logger.log_for_audit")
+@patch("psycopg2.connect")
+def test_run_data_checks_for_symptomgroups_deleted_record(mock_db_connect, mock_audit_logger, mock_get_data):
+    task = 'symptomgroups'
+    result = handler.run_data_checks_for_hk_task(env, task, mock_db_connect)
+    assert result == False
+    assert mock_audit_logger.call_count == 2
+    assert mock_get_data.call_count == 1
 
-# @patch(f"{file_path}.symptomgroup.check_symptom_group_record", return_value = True)
-# TODO restore below here when
-# @patch(f"{file_path}.symptomgroup.get_symptom_groups_data", return_value = ({'id':2000,'name':'Integration Test Update','zcodeexists':'None'},))
-# @patch(f"{file_path}.logger.log_for_audit")
-# @patch("psycopg2.connect")
-# def test_run_data_checks_for_hk_updated(mock_db_connect, mock_audit_logger, mock_get_data):
-#     task = 'symptomgroups'
-#     handler.run_data_checks_for_hk_task(env, task, mock_db_connect)
-#     assert mock_audit_logger.call_count == 1
-#     assert mock_get_data.call_count == 1
-#     # assert mock_check_data.call_count == 1
-
-# @patch(f"{file_path}.symptomgroup.check_symptom_group_record", return_value = False)
-@patch(f"{file_path}.symptomgroup.get_symptom_groups_data", return_value = ({'id':2001,'name':'Int SG','zcodeexists':'None'},))
+@patch(f"{file_path}.symptomgroup.get_symptom_groups_data", return_value = ({'id':2002,'name':'Int SG','zcodeexists':'None'},))
 @patch(f"{file_path}.logger.log_for_audit")
 @patch("psycopg2.connect")
 def test_run_data_checks_for_symptomgroups(mock_db_connect, mock_audit_logger, mock_get_data):
@@ -102,13 +91,29 @@ def test_run_data_checks_for_symptomgroups(mock_db_connect, mock_audit_logger, m
     handler.run_data_checks_for_hk_task(env, task, mock_db_connect)
     assert mock_audit_logger.call_count == 3
     assert mock_get_data.call_count == 1
-    # assert mock_check_data.call_count == 1
 
-# @patch(f"{file_path}.symptomgroup.check_symptom_group_record", return_value = False)
-@patch(f"{file_path}.referralrole.get_referral_roles_data", return_value = ({'id':2001,'name':'Int RR'},))
+@patch(f"{file_path}.referralrole.get_referral_roles_data", return_value = ({'id':2000,'name':'Integration Test Create'},))
 @patch(f"{file_path}.logger.log_for_audit")
 @patch("psycopg2.connect")
-def test_run_data_checks_for_referralroles(mock_db_connect, mock_audit_logger, mock_get_data):
+def test_run_data_checks_for_referralroles_created_record(mock_db_connect, mock_audit_logger, mock_get_data):
+    task = 'referralroles'
+    handler.run_data_checks_for_hk_task(env, task, mock_db_connect)
+    assert mock_audit_logger.call_count == 2
+    assert mock_get_data.call_count == 1
+
+@patch(f"{file_path}.referralrole.get_referral_roles_data", return_value = ({'id':2001,'name':'Integration Test Update'},))
+@patch(f"{file_path}.logger.log_for_audit")
+@patch("psycopg2.connect")
+def test_run_data_checks_for_referralroles_updated_record(mock_db_connect, mock_audit_logger, mock_get_data):
+    task = 'referralroles'
+    handler.run_data_checks_for_hk_task(env, task, mock_db_connect)
+    assert mock_audit_logger.call_count == 2
+    assert mock_get_data.call_count == 1
+
+@patch(f"{file_path}.referralrole.get_referral_roles_data", return_value = ({'id':2002,'name':'Integration Test Update'},))
+@patch(f"{file_path}.logger.log_for_audit")
+@patch("psycopg2.connect")
+def test_run_data_checks_for_referralroles_deleted_record(mock_db_connect, mock_audit_logger, mock_get_data):
     task = 'referralroles'
     handler.run_data_checks_for_hk_task(env, task, mock_db_connect)
     assert mock_audit_logger.call_count == 3

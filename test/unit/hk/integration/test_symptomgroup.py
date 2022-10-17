@@ -5,7 +5,7 @@ import psycopg2
 
 from models import symptomgroup
 
-file_path = "application.hk.integration.model.symptomgroup"
+file_path = "application.models.symptomgroup"
 env = 'unittest'
 def test_check_symptom_group_record_true():
     name = 'Integration Test Update'
@@ -32,3 +32,9 @@ def test_create_symptom_group_query():
     query, data = symptomgroup.create_symptom_group_query(symptom_group_ids)
     assert query == expected_query_string
     assert data == expected_data
+
+@patch("psycopg2.connect")
+@patch(f"{file_path}.database.execute_resultset_query",side_effect=Exception)
+def test_check_symptom_groups_data_deleted_record(mock_resultset, mock_db):
+    result_set = symptomgroup.get_symptom_groups_data(env,mock_db)
+    assert result_set == {}

@@ -5,7 +5,7 @@ import psycopg2
 
 from models import referralrole
 
-file_path = "application.hk.integration.model.referralrole"
+file_path = "application.models.referralrole"
 env = 'unittest'
 def test_check_referral_role_record_true():
     name = 'Integration Test Update'
@@ -24,3 +24,9 @@ def test_create_referral_role_query():
     query, data = referralrole.create_referral_role_query(referral_role_ids)
     assert query == expected_query_string
     assert data == expected_data
+
+@patch("psycopg2.connect")
+@patch(f"{file_path}.database.execute_resultset_query",side_effect=Exception)
+def test_check_referral_roles_data_deleted_record(mock_resultset, mock_db):
+    result_set = referralrole.get_referral_roles_data(env,mock_db)
+    assert result_set == {}
