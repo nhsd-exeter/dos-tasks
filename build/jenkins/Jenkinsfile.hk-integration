@@ -7,7 +7,7 @@ pipeline {
             defaultValue: 'all'
         )
         string(
-            description: 'Test use tba',
+            description: 'Test database/environment - integration',
             name: 'Test',
             defaultValue: 'integration'
         )
@@ -45,8 +45,6 @@ pipeline {
         SLACK_CHANNEL = 'dos-tasks-pipeline-notifications-nonprod'
         // TODO eventually develop
         PATHWAYSDOS_V4_BRANCH = 'task%2FDPTS-811-Poc-int-test'
-        //TODO because we don't want to delete ns at start - not needed ?
-        DELETE = 'false'
         BRANCH_NAME = sh(returnStdout: true, script: "make git-branch-format BRANCH_NAME=${GIT_BRANCH}").trim()
     }
     triggers { pollSCM("* * * * *") }
@@ -68,7 +66,6 @@ pipeline {
         stage('Triggering build of database') {
             steps {
                 echo "Running pathwaysdos_v4 pipeline ${DB_BUILD_JOB_NAME}"
-                // echo "Passing DELETE parameter: ${params.DELETE}"
                 build job: "${DB_BUILD_JOB_NAME}/${PATHWAYSDOS_V4_BRANCH}",\
                 parameters: [string(name:'NAMESPACE' , value:"${NAMESPACE}"),\
                 string(name:'NAMESPACE_CRON' , value:"${NAMESPACE_CRON}"),\
@@ -132,7 +129,7 @@ pipeline {
         }
         stage('Run referral role tests') {
             steps {
-                echo 'Running tests for referral rolels'
+                echo 'Running tests for referral roles'
                 catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
                     build job: "${SINGLE_HK_TEST_JOB_NAME}/${BRANCH_NAME}",\
                     parameters: [string(name:'Task' , value:"referralroles"),\
@@ -148,7 +145,6 @@ pipeline {
                 script { echo 'Check and remove' }
             }
         }
-        // params.DEBUG == true
         stage('Clear S3 archive') {
             when { expression { params.Debug == false  && params.Task != "none" } }
             steps {
@@ -171,8 +167,6 @@ pipeline {
             when { expression { params.Debug == false  && params.Task != "none" } }
             steps {
                 echo "Running pathwaysdos_v4 pipeline ${DB_DROP_JOB_NAME}"
-                // parameters required to use existing delete job
-                // NAMESPACE NAMESPACE_RD NAMESPACE_CRON PIPELINE_DATABASE DB_HOST SLACK_CHANNEL
                 build job: "${DB_DROP_JOB_NAME}/${PATHWAYSDOS_V4_BRANCH}",\
                 parameters: [string(name:'NAMESPACE' , value:"${NAMESPACE}"),\
                 string(name:'NAMESPACE_RD' , value:"${NAMESPACE_RD}"),\

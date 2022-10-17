@@ -41,15 +41,6 @@ def test_invalid_task_list():
     for i in range(len(handler.valid_tasks)):
         assert handler.valid_tasks[i] != temp_valid_tasks[i]
 
-# TODO restore
-# @patch("psycopg2.connect")
-# @patch(f"{file_path}.logger.log_for_audit")
-# @patch(f"{file_path}.set_up_test_data", return_value = None)
-# def test_insert_test_data(mock_set_up_data, mock_audit_logger, mock_db_connect):
-#     handler.insert_test_data(env,mock_db_connect)
-#     assert mock_audit_logger.call_count == 2
-#     assert mock_set_up_data.call_count == 1
-
 @patch("psycopg2.connect")
 @patch(f"{file_path}.logger.log_for_audit")
 def test_insert_test_data_logging( mock_audit_logger, mock_db_connect):
@@ -127,48 +118,6 @@ def test_run_data_checks_for_invalid_hk_task(mock_db_connect, mock_audit_logger,
     handler.run_data_checks_for_hk_task(env, task, mock_db_connect)
     assert mock_audit_logger.call_count == 3
     assert mock_get_data.call_count == 0
-
-# TODO restore
-# @patch(f"{file_path}.logger.log_for_audit")
-# @patch(f"{file_path}.insert_test_data", return_value="")
-# @patch(f"{file_path}.database.close_connection", return_value="")
-# @patch(f"{file_path}.database.connect_to_database", return_value="db_connection")
-# def test_request_valid_data_task(mock_db_connect, mock_db_close, mock_insert, mock_audit):
-#     payload = generate_event_payload('data')
-#     result = handler.request(event=payload, context=None)
-#     assert mock_db_connect.call_count == 1
-#     assert mock_db_close.call_count == 1
-#     assert mock_insert.call_count == 1
-#     assert mock_audit.call_count == 1
-
-# TODO restore
-# @patch(f"{file_path}.symptomgroup.check_symptom_groups_data", return_value=True)
-# @patch(f"{file_path}.logger.log_for_audit")
-# @patch(f"{file_path}.run_data_checks_for_hk_task", return_value=True)
-# @patch(f"{file_path}.insert_test_data", return_value="")
-# @patch(f"{file_path}.database.close_connection", return_value="")
-# @patch(f"{file_path}.database.connect_to_database", return_value="db_connection")
-# def test_request_valid_hk_task(mock_db_connect, mock_db_close, mock_insert, mock_data_checks, mock_audit, mock_check):
-#     payload = generate_event_payload('symptomgroups')
-#     result = handler.request(event=payload, context=None)
-#     assert mock_db_connect.call_count == 1
-#     assert mock_db_close.call_count == 1
-#     assert mock_insert.call_count == 0
-#     assert mock_data_checks.call_count == 1
-#     assert mock_audit.call_count == 2
-#     # assert mock_check.call_count == 1
-
-# TODO restore when/if we need to handle exception thrown
-# @patch(f"{file_path}.insert_test_data", return_value="")
-# @patch(f"{file_path}.database.close_connection", return_value="")
-# @patch(f"{file_path}.database.connect_to_database", return_value="db_connection")
-# def test_request_invalid_task(mock_db_connect, mock_db_close, mock_insert):
-#     payload = generate_event_payload('nosuch')
-#     result = handler.request(event=payload, context=None)
-#     assert mock_db_connect.call_count == 0
-#     assert mock_db_close.call_count == 0
-#     assert mock_insert.call_count == 0
-
 
 def generate_event_payload(task):
     """Utility function to generate dummy event data"""

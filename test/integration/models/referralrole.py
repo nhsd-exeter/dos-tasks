@@ -35,12 +35,6 @@ def create_referral_role_query(referral_role_ids):
     data = str(referral_role_ids)
     return query, data
 
-
-# That a new record exists with id of 2000 and description of "Integration Test Create"
-# That an existing record with id of 2001 has updated description of "Integration Test Update"
-# That an existing record with id of 2002 has been deleted
-
-
 def check_referral_roles_data(env, db_connection):
     """Returns True if all checks pass ; otherwise returns False"""
     delete_pass = True

@@ -23,18 +23,11 @@ pipeline {
     }
     environment {
         BUILD_DATE = sh(returnStdout: true, script: "date -u +'%Y-%m-%dT%H:%M:%S%z'").trim()
-        // ENVIRONMENT = 'integration'
         TASK = "${params.Task}"
         BUCKET = "${params.Bucket}"
         PROFILE = "${params.Profile}"
         FILENAME = "int_${TASK}.csv"
-        // BUCKET = "uec-dos-tasks-${PROFILE}-housekeeping-bucket/${ENVIRONMENT}"
         MAX_ATTEMPTS = 5
-        // DB_HOST = 'uec-core-dos-pipeline-primary.dos-db-rds'
-        // TODO eventually develop
-        // PATHWAYSDOS_V4_BRANCH = 'task%2FDPTS-811-Poc-int-test'
-        //TODO because we don't want to delete ns at start - not needed ?
-        // DELETE = 'false'
     }
     triggers { pollSCM("* * * * *") }
     stages {

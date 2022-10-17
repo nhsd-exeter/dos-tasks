@@ -647,7 +647,6 @@ load-single-integration-test-file-to-s3:  ### Upload single file to bucket - man
 	make aws-s3-upload FILE=$$path/$(FILENAME) URI=$(BUCKET)/$(FILENAME)
 
 check-single-integration-test-file:## check if file has been archived mandatory: [MAX_ATTEMPTS]  BUCKET=[name of folder in bucket], FILENAME=[name of file]
-	# path="test/integration/test-files"
 	filename=`basename "$(FILENAME)"`
 	make poll-s3-for-file MAX_ATTEMPTS=$(MAX_ATTEMPTS) BUCKET=$(BUCKET) FILENAME=$$filename
 
@@ -670,10 +669,9 @@ invoke-test-check: ###Run hk integration test lambda to check result of task - M
 	--payload '{ "task": "$(TASK)" }' \
 	/dev/stdout
 
-# lambda returns
+# lambda returns success flag and lambda status
 # eg {"success": "False"}{ "StatusCode": 200, "ExecutedVersion": "$LATEST" }
-# want to extract the value of success
-run-integration-test-lambda: # - Mandatory [PROFILE] [TASK]
+run-integration-test-lambda: # extract the value of success - Mandatory [PROFILE] [TASK]
 	lambda_result=$$(make invoke-test-check PROFILE=$(PROFILE) TASK=$(TASK))
 	result_array=(`echo $$lambda_result | tr '}' ' '`)
 	result=$${result_array[1]}
