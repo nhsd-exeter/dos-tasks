@@ -1,0 +1,74 @@
+pipeline {
+    agent any
+    parameters {
+        string(
+            description: 'Housekeeping task to run - eg symptomgroups',
+            name: 'Task'
+        )
+        string(
+            description: 'S3 bucket to which test file is uploaded',
+            name: 'Bucket'
+        )
+        string(
+            description: 'Profile used for test - eg integration',
+            name: 'Profile'
+        )
+    }
+
+    options {
+        buildDiscarder(logRotator(daysToKeepStr: '7', numToKeepStr: '13'))
+        disableConcurrentBuilds()
+        parallelsAlwaysFailFast()
+        timeout(time: 10, unit: 'MINUTES')
+    }
+    environment {
+        BUILD_DATE = sh(returnStdout: true, script: "date -u +'%Y-%m-%dT%H:%M:%S%z'").trim()
+        TASK = "${params.Task}"
+        BUCKET = "${params.Bucket}"
+        PROFILE = "${params.Profile}"
+        FILENAME = "int_${TASK}.csv"
+        MAX_ATTEMPTS = 5
+    }
+    triggers { pollSCM("* * * * *") }
+    stages {
+        stage('Show Configuration') {
+            steps {
+                script { sh 'make show-configuration' }
+            }
+        }
+        stage('Load test file to s3') {
+            steps {
+                script {
+                    echo "Loading test file ${FILENAME} to s3 bucket ${BUCKET}"
+                    catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                        sh "make load-single-integration-test-file-to-s3 FILENAME=${FILENAME} BUCKET=${BUCKET}"
+                    }
+                }
+            }
+        }
+        stage('Check archive folder for test file') {
+            steps {
+                script {
+                    echo "Checking archive folder in s3 bucket ${BUCKET} for test file ${FILENAME}"
+                    catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                        sh "make check-single-integration-test-file MAX_ATTEMPTS=${MAX_ATTEMPTS} FILENAME=${FILENAME} BUCKET=${BUCKET}"
+                    }
+                }
+            }
+        }
+        stage('Check results of uploaded file') {
+            steps {
+                script {
+                    echo "Check database for results of uploading file ${FILENAME}"
+                    catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                        sh "make run-integration-test-lambda PROFILE=${PROFILE} TASK=${TASK}"
+                    }
+                }
+            }
+        }
+    }
+    post {
+        always { sh "echo end of ${TASK} test" }
+        cleanup { sh 'echo clean' }
+    }
+}

@@ -62,6 +62,11 @@ terraform-plan: ### Show plan - mandatory: STACK|STACKS|INFRASTRUCTURE_STACKS=[c
 		STACKS="$(or $(STACK), $(or $(STACKS), $(INFRASTRUCTURE_STACKS)))" \
 		CMD="plan $(OPTS)"
 
+terraform-plan-detailed: ### Show plan - mandatory: STACK|STACKS|INFRASTRUCTURE_STACKS=[comma-separated names]; optional: PROFILE=[name],OPTS=[Terraform options, e.g. -out=plan.out]
+	make _terraform-stacks \
+		STACKS="$(or $(STACK), $(or $(STACKS), $(INFRASTRUCTURE_STACKS)))" \
+		CMD="plan -detailed-exitcode $(OPTS)"
+		
 terraform-output: ### Extract output variables - mandatory: STACK|STACKS|INFRASTRUCTURE_STACKS=[comma-separated names]; optional: PROFILE=[name],OPTS=[Terraform options]
 	make -s _terraform-stacks \
 		STACKS="$(or $(STACK), $(or $(STACKS), $(INFRASTRUCTURE_STACKS)))" \

@@ -33,16 +33,20 @@ build: # Build project - mandatory: TASK=[task]
 	fi
 
 build-image: # Builds images - mandatory: NAME=[name]
-	task_type=$$(make task-type NAME=$(NAME))
-	rm -rf $(DOCKER_DIR)/task/assets/*
-	rm -rf $(DOCKER_DIR)/task/Dockerfile.effective
-	rm -rf $(DOCKER_DIR)/task/.version
-	mkdir $(DOCKER_DIR)/task/assets/utilities
-	cp -r $(APPLICATION_DIR)/$$task_type/$(NAME)/*.py $(DOCKER_DIR)/task/assets/
-	cp -r $(APPLICATION_DIR)/$$task_type/$(NAME)/requirements.txt $(DOCKER_DIR)/task/assets/
-	cp -r $(APPLICATION_DIR)/utilities/*.py $(DOCKER_DIR)/task/assets/utilities/
-	make docker-image NAME=$$task_type-$(NAME)
-	rm -rf $(DOCKER_DIR)/task/assets/*
+	if [ "$(NAME)" == "integration" ]; then
+		make build-hk-integration-tester-image NAME=$(NAME)
+	else
+		task_type=$$(make task-type NAME=$(NAME))
+		rm -rf $(DOCKER_DIR)/task/assets/*
+		rm -rf $(DOCKER_DIR)/task/Dockerfile.effective
+		rm -rf $(DOCKER_DIR)/task/.version
+		mkdir $(DOCKER_DIR)/task/assets/utilities
+		cp -r $(APPLICATION_DIR)/$$task_type/$(NAME)/*.py $(DOCKER_DIR)/task/assets/
+		cp -r $(APPLICATION_DIR)/$$task_type/$(NAME)/requirements.txt $(DOCKER_DIR)/task/assets/
+		cp -r $(APPLICATION_DIR)/utilities/*.py $(DOCKER_DIR)/task/assets/utilities/
+		make docker-image NAME=$$task_type-$(NAME)
+		rm -rf $(DOCKER_DIR)/task/assets/*
+	fi
 
 start: project-start # Start project
 
@@ -56,19 +60,28 @@ test: # Test project
 	make start
 	make stop
 
+# Push targets
 push: # Push project artefacts to the registry - mandatory: TASK=[task]
 	if [ "$(TASK)" == "all" ]; then
 		for task in $$(echo $(TASKS) | tr "," "\n"); do
-			task_type=$$(make task-type NAME=$$task)
-			make docker-push NAME=$$task_type-$$task
+			make push-image TASK=$$task
 		done
+	else
+		make push-image TASK=$(TASK)
+	fi
+
+push-image: # Push project artefact to the registry - mandatory: TASK=[task]
+	if [ "$(TASK)" == "integration" ]; then
+		make push-hk-integration-tester-image
 	else
 		task_type=$$(make task-type NAME=$(TASK))
 		make docker-push NAME=$$task_type-$(TASK)
 	fi
 
-# Provision
+# Provision targets
 provision: ## provision resources for hk and cron - mandatory PROFILE TASK  and DB_NAME (cron only)
+	make copy-temp-integration-test-files
+	make terraform-apply-auto-approve STACK=$(STACKS) PROFILE=$(PROFILE)
 	if [ "$(TASK)" == "all" ]; then
 		for task in $$(echo $(TASKS) | tr "," "\n"); do
 			task_type=$$(make task-type NAME=$$task)
@@ -92,26 +105,33 @@ provision: ## provision resources for hk and cron - mandatory PROFILE TASK  and 
 			make provision-hk PROFILE=$(PROFILE) TASK=$(TASK)
 		fi
 	fi
+	make remove-temp-integration-test-files
 
 provision-hk: ## Provision environment - mandatory: PROFILE=[name], TASK=[task]
-	echo "Provisioning $(PROFILE) lambda for hk task $(TASK)"
 	eval "$$(make secret-fetch-and-export-variables)"
-	make terraform-apply-auto-approve STACK=$(STACKS) PROFILE=$(PROFILE)
-	make terraform-apply-auto-approve STACK=$(TASK) PROFILE=$(PROFILE)
-
+	echo "Provisioning $(PROFILE) lambda for hk task $(TASK)"
+	if [ "$(TASK)" == 'integration' ]; then
+		make provision-hk-integration-tester STACK=integration-test
+	else
+		make terraform-apply-auto-approve STACK=$(TASK) PROFILE=$(PROFILE)
+	fi
 
 provision-cron: ## cron specific version of provision PROFILE TASK DB_NAME
 	echo "Provisioning $(PROFILE) lambda $(TASK)-$(DB_NAME) for cron job"
 	make build-stack-for-cron-job TASK=$(TASK) DB_NAME=$(DB_NAME)
 	eval "$$(make secret-fetch-and-export-variables)"
-	make terraform-apply-auto-approve STACK=$(STACKS) PROFILE=$(PROFILE)
 	make terraform-apply-auto-approve STACK=$(TASK)-$(DB_NAME) PROFILE=$(PROFILE)
 	make delete-stack-for-cron-job TASK=$(TASK) DB_NAME=$(DB_NAME)
+
+provision-stacks: ## Provision environment - mandatory: PROFILE=[name]
+	echo "Provisioning stack infrastrucure for $(PROFILE)"
+	make terraform-apply-auto-approve STACK=$(STACKS) PROFILE=$(PROFILE)
 
 # Plan targets
 plan: # Plan cron and hk lambdas - mandatory: PROFILE=[name], TASK=[hk task] DB_NAME
 	eval "$$(make secret-fetch-and-export-variables)"
 	make terraform-plan STACK=$(STACKS) PROFILE=$(PROFILE)
+	make copy-temp-integration-test-files
 	if [ "$(TASK)" == "all" ]; then
 		for task in $$(echo $(TASKS) | tr "," "\n"); do
 			task_type=$$(make task-type NAME=$$task)
@@ -135,11 +155,16 @@ plan: # Plan cron and hk lambdas - mandatory: PROFILE=[name], TASK=[hk task] DB_
 			make plan-hk PROFILE=$(PROFILE) TASK=$(TASK)
 		fi
 	fi
+	make remove-temp-integration-test-files
 
 plan-hk: # Plan housekeeping lambda - mandatory: PROFILE=[name], TASK=[hk task]
 	echo "Planning for hk task $(TASK)"
 	eval "$$(make secret-fetch-and-export-variables)"
-	make terraform-plan STACK=$(TASK) PROFILE=$(PROFILE)
+	if [ "$(TASK)" == 'integration' ]; then
+			make plan-hk-integration-tester STACK=integration-test PROFILE=$(PROFILE)
+	else
+			make terraform-plan STACK=$(TASK) PROFILE=$(PROFILE)
+	fi
 
 plan-cron: # Plan cron job - mandatory: PROFILE=[name], TASK=[hk task] DB_NAME
 	echo "Planning for cron job $(TASK)-$(DB_NAME)"
@@ -148,9 +173,12 @@ plan-cron: # Plan cron job - mandatory: PROFILE=[name], TASK=[hk task] DB_NAME
 	make terraform-plan STACK=$(TASK)-$(DB_NAME) PROFILE=$(PROFILE)
 	make delete-stack-for-cron-job TASK=$(TASK) DB_NAME=$(DB_NAME)
 
-#  Destroy targets
+plan-stacks: ### plan shared infrastructure defined in STACKS PROFILE
+	make terraform-plan-detailed STACK=$(STACKS) PROFILE=$(PROFILE)
 
+#  Destroy targets
 destroy: # To destroy cron and hk lambdas - mandatory: PROFILE=[name], TASK=[hk task] DB_NAME
+	make copy-temp-integration-test-files
 	if [ "$(TASK)" == "all" ]; then
 		for task in $$(echo $(TASKS) | tr "," "\n"); do
 			task_type=$$(make task-type NAME=$$task)
@@ -174,13 +202,18 @@ destroy: # To destroy cron and hk lambdas - mandatory: PROFILE=[name], TASK=[hk 
 			make destroy-hk PROFILE=$(PROFILE) TASK=$(TASK)
 		fi
 	fi
+	make remove-temp-integration-test-files
 
 # eg make destroy PROFILE=nonprod TASK=symptomgroups
 destroy-hk: # Destroy housekeeping lambda - mandatory: PROFILE=[name], TASK=[hk task]
 	task_type=$$(make task-type NAME=$(TASK))
 	if [ "$$task_type" == 'hk' ]; then
 		eval "$$(make secret-fetch-and-export-variables)"
-		make terraform-destroy-auto-approve STACK=$(TASK) PROFILE=$(PROFILE)
+		if [ "$(TASK)" == 'integration' ]; then
+			make destroy-hk-integration-tester STACK=integration-test PROFILE=$(PROFILE)
+		else
+			make terraform-destroy-auto-approve STACK=$(TASK) PROFILE=$(PROFILE)
+		fi
 	else
 		echo $(TASK) is not an hk job
 	fi
@@ -237,9 +270,30 @@ unit-test: # Runs unit tests for task - mandatory: TASK=[task]
 clean: # Clean up project
 	make docker-network-remove
 
-# --------------------------------------
+poll-s3-for-file: ## retries look up for file in bucket [MAX_ATTEMPTS] mandatory [BUCKET] [FILENAME]
+	echo "Checking bucket $(BUCKET) for file $(FILENAME)"
+	for i in {1..$(MAX_ATTEMPTS)}
+	do
+		archived=$$(make check-bucket-for-file BUCKET=$(BUCKET) FILENAME=$(FILENAME))
+		echo $$archived
+		if [ $$archived == true ]; then
+			break
+		fi
+		echo Sleeping..
+		sleep 1
+	done
+
+check-bucket-for-file: ## returns true if filename exists in bucket  - mandatory [BUCKET] [ENV] [FILENAME]
+	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
+		$(AWSCLI) s3 ls \
+			s3://$(BUCKET) \
+			2>&1 | grep -q $(FILENAME) \
+	" > /dev/null 2>&1 && echo true || echo false
 
 build-tester: # Builds image used for testing - mandatory: PROFILE=[name]
+	mkdir $(DOCKER_DIR)/tester/assets/integration
+	mkdir $(DOCKER_DIR)/tester/assets/integration/data-files
+	cp $(APPLICATION_TEST_DIR)/integration/data-files/* $(DOCKER_DIR)/tester/assets/integration/data-files
 	make docker-image NAME=tester
 
 push-tester: # Pushes image used for testing - mandatory: PROFILE=[name]
@@ -255,15 +309,24 @@ remove-temp-stt-unit-test-files:
 
 unit-test-task: # Run task unit tests - mandatory: TASK=[name of task]
 	if [ "$(TASK)" = "stt" ]; then
+		make remove-temp-stt-unit-test-files
 		make copy-stt-unit-test-files
+	fi
+	if [ "$(TASK)" = "integration" ]; then
+		make remove-temp-hk-integration-test-files
+		make create-temp-hk-integration-test-files
 	fi
 	task_type=$$(make task-type NAME=$(TASK))
 	rm -rf $(APPLICATION_DIR)/$$task_type/$(TASK)/test
 	rm -rf $(APPLICATION_DIR)/$$task_type/$(TASK)/utilities
 	mkdir $(APPLICATION_DIR)/$$task_type/$(TASK)/test
-	mkdir $(APPLICATION_DIR)/$$task_type/$(TASK)/utilities
 	cp $(APPLICATION_TEST_DIR)/unit/$$task_type/$(TASK)/* $(APPLICATION_DIR)/$$task_type/$(TASK)/test
+	mkdir $(APPLICATION_DIR)/$$task_type/$(TASK)/utilities
 	cp $(APPLICATION_DIR)/utilities/*.py $(APPLICATION_DIR)/$$task_type/$(TASK)/utilities
+	if [ "$(TASK)" = "integration" ]; then
+		mkdir $(APPLICATION_DIR)/$$task_type/$(TASK)/models
+		cp $(APPLICATION_DIR)/models/*.py $(APPLICATION_DIR)/$$task_type/$(TASK)/models
+	fi
 	make docker-run-tools IMAGE=$$(make _docker-get-reg)/tester:latest \
 		DIR=application/$$task_type/$(TASK) \
 		CMD="python3 -m pytest test/"
@@ -271,6 +334,9 @@ unit-test-task: # Run task unit tests - mandatory: TASK=[name of task]
 	rm -rf $(APPLICATION_DIR)/$$task_type/$(TASK)/utilities
 	if [ "$(TASK)" = "stt" ]; then
 		make remove-temp-stt-unit-test-files
+	fi
+	if [ "$(TASK)" = "integration" ]; then
+		make remove-temp-hk-integration-test-files
 	fi
 
 unit-test-utilities: # Run utilities unit tests
@@ -286,7 +352,6 @@ unit-test-utilities: # Run utilities unit tests
 	rm -rf $(APPLICATION_DIR)/utilities/test
 	rm -rf $(APPLICATION_DIR)/test-files
 
-
 copy-stt-coverage-test-files:
 	rm -rf $(APPLICATION_DIR)/test-files
 	mkdir $(APPLICATION_DIR)/test-files
@@ -297,6 +362,8 @@ remove-temp-stt-coverage-test-files:
 
 coverage: ## Run test coverage - mandatory: PROFILE=[profile] TASK=[task] FORMAT=[xml/html]
 	make copy-stt-coverage-test-files
+	make remove-temp-hk-integration-test-files
+	make create-temp-hk-integration-test-files
 	if [ "$(TASK)" = "" ]; then
 		tasks=$(TASKS)
 	else
@@ -327,6 +394,7 @@ coverage: ## Run test coverage - mandatory: PROFILE=[profile] TASK=[task] FORMAT
 	done
 	rm -rf $(APPLICATION_DIR)/utilities/test
 	make remove-temp-stt-coverage-test-files
+	make remove-temp-hk-integration-test-files
 
 python-code-coverage-format: ### Test Python code with 'coverage' - mandatory: CMD=[test program]; optional: DIR,FILES=[file or pattern],EXCLUDE=[comma-separated list],FORMAT=[xml,html]
 	if [ "$(FORMAT)" = "" ]; then
@@ -365,7 +433,6 @@ remove-old-versions-for-task: ## Prune old versions of hk and/or cron lambdas - 
 				make remove-old-versions-for-cron-task PROFILE=$(PROFILE) TASK=$(TASK) DB_NAME=$(DB_NAME)
 			fi
 	fi
-
 
 remove-old-versions-for-hk-task: ## Prune old versions of hk task lambdas - Mandatory; [PROFILE] [TASK]
 	eval "$$(make aws-assume-role-export-variables)"
@@ -482,14 +549,154 @@ create-artefact-repositories: # Create ECR repositories to store the artefacts -
 	make docker-create-repository NAME=cron-removeoldchanges
 	make docker-create-repository NAME=hk-symptomdiscriminatorsynonyms
 	make docker-create-repository NAME=hk-symptomgroupdiscriminators
+	make docker-create-repository NAME=hk-integration-tester
 
 create-tester-repository: # Create ECR repositories to store the artefacts
 	make docker-create-repository NAME=tester
 
+# ==============
+# integration test related targets
+# --------------------------------------
+create-temp-hk-integration-test-files: # copy integration code from test/integration to new application/hk/integration folder
+	rm -rf $(APPLICATION_DIR)/hk/integration/*
+	mkdir $(APPLICATION_DIR)/hk/integration
+	mkdir $(APPLICATION_DIR)/hk/integration/data-files
+	mkdir $(APPLICATION_DIR)/hk/integration/test-files
+	mkdir $(APPLICATION_DIR)/models
+	cp $(APPLICATION_TEST_DIR)/integration/*.py $(APPLICATION_DIR)/hk/integration/
+	cp $(APPLICATION_TEST_DIR)/integration/requirements.txt $(APPLICATION_DIR)/hk/integration/
+	cp $(APPLICATION_TEST_DIR)/integration/models/* $(APPLICATION_DIR)/models
+	cp $(APPLICATION_TEST_DIR)/integration/data-files/* $(APPLICATION_DIR)/hk/integration/data-files
+
+remove-temp-hk-integration-test-files:
+	rm -rf $(APPLICATION_DIR)/hk/integration
+	rm -rf $(APPLICATION_DIR)/models
+
+build-hk-integration-tester-image: # Builds integration test image [NAME]
+	make remove-temp-hk-integration-test-files
+	make create-temp-hk-integration-test-files
+	task_type=$$(make task-type NAME=$(NAME))
+	rm -rf $(DOCKER_DIR)/hk-integration-tester/assets/*
+	rm -rf $(DOCKER_DIR)/hk-integration-tester/Dockerfile.effective
+	rm -rf $(DOCKER_DIR)/hk-integration-tester/.version
+	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/utilities
+	cp -r $(APPLICATION_DIR)/utilities/*.py $(DOCKER_DIR)/hk-integration-tester/assets/utilities/
+	mkdir $(DOCKER_DIR)/hk-integration-tester/assets/models
+	cp -r $(APPLICATION_DIR)/models/*.py $(DOCKER_DIR)/hk-integration-tester/assets/models/
+	cp -r $(APPLICATION_DIR)/$$task_type/integration/*.py $(DOCKER_DIR)/hk-integration-tester/assets/
+	cp -r $(APPLICATION_DIR)/$$task_type/integration/requirements.txt $(DOCKER_DIR)/hk-integration-tester/assets/
+	cp -r $(APPLICATION_DIR)/$$task_type/integration/data-files/ $(DOCKER_DIR)/hk-integration-tester/assets/data-files
+	make docker-image NAME=hk-integration-tester
+	rm -rf $(DOCKER_DIR)/hk-integration-tester/assets/*
+	make remove-temp-hk-integration-test-files
+
+push-hk-integration-tester-image: #
+	make docker-push NAME=hk-integration-tester
+
+provision-hk-integration-tester: ## mandatory: PROFILE=[name], STACK=[integration-test]
+	echo "Provisioning $(PROFILE) lambda for hk-integration tester"
+	eval "$$(make secret-fetch-and-export-variables)"
+	make terraform-apply-auto-approve STACK=$(STACK) PROFILE=$(PROFILE)
+
+destroy-hk-integration-tester: ## mandatory: PROFILE=[name], STACK=[integration-test]
+	echo "Destroying $(PROFILE) lambda for hk-integration tester"
+	eval "$$(make secret-fetch-and-export-variables)"
+	make terraform-destroy-auto-approve STACK=$(STACK) PROFILE=$(PROFILE)
+
+plan-hk-integration-tester: ## mandatory: PROFILE=[name], STACK=[integration-test]
+	echo "Planning $(PROFILE) lambda for $(STACK)"
+	eval "$$(make secret-fetch-and-export-variables)"
+	make terraform-plan STACK=$(STACK) PROFILE=$(PROFILE)
+
+copy-temp-integration-test-files:
+	rm -rf $(APPLICATION_DIR)/hk/integration
+	mkdir $(APPLICATION_DIR)/hk/integration
+	mkdir $(APPLICATION_DIR)/hk/integration/models
+# mkdir $(APPLICATION_DIR)/hk/integration/test
+	mkdir $(APPLICATION_DIR)/hk/integration/data-files
+	mkdir $(APPLICATION_DIR)/hk/integration/utilities
+	cp $(APPLICATION_DIR)/utilities/*.py $(APPLICATION_DIR)/hk/integration/utilities
+	cp $(APPLICATION_TEST_DIR)/integration/*.py $(APPLICATION_DIR)/hk/integration
+	cp $(APPLICATION_TEST_DIR)/integration/requirements.txt $(APPLICATION_DIR)/hk/integration
+	cp $(APPLICATION_TEST_DIR)/integration/models/* $(APPLICATION_DIR)/hk/integration/models
+# cp $(APPLICATION_TEST_DIR)/integration/test/* $(APPLICATION_DIR)/hk/integration/test
+	cp $(APPLICATION_TEST_DIR)/integration/data-files/* $(APPLICATION_DIR)/hk/integration/data-files
+
+remove-temp-integration-test-files:
+	rm -rf $(APPLICATION_DIR)/hk/integration
+
+#====
+# targets to upload test files to s3 bucket and check in archive folder
+#====
+load-integration-test-files-to-s3:  ### Upload all test csv files to bucket - mandatory: FILEPATH=[local path (inside container)],BUCKET=[name of folder in bucket]
+	eval "$$(make aws-assume-role-export-variables)"
+	args="--recursive --include 'int_*.csv'"
+	make aws-s3-upload FILE=$(FILEPATH) URI=$(BUCKET) ARGS=$$args
+
+check-integration-test-files:## iterate over integration test folder mandatory: [MAX_ATTEMPTS]  BUCKET=[name of folder in bucket]
+	int_test_folder="test/integration/test-files/*"
+	for f in $$int_test_folder
+	do
+		filename=`basename "$$f"`
+		make poll-s3-for-file MAX_ATTEMPTS=$(MAX_ATTEMPTS) BUCKET=$(BUCKET) FILENAME=$$filename
+	done
+
+load-single-integration-test-file-to-s3:  ### Upload single file to bucket - mandatory: FILENAME=[name of file],BUCKET=[name of folder in bucket]
+	eval "$$(make aws-assume-role-export-variables)"
+	path="test/integration/test-files"
+	make aws-s3-upload FILE=$$path/$(FILENAME) URI=$(BUCKET)/$(FILENAME)
+
+check-single-integration-test-file:## check if file has been archived mandatory: [MAX_ATTEMPTS]  BUCKET=[name of folder in bucket], FILENAME=[name of file]
+	filename=`basename "$(FILENAME)"`
+	make poll-s3-for-file MAX_ATTEMPTS=$(MAX_ATTEMPTS) BUCKET=$(BUCKET) FILENAME=$$filename
+
+#============
+# tidy up post testing
+#==============
+
+clear-integration-archive: # BUCKET=[name of folder in bucket]
+	eval "$$(make aws-assume-role-export-variables)"
+	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
+		$(AWSCLI) s3 rm s3://$(BUCKET)/archive/ --recursive --exclude '*' --include '*.csv'"
+
+#=================
+# targets to test results of hk job
+#=================
+
+invoke-test-check: ###Run hk integration test lambda to check result of task - Mandatory [PROFILE] [TASK]
+	eval "$$(make aws-assume-role-export-variables)"
+	aws lambda invoke --function-name $(TF_VAR_hk_integration_tester_lambda_function_name) \
+	--payload '{ "task": "$(TASK)" }' \
+	/dev/stdout
+
+# lambda returns success flag and lambda status
+# eg {"success": "False"}{ "StatusCode": 200, "ExecutedVersion": "$LATEST" }
+run-integration-test-lambda: # extract the value of success - Mandatory [PROFILE] [TASK]
+	lambda_result=$$(make invoke-test-check PROFILE=$(PROFILE) TASK=$(TASK))
+	result_array=(`echo $$lambda_result | tr '}' ' '`)
+	result=$${result_array[1]}
+	result=$${result#?}
+	result=$${result%?}
+	if [ $$result == "True" ]; then
+		echo pass
+		exit 0
+	else
+		echo fail
+		exit 1
+	fi
+
 # ==============================================================================
+
+git-branch-format:  ## DOS version of [BRANCH_NAME]
+	echo ${BRANCH_NAME} | sed 's;/;%2F;g'
+
 
 .SILENT: \
 	aws-lambda-get-versions-to-remove \
 	parse-profile-from-tag \
 	cron-task-check \
-	task-type
+	check-bucket-for-file \
+	poll-s3-for-file \
+	task-type \
+	invoke-test-check \
+	git-branch-format

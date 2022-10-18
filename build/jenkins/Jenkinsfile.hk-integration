@@ -1,0 +1,184 @@
+pipeline {
+    agent any
+    parameters {
+        string(
+            description: 'Housekeeping task to run',
+            name: 'Task',
+            defaultValue: 'all'
+        )
+        string(
+            description: 'Test database/environment - integration',
+            name: 'Test',
+            defaultValue: 'integration'
+        )
+        booleanParam(
+            description: 'Debug mode - true will not tear down hk lambdas or database',
+            name: 'Debug',
+            defaultValue: false
+        )
+    }
+
+    options {
+        buildDiscarder(logRotator(daysToKeepStr: '7', numToKeepStr: '13'))
+        disableConcurrentBuilds()
+        parallelsAlwaysFailFast()
+        timeout(time: 60, unit: 'MINUTES')
+    }
+    environment {
+        BUILD_DATE = sh(returnStdout: true, script: "date -u +'%Y-%m-%dT%H:%M:%S%z'").trim()
+        PROFILE = 'integration'
+        ENVIRONMENT = 'integration'
+        TASK = "${params.Task}"
+        TEST_TASK = "${params.Test}"
+        DB_BUILD_JOB_NAME = 'dos-functional-pipeline-tasks-int-deploy'
+        DB_DROP_JOB_NAME = 'dos-functional-pipeline-delete'
+        SINGLE_HK_TEST_JOB_NAME = 'uec-dos-tasks-hk-integration-test'
+        NAMESPACE = "${ENVIRONMENT}"
+        NAMESPACE_RD = "${NAMESPACE}-rd"
+        NAMESPACE_CRON = "${NAMESPACE}-cron"
+        DB_PREFIX = 'pathwaysdos'
+        DB_SUFFIX = 'tasks'
+        PIPELINE_DATABASE = "${DB_PREFIX}_${ENVIRONMENT}"
+        BUCKET = "uec-dos-tasks-${PROFILE}-housekeeping-bucket/${ENVIRONMENT}"
+        MAX_ATTEMPTS = 5
+        DB_HOST = 'uec-core-dos-pipeline-primary.dos-db-rds'
+        SLACK_CHANNEL = 'dos-tasks-pipeline-notifications-nonprod'
+        // TODO eventually develop
+        PATHWAYSDOS_V4_BRANCH = 'task%2FDPTS-811-Poc-int-test'
+        BRANCH_NAME = sh(returnStdout: true, script: "make git-branch-format BRANCH_NAME=${GIT_BRANCH}").trim()
+    }
+    triggers { pollSCM("* * * * *") }
+    stages {
+        stage('Show Configuration') {
+            steps {
+                script { sh 'make show-configuration' }
+            }
+        }
+        stage('Precautionary teardown hk infrastructure') {
+            when { expression { params.Task != "none" } }
+            steps {
+                script {
+                    echo 'Precautionary cleardown hk lambdas and integration test infrastructure'
+                    sh "make destroy PROFILE=${PROFILE} TASK=${params.Task}"
+                }
+            }
+        }
+        stage('Triggering build of database') {
+            steps {
+                echo "Running pathwaysdos_v4 pipeline ${DB_BUILD_JOB_NAME}"
+                build job: "${DB_BUILD_JOB_NAME}/${PATHWAYSDOS_V4_BRANCH}",\
+                parameters: [string(name:'NAMESPACE' , value:"${NAMESPACE}"),\
+                string(name:'NAMESPACE_CRON' , value:"${NAMESPACE_CRON}"),\
+                string(name:'NAMESPACE_RD' , value:"${NAMESPACE_RD}"),\
+                string(name:'PIPELINE_DATABASE' , value:"${PIPELINE_DATABASE}"),\
+                string(name:'DB_HOST' , value:"${DB_HOST}"),\
+                string(name:'SLACK_CHANNEL' , value:"${SLACK_CHANNEL}")
+                ]
+            }
+        }
+        stage("Build and push hk lambdas") {
+            when { expression { params.Task != "none" } }
+            steps {
+                script { sh "make unit-test TASK=${params.Task}" }
+                script { sh "make build TASK=${params.Task}" }
+                script { sh "make push TASK=${params.Task}" }
+            }
+        }
+        stage('Check key infrastructure exists') {
+            when { expression { params.Task != "none" } }
+            steps {
+                script {
+                    echo 'Checking infrastructure defined as STACKS'
+                    catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                        sh "make plan-stacks PROFILE=${PROFILE}"
+                    }
+                }
+            }
+        }
+        stage('Provision hk and integration test lambdas') {
+            when { expression { params.Task != "none" } }
+            steps {
+                script {
+                    echo 'Provision hk and integration test lambdas'
+                    catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                        sh "make provision PROFILE=${PROFILE} TASK=${params.Task}"
+                    }
+                }
+            }
+        }
+        stage('Set up data conditions') {
+            when { expression { params.Task != "none" } }
+            steps {
+                script {
+                    echo 'Run set up test data conditions'
+                    sh "make run-integration-test-lambda PROFILE=${PROFILE} TASK=data"
+                }
+            }
+        }
+        stage('Run symptom group tests') {
+            steps {
+                echo 'Running tests for symptomgroups'
+                catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                    build job: "${SINGLE_HK_TEST_JOB_NAME}/${BRANCH_NAME}",\
+                    parameters: [string(name:'Task' , value:"symptomgroups"),\
+                    string(name:'Bucket' , value:"${BUCKET}"),\
+                    string(name:'Profile' , value:"${PROFILE}")
+                    ]
+                }
+            }
+        }
+        stage('Run referral role tests') {
+            steps {
+                echo 'Running tests for referral roles'
+                catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                    build job: "${SINGLE_HK_TEST_JOB_NAME}/${BRANCH_NAME}",\
+                    parameters: [string(name:'Task' , value:"referralroles"),\
+                    string(name:'Bucket' , value:"${BUCKET}"),\
+                    string(name:'Profile' , value:"${PROFILE}")
+                    ]
+                }
+            }
+        }
+        stage('Check and remove older versions') {
+            when { expression { params.Task != "none" } }
+            steps {
+                script { echo 'Check and remove' }
+            }
+        }
+        stage('Clear S3 archive') {
+            when { expression { params.Debug == false  && params.Task != "none" } }
+            steps {
+                script {
+                    echo 'Remove test files from archive'
+                    sh "make clear-integration-archive BUCKET=${BUCKET}"
+                }
+            }
+        }
+        stage('Teardown hk infrastructure') {
+            when { expression { params.Debug == false  && params.Task != "none" } }
+            steps {
+                script {
+                    echo 'Teardown hk lambdas and integration test infrastructure'
+                    sh "make destroy PROFILE=${PROFILE} TASK=${params.Task}"
+                }
+            }
+        }
+        stage('Delete namespace and drop database') {
+            when { expression { params.Debug == false  && params.Task != "none" } }
+            steps {
+                echo "Running pathwaysdos_v4 pipeline ${DB_DROP_JOB_NAME}"
+                build job: "${DB_DROP_JOB_NAME}/${PATHWAYSDOS_V4_BRANCH}",\
+                parameters: [string(name:'NAMESPACE' , value:"${NAMESPACE}"),\
+                string(name:'NAMESPACE_RD' , value:"${NAMESPACE_RD}"),\
+                string(name:'NAMESPACE_CRON' , value:"${NAMESPACE_CRON}"),\
+                string(name:'SLACK_CHANNEL' , value:"${SLACK_CHANNEL}"),\
+                string(name:'PIPELINE_DATABASE' , value:"${PIPELINE_DATABASE}"),\
+                string(name:'DB_HOST' , value:"${DB_HOST}")]
+            }
+        }
+    }
+    post {
+        always { sh 'echo end' }
+        cleanup { sh 'echo clean' }
+    }
+}
