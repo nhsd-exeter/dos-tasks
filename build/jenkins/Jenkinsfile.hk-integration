@@ -85,7 +85,7 @@ pipeline {
                 script {
                     echo 'Provision hk and integration test lambdas'
                     catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
-                        sh "make provision PROFILE=${PROFILE} TASK=${${TASK}}"
+                        sh "make provision PROFILE=${PROFILE} TASK=${TASK}"
                     }
                 }
             }
@@ -141,7 +141,7 @@ pipeline {
             steps {
                 script {
                     echo 'Teardown hk lambdas and integration test infrastructure'
-                    sh "make destroy PROFILE=${PROFILE} TASK=${${TASK}}"
+                    sh "make destroy PROFILE=${PROFILE} TASK=${TASK}"
                 }
             }
         }
