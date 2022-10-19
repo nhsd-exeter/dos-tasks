@@ -1,16 +1,6 @@
 pipeline {
     agent any
     parameters {
-        string(
-            description: 'Housekeeping task to run',
-            name: 'Task',
-            defaultValue: 'all'
-        )
-        string(
-            description: 'Test database/environment - integration',
-            name: 'Test',
-            defaultValue: 'integration'
-        )
         booleanParam(
             description: 'Debug mode - true will not tear down hk lambdas or database',
             name: 'Debug',
@@ -28,8 +18,7 @@ pipeline {
         BUILD_DATE = sh(returnStdout: true, script: "date -u +'%Y-%m-%dT%H:%M:%S%z'").trim()
         PROFILE = 'integration'
         ENVIRONMENT = 'integration'
-        TASK = "${params.Task}"
-        TEST_TASK = "${params.Test}"
+        TASK = 'all'
         DB_BUILD_JOB_NAME = 'dos-functional-pipeline-tasks-int-deploy'
         DB_DROP_JOB_NAME = 'dos-functional-pipeline-delete'
         SINGLE_HK_TEST_JOB_NAME = 'uec-dos-tasks-hk-integration-test'
@@ -43,8 +32,7 @@ pipeline {
         MAX_ATTEMPTS = 5
         DB_HOST = 'uec-core-dos-pipeline-primary.dos-db-rds'
         SLACK_CHANNEL = 'dos-tasks-pipeline-notifications-nonprod'
-        // TODO eventually develop
-        PATHWAYSDOS_V4_BRANCH = 'task%2FDPTS-811-Poc-int-test'
+        PATHWAYSDOS_V4_BRANCH = 'develop'
         BRANCH_NAME = sh(returnStdout: true, script: "make git-branch-format BRANCH_NAME=${GIT_BRANCH}").trim()
     }
     triggers { pollSCM("* * * * *") }
