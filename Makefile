@@ -286,7 +286,7 @@ poll-s3-for-file: ## retries look up for file in bucket [MAX_ATTEMPTS] mandatory
 check-bucket-for-file: ## returns true if filename exists in bucket  - mandatory [BUCKET] [ENV] [FILENAME]
 	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
 		$(AWSCLI) s3 ls \
-			s3://$(BUCKET) \
+			s3://$(BUCKET)/ \
 			2>&1 | grep -q $(FILENAME) \
 	" > /dev/null 2>&1 && echo true || echo false
 
