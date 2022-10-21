@@ -27,7 +27,7 @@ pipeline {
         BUCKET = "${params.Bucket}"
         PROFILE = "${params.Profile}"
         FILENAME = "int_${TASK}.csv"
-        MAX_ATTEMPTS = 10
+        MAX_ATTEMPTS = 30
     }
     triggers { pollSCM("* * * * *") }
     stages {

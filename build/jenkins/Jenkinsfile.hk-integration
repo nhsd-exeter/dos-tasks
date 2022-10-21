@@ -29,7 +29,6 @@ pipeline {
         DB_SUFFIX = 'tasks'
         PIPELINE_DATABASE = "${DB_PREFIX}_${ENVIRONMENT}"
         BUCKET = "uec-dos-tasks-${PROFILE}-housekeeping-bucket/${ENVIRONMENT}"
-        MAX_ATTEMPTS = 5
         DB_HOST = 'uec-core-dos-pipeline-primary.dos-db-rds'
         SLACK_CHANNEL = 'dos-tasks-pipeline-notifications-nonprod'
         PATHWAYSDOS_V4_BRANCH = 'develop'
