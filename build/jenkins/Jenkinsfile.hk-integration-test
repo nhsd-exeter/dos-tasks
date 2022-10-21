@@ -27,7 +27,7 @@ pipeline {
         BUCKET = "${params.Bucket}"
         PROFILE = "${params.Profile}"
         FILENAME = "int_${TASK}.csv"
-        MAX_ATTEMPTS = 30
+        MAX_ATTEMPTS =15
     }
     triggers { pollSCM("* * * * *") }
     stages {
@@ -51,7 +51,7 @@ pipeline {
                 script {
                     echo "Checking archive folder in s3 bucket ${BUCKET} for test file ${FILENAME}"
                     catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
-                        sh "make check-single-integration-test-file MAX_ATTEMPTS=${MAX_ATTEMPTS} FILENAME=${FILENAME} BUCKET=${BUCKET}/archive/"
+                        sh "make check-single-integration-test-file MAX_ATTEMPTS=${MAX_ATTEMPTS} FILENAME=${FILENAME} BUCKET=${BUCKET}/archive"
                     }
                 }
             }
