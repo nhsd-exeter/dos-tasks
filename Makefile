@@ -272,6 +272,7 @@ clean: # Clean up project
 
 poll-s3-for-file: ## retries look up for file in bucket [MAX_ATTEMPTS] mandatory [BUCKET] [FILENAME]
 	echo "Checking bucket $(BUCKET) for file $(FILENAME)"
+	eval "$$(make aws-assume-role-export-variables)"
 	for i in {1..$(MAX_ATTEMPTS)}
 	do
 		archived=$$(make check-bucket-for-file BUCKET=$(BUCKET) FILENAME=$(FILENAME))
