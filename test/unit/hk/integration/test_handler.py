@@ -126,7 +126,7 @@ def test_run_data_checks_for_servicetypes_created_record(mock_db_connect, mock_a
     task = 'servicetypes'
     result = handler.run_data_checks_for_hk_task(env, task, mock_db_connect)
     assert result == False
-    assert mock_audit_logger.call_count == 4
+    assert mock_audit_logger.call_count == 3
     assert mock_get_data.call_count == 1
 
 @patch(f"{file_path}.servicetype.get_service_types_data", return_value = ({'id':2001,'name':'Wrong name','nationalranking':8,'searchcapacitystatus':True, 'capacitymodel':'n/a', 'capacityreset':'interval'},))
@@ -136,7 +136,7 @@ def test_run_data_checks_for_servicetypes_deleted_record(mock_db_connect, mock_a
     task = 'servicetypes'
     result = handler.run_data_checks_for_hk_task(env, task, mock_db_connect)
     assert result == False
-    assert mock_audit_logger.call_count == 2
+    assert mock_audit_logger.call_count == 3
     assert mock_get_data.call_count == 1
 
 @patch(f"{file_path}.servicetype.get_service_types_data", return_value = ({'id':2002,'name':'Wrong name','nationalranking':8,'searchcapacitystatus':True, 'capacitymodel':'n/a', 'capacityreset':'interval'},))
