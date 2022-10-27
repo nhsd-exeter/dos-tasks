@@ -58,6 +58,7 @@ def check_service_types_data(env, db_connection):
             )
         if st_id == created_record_id:
             create_pass = check_service_type_record(env, service_type, created_record_name, expected_national_ranking)
+        if st_id == updated_record_id:
             update_pass = check_service_type_record(env, service_type, updated_record_name, expected_national_ranking)
     all_pass = delete_pass and update_pass and create_pass
     return all_pass
