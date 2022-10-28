@@ -34,4 +34,4 @@ values (20002,'Integration Test Delete');
 --for symptomgroupdiscriminators integration testing
 -- create record to symptomdiscriminators job to delete later
 insert into pathwaysdos.symptomgroupsymptomdiscriminators (symptomgroupid,symptomdiscriminatorid)
-values (1121,4017)
+values (1121,4017);
