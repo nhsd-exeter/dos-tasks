@@ -19,7 +19,7 @@ def test_check_symptom_discriminator_record_false_description():
 
 def test_create_symptom_discriminator_query():
     symptom_discriminator_ids = (20000,2001,20002)
-    expected_query_string = "select id, description from pathwaysdos.from symptomdiscriminators where id = %s or id = %s or id = %s;"
+    expected_query_string = "select id, description from pathwaysdos.symptomdiscriminators where id = %s or id = %s or id = %s;"
     expected_data = symptom_discriminator_ids
     query, data = symptomdiscriminator.create_symptom_discriminator_query(symptom_discriminator_ids)
     assert query == expected_query_string

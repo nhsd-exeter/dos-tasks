@@ -30,7 +30,7 @@ def get_symptom_discriminator_data(env, db_connection):
 
 def create_symptom_discriminator_query(symptom_discriminator_ids):
     query = (
-        """select id, description from pathwaysdos.from symptomdiscriminators where id = %s or id = %s or id = %s;"""
+        """select id, description from pathwaysdos.symptomdiscriminators where id = %s or id = %s or id = %s;"""
     )
     data = symptom_discriminator_ids
     return query, data
