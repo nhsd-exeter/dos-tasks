@@ -70,6 +70,6 @@ def check_service_type_record(env, service_type, expected_name, expected_nationa
     else:
         logger.log_for_audit(
                 env,
-                "Record with id:{0}, name:{1}, nationalranking:{2} not correct".format(service_type["id"],service_type["name"],service_type["nationalranking"]),
+                "Record with id:{0}, name:{1}, nationalranking:{2}, capacityreset:{3}, capacitymodel:{4}, searchcapacitystatus:{5} not correct".format(service_type["id"],service_type["name"],service_type["nationalranking"],service_type["capacityreset"],service_type["capacitymodel"],service_type["searchcapacitystatus"]),
             )
         return False
