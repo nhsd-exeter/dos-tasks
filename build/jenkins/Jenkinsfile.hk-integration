@@ -1,16 +1,6 @@
 pipeline {
     agent any
     parameters {
-        string(
-            description: 'Housekeeping task to run',
-            name: 'Task',
-            defaultValue: 'all'
-        )
-        string(
-            description: 'Test database/environment - integration',
-            name: 'Test',
-            defaultValue: 'integration'
-        )
         booleanParam(
             description: 'Debug mode - true will not tear down hk lambdas or database',
             name: 'Debug',
@@ -22,14 +12,13 @@ pipeline {
         buildDiscarder(logRotator(daysToKeepStr: '7', numToKeepStr: '13'))
         disableConcurrentBuilds()
         parallelsAlwaysFailFast()
-        timeout(time: 60, unit: 'MINUTES')
+        timeout(time: 90, unit: 'MINUTES')
     }
     environment {
         BUILD_DATE = sh(returnStdout: true, script: "date -u +'%Y-%m-%dT%H:%M:%S%z'").trim()
         PROFILE = 'integration'
         ENVIRONMENT = 'integration'
-        TASK = "${params.Task}"
-        TEST_TASK = "${params.Test}"
+        TASK = 'all'
         DB_BUILD_JOB_NAME = 'dos-functional-pipeline-tasks-int-deploy'
         DB_DROP_JOB_NAME = 'dos-functional-pipeline-delete'
         SINGLE_HK_TEST_JOB_NAME = 'uec-dos-tasks-hk-integration-test'
@@ -40,11 +29,9 @@ pipeline {
         DB_SUFFIX = 'tasks'
         PIPELINE_DATABASE = "${DB_PREFIX}_${ENVIRONMENT}"
         BUCKET = "uec-dos-tasks-${PROFILE}-housekeeping-bucket/${ENVIRONMENT}"
-        MAX_ATTEMPTS = 5
         DB_HOST = 'uec-core-dos-pipeline-primary.dos-db-rds'
         SLACK_CHANNEL = 'dos-tasks-pipeline-notifications-nonprod'
-        // TODO eventually develop
-        PATHWAYSDOS_V4_BRANCH = 'task%2FDPTS-811-Poc-int-test'
+        PATHWAYSDOS_V4_BRANCH = 'develop'
         BRANCH_NAME = sh(returnStdout: true, script: "make git-branch-format BRANCH_NAME=${GIT_BRANCH}").trim()
     }
     triggers { pollSCM("* * * * *") }
@@ -55,11 +42,10 @@ pipeline {
             }
         }
         stage('Precautionary teardown hk infrastructure') {
-            when { expression { params.Task != "none" } }
             steps {
                 script {
                     echo 'Precautionary cleardown hk lambdas and integration test infrastructure'
-                    sh "make destroy PROFILE=${PROFILE} TASK=${params.Task}"
+                    sh "make destroy PROFILE=${PROFILE} TASK=${TASK}"
                 }
             }
         }
@@ -77,15 +63,13 @@ pipeline {
             }
         }
         stage("Build and push hk lambdas") {
-            when { expression { params.Task != "none" } }
             steps {
-                script { sh "make unit-test TASK=${params.Task}" }
-                script { sh "make build TASK=${params.Task}" }
-                script { sh "make push TASK=${params.Task}" }
+                script { sh "make unit-test TASK=${TASK}" }
+                script { sh "make build TASK=${TASK}" }
+                script { sh "make push TASK=${TASK}" }
             }
         }
         stage('Check key infrastructure exists') {
-            when { expression { params.Task != "none" } }
             steps {
                 script {
                     echo 'Checking infrastructure defined as STACKS'
@@ -96,18 +80,16 @@ pipeline {
             }
         }
         stage('Provision hk and integration test lambdas') {
-            when { expression { params.Task != "none" } }
             steps {
                 script {
                     echo 'Provision hk and integration test lambdas'
                     catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
-                        sh "make provision PROFILE=${PROFILE} TASK=${params.Task}"
+                        sh "make provision PROFILE=${PROFILE} TASK=${TASK}"
                     }
                 }
             }
         }
         stage('Set up data conditions') {
-            when { expression { params.Task != "none" } }
             steps {
                 script {
                     echo 'Run set up test data conditions'
@@ -140,13 +122,12 @@ pipeline {
             }
         }
         stage('Check and remove older versions') {
-            when { expression { params.Task != "none" } }
             steps {
                 script { echo 'Check and remove' }
             }
         }
         stage('Clear S3 archive') {
-            when { expression { params.Debug == false  && params.Task != "none" } }
+            when { expression { params.Debug == false } }
             steps {
                 script {
                     echo 'Remove test files from archive'
@@ -155,16 +136,16 @@ pipeline {
             }
         }
         stage('Teardown hk infrastructure') {
-            when { expression { params.Debug == false  && params.Task != "none" } }
+            when { expression { params.Debug == false } }
             steps {
                 script {
                     echo 'Teardown hk lambdas and integration test infrastructure'
-                    sh "make destroy PROFILE=${PROFILE} TASK=${params.Task}"
+                    sh "make destroy PROFILE=${PROFILE} TASK=${TASK}"
                 }
             }
         }
         stage('Delete namespace and drop database') {
-            when { expression { params.Debug == false  && params.Task != "none" } }
+            when { expression { params.Debug == false  } }
             steps {
                 echo "Running pathwaysdos_v4 pipeline ${DB_DROP_JOB_NAME}"
                 build job: "${DB_DROP_JOB_NAME}/${PATHWAYSDOS_V4_BRANCH}",\
