@@ -12,12 +12,12 @@ def request(event, context):
     env = os.getenv("DB_NAME")
     event_id = event["id"]
     event_time = event["time"]
-    logger.log_for_audit(env, "operation:start")
-    logger.log_for_audit(env, "Event id: {0}, event time: {1} , environment: {2}".format(event_id, event_time, env))
+    logger.log_for_audit(env, "operation=start")
+    logger.log_for_audit(env, "Event id={0}, event time={1} , environment={2}".format(event_id, event_time, env))
     db_connection = database.connect_to_database(env)
     remove_old_changes(env, db_connection)
     cron_common.cron_cleanup(env, db_connection)
-    logger.log_for_audit(env, "operation:end")
+    logger.log_for_audit(env, "operation=end")
     return task_description + " execution successful"
 
 
@@ -39,7 +39,7 @@ def log_removed_changes(env, db_connection, delete_count_result):
     end_at = datetime.utcnow()
     logger.log_for_audit(
         env,
-        "operation:RemoveOldChanges | records deleted:{0} | deleted at:{1} ".format(
+        "operation=RemoveOldChanges | records deleted={0} | deleted at={1} ".format(
             deleted_count, end_at.strftime(format_data)
         ),
     )

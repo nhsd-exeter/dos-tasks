@@ -20,7 +20,7 @@ def request(event, context):
     filename = event["filename"]
     bucket = event["bucket"]
     db_connection = None
-    logger.log_for_audit(event["env"], "action:task started")
+    logger.log_for_audit(event["env"], "action=task started")
     try:
         summary_count_dict = common.initialise_summary_count()
         db_connection = database.connect_to_database(env)
@@ -34,7 +34,7 @@ def request(event, context):
             # process_extracted_data(db_connection, csv_data, summary_count_dict, event)
             message.send_success_slack_message(event, start, summary_count_dict)
         common.report_summary_counts(summary_count_dict, env)
-        logger.log_for_audit(event["env"], "action:task complete")
+        logger.log_for_audit(event["env"], "action=task complete")
     except Exception as e:
         logger.log_for_error(env, "Problem {}".format(e))
         message.send_failure_slack_message(event, start)
@@ -52,7 +52,7 @@ def generate_db_query(row_values, env):
     elif row_values["action"] in ("DELETE"):
         return delete_query(row_values)
     else:
-        logger.log_for_error(env, "action:validation | {} not in approved list of actions".format(row_values["action"]))
+        logger.log_for_error(env, "action=validation | {} not in approved list of actions".format(row_values["action"]))
         raise psycopg2.DatabaseError("Database Action {} is invalid".format(row_values["action"]))
 
 
@@ -139,7 +139,7 @@ def extract_query_data_from_csv(lines, env):
             data_dict["capacitymodel"] = str(v_capacitymodel)
             data_dict["capacityreset"] = str(v_capacityreset)
         except Exception as ex:
-            logger.log_for_audit(env, "action:validation | CSV data invalid | " + ex)
+            logger.log_for_audit(env, "action=validation | CSV data invalid | " + ex)
         query_data[str(row_number)] = data_dict
     return query_data
 

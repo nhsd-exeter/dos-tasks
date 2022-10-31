@@ -36,15 +36,15 @@ def process_event(event, start):
         if task == "stt":
             if not filename.endswith(".zip"):
                 log_for_audit(
-                    env, "Incorrect file extension, found: {}, expected: '.zip'".format(filename.split(".")[1])
+                    env, "Incorrect file extension, found={}, expected='.zip'".format(filename.split(".")[1])
                 )
-                raise IOError("Incorrect file extension, found: {}, expected: '.zip'".format(filename.split(".")[1]))
+                raise IOError("Incorrect file extension, found={}, expected='.zip'".format(filename.split(".")[1]))
         else:
             if not filename.endswith(".csv"):
                 log_for_audit(
-                    env, "Incorrect file extension, found: {}, expected: '.csv'".format(filename.split(".")[1])
+                    env, "Incorrect file extension, found={}, expected='.csv'".format(filename.split(".")[1])
                 )
-                raise IOError("Incorrect file extension, found: {}, expected: '.csv'".format(filename.split(".")[1]))
+                raise IOError("Incorrect file extension, found={}, expected='.csv'".format(filename.split(".")[1]))
     except Exception as e:
         print("Error Processing Event: {}".format(e))
         send_failure_slack_message({"filename": filename, "env": env, "bucket": bucket}, start)

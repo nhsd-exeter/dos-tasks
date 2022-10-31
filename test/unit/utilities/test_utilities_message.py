@@ -32,7 +32,7 @@ def test_send_success_slack_message(mock_datetime, mock_post):
                             "text": """Status: Success :woohoo:
 Project: *uec-dos-tasks* | Environment: *mock_env* | Profile: *local*
 Task: *utilities* | File: *mock_filename* | Bucket: *mock_bucket*
-Summary: *blank:4, create:3, delete:2, error:1, update:0*
+Summary: *blank=4, create=3, delete=2, error=1, update=0*
 Start Time: *{start}* | Finish Time: *{finish}* | Duration: *{duration}*""".format(
                                 start=start.strftime("%Y-%m-%d %H:%M:%S"),
                                 finish=finish.strftime("%Y-%m-%d %H:%M:%S"),
@@ -69,7 +69,7 @@ def test_send_failure_slack_message(mock_datetime, mock_post):
                             "text": """Status: Failure :fire:
 Project: *uec-dos-tasks* | Environment: *mock_env* | Profile: *local*
 Task: *utilities* | File: *mock_filename* | Bucket: *mock_bucket*
-Summary: *blank:0, create:0, delete:0, error:0, update:0*
+Summary: *blank=0, create=0, delete=0, error=0, update=0*
 Start Time: *{start}* | Finish Time: *{finish}* | Duration: *{duration}*""".format(
                                 start=start.strftime("%Y-%m-%d %H:%M:%S"),
                                 finish=finish.strftime("%Y-%m-%d %H:%M:%S"),

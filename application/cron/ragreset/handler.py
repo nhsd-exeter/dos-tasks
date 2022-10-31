@@ -19,12 +19,12 @@ def request(event, context):
     env = os.getenv("DB_NAME")
     event_id = event["id"]
     event_time = event["time"]
-    logger.log_for_audit(env, "operation:start")
-    logger.log_for_audit(env, "Event id: {0}, event time: {1} , environment: {2}".format(event_id, event_time, env))
+    logger.log_for_audit(env, "operation=start")
+    logger.log_for_audit(env, "Event id={0}, event time={1} , environment={2}".format(event_id, event_time, env))
     db_connection = database.connect_to_database(env)
     reset_rag_status(env, db_connection)
     cron_common.cron_cleanup(env, db_connection)
-    logger.log_for_audit(env, "operation:end")
+    logger.log_for_audit(env, "operation=end")
     return task_description + " execution successful"
 
 
@@ -116,7 +116,7 @@ def log_updated_services(env, db_connection, updated_services):
     end_at = datetime.utcnow()
     logger.log_for_audit(
         env,
-        "operation:AutoUpdateCapacityStatus | records updated:{0} | updated at:{1}".format(
+        "operation=AutoUpdateCapacityStatus | records updated={0} | updated at={1}".format(
             str(len(updated_services)), end_at.strftime(format_data)
         ),
     )

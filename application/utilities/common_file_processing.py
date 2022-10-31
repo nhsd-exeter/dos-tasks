@@ -15,18 +15,18 @@ def check_ids_csv_values(line, env):
     try:
         int(line[0])
     except ValueError:
-        log_for_audit(env, "action:validation | Problem:Id {} must be a integer".format(line[0]))
+        log_for_audit(env, "action=validation | Problem=Id {} must be a integer".format(line[0]))
         valid_values = False
     if not str(line[0]):
-        log_for_audit(env, "action:validation | Problem:Id {} can not be null or empty".format(line[0]))
+        log_for_audit(env, "action=validation | Problem=Id {} can not be null or empty".format(line[0]))
         valid_values = False
     try:
         int(line[1])
     except ValueError:
-        log_for_audit(env, "action:validation | Problem:Id {} must be a integer".format(line[1]))
+        log_for_audit(env, "action=validation | Problem=Id {} must be a integer".format(line[1]))
         valid_values = False
     if not str(line[1]):
-        log_for_audit(env, "action:validation | Problem:Id {} can not be null or empty".format(line[1]))
+        log_for_audit(env, "action=validation | Problem=Id {} can not be null or empty".format(line[1]))
         valid_values = False
     return valid_values
 

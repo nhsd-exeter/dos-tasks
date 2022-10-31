@@ -18,12 +18,12 @@ def request(event, context):
     bucket = event["bucket"]
     env = event["env"]
     db_connection = None
-    logger.log_for_audit(event["env"], "action:task started")
+    logger.log_for_audit(event["env"], "action=task started")
     scenario_count = initialise_count()
     try:
         db_connection = database.connect_to_database(env)
         bundle = common.retrieve_compressed_file_from_bucket(bucket, filename, event, start)
-        logger.log_for_audit(env, "action:bundle {} downloaded".format(filename))
+        logger.log_for_audit(env, "action=bundle {} downloaded".format(filename))
         bundle_id = add_bundle(env, db_connection, filename)
         processed = process_zipfile(env, db_connection, bundle, filename, bundle_id, scenario_count)
         common.report_summary_counts(scenario_count, env)
@@ -54,7 +54,7 @@ def process_zipfile(env, db_connection, bundle, filename, bundle_id, scenario_co
         bundle_zip = zipfile.ZipFile(io.BytesIO(bundle))
         for info in bundle_zip.infolist():
             name = info.filename
-            logger.log_for_audit(env, "action:processing scenario {}".format(name))
+            logger.log_for_audit(env, "action=processing scenario {}".format(name))
             scenario_file = bundle_zip.read(name).decode("utf-8")
             if file_check(info):
                 try:
@@ -63,7 +63,7 @@ def process_zipfile(env, db_connection, bundle, filename, bundle_id, scenario_co
                     if valid_template is True:
                         insert_template_scenario(env, db_connection, template_scenario, scenario_count)
                     else:
-                        logger.log_for_audit(env, "action:invalid scenario {}".format(name))
+                        logger.log_for_audit(env, "action=invalid scenario {}".format(name))
                         scenario_count[rejected_subtotal] = scenario_count[rejected_subtotal] + 1
                 except Exception as e:
                     processed = False
@@ -198,9 +198,9 @@ def add_bundle(env, db_connection, zip_file_name):
         result_set = database.execute_resultset_query(env, db_connection, query, data)
         if result_set is not None:
             bundle_id = result_set[0]["id"]
-            logger.log_for_audit(env, "action:bundle {} inserted".format(bundle_id))
+            logger.log_for_audit(env, "action=bundle {} inserted".format(bundle_id))
     else:
-        logger.log_for_audit(env, "action:bundle {} found".format(bundle_id))
+        logger.log_for_audit(env, "action=bundle {} found".format(bundle_id))
     return bundle_id
 
 

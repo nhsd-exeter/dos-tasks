@@ -11,16 +11,16 @@ profile = os.environ.get("PROFILE")
 def close_connection(env, db_connection):
     # Close database connection
     if db_connection is not None:
-        logger.log_for_audit(env, "action:close DB connection")
+        logger.log_for_audit(env, "action=close DB connection")
         db_connection.close()
     else:
-        logger.log_for_error(env, "action:no DB connection to close")
+        logger.log_for_error(env, "action=no DB connection to close")
 
 
 # TODO move inside class later
 def connect_to_database(env):
     db = DB()
-    logger.log_for_audit(env, "action:establish database connection")
+    logger.log_for_audit(env, "action=establish database connection")
     if not db.db_set_connection_details(env):
         logger.log_for_error(env, "Error DB Parameter(s) not found in secrets store.")
         raise ValueError("DB Parameter(s) not found in secrets store")
@@ -61,7 +61,7 @@ def execute_db_query(db_connection, query, data, line, values, summary_count_dic
             log = log + x + ":" + str(y) + " | "
         logger.log_for_audit(
             env,
-            "action:Process row | {} | line number:{}".format(log[:-2], line),
+            "action=Process row | {} | line number={}".format(log[:-2], line),
         ),
     except Exception as e:
         logger.log_for_error(env, "Line {} in transaction failed. Rolling back".format(line))

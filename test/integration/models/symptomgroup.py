@@ -71,6 +71,6 @@ def check_symptom_group_record(env, symptom_group, expected_name, expected_zcode
     else:
         logger.log_for_audit(
                 env,
-                "Record with id:{0}, name:{1}, zcodeexists:{2} not correct".format(symptom_group["id"],symptom_group["name"],symptom_group["zcodeexists"]),
+                "Record with id={0}, name={1}, zcodeexists={2} not correct".format(symptom_group["id"],symptom_group["name"],symptom_group["zcodeexists"]),
             )
         return False
