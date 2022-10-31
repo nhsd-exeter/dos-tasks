@@ -449,7 +449,7 @@ def test_get_scenario_insert_query( mock_disposition, mock_disposition_group, mo
     template_scenario = handler.process_scenario_file(env, sample_scenario_file_name,convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
     template_scenario.triage_report = expected_triage_report
     query, data = handler.get_scenario_insert_query(template_scenario)
-    assert query == """insert into pathwaysdos.scenarios(bundleid, scenarioid, symptomgroupid, dispositionid,
+    assert query == """insert into pathwaysdos.scenarios(scenariobundleid, scenarioid, symptomgroupid, dispositionid,
 dispositiongroupid, symptomdiscriminatorid, ageid, genderid, triagereport, createdtime
 )
     values (%s,%s,%s,%s,%s,%s,%s,%s,%s,now()
@@ -507,7 +507,7 @@ def test_get_disposition_group_id(mock_execute, mock_query, mock_db_connect):
 def test_get_existing_scenario_check_query(mock_db_connect):
     template_scenario = handler.process_scenario_file(env, sample_scenario_file_name,convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
     query, data = handler.get_existing_scenario_check_query(template_scenario)
-    assert query == """select s.id from pathwaysdos.scenarios s where s.bundleid = %s and
+    assert query == """select s.id from pathwaysdos.scenarios s where s.scenariobundleid = %s and
     s.scenarioid = %s"""
     assert data == (bundle_id,expected_scenario_id,)
 

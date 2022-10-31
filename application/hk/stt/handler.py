@@ -125,7 +125,7 @@ def is_new_scenario(env, db_connection, template_scenario):
 
 
 def get_existing_scenario_check_query(template_scenario):
-    query = """select s.id from pathwaysdos.scenarios s where s.bundleid = %s and
+    query = """select s.id from pathwaysdos.scenarios s where s.scenariobundleid = %s and
     s.scenarioid = %s"""
     data = (
         template_scenario.bundle_id,
@@ -135,7 +135,7 @@ def get_existing_scenario_check_query(template_scenario):
 
 
 def get_scenario_insert_query(template_scenario):
-    query = """insert into pathwaysdos.scenarios(bundleid, scenarioid, symptomgroupid, dispositionid,
+    query = """insert into pathwaysdos.scenarios(scenariobundleid, scenarioid, symptomgroupid, dispositionid,
 dispositiongroupid, symptomdiscriminatorid, ageid, genderid, triagereport, createdtime
 )
     values (%s,%s,%s,%s,%s,%s,%s,%s,%s,now()
