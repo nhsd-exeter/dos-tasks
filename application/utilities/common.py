@@ -36,7 +36,7 @@ def valid_action(record_exists, row_data, env, invalid_action_type="false"):
     if not valid_action:
         log = ""
         for x, y in row_data.items():
-            log = log + x + ":" + str(y) + ", "
+            log = log + x + "=" + str(y) + ", "
         log_for_error(
             env,
             "validation=Invalid action for line {}".format(
@@ -54,7 +54,7 @@ def archive_file(bucket, filename, event, start):
     s3_class.delete_object(bucket, filename, event, start)
     log_for_audit(
         event["env"],
-        "action=archive file:{} | bucket={}/archive/{}".format(
+        "action=archive | file={} | bucket={}/archive/{}".format(
             filename, filename.split("/")[0], filename.split("/")[1]
         ),
     )
