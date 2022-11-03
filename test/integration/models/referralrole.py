@@ -11,8 +11,6 @@ updated_record_id = 2001
 updated_record_name = "Integration Test Update"
 created_record_id = 2000
 created_record_name = "Integration Test Create"
-expected_zcode_exists = False
-
 
 def get_referral_roles_data(env, db_connection):
     """Returns referralroles under test"""

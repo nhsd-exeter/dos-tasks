@@ -8,7 +8,7 @@ from .. import handler
 
 file_path = "application.hk.integration.handler"
 env = 'integration'
-valid_tasks = ("data","symptomgroups","referralroles")
+valid_tasks = ("data","symptomgroups","referralroles", "servicetypes", "symptomdiscriminators", "symptomgroupdiscriminators")
 
 @patch(f"{file_path}.logger.log_for_audit")
 def test_is_valid_task_invalid_lc(mock_logger):
@@ -36,7 +36,7 @@ def test_valid_task_list():
 # This may be hard to maintain as nothing in this list can be in its actual position
 # add any new task as penultimate in list
 def test_invalid_task_list():
-    temp_valid_tasks = ("symptomgroups","referralroles","data")
+    temp_valid_tasks = ("symptomgroups","referralroles","servicetypes","symptomdiscriminators","symptomgroupdiscriminators","data")
     assert len(handler.valid_tasks) == len(temp_valid_tasks)
     for i in range(len(handler.valid_tasks)):
         assert handler.valid_tasks[i] != temp_valid_tasks[i]
@@ -119,6 +119,75 @@ def test_run_data_checks_for_invalid_hk_task(mock_db_connect, mock_audit_logger,
     assert mock_audit_logger.call_count == 3
     assert mock_get_data.call_count == 0
 
+@patch(f"{file_path}.servicetype.get_service_types_data", return_value = ({'id':2000,'name':'Wrong name','nationalranking':8,'searchcapacitystatus':True, 'capacitymodel':'n/a', 'capacityreset':'interval'},))
+@patch(f"{file_path}.logger.log_for_audit")
+@patch("psycopg2.connect")
+def test_run_data_checks_for_servicetypes_created_record(mock_db_connect, mock_audit_logger, mock_get_data):
+    task = 'servicetypes'
+    result = handler.run_data_checks_for_hk_task(env, task, mock_db_connect)
+    assert result == False
+    assert mock_audit_logger.call_count == 3
+    assert mock_get_data.call_count == 1
+
+@patch(f"{file_path}.servicetype.get_service_types_data", return_value = ({'id':2001,'name':'Wrong name','nationalranking':8,'searchcapacitystatus':True, 'capacitymodel':'n/a', 'capacityreset':'interval'},))
+@patch(f"{file_path}.logger.log_for_audit")
+@patch("psycopg2.connect")
+def test_run_data_checks_for_servicetypes_deleted_record(mock_db_connect, mock_audit_logger, mock_get_data):
+    task = 'servicetypes'
+    result = handler.run_data_checks_for_hk_task(env, task, mock_db_connect)
+    assert result == False
+    assert mock_audit_logger.call_count == 3
+    assert mock_get_data.call_count == 1
+
+@patch(f"{file_path}.servicetype.get_service_types_data", return_value = ({'id':2002,'name':'Wrong name','nationalranking':8,'searchcapacitystatus':True, 'capacitymodel':'n/a', 'capacityreset':'interval'},))
+@patch(f"{file_path}.logger.log_for_audit")
+@patch("psycopg2.connect")
+def test_run_data_checks_for_servicetypes(mock_db_connect, mock_audit_logger, mock_get_data):
+    task = 'servicetypes'
+    handler.run_data_checks_for_hk_task(env, task, mock_db_connect)
+    assert mock_audit_logger.call_count == 3
+    assert mock_get_data.call_count == 1
+
+@patch(f"{file_path}.symptomdiscriminator.get_symptom_discriminator_data", return_value = ({'id':20000,'description':'Wrong description'},))
+@patch(f"{file_path}.logger.log_for_audit")
+@patch("psycopg2.connect")
+def test_run_data_checks_for_symptomdiscriminators_created_record(mock_db_connect, mock_audit_logger, mock_get_data):
+    task = 'symptomdiscriminators'
+    result = handler.run_data_checks_for_hk_task(env, task, mock_db_connect)
+    assert result == False
+    assert mock_audit_logger.call_count == 3
+    assert mock_get_data.call_count == 1
+
+@patch(f"{file_path}.symptomdiscriminator.get_symptom_discriminator_data", return_value = ({'id':20001,'description':'Wrong description'},))
+@patch(f"{file_path}.logger.log_for_audit")
+@patch("psycopg2.connect")
+def test_run_data_checks_for_symptomdiscriminators_deleted_record(mock_db_connect, mock_audit_logger, mock_get_data):
+    task = 'symptomdiscriminators'
+    result = handler.run_data_checks_for_hk_task(env, task, mock_db_connect)
+    assert result == False
+    assert mock_audit_logger.call_count == 3
+    assert mock_get_data.call_count == 1
+
+@patch(f"{file_path}.symptomdiscriminator.get_symptom_discriminator_data", return_value = ({'id':20002,'description':'Wrong description'},))
+@patch(f"{file_path}.logger.log_for_audit")
+@patch("psycopg2.connect")
+def test_run_data_checks_for_symptomdiscriminators(mock_db_connect, mock_audit_logger, mock_get_data):
+    task = 'symptomdiscriminators'
+    handler.run_data_checks_for_hk_task(env, task, mock_db_connect)
+    assert mock_audit_logger.call_count == 3
+    assert mock_get_data.call_count == 1
+def generate_event_payload(task):
+    """Utility function to generate dummy event data"""
+    return {"task": task,}
+
+@patch(f"{file_path}.symptomgroupsymptomdiscriminator.get_symptom_group_symptom_discriminators_data", return_value = ({'symptomgroupid':20002,'symptomdiscriminatorid':1999},))
+@patch(f"{file_path}.logger.log_for_audit")
+@patch("psycopg2.connect")
+def test_run_data_checks_for_symptomdiscriminators(mock_db_connect, mock_audit_logger, mock_get_data):
+    task = 'symptomgroupdiscriminators'
+    handler.run_data_checks_for_hk_task(env, task, mock_db_connect)
+    assert mock_audit_logger.call_count == 2
+    assert mock_get_data.call_count == 1
 def generate_event_payload(task):
     """Utility function to generate dummy event data"""
     return {"task": task,}
