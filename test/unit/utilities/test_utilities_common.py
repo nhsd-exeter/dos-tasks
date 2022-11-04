@@ -477,7 +477,7 @@ def test_slack_summary_count_blank_lines_negative():
     summary_count = {}
     summary_count={"blank": -1, "create": 2,"delete": 8, "error": 1,"update": 4}
     report=common.slack_summary_counts(summary_count)
-    assert report ==  "blank:0, create:2, delete:8, error:1, update:4"
+    assert report ==  "blank=0, create=2, delete=8, error=1, update=4"
 
 def test_slack_summary_count():
     """Test slack report log output of null summary count """

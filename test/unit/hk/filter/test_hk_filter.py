@@ -12,7 +12,7 @@ start = datetime.utcnow()
 def test_incorrect_file_extension_returns_error(mock_send_failure_slack_message):
     mock_event = {'Records': [{'s3': {'bucket': {'name': 'uec-dos-tasks-mock-bucket'}, 'object': {'key': 'unittest/DPTS-001_referralroles.zip'}}}]}
     with pytest.raises(IOError) as assertion:
-        error_message = "Incorrect file extension, found: zip, expected: '.csv'"
+        error_message = "Incorrect file extension, found=zip, expected='.csv'"
         handler.process_event(mock_event, start)
     assert str(assertion.value) == error_message
     mock_send_failure_slack_message.assert_called_once()
@@ -21,7 +21,7 @@ def test_incorrect_file_extension_returns_error(mock_send_failure_slack_message)
 def test_incorrect_stt_file_extension_returns_error(mock_send_failure_slack_message):
     mock_event = {'Records': [{'s3': {'bucket': {'name': 'uec-dos-tasks-mock-bucket'}, 'object': {'key': 'unittest/DPTS-001_stt.csv'}}}]}
     with pytest.raises(IOError) as assertion:
-        error_message = "Incorrect file extension, found: csv, expected: '.zip'"
+        error_message = "Incorrect file extension, found=csv, expected='.zip'"
         handler.process_event(mock_event, start)
     assert str(assertion.value) == error_message
     mock_send_failure_slack_message.assert_called_once()

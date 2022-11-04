@@ -15,7 +15,7 @@ def request(event, context):
     # where task could be data or name of hk job eg symptomgroup
     task = event["task"]
     db_connection = None
-    logger.log_for_audit(env, "action:task started")
+    logger.log_for_audit(env, "action=task started")
     if is_valid_task(env, task):
         try:
             db_connection = database.connect_to_database(env)
@@ -23,14 +23,14 @@ def request(event, context):
                 success = insert_test_data(env, db_connection)
             else:
                 success = run_data_checks_for_hk_task(env, task, db_connection)
-                logger.log_for_audit(env, "action:integration test complete for {}".format(task))
+                logger.log_for_audit(env, "action=integration test complete for {}".format(task))
         except Exception as e:
             logger.log_for_error(env, "Problem {}".format(e))
         finally:
             database.close_connection(event, db_connection)
 
     status_code = 200 if success else 500
-    logger.log_for_audit(env, "status code: {}".format(status_code))
+    logger.log_for_audit(env, "status code={}".format(status_code))
 
     return {"success":str(success)}
 
@@ -83,5 +83,5 @@ def is_valid_task(env, task):
             valid_task = True
             break
     if valid_task is False:
-        logger.log_for_audit(env, "action:unrecognised task {} ".format(task))
+        logger.log_for_audit(env, "action=unrecognised task {} ".format(task))
     return valid_task

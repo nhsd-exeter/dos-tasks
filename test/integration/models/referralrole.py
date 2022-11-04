@@ -62,6 +62,6 @@ def check_referral_role_record(env, referral_role, expected_name):
     else:
         logger.log_for_audit(
                 env,
-                "Record with id:{0}, name:{1} not correct".format(referral_role["id"],referral_role["name"]),
+                "Record with id={0}, name={1} not correct".format(referral_role["id"],referral_role["name"]),
             )
         return False

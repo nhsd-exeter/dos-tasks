@@ -17,7 +17,7 @@ def check_csv_format(csv_row, expected_col_count, env, count):
     else:
         log_for_audit(
             env,
-            "action:validation | Incorrect line format | line:{0} | expected:{1} | actual:{2}".format(
+            "action=validation | Incorrect line format | line={0} | expected={1} | actual={2}".format(
                 count, expected_col_count, len(csv_row)
             ),
         )
@@ -36,10 +36,10 @@ def valid_action(record_exists, row_data, env, invalid_action_type="false"):
     if not valid_action:
         log = ""
         for x, y in row_data.items():
-            log = log + x + ":" + str(y) + ", "
+            log = log + x + "=" + str(y) + ", "
         log_for_error(
             env,
-            "validation:Invalid action for line {}".format(
+            "validation=Invalid action for line {}".format(
                 log[:-2],
             ),
         )
@@ -54,7 +54,7 @@ def archive_file(bucket, filename, event, start):
     s3_class.delete_object(bucket, filename, event, start)
     log_for_audit(
         event["env"],
-        "action:archive file:{} | bucket:{}/archive/{}".format(
+        "action=archive | file={} | bucket={}/archive/{}".format(
             filename, filename.split("/")[0], filename.split("/")[1]
         ),
     )
@@ -62,13 +62,13 @@ def archive_file(bucket, filename, event, start):
 
 
 def retrieve_file_from_bucket(bucket, filename, event, start):
-    log_for_audit(event["env"], "action:retrieve file | bucket:{} | file:{}".format(bucket, filename))
+    log_for_audit(event["env"], "action=retrieve file | bucket={} | file={}".format(bucket, filename))
     s3_bucket = utilities.s3.S3()
     return s3_bucket.get_object(bucket, filename, event, start)
 
 
 def retrieve_compressed_file_from_bucket(bucket, filename, event, start):
-    log_for_audit(event["env"], "action:retrieve file | bucket:{} | file:{}".format(bucket, filename))
+    log_for_audit(event["env"], "action=retrieve file | bucket={} | file={}".format(bucket, filename))
     s3_bucket = utilities.s3.S3()
     return s3_bucket.get_compressed_object(bucket, filename, event, start)
 
@@ -79,13 +79,13 @@ def check_csv_values(line, env):
     try:
         int(line[0])
     except ValueError:
-        log_for_audit(env, "action:validation | Problem:Id {} must be a integer".format(line[0]))
+        log_for_audit(env, "action=validation | Problem=Id {} must be a integer".format(line[0]))
         valid_values = False
     if not str(line[0]):
-        log_for_audit(env, "action:validation | Problem:Id {} can not be null or empty".format(line[0]))
+        log_for_audit(env, "action=validation | Problem=Id {} can not be null or empty".format(line[0]))
         valid_values = False
     if not line[1]:
-        log_for_audit(env, "action:validation | Problem:Name/Description {} can not be null or empty".format(line[1]))
+        log_for_audit(env, "action=validation | Problem=Name/Description {} can not be null or empty".format(line[1]))
         valid_values = False
     return valid_values
 
@@ -143,7 +143,7 @@ def slack_summary_counts(summary_count_dict):
         report_text = ""
         for key in summary_count_dict.keys():
             count = summary_count_dict[key] if summary_count_dict[key] >= 0 else 0
-            report_text = report_text + str(key).lower() + ":" + str(count) + ", "
+            report_text = report_text + str(key).lower() + "=" + str(count) + ", "
         report = report_text[: len(report_text) - 2]
     else:
         report = ""
