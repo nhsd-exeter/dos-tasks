@@ -8,7 +8,7 @@ from .. import handler
 
 file_path = "application.hk.integration.handler"
 env = 'integration'
-valid_tasks = ("data","symptomgroups","referralroles", "servicetypes", "symptomdiscriminators", "symptomgroupdiscriminators")
+valid_tasks = ("data","symptomgroups","referralroles", "servicetypes", "symptomdiscriminators", "symptomgroupdiscriminators", "symptomdiscriminatorsynonyms")
 
 @patch(f"{file_path}.logger.log_for_audit")
 def test_is_valid_task_invalid_lc(mock_logger):
@@ -36,7 +36,7 @@ def test_valid_task_list():
 # This may be hard to maintain as nothing in this list can be in its actual position
 # add any new task as penultimate in list
 def test_invalid_task_list():
-    temp_valid_tasks = ("symptomgroups","referralroles","servicetypes","symptomdiscriminators","symptomgroupdiscriminators","data")
+    temp_valid_tasks = ("symptomgroups","referralroles","servicetypes","symptomdiscriminators","symptomgroupdiscriminators","symptomdiscriminatorsynonyms","data")
     assert len(handler.valid_tasks) == len(temp_valid_tasks)
     for i in range(len(handler.valid_tasks)):
         assert handler.valid_tasks[i] != temp_valid_tasks[i]
@@ -148,15 +148,6 @@ def test_run_data_checks_for_servicetypes(mock_db_connect, mock_audit_logger, mo
     assert mock_audit_logger.call_count == 3
     assert mock_get_data.call_count == 1
 
-@patch(f"{file_path}.symptomdiscriminator.get_symptom_discriminator_data", return_value = ({'id':20000,'description':'Wrong description'},))
-@patch(f"{file_path}.logger.log_for_audit")
-@patch("psycopg2.connect")
-def test_run_data_checks_for_symptomdiscriminators_created_record(mock_db_connect, mock_audit_logger, mock_get_data):
-    task = 'symptomdiscriminators'
-    result = handler.run_data_checks_for_hk_task(env, task, mock_db_connect)
-    assert result == False
-    assert mock_audit_logger.call_count == 3
-    assert mock_get_data.call_count == 1
 
 @patch(f"{file_path}.symptomdiscriminator.get_symptom_discriminator_data", return_value = ({'id':20001,'description':'Wrong description'},))
 @patch(f"{file_path}.logger.log_for_audit")
@@ -188,6 +179,30 @@ def test_run_data_checks_for_symptomdiscriminators(mock_db_connect, mock_audit_l
     handler.run_data_checks_for_hk_task(env, task, mock_db_connect)
     assert mock_audit_logger.call_count == 2
     assert mock_get_data.call_count == 1
+
+
+
+@patch(f"{file_path}.symptomdiscriminatorsynonyms.get_symptom_discriminator_synonyms_data", return_value = ({'symptomdiscriminatorid':11116,'name':'Integration test create'},))
+@patch(f"{file_path}.logger.log_for_audit")
+@patch("psycopg2.connect")
+def test_run_data_checks_for_symptomdiscriminatorsynonyms_created_record(mock_db_connect, mock_audit_logger, mock_get_data):
+    task = 'symptomdiscriminatorsynonyms'
+    result = handler.run_data_checks_for_hk_task(env, task, mock_db_connect)
+    assert result == True
+    assert mock_audit_logger.call_count == 3
+    assert mock_get_data.call_count == 1
+
+@patch(f"{file_path}.symptomdiscriminatorsynonyms.get_symptom_discriminator_synonyms_data", return_value = ({'symptomdiscriminatorid':11009,'name':'Integration test delete'},))
+@patch(f"{file_path}.logger.log_for_audit")
+@patch("psycopg2.connect")
+def test_run_data_checks_for_symptomdiscriminatorsynonyms_deleted_record(mock_db_connect, mock_audit_logger, mock_get_data):
+    task = 'symptomdiscriminatorsynonyms'
+    result = handler.run_data_checks_for_hk_task(env, task, mock_db_connect)
+    assert result == False
+    assert mock_audit_logger.call_count == 3
+    assert mock_get_data.call_count == 1
+
+
 def generate_event_payload(task):
     """Utility function to generate dummy event data"""
     return {"task": task,}

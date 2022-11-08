@@ -2,11 +2,11 @@ from utilities import logger, database
 import os
 import json
 
-from models import symptomgroup, referralrole, servicetype, symptomdiscriminator, symptomgroupsymptomdiscriminator
+from models import symptomgroup, referralrole, servicetype, symptomdiscriminator, symptomgroupsymptomdiscriminator, symptomdiscriminatorsynonyms
 
 data_sql_scripts = ("./data-files/test-data.sql",)
 # List of tasks handled by this code DO NOT change the order add any new task to end
-valid_tasks = ("data", "symptomgroups", "referralroles", "servicetypes", "symptomdiscriminators", "symptomgroupdiscriminators")
+valid_tasks = ("data", "symptomgroups", "referralroles", "servicetypes", "symptomdiscriminators", "symptomgroupdiscriminators", "symptomdiscriminatorsynonyms")
 
 
 def request(event, context):
@@ -50,6 +50,8 @@ def run_data_checks_for_hk_task(env, task, db_connection):
         checks_pass = symptomdiscriminator.check_symptom_discriminator_data(env, db_connection)
     if task.lower() == valid_tasks[5].lower():
         checks_pass = symptomgroupsymptomdiscriminator.check_symptom_group_symptom_discriminators_data(env, db_connection)
+    if task.lower() == valid_tasks[6].lower():
+        checks_pass = symptomdiscriminatorsynonyms.check_symptom_discriminator_synonyms_data(env, db_connection)
     # if no code to handle task default to fail
     if checks_pass is None:
         logger.log_for_audit(env, "No function to handle task {}".format(task))
