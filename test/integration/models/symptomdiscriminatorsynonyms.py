@@ -16,8 +16,8 @@ def get_symptom_discriminator_synonyms_data(env, db_connection):
     result_set = {}
     symptom_discriminator_synonyms_values = (deleted_record_sdid, deleted_record_name, created_record_sdid, created_record_name)
     try:
-        query = create_symptom_discriminator_synonyms_query(symptom_discriminator_synonyms_values)
-        result_set = database.execute_resultset_query(env, db_connection, query, symptom_discriminator_synonyms_values)
+        query, data = create_symptom_discriminator_synonyms_query(symptom_discriminator_synonyms_values)
+        result_set = database.execute_resultset_query(env, db_connection, query, data)
     except Exception as e:
         logger.log_for_error(
             env,
