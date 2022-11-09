@@ -157,6 +157,18 @@ pipeline {
                 }
             }
         }
+        stage('Run symptom discriminator synonyms tests') {
+            steps {
+                echo 'Running tests for symptom discriminator synonyms'
+                catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                    build job: "${SINGLE_HK_TEST_JOB_NAME}/${BRANCH_NAME}",\
+                    parameters: [string(name:'Task' , value:"symptomdiscriminatorsynonyms"),\
+                    string(name:'Bucket' , value:"${BUCKET}"),\
+                    string(name:'Profile' , value:"${PROFILE}")
+                    ]
+                }
+            }
+        }
         stage('Check and remove older versions') {
             steps {
                 script { echo 'Check and remove' }
