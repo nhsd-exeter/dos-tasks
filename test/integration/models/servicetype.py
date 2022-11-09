@@ -33,7 +33,7 @@ def get_service_types_data(env, db_connection):
 
 def create_service_type_query(service_type_ids):
     query = (
-        """select id, name, nationalranking, searchcapacitystatus, capacitymodel, capacityreset from servicetypes where id in (2000,2001,2002);"""
+        """select id, name, nationalranking, searchcapacitystatus, capacitymodel, capacityreset from servicetypes where id in (%s, %s, %s);"""
     )
     data = service_type_ids
     return query, data

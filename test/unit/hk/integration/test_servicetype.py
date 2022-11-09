@@ -26,7 +26,7 @@ def test_check_service_type_record_false_name():
 
 def test_create_service_type_query():
     service_type_ids = '(2000,2001,2002)'
-    expected_query_string = "select id, name, nationalranking, searchcapacitystatus, capacitymodel, capacityreset from servicetypes where id in (2000,2001,2002);"
+    expected_query_string = "select id, name, nationalranking, searchcapacitystatus, capacitymodel, capacityreset from servicetypes where id in (%s, %s, %s);"
     expected_data = service_type_ids
     query, data = servicetype.create_service_type_query(service_type_ids)
     assert query.replace(" ", "") == expected_query_string.replace(" ", "")
