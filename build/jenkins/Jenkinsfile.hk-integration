@@ -45,7 +45,7 @@ pipeline {
             steps {
                 script {
                     echo 'Precautionary cleardown hk lambdas and integration test infrastructure'
-                    sh "make destroy PROFILE=${PROFILE} TASK=${TASK}"
+                    sh "make adestroy PROFILE=${PROFILE} TASK=${TASK}"
                 }
             }
         }
@@ -209,8 +209,8 @@ pipeline {
     post {
       failure {
         script {
-            echo "HK Integration test pipeline failed for profile ${params.PROFILE}"
-            sh "make pipeline-send-notification DEPLOYMENT_SECRETS=${SLACK_SECRETS} PIPELINE_NAME='UEC DoS Tasks Integration Test' BUILD_STATUS=${currentBuild.currentResult}"
+            echo "HK Integration test pipeline failed"
+            sh "make pipeline-send-failure-notification PIPELINE_NAME='UEC DoS Tasks Integration Test' BUILD_STATUS=${currentBuild.currentResult}"
           }
         }
       always { sh 'echo end' }
