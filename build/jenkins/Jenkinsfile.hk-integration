@@ -45,7 +45,7 @@ pipeline {
             steps {
                 script {
                     echo 'Precautionary cleardown hk lambdas and integration test infrastructure'
-                    sh "make adestroy PROFILE=${PROFILE} TASK=${TASK}"
+                    sh "make destroy PROFILE=${PROFILE} TASK=${TASK}"
                 }
             }
         }
