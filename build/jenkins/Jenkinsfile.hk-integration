@@ -30,7 +30,7 @@ pipeline {
         PIPELINE_DATABASE = "${DB_PREFIX}_${ENVIRONMENT}"
         BUCKET = "uec-dos-tasks-${PROFILE}-housekeeping-bucket/${ENVIRONMENT}"
         DB_HOST = 'uec-core-dos-pipeline-primary.dos-db-rds'
-        SLACK_CHANNEL = 'dos-tasks-pipeline-notifications-nonprod'
+        SLACK_CHANNEL = 'dos-tasks-integration-notifications'
         PATHWAYSDOS_V4_BRANCH = 'develop'
         BRANCH_NAME = sh(returnStdout: true, script: "make git-branch-format BRANCH_NAME=${GIT_BRANCH}").trim()
     }
@@ -157,6 +157,18 @@ pipeline {
                 }
             }
         }
+        stage('Run symptom discriminator synonyms tests') {
+            steps {
+                echo 'Running tests for symptom discriminator synonyms'
+                catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                    build job: "${SINGLE_HK_TEST_JOB_NAME}/${BRANCH_NAME}",\
+                    parameters: [string(name:'Task' , value:"symptomdiscriminatorsynonyms"),\
+                    string(name:'Bucket' , value:"${BUCKET}"),\
+                    string(name:'Profile' , value:"${PROFILE}")
+                    ]
+                }
+            }
+        }
         stage('Check and remove older versions') {
             steps {
                 script { echo 'Check and remove' }
@@ -195,7 +207,13 @@ pipeline {
         }
     }
     post {
-        always { sh 'echo end' }
-        cleanup { sh 'echo clean' }
+      failure {
+        script {
+            echo "HK Integration test pipeline failed"
+            sh "make pipeline-send-failure-notification PIPELINE_NAME='UEC DoS Tasks Integration Test' BUILD_STATUS=${currentBuild.currentResult}"
+          }
+        }
+      always { sh 'echo end' }
+      cleanup { sh "make clean" }
     }
 }

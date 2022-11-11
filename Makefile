@@ -503,7 +503,10 @@ deployment-summary: # Returns a deployment summary
 	echo Terraform Changes
 	cat /tmp/terraform_changes.txt | grep -E 'Apply...'
 
-pipeline-send-notification: ## Send Slack notification with the pipeline status - mandatory: PIPELINE_NAME,BUILD_STATUS
+pipeline-send-failure-notification: ## Send Slack notification with the pipeline status - mandatory: PIPELINE_NAME,BUILD_STATUS
+	make pipeline-send-notification DEPLOYMENT_SECRETS=$(SLACK_SECRETS)
+
+pipeline-send-notification: ## Send Slack notification with the pipeline status - mandatory: PIPELINE_NAME,BUILD_STATUS optional:DEPLOYMENT_SECRETS
 	eval "$$(make aws-assume-role-export-variables)"
 	eval "$$(make secret-fetch-and-export-variables NAME=$(DEPLOYMENT_SECRETS))"
 	make slack-it

@@ -19,7 +19,7 @@ expected_capacity_reset = "interval"
 def get_service_types_data(env, db_connection):
     """Returns servicetypes under test"""
     result_set = {}
-    service_type_ids = "(2000,2001,2002)"
+    service_type_ids = (created_record_id,updated_record_id,deleted_record_id)
     try:
         query, data = create_service_type_query(service_type_ids)
         result_set = database.execute_resultset_query(env, db_connection, query, data)
@@ -33,7 +33,7 @@ def get_service_types_data(env, db_connection):
 
 def create_service_type_query(service_type_ids):
     query = (
-        """select id, name, nationalranking, searchcapacitystatus, capacitymodel, capacityreset from servicetypes where id in (2000,2001,2002);"""
+        """select id, name, nationalranking, searchcapacitystatus, capacitymodel, capacityreset from servicetypes where id = %s or id = %s or id = %s;"""
     )
     data = service_type_ids
     return query, data
