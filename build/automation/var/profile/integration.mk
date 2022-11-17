@@ -33,3 +33,6 @@ TF_VAR_hk_integration_tester_lambda_function_name = $(PROJECT_ID)-$(ENV)-$(TF_VA
 TF_VAR_uec_dos_tasks_python_libs = uec-dos-tasks-python-libs
 # Derive the security group for RDS
 TF_VAR_db_identifier = uec-core-dos-pipeline-db-12
+
+# Build slack secrets
+TF_VAR_sm_required = true
