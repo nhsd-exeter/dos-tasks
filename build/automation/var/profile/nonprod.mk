@@ -29,6 +29,3 @@ LAMBDA_VERSIONS_TO_RETAIN = 5
 
 # Derive the security group for RDS
 TF_VAR_db_identifier = uec-core-dos-pipeline-db-12
-
-# Build slack secrets
-TF_VAR_sm_required = false
