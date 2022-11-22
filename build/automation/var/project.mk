@@ -18,3 +18,6 @@ DOCKER_REPOSITORIES =
 SSL_DOMAINS_PROD =
 DEPLOYMENT_SECRETS = $(PROJECT_ID)-$(PROFILE)/deployment
 SLACK_SECRETS = $(PROJECT_ID)-$(PROFILE)/slack
+
+# Build slack secrets
+TF_VAR_sm_required = false

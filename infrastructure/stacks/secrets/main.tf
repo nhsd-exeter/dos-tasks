@@ -4,6 +4,7 @@ resource "aws_secretsmanager_secret" "deployment_secrets" {
 }
 
 resource "aws_secretsmanager_secret" "slack_secrets" {
-  name = "${var.service_prefix}/slack"
-  tags = local.standard_tags
+  count = var.sm_required ? 1 : 0
+  name  = "${var.service_prefix}/slack"
+  tags  = local.standard_tags
 }
