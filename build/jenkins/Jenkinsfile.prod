@@ -1,7 +1,8 @@
 pipeline {
   agent any
   parameters {
-    choice(name: 'Task', choices: ['none', 'all', 'filter', 'referralroles','symptomgroups','symptomdiscriminators','symptomdiscriminatorsynonyms','symptomgroupdiscriminators'], description: 'Select which task to deploy')
+    choice(name: 'Task', choices: ['none', 'all', 'filter', 'referralroles','servicetypes','stt','symptomgroups','symptomdiscriminators','symptomdiscriminatorsynonyms','symptomgroupdiscriminators','ragreset','removeoldchanges'], description: 'Select which task to deploy')
+    choice(name: 'Database', choices: ['uat1', 'uat2', 'ut'], description: 'Select target database (cron jobs ONLY)')
   }
   options {
     buildDiscarder(logRotator(daysToKeepStr: "7", numToKeepStr: "13"))
@@ -13,6 +14,7 @@ pipeline {
     GIT_TAG = "${env.BRANCH_NAME}"
     PROFILE = sh(returnStdout: true, script: "make parse-profile-from-tag GIT_TAG=$GIT_TAG").trim()
     TASK = "${params.Task}"
+    DB_NAME = "${params.Database}"
   }
   triggers { pollSCM(env.BRANCH_NAME == "main" ? "* * * * *" : "") }
   stages {
@@ -39,7 +41,7 @@ pipeline {
         expression { env.PROFILE == "put" || env.PROFILE == "live" }
       }
       steps {
-        script { sh "make provision TASK=${params.Task}" }
+        script { sh "make provision TASK=${params.Task} DB_NAME=${params.Database}" }
       }
     }
   }
