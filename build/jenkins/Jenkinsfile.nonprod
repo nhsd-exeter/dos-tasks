@@ -36,7 +36,7 @@ pipeline {
       }
     }
 
-    stage("Check") {
+    stage("Check for vulnerabilities") {
       when { expression { params.Task != "none" } }
       steps {
         script {
