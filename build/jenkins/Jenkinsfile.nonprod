@@ -17,6 +17,7 @@ pipeline {
     ENVIRONMENT = "nonprod"
     TASK = "${params.Task}"
     DB_NAME = "${params.Database}"
+    UNACCEPTABLE_VULNERABILITY_LEVELS = "HIGH,CRITICAL"
   }
   triggers { pollSCM("* * * * *") }
   stages {
@@ -34,6 +35,25 @@ pipeline {
         script { sh "make push TASK=${params.Task}" }
       }
     }
+
+    stage("Check") {
+      when { expression { params.Task != "none" } }
+      steps {
+        script {
+            echo 'Checking for vulnerabilities in latest docker image used for all tasks'
+            catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                sh "make security-scan-image REPOSITORY=hk-filter UNACCEPTABLE_VULNERABILITY_LEVELS=${UNACCEPTABLE_VULNERABILITY_LEVELS}"
+            }
+        }
+        script {
+            echo 'Checking for vulnerabilities in latest docker image used for testing'
+            catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                sh "make security-scan-image REPOSITORY=tester UNACCEPTABLE_VULNERABILITY_LEVELS=${UNACCEPTABLE_VULNERABILITY_LEVELS}"
+            }
+        }
+      }
+    }
+
 
     stage("Test") {
       when { expression { params.Task != "none" } }
