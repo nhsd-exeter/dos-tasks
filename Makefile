@@ -698,6 +698,10 @@ terraform-plan-detailed: ### Show plan - mandatory: STACK|STACKS|INFRASTRUCTURE_
 	make _terraform-stacks \
 		STACKS="$(or $(STACK), $(or $(STACKS), $(INFRASTRUCTURE_STACKS)))" \
 		CMD="plan -detailed-exitcode $(OPTS)"
+
+docker-network-remove: ### Remove Docker network
+	docker network rm $(DOCKER_NETWORK) 2> /dev/null ||:
+
 # ========================
 git-branch-format:  ## DOS version of [BRANCH_NAME]
 	echo ${BRANCH_NAME} | sed 's;/;%2F;g'
