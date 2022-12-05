@@ -62,11 +62,6 @@ terraform-plan: ### Show plan - mandatory: STACK|STACKS|INFRASTRUCTURE_STACKS=[c
 		STACKS="$(or $(STACK), $(or $(STACKS), $(INFRASTRUCTURE_STACKS)))" \
 		CMD="plan $(OPTS)"
 
-terraform-plan-detailed: ### Show plan - mandatory: STACK|STACKS|INFRASTRUCTURE_STACKS=[comma-separated names]; optional: PROFILE=[name],OPTS=[Terraform options, e.g. -out=plan.out]
-	make _terraform-stacks \
-		STACKS="$(or $(STACK), $(or $(STACKS), $(INFRASTRUCTURE_STACKS)))" \
-		CMD="plan -detailed-exitcode $(OPTS)"
-		
 terraform-output: ### Extract output variables - mandatory: STACK|STACKS|INFRASTRUCTURE_STACKS=[comma-separated names]; optional: PROFILE=[name],OPTS=[Terraform options]
 	make -s _terraform-stacks \
 		STACKS="$(or $(STACK), $(or $(STACKS), $(INFRASTRUCTURE_STACKS)))" \
@@ -212,6 +207,14 @@ _terraform-delete-state-lock: ### Delete Terraform state lock - mandatory: STACK
 
 # ==============================================================================
 
+_terraform-copy-common: # Copies all common terraform files to the desired stack - Mandatory: STACK - name of stack to copy common terraform file into
+	cp $(TERRAFORM_DIR)/common/common-*.tf $(TERRAFORM_DIR)/$(STACK)
+
+_terraform-remove-common: # Removes all common terraform files from the desired stack - Mandatory: STACK - name of stack to clean up common terraform file from
+	rm -f $(TERRAFORM_DIR)/$(STACK)/common-*.tf
+
+# ==============================================================================
+
 terraform-check-module-versions: ### Check Terraform module versions alignment
 	# acm terraform-aws-modules/acm/aws
 	name="terraform acm terraform-aws-modules/acm/aws"
@@ -282,14 +285,6 @@ terraform-check-module-versions: ### Check Terraform module versions alignment
 
 # ==============================================================================
 
-_terraform-copy-common: # Copies all common terraform files to the desired stack - Mandatory: STACK - name of stack to copy common terraform file into
-	cp $(TERRAFORM_DIR)/common/common-*.tf $(TERRAFORM_DIR)/$(STACK)
-
-_terraform-remove-common: # Removes all common terraform files from the desired stack - Mandatory: STACK - name of stack to clean up common terraform file from
-	rm -f $(TERRAFORM_DIR)/$(STACK)/common-*.tf
-
-# ==============================================================================
-
 .SILENT: \
 	terraform-check-module-versions \
 	terraform-export-variables \
@@ -299,4 +294,4 @@ _terraform-remove-common: # Removes all common terraform files from the desired 
 	terraform-output \
 	terraform-show \
 	terraform-copy-common \
-	terrafrom-remove-common
+	terraform-remove-common
