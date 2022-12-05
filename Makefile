@@ -691,6 +691,14 @@ run-integration-test-lambda: # extract the value of success - Mandatory [PROFILE
 
 # ==============================================================================
 
+# ========================
+# May eventually be in devops library terraform
+# ========================
+terraform-plan-detailed: ### Show plan - mandatory: STACK|STACKS|INFRASTRUCTURE_STACKS=[comma-separated names]; optional: PROFILE=[name],OPTS=[Terraform options, e.g. -out=plan.out]
+	make _terraform-stacks \
+		STACKS="$(or $(STACK), $(or $(STACKS), $(INFRASTRUCTURE_STACKS)))" \
+		CMD="plan -detailed-exitcode $(OPTS)"
+# ========================
 git-branch-format:  ## DOS version of [BRANCH_NAME]
 	echo ${BRANCH_NAME} | sed 's;/;%2F;g'
 
