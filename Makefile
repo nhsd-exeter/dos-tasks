@@ -557,24 +557,18 @@ aws-ecr-get-security-threshold-scan:  ## Reports if vulnerabilities exist at thr
 	INFORMATIONAL=$$(echo $$SCAN_WARNINGS | jq '.INFORMATIONAL')
 	UNDEFINED=$$(echo $$SCAN_WARNINGS | jq '.UNDEFINED')
 	THRESHOLD_CROSSED=false
-	IS_UNACCEPTABLE_WARNINGS=false
+	VULNERABLE=false
 	for LEVEL in $$(echo $$VULNERABILITY_LEVELS | tr "," "\n" | tr [:lower:] [:upper:]); do
 			if [ $$LEVEL == $(THRESHOLD_LEVEL) ]  || [ $$THRESHOLD_CROSSED == "true" ] ; then
 				THRESHOLD_CROSSED=true
 				if [ "$$(echo $$(eval echo \"\$$$$LEVEL\"))" != null ] ; then
-					IS_UNACCEPTABLE_WARNINGS=true
+					VULNERABLE=true
 					echo $$LEVEL vulnerabilities reported
-					echo "CRITICAL: $$CRITICAL"
-					echo "HIGH: $$HIGH"
-					echo "MEDIUM: $$MEDIUM"
-					echo "LOW: $$LOW"
-					echo "INFORMATIONAL: $$INFORMATIONAL"
-					echo "UNDEFINED: $$UNDEFINED"
 				fi
 			fi
 	done
 	echo "For more details visit https://$(AWS_REGION).console.aws.amazon.com/ecr/repositories/private/$(AWS_ACCOUNT_ID_MGMT)/$(PROJECT_GROUP_SHORT)/$(PROJECT_NAME_SHORT)/$(REPOSITORY)?region=$(AWS_REGION)"
-	if [[ "$(FAIL_ON_WARNINGS)" =~ ^(true|yes|y|on|1|TRUE|YES|Y|ON)$$ ]] && [ $$IS_UNACCEPTABLE_WARNINGS == "true" ]; then
+	if [[ "$(FAIL_ON_WARNINGS)" =~ ^(true|yes|y|on|1|TRUE|YES|Y|ON)$$ ]] && [ $$VULNERABLE == "true" ]; then
 		exit 1
 	fi
 
