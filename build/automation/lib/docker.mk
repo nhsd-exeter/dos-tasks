@@ -9,25 +9,25 @@ DOCKER_NETWORK = $(PROJECT_GROUP_SHORT)/$(PROJECT_NAME_SHORT)/$(BUILD_ID)
 DOCKER_REGISTRY = $(AWS_ECR)/$(PROJECT_GROUP_SHORT)/$(PROJECT_NAME_SHORT)
 DOCKER_LIBRARY_REGISTRY = nhsd
 
-DOCKER_ALPINE_VERSION = 3.15.0
-DOCKER_COMPOSER_VERSION = 2.0.13
+DOCKER_ALPINE_VERSION = 3.16.0
+DOCKER_COMPOSER_VERSION = 2.3.7
 DOCKER_CONFIG_LINT_VERSION = v1.6.0
-DOCKER_DIND_VERSION = 20.10.12-dind
+DOCKER_DIND_VERSION = 20.10.17-dind
 DOCKER_EDITORCONFIG_CHECKER_VERSION = 2.4.0
-DOCKER_ELASTICSEARCH_VERSION = 7.17.0
-DOCKER_GRADLE_VERSION = 7.0.2-jdk$(JAVA_VERSION)
+DOCKER_ELASTICSEARCH_VERSION = 8.2.2
+DOCKER_GRADLE_VERSION = 7.2.0-jdk$(JAVA_VERSION)
 DOCKER_LOCALSTACK_VERSION = $(LOCALSTACK_VERSION)
-DOCKER_MAVEN_VERSION = 3.8.1-openjdk-$(JAVA_VERSION)-slim
-DOCKER_NGINX_VERSION = 1.21.6-alpine
+DOCKER_MAVEN_VERSION = 3.8.3-openjdk-$(JAVA_VERSION)-slim
+DOCKER_NGINX_VERSION = 1.22.0-alpine
 DOCKER_NODE_VERSION = $(NODE_VERSION)-alpine
 DOCKER_OPENJDK_VERSION = $(JAVA_VERSION)-alpine
 DOCKER_POSTGRES_VERSION = $(POSTGRES_VERSION)-alpine
 DOCKER_POSTMAN_NEWMAN_VERSION = $(POSTMAN_NEWMAN_VERSION)-alpine
 DOCKER_PYTHON_VERSION = $(PYTHON_VERSION)-alpine
 DOCKER_SONAR_SCANNER_CLI_VERSION = $(SONAR_SCANNER_CLI_VERSION)
-DOCKER_TERRAFORM_CHECKOV_VERSION = 2.0.170
-DOCKER_TERRAFORM_COMPLIANCE_VERSION = 1.3.14
-DOCKER_TERRAFORM_TFSEC_VERSION = v0.39.42
+DOCKER_CHECKOV_VERSION = 2.0.1222
+DOCKER_TERRAFORM_COMPLIANCE_VERSION = 1.3.33
+DOCKER_TERRAFORM_TFSEC_VERSION = v1.26.0
 DOCKER_TERRAFORM_VERSION = $(TERRAFORM_VERSION)
 DOCKER_WIREMOCK_VERSION = $(WIREMOCK_VERSION)-alpine
 
@@ -79,9 +79,6 @@ docker-build docker-image: ### Build Docker image - mandatory: NAME; optional: V
 		make build __DOCKER_BUILD=true && exit || cd $(PROJECT_DIR)
 	elif [ -d $(DOCKER_DIR)/$(NAME) ] && [ -z "$(__DOCKER_BUILD)" ]; then
 		cd $(DOCKER_DIR)/$(NAME)
-		make build __DOCKER_BUILD=true && exit || cd $(PROJECT_DIR)
-	elif [ -d $(DOCKER_DIR)/task ] && [ -z "$(__DOCKER_BUILD)" ]; then
-		cd $(DOCKER_DIR)/task
 		make build __DOCKER_BUILD=true && exit || cd $(PROJECT_DIR)
 	fi
 	# Dockerfile
@@ -207,9 +204,6 @@ docker-prune: docker-clean ### Clean Docker resources - optional: ALL=true
 	docker network rm $(DOCKER_NETWORK) 2> /dev/null ||:
 	[[ "$(ALL)" =~ ^(true|yes|y|on|1|TRUE|YES|Y|ON)$$ ]] && docker system prune --volumes --all --force ||:
 
-docker-network-remove: ### Remove Docker network
-	docker network rm $(DOCKER_NETWORK) 2> /dev/null ||:
-
 # ==============================================================================
 
 docker-create-dockerfile: ### Create effective Dockerfile - mandatory: NAME; optional FILE=[Dockerfile name, defaults to Dockerfile]
@@ -239,7 +233,7 @@ docker-create-dockerfile: ### Create effective Dockerfile - mandatory: NAME; op
 		s#FROM postgres:latest#FROM postgres:$(DOCKER_POSTGRES_VERSION)#g; \
 		s#FROM postman/newman:latest#FROM postman/newman:$(DOCKER_POSTMAN_NEWMAN_VERSION)#g; \
 		s#FROM python:latest#FROM python:$(DOCKER_PYTHON_VERSION)#g; \
-		s#FROM rodolpheche/wiremock:latest#FROM rodolpheche/wiremock:$(DOCKER_WIREMOCK_VERSION)#g; \
+		s#FROM wiremock/wiremock:latest#FROM wiremock/wiremock:$(DOCKER_WIREMOCK_VERSION)#g; \
 	" Dockerfile.effective
 	cd $$dir
 
@@ -604,7 +598,7 @@ docker-run-terraform: ### Run terraform container - mandatory: CMD; optional: DI
 
 docker-run-terraform-tfsec: ### Run terraform tfsec container - optional: DIR,ARGS=[Docker args],VARS_FILE=[Makefile vars file],IMAGE=[image name],CONTAINER=[container name]; SEE: https://github.com/tfsec/tfsec
 	make docker-config > /dev/null 2>&1
-	image=$$([ -n "$(IMAGE)" ] && echo $(IMAGE) || echo tfsec/tfsec:$(DOCKER_TERRAFORM_TFSEC_VERSION))
+	image=$$([ -n "$(IMAGE)" ] && echo $(IMAGE) || echo aquasec/tfsec:$(DOCKER_TERRAFORM_TFSEC_VERSION))
 	container=$$([ -n "$(CONTAINER)" ] && echo $(CONTAINER) || echo tfsec-$(BUILD_COMMIT_HASH)-$(BUILD_ID)-$$(date --date=$$(date -u +"%Y-%m-%dT%H:%M:%S%z") -u +"%Y%m%d%H%M%S" 2> /dev/null)-$$(make secret-random LENGTH=8))
 	docker run --interactive $(_TTY) --rm \
 		--name $$container \
@@ -621,9 +615,9 @@ docker-run-terraform-tfsec: ### Run terraform tfsec container - optional: DIR,AR
 		$$image \
 			.
 
-docker-run-terraform-checkov: ### Run terraform checkov container - optional: DIR,ARGS=[Docker args],VARS_FILE=[Makefile vars file],IMAGE=[image name],CONTAINER=[container name]; SEE: https://github.com/bridgecrewio/checkov
+docker-run-checkov: ### Run checkov container - optional: DIR,ARGS=[Docker args],VARS_FILE=[Makefile vars file],IMAGE=[image name],CONTAINER=[container name]; SEE: https://github.com/bridgecrewio/checkov
 	make docker-config > /dev/null 2>&1
-	image=$$([ -n "$(IMAGE)" ] && echo $(IMAGE) || echo bridgecrew/checkov:$(DOCKER_TERRAFORM_CHECKOV_VERSION))
+	image=$$([ -n "$(IMAGE)" ] && echo $(IMAGE) || echo bridgecrew/checkov:$(DOCKER_CHECKOV_VERSION))
 	container=$$([ -n "$(CONTAINER)" ] && echo $(CONTAINER) || echo tfsec-$(BUILD_COMMIT_HASH)-$(BUILD_ID)-$$(date --date=$$(date -u +"%Y-%m-%dT%H:%M:%S%z") -u +"%Y%m%d%H%M%S" 2> /dev/null)-$$(make secret-random LENGTH=8))
 	docker run --interactive $(_TTY) --rm \
 		--name $$container \

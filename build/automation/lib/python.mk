@@ -1,6 +1,6 @@
 PYTHON_VERSION_MAJOR = 3
 PYTHON_VERSION_MINOR = 10
-PYTHON_VERSION_PATCH = 2
+PYTHON_VERSION_PATCH = 5
 PYTHON_VERSION = $(PYTHON_VERSION_MAJOR).$(PYTHON_VERSION_MINOR).$(PYTHON_VERSION_PATCH)
 PYTHON_BASE_PACKAGES = \
 	awscli-local==0.18 \
@@ -74,7 +74,7 @@ python-code-check: ### Check Python code with 'flake8' - optional: FILES=[direc
 	"
 
 python-code-coverage: ### Test Python code with 'coverage' - mandatory: CMD=[test program]; optional: DIR,FILES=[file or pattern],EXCLUDE=[comma-separated list]
-	make docker-run-tools SH=y DIR=$(or $(DIR), $(APPLICATION_DIR_REL)) ARGS="$(ARGS)" CMD=" \
+	make docker-run-tools SH=y DIR=$(or $(DIR), $(APPLICATION_DIR_REL)) CMD=" \
 		python -m coverage run \
 			--source=$(or $(FILES), '.') \
 			--omit=*/tests/*,$(EXCLUDE) \
