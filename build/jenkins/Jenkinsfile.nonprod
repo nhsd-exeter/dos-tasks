@@ -54,7 +54,6 @@ pipeline {
       }
     }
 
-
     stage("Test") {
       when { expression { params.Task != "none" } }
       steps {
