@@ -456,10 +456,10 @@ aws-lambda-remove-old-versions: ## Remove older versions Mandatory NAME=[lambda 
 	echo "There are $${#version_array[*]} versions to be removed for $(NAME)"
 	for version in $${older_versions_to_remove}
 		do
-			make aws-lamba-function-delete NAME=$(NAME) VERSION=$$version
+			make aws-lamba-function-delete-versions NAME=$(NAME) VERSION=$$version
 		done
 
-aws-lamba-function-delete: ## Delete version of lambda function - Mandatory NAME=[lambda function] VERSION=[version number]
+aws-lamba-function-delete-versions: ## Delete version of lambda function - Mandatory NAME=[lambda function] VERSION=[version number]
 	echo "Removing version $(VERSION) for $(NAME)"
 	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
 		$(AWSCLI) lambda delete-function \
@@ -497,6 +497,49 @@ aws-lambda-get-versions-to-remove: ## Returns list of version ids for a lambda f
 		fi
 		echo $${versions_to_remove[*]}
 
+delete-lambdas-for-task: ## delete hk and/or cron lambdas - Mandatory; [PROFILE] - Optional [TASK] [DB_NAME]
+	if [ "$(TASK)" == "all" ]; then
+		for task in $$(echo $(TASKS) | tr "," "\n"); do
+			task_type=$$(make task-type NAME=$$task)
+			if [ $$task_type == "hk" ]; then
+				make delete-lambdas-for-hk-task PROFILE=$(PROFILE) TASK=$$task
+			fi
+			if [ $$task_type == "cron" ] && [ ! -z "$(DB_NAME)" ]; then
+				make delete-lambdas-for-cron-task PROFILE=$(PROFILE) TASK=$$task DB_NAME=$(DB_NAME)
+			else
+				echo "DB_NAME parameter required to delete cron job"
+			fi
+		done
+	else
+			task_type=$$(make task-type NAME=$(TASK))
+			if [ $$task_type == "hk" ]; then
+				make delete-lambdas-for-hk-task PROFILE=$(PROFILE) TASK=$(TASK)
+			fi
+			if [ $$task_type == "cron" ]; then
+				make delete-lambdas-for-cron-task PROFILE=$(PROFILE) TASK=$(TASK) DB_NAME=$(DB_NAME)
+			fi
+	fi
+
+delete-lambdas-for-hk-task: ## Delete hk task lambdas - Mandatory; [PROFILE] [TASK]
+	eval "$$(make aws-assume-role-export-variables)"
+	task_type=$$(make task-type NAME=$(TASK))
+	lambda_name="${SERVICE_PREFIX}-$$task_type-$(TASK)-lambda"
+	echo "Checking for hk lambda function $$lambda_name"
+	aws-lamba-function-delete NAME=$$lambda_name
+
+delete-lambdas-for-cron-task: ## Delete hk cron lambdas - Mandatory; [PROFILE] [TASK]
+eval "$$(make aws-assume-role-export-variables)"
+	task_type=$$(make task-type NAME=$(TASK))
+	lambda_name="${SERVICE_PREFIX}-$$task_type-$(TASK)-$(DB_NAME)-lambda"
+	echo "Checking for cron lambda function $$lambda_name"
+	make aws-lamba-function-delete NAME=$$lambda_name
+
+aws-lamba-function-delete: ## Delete of lambda function - Mandatory NAME=[lambda function]
+	echo "Removing version $(VERSION) for $(NAME)"
+	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
+		$(AWSCLI) lambda delete-function \
+			--function-name $(NAME) \
+		"
 # --------------------------------------
 
 deployment-summary: # Returns a deployment summary
