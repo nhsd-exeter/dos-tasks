@@ -528,7 +528,7 @@ delete-lambdas-for-hk-task: ## Delete hk task lambdas - Mandatory; [PROFILE] [TA
 	aws-lamba-function-delete NAME=$$lambda_name
 
 delete-lambdas-for-cron-task: ## Delete hk cron lambdas - Mandatory; [PROFILE] [TASK]
-eval "$$(make aws-assume-role-export-variables)"
+	eval "$$(make aws-assume-role-export-variables)"
 	task_type=$$(make task-type NAME=$(TASK))
 	lambda_name="${SERVICE_PREFIX}-$$task_type-$(TASK)-$(DB_NAME)-lambda"
 	echo "Checking for cron lambda function $$lambda_name"
