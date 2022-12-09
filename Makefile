@@ -537,6 +537,42 @@ task-type: # Return the type of task cron/hk - mandatory: NAME=[name of task]
 		exit 1
 	fi
 
+security-scan-image:  ## Mandatory REPOSITORY[name of image task or tester] THRESHOLD_LEVEL=[one of UNDEFINED,INFORMATIONAL,LOW,MEDIUM,HIGH,CRITICAL] FAIL_ON_WARNINGS ; Optional TAG
+	if [ -z "$(TAG)" ]; then
+		tag=latest
+	else
+		tag=$(TAG)
+	fi
+	make aws-ecr-get-security-threshold-scan REPOSITORY=$(REPOSITORY) TAG=$$tag THRESHOLD_LEVEL=$(THRESHOLD_LEVEL) FAIL_ON_WARNINGS=$(FAIL_ON_WARNINGS)
+
+aws-ecr-get-security-threshold-scan:  ## Reports if vulnerabilities exist at threshold level or higher Mandatory: REPOSITORY  THRESHOLD_LEVEL[one of UNDEFINED,INFORMATIONAL,LOW,MEDIUM,HIGH,CRITICAL] FAIL_ON_WARNINGS
+	VULNERABILITY_LEVELS=("UNDEFINED","INFORMATIONAL","LOW","MEDIUM","HIGH","CRITICAL")
+	make -s aws-ecr-wait-for-image-scan-complete REPOSITORY=$(REPOSITORY) TAG=$(TAG)
+	SCAN_FINDINGS=$$(make -s aws-ecr-describe-image-scan-findings REPOSITORY=$(REPOSITORY) TAG=$(TAG))
+	SCAN_WARNINGS=$$(echo $$SCAN_FINDINGS | jq '.imageScanFindings.findingSeverityCounts')
+	CRITICAL=$$(echo $$SCAN_WARNINGS | jq '.CRITICAL')
+	HIGH=$$(echo $$SCAN_WARNINGS | jq '.HIGH')
+	MEDIUM=$$(echo $$SCAN_WARNINGS | jq '.MEDIUM')
+	LOW=$$(echo $$SCAN_WARNINGS | jq '.LOW')
+	INFORMATIONAL=$$(echo $$SCAN_WARNINGS | jq '.INFORMATIONAL')
+	UNDEFINED=$$(echo $$SCAN_WARNINGS | jq '.UNDEFINED')
+	THRESHOLD_CROSSED=false
+	VULNERABLE=false
+	for LEVEL in $$(echo $$VULNERABILITY_LEVELS | tr "," "\n" | tr [:lower:] [:upper:]); do
+			if [ $$LEVEL == $(THRESHOLD_LEVEL) ]  || [ $$THRESHOLD_CROSSED == "true" ] ; then
+				THRESHOLD_CROSSED=true
+				if [ "$$(echo $$(eval echo \"\$$$$LEVEL\"))" != null ] ; then
+					VULNERABLE=true
+					echo $$LEVEL vulnerabilities reported
+				fi
+			fi
+	done
+	echo "For more details visit https://$(AWS_REGION).console.aws.amazon.com/ecr/repositories/private/$(AWS_ACCOUNT_ID_MGMT)/$(PROJECT_GROUP_SHORT)/$(PROJECT_NAME_SHORT)/$(REPOSITORY)?region=$(AWS_REGION)"
+	if [[ "$(FAIL_ON_WARNINGS)" =~ ^(true|yes|y|on|1|TRUE|YES|Y|ON)$$ ]] && [ $$VULNERABLE == "true" ]; then
+		exit 1
+	fi
+
+
 # ==============================================================================
 # Supporting targets
 

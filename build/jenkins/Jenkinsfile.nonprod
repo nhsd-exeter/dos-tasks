@@ -17,6 +17,7 @@ pipeline {
     ENVIRONMENT = "nonprod"
     TASK = "${params.Task}"
     DB_NAME = "${params.Database}"
+    VULNERABILITY_THRESHOLD_LEVEL = "HIGH"
   }
   triggers { pollSCM("* * * * *") }
   stages {
@@ -32,6 +33,24 @@ pipeline {
         script { sh "make unit-test TASK=${params.Task}" }
         script { sh "make build TASK=${params.Task}" }
         script { sh "make push TASK=${params.Task}" }
+      }
+    }
+
+    stage("Check for vulnerabilities") {
+      when { expression { params.Task != "none" } }
+      steps {
+        script {
+            echo 'Checking for vulnerabilities in latest docker image used for all tasks'
+            catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                sh "make security-scan-image REPOSITORY=hk-filter THRESHOLD_LEVEL==${VULNERABILITY_THRESHOLD_LEVEL} FAIL_ON_WARNINGS=true"
+            }
+        }
+        script {
+            echo 'Checking for vulnerabilities in latest docker image used for testing'
+            catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                sh "make security-scan-image REPOSITORY=tester THRESHOLD_LEVEL==${VULNERABILITY_THRESHOLD_LEVEL} FAIL_ON_WARNINGS=true"
+            }
+        }
       }
     }
 
