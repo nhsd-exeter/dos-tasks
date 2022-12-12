@@ -21,3 +21,9 @@ SLACK_SECRETS = $(PROJECT_ID)-$(PROFILE)/slack
 
 # Build slack secrets
 TF_VAR_sm_required = false
+
+# Texas  VPC
+TF_VAR_vpc_name = lk8s-$(AWS_ACCOUNT_NAME).texasplatform.uk
+
+# Housekeeping bucket name
+TF_VAR_housekeeping_bucket_name = $(SERVICE_PREFIX)-housekeeping-bucket

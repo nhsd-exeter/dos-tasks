@@ -28,4 +28,5 @@ locals {
     Project     = var.service_tag_common
     Environment = var.profile
   }
+  private_subnets = [data.aws_subnet.texas_subnet[0].id, data.aws_subnet.texas_subnet[1].id, data.aws_subnet.texas_subnet[2].id]
 }

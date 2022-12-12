@@ -25,3 +25,11 @@ variable "environment" {}
 
 variable "texas_terraform_state_store" {}
 variable "terraform_platform_state_store" {}
+
+variable "vpc_name" {
+  description = "Name of vpc"
+}
+
+variable "housekeeping_bucket_name" {
+  description = "Name of housekeeping bucket"
+}
