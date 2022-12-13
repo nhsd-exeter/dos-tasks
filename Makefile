@@ -544,7 +544,7 @@ check-lambda-exists: ## Checking lambda function exists - Mandatory NAME=[lambda
 	" > /dev/null 2>&1 && echo true || echo false
 
 aws-lambda-function-delete: ## Delete of lambda function - Mandatory NAME=[lambda function]
-	if [ "$$(make check-lambda-exists NAME=${NAME})" ] ; then
+	if [ "true" == "$$(make -s check-lambda-exists NAME=${NAME})" ] ; then
 		echo "Removing lambda $(NAME)"
 		make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
 			$(AWSCLI) lambda delete-function \
@@ -553,8 +553,12 @@ aws-lambda-function-delete: ## Delete of lambda function - Mandatory NAME=[lambd
 	else
 		echo "Lambda $(NAME) does not exist"
 	fi
-
 # --------------------------------------
+fake:
+		make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
+			$(AWSCLI) lambda delete-function \
+				--function-name $(NAME) \
+			"
 
 deployment-summary: # Returns a deployment summary
 	echo Terraform Changes
