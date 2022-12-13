@@ -501,23 +501,25 @@ delete-lambdas-for-task: ## delete hk and/or cron lambdas - Mandatory; [PROFILE]
 	if [ "$(TASK)" == "all" ]; then
 		for task in $$(echo $(TASKS) | tr "," "\n"); do
 			task_type=$$(make task-type NAME=$$task)
-			if [ $$task_type == "hk" ]; then
-				make delete-lambdas-for-hk-task PROFILE=$(PROFILE) TASK=$$task
-			fi
-			if [ $$task_type == "cron" ] && [ ! -z "$(DB_NAME)" ]; then
+			if [ "$$task_type" == 'cron' ] && [ ! -z "$(DB_NAME)" ]; then
 				make delete-lambdas-for-cron-task PROFILE=$(PROFILE) TASK=$$task DB_NAME=$(DB_NAME)
 			else
-				echo "DB_NAME parameter required to delete cron job"
+				echo "$$task is not a cron job or no database specified for cron job"
+			fi
+			if [ "$$task_type" == 'hk' ]; then
+				make delete-lambdas-for-hk-task PROFILE=$(PROFILE) TASK=$$task
 			fi
 		done
 	else
-			task_type=$$(make task-type NAME=$(TASK))
-			if [ $$task_type == "hk" ]; then
-				make delete-lambdas-for-hk-task PROFILE=$(PROFILE) TASK=$(TASK)
-			fi
-			if [ $$task_type == "cron" ]; then
-				make delete-lambdas-for-cron-task PROFILE=$(PROFILE) TASK=$(TASK) DB_NAME=$(DB_NAME)
-			fi
+		task_type=$$(make task-type NAME=$(TASK))
+		if [ "$$task_type" == 'cron' ] && [ ! -z "$(DB_NAME)" ]; then
+			make delete-lambdas-for-cron-task PROFILE=$(PROFILE) TASK=$(TASK) DB_NAME=$(DB_NAME)
+		else
+			echo "No database specified for cron job"
+		fi
+		if [ "$$task_type" == 'hk' ]; then
+			make delete-lambdas-for-hk-task PROFILE=$(PROFILE) TASK=$(TASK)
+		fi
 	fi
 
 delete-lambdas-for-hk-task: ## Delete hk task lambdas - Mandatory; [PROFILE] [TASK]
@@ -525,21 +527,33 @@ delete-lambdas-for-hk-task: ## Delete hk task lambdas - Mandatory; [PROFILE] [TA
 	task_type=$$(make task-type NAME=$(TASK))
 	lambda_name="${SERVICE_PREFIX}-$$task_type-$(TASK)-lambda"
 	echo "Checking for hk lambda function $$lambda_name"
-	aws-lamba-function-delete NAME=$$lambda_name
+	make aws-lambda-function-delete NAME=$$lambda_name
 
 delete-lambdas-for-cron-task: ## Delete hk cron lambdas - Mandatory; [PROFILE] [TASK]
 	eval "$$(make aws-assume-role-export-variables)"
 	task_type=$$(make task-type NAME=$(TASK))
 	lambda_name="${SERVICE_PREFIX}-$$task_type-$(TASK)-$(DB_NAME)-lambda"
 	echo "Checking for cron lambda function $$lambda_name"
-	make aws-lamba-function-delete NAME=$$lambda_name
+	make aws-lambda-function-delete NAME=$$lambda_name
 
-aws-lamba-function-delete: ## Delete of lambda function - Mandatory NAME=[lambda function]
-	echo "Removing version $(VERSION) for $(NAME)"
+
+check-lambda-exists: ## Checking lambda function exists - Mandatory NAME=[lambda function]
 	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
-		$(AWSCLI) lambda delete-function \
+		$(AWSCLI) lambda get-function \
 			--function-name $(NAME) \
-		"
+	" > /dev/null 2>&1 && echo true || echo false
+
+aws-lambda-function-delete: ## Delete of lambda function - Mandatory NAME=[lambda function]
+	if [ "$$(make check-lambda-exists NAME=${NAME})" ] ; then
+		echo "Removing lambda $(NAME)"
+		make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
+			$(AWSCLI) lambda delete-function \
+				--function-name $(NAME) \
+			"
+	else
+		echo "Lambda $(NAME) does not exist"
+	fi
+
 # --------------------------------------
 
 deployment-summary: # Returns a deployment summary
