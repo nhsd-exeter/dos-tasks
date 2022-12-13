@@ -554,11 +554,6 @@ aws-lambda-function-delete: ## Delete of lambda function - Mandatory NAME=[lambd
 		echo "Lambda $(NAME) does not exist"
 	fi
 # --------------------------------------
-fake:
-		make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
-			$(AWSCLI) lambda delete-function \
-				--function-name $(NAME) \
-			"
 
 deployment-summary: # Returns a deployment summary
 	echo Terraform Changes

@@ -183,6 +183,23 @@ pipeline {
                 }
             }
         }
+        stage('Delete lambdas'){
+            steps {
+                echo 'Deleting integration lambdas'
+                sh "make delete-lambdas-for-task PROFILE=${PROFILE} TASK=${TASK}"
+            }
+        }
+        stage ('refresh aws credentials'){
+            steps{
+                echo 'refreshing aws credentials'
+            }
+        }
+        stage('Sleep for 20 minutes'){
+            steps{
+                echo 'sleeping for 20 minutes'
+                sleep(time:5,unit:"MINUTES")
+            }
+        }
         stage('Teardown hk infrastructure') {
             when { expression { params.Debug == false } }
             steps {
