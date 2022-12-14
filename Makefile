@@ -498,6 +498,7 @@ aws-lambda-get-versions-to-remove: ## Returns list of version ids for a lambda f
 		echo $${versions_to_remove[*]}
 
 delete-lambdas-for-task: ## delete hk and/or cron lambdas - Mandatory; [PROFILE] - Optional [TASK] [DB_NAME]
+	make copy-temp-integration-test-files
 	if [ "$(TASK)" == "all" ]; then
 		for task in $$(echo $(TASKS) | tr "," "\n"); do
 			task_type=$$(make task-type NAME=$$task)
@@ -521,6 +522,7 @@ delete-lambdas-for-task: ## delete hk and/or cron lambdas - Mandatory; [PROFILE]
 			make delete-lambdas-for-hk-task PROFILE=$(PROFILE) TASK=$(TASK)
 		fi
 	fi
+	make remove-temp-integration-test-files
 
 delete-lambdas-for-hk-task: ## Delete hk task lambdas - Mandatory; [PROFILE] [TASK]
 	eval "$$(make aws-assume-role-export-variables)"
