@@ -184,6 +184,7 @@ pipeline {
             }
         }
         stage('Delete lambdas'){
+            when { expression { params.Debug == false } }
             steps {
                 echo 'Deleting integration lambdas'
                 sh "make delete-lambdas-for-task PROFILE=${PROFILE} TASK=${TASK}"
