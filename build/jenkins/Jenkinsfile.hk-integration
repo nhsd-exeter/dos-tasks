@@ -191,11 +191,13 @@ pipeline {
             }
         }
         stage ('refresh aws credentials'){
+            when { expression { params.Debug == false } }
             steps{
                 echo 'refreshing aws credentials'
             }
         }
         stage('Sleep for 20 minutes'){
+            when { expression { params.Debug == false } }
             steps{
                 echo 'sleeping for 20 minutes'
                 sleep(time:20,unit:"MINUTES")
