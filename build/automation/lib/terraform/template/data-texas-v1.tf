@@ -37,15 +37,29 @@ data "terraform_remote_state" "security_groups" {
   }
 }
 
-data "terraform_remote_state" "vpc" {
-  backend = "s3"
-  config = {
-    key    = var.vpc_terraform_state_key
-    bucket = var.terraform_platform_state_store
-    region = var.aws_region
+# data "terraform_remote_state" "vpc" {
+#   backend = "s3"
+#   config = {
+#     key    = var.vpc_terraform_state_key
+#     bucket = var.terraform_platform_state_store
+#     region = var.aws_region
+#   }
+# }
+
+data "aws_vpcs" "vpcs" {
+  tags = {
+    Name = var.vpc_name
   }
 }
 
+data "aws_vpc" "vpc" {
+  count = length(data.aws_vpcs.vpcs.ids)
+  id    = tolist(data.aws_vpcs.vpcs.ids)[count.index]
+}
+
+#
+# variable "vpc_name" {}
+#
 # ==============================================================================
 # Terraform state keys and store set by the Make DevOps automation scripts
 
