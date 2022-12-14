@@ -527,7 +527,11 @@ delete-lambdas-for-task: ## delete hk and/or cron lambdas - Mandatory; [PROFILE]
 delete-lambdas-for-hk-task: ## Delete hk task lambdas - Mandatory; [PROFILE] [TASK]
 	eval "$$(make aws-assume-role-export-variables)"
 	task_type=$$(make task-type NAME=$(TASK))
-	lambda_name="${SERVICE_PREFIX}-$$task_type-$(TASK)-lambda"
+	if [ "$(TASK)" == 'integration' ]; then
+		lambda_name="${SERVICE_PREFIX}-$$task_type-$(TASK)-tester-lambda"
+	else
+		lambda_name="${SERVICE_PREFIX}-$$task_type-$(TASK)-lambda"
+	fi
 	echo "Checking for hk lambda function $$lambda_name"
 	make aws-lambda-function-delete NAME=$$lambda_name
 
