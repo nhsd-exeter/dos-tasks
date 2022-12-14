@@ -41,7 +41,7 @@ pipeline {
                 script { sh 'make show-configuration' }
             }
         }
-        stage('Precautionary teardown hk infrastructure') {
+/*        stage('Precautionary teardown hk infrastructure') {
             steps {
                 script {
                     echo 'Precautionary cleardown hk lambdas and integration test infrastructure'
@@ -188,7 +188,7 @@ pipeline {
                 echo 'Deleting integration lambdas'
                 sh "make delete-lambdas-for-task PROFILE=${PROFILE} TASK=${TASK}"
             }
-        }
+        } */
         stage ('refresh aws credentials'){
             steps{
                 echo 'refreshing aws credentials'
