@@ -197,7 +197,7 @@ pipeline {
         stage('Sleep for 20 minutes'){
             steps{
                 echo 'sleeping for 20 minutes'
-                sleep(time:5,unit:"MINUTES")
+                sleep(time:20,unit:"MINUTES")
             }
         }
         stage('Teardown hk infrastructure') {
