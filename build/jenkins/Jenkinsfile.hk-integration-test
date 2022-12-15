@@ -69,6 +69,6 @@ pipeline {
     }
     post {
         always { sh "echo end of ${TASK} test" }
-        cleanup { sh 'echo clean' }
+        cleanup { sh "make clean" }
     }
 }

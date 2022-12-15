@@ -33,7 +33,6 @@ pipeline {
         SLACK_CHANNEL = 'dos-tasks-integration-notifications'
         PATHWAYSDOS_V4_BRANCH = 'develop'
         BRANCH_NAME = sh(returnStdout: true, script: "make git-branch-format BRANCH_NAME=${GIT_BRANCH}").trim()
-        VULNERABILITY_THRESHOLD_LEVEL = "HIGH"
     }
     triggers { pollSCM("* * * * *") }
     stages {
@@ -68,22 +67,6 @@ pipeline {
                 script { sh "make unit-test TASK=${TASK}" }
                 script { sh "make build TASK=${TASK}" }
                 script { sh "make push TASK=${TASK}" }
-            }
-        }
-        stage("Check for vulnerabilities") {
-            steps {
-                script {
-                    echo 'Checking for vulnerabilities in latest docker image used for all tasks'
-                    catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
-                        sh "make security-scan-image REPOSITORY=hk-filter THRESHOLD_LEVEL==${VULNERABILITY_THRESHOLD_LEVEL} FAIL_ON_WARNINGS=true"
-                    }
-                }
-                script {
-                    echo 'Checking for vulnerabilities in latest docker image used for testing'
-                    catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
-                        sh "make security-scan-image REPOSITORY=tester THRESHOLD_LEVEL==${VULNERABILITY_THRESHOLD_LEVEL} FAIL_ON_WARNINGS=true"
-                    }
-                }
             }
         }
         stage('Check key infrastructure exists') {
@@ -198,6 +181,26 @@ pipeline {
                     echo 'Remove test files from archive'
                     sh "make clear-integration-archive BUCKET=${BUCKET}"
                 }
+            }
+        }
+        stage('Delete lambdas'){
+            when { expression { params.Debug == false } }
+            steps {
+                echo 'Deleting integration lambdas'
+                sh "make delete-lambdas-for-task PROFILE=${PROFILE} TASK=${TASK}"
+            }
+        }
+        stage ('refresh aws credentials'){
+            when { expression { params.Debug == false } }
+            steps{
+                echo 'refreshing aws credentials'
+            }
+        }
+        stage('Sleep for 20 minutes'){
+            when { expression { params.Debug == false } }
+            steps{
+                echo 'sleeping for 20 minutes'
+                sleep(time:20,unit:"MINUTES")
             }
         }
         stage('Teardown hk infrastructure') {
