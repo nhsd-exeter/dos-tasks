@@ -33,3 +33,7 @@ variable "vpc_name" {
 variable "housekeeping_bucket_name" {
   description = "Name of housekeeping bucket"
 }
+
+variable "housekeeping_role_name" {
+  description = "Name of housekeeping role"
+}

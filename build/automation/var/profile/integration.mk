@@ -12,7 +12,7 @@ VULNERABILITY_LEVEL := CRITICAL,HIGH
 # ==============================================================================
 # Infrastructure variables
 
-STACKS := secrets,s3,security-groups
+STACKS := secrets,s3,security-groups,iam-role
 # don't need to include cron jobs in list of tasks
 TASKS := filter,integration,referralroles,symptomgroups,symptomdiscriminators,symptomdiscriminatorsynonyms,symptomgroupdiscriminators,servicetypes,stt
 ENVIRONMENT_LIST := ["integration"]

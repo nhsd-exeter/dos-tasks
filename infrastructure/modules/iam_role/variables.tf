@@ -26,26 +26,10 @@ variable "service_prefix" {
 # # Lambda
 # ##############
 
-variable "image_uri" {
-  description = "Docker image URI"
+variable "s3_bucket_arn" {
+  description = "ARN of Housekeeping bucket"
 }
 
-variable "subnet_ids" {
-  description = "List of subnet IDs"
-}
-
-variable "security_group_ids" {
-  description = "List of security group IDs"
-}
-
-
-variable "splunk_firehose_subscription" {
-  description = "Name of splunk firehose subscription"
-}
-
-variable "splunk_firehose_role" {
-  description = "Name of splunk firehose IAM role"
-}
 
 # ##############
 # # Inputs
@@ -68,24 +52,4 @@ variable "env_vars" {
     "service" = "core-dos",
     "profile" = "nonprod"
   }
-}
-
-variable "timeout" {
-  description = "Timeout of the lambda function in seconds"
-  default     = "900"
-}
-
-variable "retry_attempts" {
-  description = "Number of retries for the lamdba"
-  default     = 0
-}
-
-variable "log_retention" {
-  description = "Length of timeto keep the logs in cloudwatch"
-  default     = "0"
-}
-
-variable "memory_size" {
-  description = "Amount of memory in MB your Lambda Function can use at runtime"
-  default     = "128"
 }
