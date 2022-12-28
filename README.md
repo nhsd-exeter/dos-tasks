@@ -99,7 +99,7 @@ Before starting any work, please read [CONTRIBUTING.md](documentation/CONTRIBUTI
 ## Development
 
 - Describe how to
-  - Connect to a local database
+  - Connect to a local database - not relevant
   - Interact with mock components
   - Switch each individual component to the dev mode
 - Code formatting

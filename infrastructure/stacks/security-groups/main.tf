@@ -1,7 +1,7 @@
 resource "aws_security_group" "hk_lambda_sg" {
   name        = "${var.service_prefix}-hk-sg"
   description = "Generic SG for HK tasks"
-  vpc_id      = data.terraform_remote_state.vpc.outputs.vpc_id
+  vpc_id      = data.aws_vpc.vpc[0].id
   egress {
     description     = "Core DoS DB Access"
     from_port       = 5432

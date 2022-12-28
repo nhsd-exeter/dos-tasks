@@ -1,7 +1,7 @@
 module "housekeeping_bucket" {
   source          = "../../modules/s3"
-  bucket_name     = "${var.service_prefix}-housekeeping-bucket"
-  bucket_iam_role = "${var.service_prefix}-housekeeping-bucket-role"
+  bucket_name     = var.housekeeping_bucket_name
+  bucket_iam_role = "${var.housekeeping_bucket_name}-role"
   attach_policy   = true
   log_bucket      = var.texas_s3_logs_bucket
   service_name    = var.project_group_short
