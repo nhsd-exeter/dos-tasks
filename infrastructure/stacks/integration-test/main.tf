@@ -1,6 +1,7 @@
 module "integration_test_lambda" {
   source             = "../../modules/lambda"
   name               = "hk-integration-tester"
+  housekeeping_role_name = data.aws_iam_role.housekeeping_role.arn
   image_uri          = "${var.aws_ecr}/${var.project_group_short}/${var.project_name_short}/hk-integration-tester:${var.image_version}"
   subnet_ids         = local.private_subnets
   security_group_ids = [data.aws_security_group.lambda_sg.id]
