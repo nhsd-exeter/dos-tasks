@@ -29,6 +29,6 @@ data "aws_s3_bucket" "housekeeping_bucket" {
   bucket = var.housekeeping_bucket_name
 }
 
-data "aws_iam_role" "housekeeping_role" {
-  name = var.housekeeping_role_name
-}
+# data "aws_iam_role" "housekeeping_role" {
+#   name = var.housekeeping_role_name
+# }
