@@ -1,9 +1,9 @@
 resource "aws_lambda_function" "lambda" {
   function_name = "${var.service_prefix}-${var.name}-lambda"
-  role          = var.houskeeping_role
-  publish       = true
-  package_type  = "Image"
-  image_uri     = var.image_uri
+  role          = var.housekeeping_role_name
+  publish      = true
+  package_type = "Image"
+  image_uri    = var.image_uri
 
   timeout     = var.timeout
   memory_size = var.memory_size
@@ -21,8 +21,6 @@ resource "aws_lambda_function" "lambda" {
     variables = var.env_vars
   }
   depends_on = [
-    var.housekeeping_role_name,
-    aws_iam_role_policy.lambda_role_policy,
     aws_cloudwatch_log_group.lambda_log_group
   ]
 }
