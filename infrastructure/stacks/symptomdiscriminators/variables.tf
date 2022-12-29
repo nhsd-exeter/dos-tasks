@@ -37,3 +37,7 @@ variable "splunk_firehose_subscription" {
 variable "splunk_firehose_role" {
   description = "Name of splunk firehose IAM role"
 }
+
+variable "housekeeping_role_name" {
+  description = "Name of housekeeping role"
+}
