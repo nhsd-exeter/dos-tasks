@@ -10,7 +10,6 @@
     - [Local Environment Configuration](#local-environment-configuration)
     - [Local Project Setup](#local-project-setup)
   - [Contributing](#contributing)
-- [c](#c)
   - [Development](#development)
   - [Testing](#testing)
     - [Test data and mock services](#test-data-and-mock-services)
@@ -18,6 +17,7 @@
   - [Deployment](#deployment)
     - [Artefact Versioning](#artefact-versioning)
     - [CI/CD Pipelines](#cicd-pipelines)
+- [](#)
     - [Deployment From the Command-line](#deployment-from-the-command-line)
     - [Secrets](#secrets)
     - [AWS Access](#aws-access)
@@ -149,7 +149,7 @@ List all the pipelines and their purpose
 - Production (deployment)
 
 Reference the [jenkins/README.md](build/automation/lib/jenkins/README.md) file
-
+#
 <img src="./documentation/diagrams/DevOps-Pipelines.png" width="1024" /><br /><br />
 
 ### Deployment From the Command-line
