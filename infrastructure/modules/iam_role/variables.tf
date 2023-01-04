@@ -37,7 +37,7 @@ variable "s3_bucket_arn" {
 
 # Required
 variable "name" {
-  description = "Name of the lambda function"
+  description = "Name of the iam role"
 }
 
 variable "tags" {

@@ -1,11 +1,11 @@
 module "symptomgroups_lambda" {
-  source                 = "../../modules/lambda"
-  name                   = "hk-symptomgroups"
-  housekeeping_role_name = data.aws_iam_role.housekeeping_role.arn
-  image_uri              = "${var.aws_ecr}/${var.project_group_short}/${var.project_name_short}/hk-symptomgroups:${var.image_version}"
-  subnet_ids             = local.private_subnets
-  security_group_ids     = [data.aws_security_group.lambda_sg.id]
-  timeout                = "900"
+  source                = "../../modules/lambda"
+  name                  = "hk-symptomgroups"
+  housekeeping_role_arn = data.aws_iam_role.housekeeping_role.arn
+  image_uri             = "${var.aws_ecr}/${var.project_group_short}/${var.project_name_short}/hk-symptomgroups:${var.image_version}"
+  subnet_ids            = local.private_subnets
+  security_group_ids    = [data.aws_security_group.lambda_sg.id]
+  timeout               = "900"
 
   splunk_firehose_subscription = var.splunk_firehose_subscription
   splunk_firehose_role         = var.splunk_firehose_role

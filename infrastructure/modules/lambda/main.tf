@@ -1,6 +1,6 @@
 resource "aws_lambda_function" "lambda" {
   function_name = "${var.service_prefix}-${var.name}-lambda"
-  role          = var.housekeeping_role_name
+  role          = var.housekeeping_role_arn
   publish      = true
   package_type = "Image"
   image_uri    = var.image_uri

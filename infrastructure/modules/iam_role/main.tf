@@ -1,5 +1,5 @@
 resource "aws_iam_role" "lambda_role" {
-  name               = "${var.service_prefix}-hk-role"
+  name               = var.name
   path               = "/"
   assume_role_policy = <<EOF
 {
@@ -18,7 +18,7 @@ EOF
 }
 
 resource "aws_iam_role_policy" "lambda_role_policy" {
-  name   = "${var.service_prefix}-hk-role-policy"
+  name   = "${var.name}-policy"
   role   = aws_iam_role.lambda_role.name
   policy = <<POLICY
 {
