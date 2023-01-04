@@ -1,11 +1,11 @@
 module "ragreset_lambda" {
-  source             = "../../modules/lambda"
-  name               = "cron-ragreset-DB_NAME_TO_REPLACE"
-  image_uri          = "${var.aws_ecr}/${var.project_group_short}/${var.project_name_short}/cron-ragreset:${var.image_version}"
-  subnet_ids         = local.private_subnets
-  security_group_ids = [data.aws_security_group.lambda_sg.id]
-  s3_bucket_arn      = data.aws_s3_bucket.housekeeping_bucket.arn
-  timeout            = "900"
+  source                = "../../modules/lambda"
+  name                  = "cron-ragreset-DB_NAME_TO_REPLACE"
+  image_uri             = "${var.aws_ecr}/${var.project_group_short}/${var.project_name_short}/cron-ragreset:${var.image_version}"
+  subnet_ids            = local.private_subnets
+  security_group_ids    = [data.aws_security_group.lambda_sg.id]
+  housekeeping_role_arn = data.aws_iam_role.housekeeping_role.arn
+  timeout               = "900"
 
   splunk_firehose_subscription = var.splunk_firehose_subscription
   splunk_firehose_role         = var.splunk_firehose_role
@@ -43,7 +43,3 @@ resource "aws_lambda_permission" "allow_cloudwatch" {
   principal     = "events.amazonaws.com"
   source_arn    = aws_cloudwatch_event_rule.scheduled_event_rule.arn
 }
-
-
-
-
