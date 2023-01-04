@@ -38,9 +38,6 @@ variable "security_group_ids" {
   description = "List of security group IDs"
 }
 
-variable "s3_bucket_arn" {
-  description = "ARN of Housekeeping bucket"
-}
 
 variable "splunk_firehose_subscription" {
   description = "Name of splunk firehose subscription"
@@ -48,6 +45,10 @@ variable "splunk_firehose_subscription" {
 
 variable "splunk_firehose_role" {
   description = "Name of splunk firehose IAM role"
+}
+
+variable "housekeeping_role_arn" {
+  description = "Arn of housekeeping role"
 }
 
 # ##############
