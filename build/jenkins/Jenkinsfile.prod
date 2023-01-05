@@ -2,7 +2,7 @@ pipeline {
   agent any
   parameters {
     choice(name: 'Task', choices: ['none', 'all', 'filter', 'referralroles','servicetypes','stt','symptomgroups','symptomdiscriminators','symptomdiscriminatorsynonyms','symptomgroupdiscriminators','ragreset','removeoldchanges'], description: 'Select which task to deploy')
-    choice(name: 'Database', choices: ['uat1', 'uat2', 'ut'], description: 'Select target database (cron jobs ONLY)')
+    choice(name: 'Database', choices: ['none', 'uat1', 'uat2', 'ut'], description: 'Select target database (cron jobs ONLY)')
   }
   options {
     buildDiscarder(logRotator(daysToKeepStr: "7", numToKeepStr: "13"))
