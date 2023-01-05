@@ -1,12 +1,11 @@
 resource "aws_lambda_function" "lambda" {
   function_name = "${var.service_prefix}-${var.name}-lambda"
   role          = var.housekeeping_role_arn
-  publish      = true
-  package_type = "Image"
-  image_uri    = var.image_uri
-
-  timeout     = var.timeout
-  memory_size = var.memory_size
+  publish       = true
+  package_type  = "Image"
+  image_uri     = var.image_uri
+  timeout       = var.timeout
+  memory_size   = var.memory_size
 
   vpc_config {
     subnet_ids         = var.subnet_ids
