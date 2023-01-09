@@ -526,7 +526,13 @@ parse-profile-from-tag: # Return profile based off of git tag - Mandatory GIT_TA
 
 tag: # Tag commit for production deployment as `[YYYYmmddHHMMSS]-[env]` - mandatory: PROFILE=[profile name],COMMIT=[hash]
 	hash=$$(make git-hash COMMIT=$(COMMIT))
-	make git-tag-create-environment-deployment PROFILE=$(PROFILE) COMMIT=$$hash
+	make git-full-tag-create-environment-deployment PROFILE=$(PROFILE) COMMIT=$$hash
+
+git-full-tag-create-environment-deployment: ### Tag environment deployment as `[env]-[YYYYmmddHHMMSS]-[hash]` - mandatory: PROFILE=[profile name]; optional: COMMIT=[release candidate tag name, defaults to main]
+	[ $(PROFILE) == local ] && (echo "ERROR: Please, specify the PROFILE"; exit 1)
+	commit=$(or $(COMMIT), $$(make git-branch-get-main-name))
+	tag=$(ENVIRONMENT)-$(BUILD_TIMESTAMP)-$$commit
+	make git-tag-create TAG=$$tag COMMIT=$$commit
 
 task-type: # Return the type of task cron/hk - mandatory: NAME=[name of task]
 	if [ -d $(APPLICATION_DIR)/hk/$(NAME) ]; then
