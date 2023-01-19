@@ -522,7 +522,7 @@ propagate: # Propagate the image to production ecr - mandatory: BUILD_COMMIT_HAS
 		make docker-image-find-and-version-as COMMIT=$(BUILD_COMMIT_HASH) NAME=$$task_type-$(ARTEFACTS) TAG=$(GIT_TAG)
 	fi
 parse-profile-from-tag: # Return profile based off of git tag - Mandatory GIT_TAG=[git tag]
-	echo $(GIT_TAG) | cut -d "-" -f2
+	echo $(GIT_TAG) | cut -d "-" -f1
 
 tag: # Tag commit for production deployment as `[YYYYmmddHHMMSS]-[env]` - mandatory: PROFILE=[profile name],COMMIT=[hash]
 	hash=$$(make git-hash COMMIT=$(COMMIT))
