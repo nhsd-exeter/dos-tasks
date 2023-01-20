@@ -24,7 +24,20 @@ pipeline {
         script { sh "make show-configuration" }
       }
     }
-
+    stage('Build necessary infrastructure exists') {
+      when {
+        expression { params.Task != "none" }
+        expression { env.PROFILE == "put" || env.PROFILE == "live" }
+      }
+        steps {
+            script {
+                echo 'Check infrastructure defined as STACKS'
+                catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                    sh "make provision-stacks PROFILE=${PROFILE}"
+                }
+            }
+        }
+    }
     stage("Propagate Artefacts") {
       when {
         expression { params.Task != "none" }
