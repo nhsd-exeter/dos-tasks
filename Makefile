@@ -12,7 +12,7 @@ copy-cron-template-stack: ## update placeholder value for cron job target databa
 	sed "s/DB_NAME_TO_REPLACE/$(DB_NAME)/g" $(TERRAFORM_DIR)/$(STACK)/cron-template/$(TASK)/template/main.tf  > \
 			$(TERRAFORM_DIR)/$(STACK)/cron-template/$(TASK)/main.tf
 	cp $(TERRAFORM_DIR)/$(STACK)/cron-template/$(TASK)/*.tf $(TERRAFORM_DIR)/$(STACK)/$(TASK)-$(DB_NAME)
-
+	cp $(TERRAFORM_DIR)/tasks-common/role-data.tf $(TERRAFORM_DIR)/$(STACK)/$(TASK)-$(DB_NAME)/role-data.tf
 
 build-stack-for-cron-job: ## create a stack for cron and db - cron tasks only mandatory: TASK=[task] DB_NAME=[db name minus prefix eg test not pathwaysdos-test]
 	task_type=$$(make task-type NAME=$(TASK))
@@ -81,6 +81,7 @@ push-image: # Push project artefact to the registry - mandatory: TASK=[task]
 # Provision targets
 provision: ## provision resources for hk and cron - mandatory PROFILE TASK  and DB_NAME (cron only)
 	make copy-temp-integration-test-files
+	make create_temp_bucket_data_file
 	make terraform-apply-auto-approve STACK=$(STACKS) PROFILE=$(PROFILE)
 	if [ "$(TASK)" == "all" ]; then
 		for task in $$(echo $(TASKS) | tr "," "\n"); do
@@ -106,15 +107,18 @@ provision: ## provision resources for hk and cron - mandatory PROFILE TASK  and 
 		fi
 	fi
 	make remove-temp-integration-test-files
+	make remove_temp_bucket_data_file
 
 provision-hk: ## Provision environment - mandatory: PROFILE=[name], TASK=[task]
 	eval "$$(make secret-fetch-and-export-variables)"
 	echo "Provisioning $(PROFILE) lambda for hk task $(TASK)"
+	make create-temp-data-files TASK=$(TASK)
 	if [ "$(TASK)" == 'integration' ]; then
 		make provision-hk-integration-tester STACK=integration-test
 	else
 		make terraform-apply-auto-approve STACK=$(TASK) PROFILE=$(PROFILE)
 	fi
+	make remove-temp-data-files TASK=$(TASK)
 
 provision-cron: ## cron specific version of provision PROFILE TASK DB_NAME
 	echo "Provisioning $(PROFILE) lambda $(TASK)-$(DB_NAME) for cron job"
@@ -130,6 +134,7 @@ provision-stacks: ## Provision environment - mandatory: PROFILE=[name]
 # Plan targets
 plan: # Plan cron and hk lambdas - mandatory: PROFILE=[name], TASK=[hk task] DB_NAME
 	eval "$$(make secret-fetch-and-export-variables)"
+	make create_temp_bucket_data_file
 	make terraform-plan STACK=$(STACKS) PROFILE=$(PROFILE)
 	make copy-temp-integration-test-files
 	if [ "$(TASK)" == "all" ]; then
@@ -156,15 +161,18 @@ plan: # Plan cron and hk lambdas - mandatory: PROFILE=[name], TASK=[hk task] DB_
 		fi
 	fi
 	make remove-temp-integration-test-files
+	make remove_temp_bucket_data_file
 
 plan-hk: # Plan housekeeping lambda - mandatory: PROFILE=[name], TASK=[hk task]
 	echo "Planning for hk task $(TASK)"
+	make create-temp-data-files TASK=$(TASK)
 	eval "$$(make secret-fetch-and-export-variables)"
 	if [ "$(TASK)" == 'integration' ]; then
 			make plan-hk-integration-tester STACK=integration-test PROFILE=$(PROFILE)
 	else
 			make terraform-plan STACK=$(TASK) PROFILE=$(PROFILE)
 	fi
+	make remove-temp-data-files TASK=$(TASK)
 
 plan-cron: # Plan cron job - mandatory: PROFILE=[name], TASK=[hk task] DB_NAME
 	echo "Planning for cron job $(TASK)-$(DB_NAME)"
@@ -207,6 +215,7 @@ destroy: # To destroy cron and hk lambdas - mandatory: PROFILE=[name], TASK=[hk 
 # eg make destroy PROFILE=nonprod TASK=symptomgroups
 destroy-hk: # Destroy housekeeping lambda - mandatory: PROFILE=[name], TASK=[hk task]
 	task_type=$$(make task-type NAME=$(TASK))
+	make create-temp-data-files TASK=$(TASK)
 	if [ "$$task_type" == 'hk' ]; then
 		eval "$$(make secret-fetch-and-export-variables)"
 		if [ "$(TASK)" == 'integration' ]; then
@@ -217,6 +226,7 @@ destroy-hk: # Destroy housekeeping lambda - mandatory: PROFILE=[name], TASK=[hk 
 	else
 		echo $(TASK) is not an hk job
 	fi
+	make remove-temp-data-files TASK=$(TASK)
 
 # make destroy-all-cron PROFILE=nonprod
 destroy-all-cron: ## Clear down every cron for every db - mandatory [PROFILE]
@@ -578,6 +588,21 @@ aws-ecr-get-security-threshold-scan:  ## Reports if vulnerabilities exist at thr
 		exit 1
 	fi
 
+# bucket data may only be needed by controlling filter but no harm in adding it to all
+create-temp-data-files: # Copies role-data file to required lambda stack - Mandatory: TASK - name of task stack to copy data file for iam role
+	cp $(TERRAFORM_DIR)/tasks-common/role-data.tf $(TERRAFORM_DIR)/$(TASK)/role-data.tf
+	cp $(TERRAFORM_DIR)/tasks-common/bucket-data.tf $(TERRAFORM_DIR)/$(TASK)/bucket-data.tf
+
+remove-temp-data-files: # Removes temp copy of role data file from TASK related stack - Mandatory: TASK - name of stack
+	rm -f $(TERRAFORM_DIR)/$(TASK)/role-data.tf
+	rm -f $(TERRAFORM_DIR)/$(TASK)/bucket-data.tf
+
+
+create_temp_bucket_data_file: # Add bucket data file to terraform for each hk task and for creation of iam role Mandatory TASk
+	cp $(TERRAFORM_DIR)/tasks-common/bucket-data.tf $(TERRAFORM_DIR)/iam-role/bucket-data.tf
+
+remove_temp_bucket_data_file: # Remove temp bucket data file Mandatory TASK=task
+	rm -f $(TERRAFORM_DIR)/iam-role/bucket-data.tf
 
 # ==============================================================================
 # Supporting targets
