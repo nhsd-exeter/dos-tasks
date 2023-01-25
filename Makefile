@@ -182,7 +182,9 @@ plan-cron: # Plan cron job - mandatory: PROFILE=[name], TASK=[hk task] DB_NAME
 	make delete-stack-for-cron-job TASK=$(TASK) DB_NAME=$(DB_NAME)
 
 plan-stacks: ### plan shared infrastructure defined in STACKS PROFILE
+	make create_temp_bucket_data_file
 	make terraform-plan-detailed STACK=$(STACKS) PROFILE=$(PROFILE)
+	make remove_temp_bucket_data_file
 
 #  Destroy targets
 destroy: # To destroy cron and hk lambdas - mandatory: PROFILE=[name], TASK=[hk task] DB_NAME
