@@ -221,9 +221,7 @@ destroy-hk: # Destroy housekeeping lambda - mandatory: PROFILE=[name], TASK=[hk 
 	if [ "$$task_type" == 'hk' ]; then
 		eval "$$(make secret-fetch-and-export-variables)"
 		if [ "$(TASK)" == 'integration' ]; then
-			make create-temp-data-files TASK=integration-test
 			make destroy-hk-integration-tester STACK=integration-test PROFILE=$(PROFILE)
-			make remove-temp-data-files TASK=integration-test
 		else
 			make create-temp-data-files TASK=$(TASK)
 			make terraform-destroy-auto-approve STACK=$(TASK) PROFILE=$(PROFILE)
@@ -671,19 +669,25 @@ push-hk-integration-tester-image: #
 	make docker-push NAME=hk-integration-tester
 
 provision-hk-integration-tester: ## mandatory: PROFILE=[name], STACK=[integration-test]
+	make create-temp-data-files TASK=$(STACK)
 	echo "Provisioning $(PROFILE) lambda for hk-integration tester"
 	eval "$$(make secret-fetch-and-export-variables)"
 	make terraform-apply-auto-approve STACK=$(STACK) PROFILE=$(PROFILE)
+	make remove-temp-data-files TASK=$(STACK)
 
 destroy-hk-integration-tester: ## mandatory: PROFILE=[name], STACK=[integration-test]
 	echo "Destroying $(PROFILE) lambda for hk-integration tester"
+	make create-temp-data-files TASK=$(STACK)
 	eval "$$(make secret-fetch-and-export-variables)"
 	make terraform-destroy-auto-approve STACK=$(STACK) PROFILE=$(PROFILE)
+	make remove-temp-data-files TASK=$(STACK)
 
 plan-hk-integration-tester: ## mandatory: PROFILE=[name], STACK=[integration-test]
 	echo "Planning $(PROFILE) lambda for $(STACK)"
+	make create-temp-data-files TASK=$(STACK)
 	eval "$$(make secret-fetch-and-export-variables)"
 	make terraform-plan STACK=$(STACK) PROFILE=$(PROFILE)
+	make remove-temp-data-files TASK=$(STACK)
 
 copy-temp-integration-test-files:
 	rm -rf $(APPLICATION_DIR)/hk/integration
