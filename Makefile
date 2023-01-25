@@ -215,18 +215,22 @@ destroy: # To destroy cron and hk lambdas - mandatory: PROFILE=[name], TASK=[hk 
 # eg make destroy PROFILE=nonprod TASK=symptomgroups
 destroy-hk: # Destroy housekeeping lambda - mandatory: PROFILE=[name], TASK=[hk task]
 	task_type=$$(make task-type NAME=$(TASK))
-	make create-temp-data-files TASK=$(TASK)
+
 	if [ "$$task_type" == 'hk' ]; then
 		eval "$$(make secret-fetch-and-export-variables)"
 		if [ "$(TASK)" == 'integration' ]; then
+			make create-temp-data-files TASK=integration-test
 			make destroy-hk-integration-tester STACK=integration-test PROFILE=$(PROFILE)
+			make remove-temp-data-files TASK=integration-test
 		else
+			make create-temp-data-files TASK=$(TASK)
 			make terraform-destroy-auto-approve STACK=$(TASK) PROFILE=$(PROFILE)
+			make remove-temp-data-files TASK=$(TASK)
 		fi
 	else
 		echo $(TASK) is not an hk job
 	fi
-	make remove-temp-data-files TASK=$(TASK)
+
 
 # make destroy-all-cron PROFILE=nonprod
 destroy-all-cron: ## Clear down every cron for every db - mandatory [PROFILE]
