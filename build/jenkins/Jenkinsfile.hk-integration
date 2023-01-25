@@ -42,14 +42,14 @@ pipeline {
                 script { sh 'make show-configuration' }
             }
         }
-        // stage('Precautionary teardown hk infrastructure') {
-        //     steps {
-        //         script {
-        //             echo 'Precautionary cleardown hk lambdas and integration test infrastructure'
-        //             sh "make destroy PROFILE=${PROFILE} TASK=${TASK}"
-        //         }
-        //     }
-        // }
+        stage('Precautionary teardown hk infrastructure') {
+            steps {
+                script {
+                    echo 'Precautionary cleardown hk lambdas and integration test infrastructure'
+                    sh "make destroy PROFILE=${PROFILE} TASK=${TASK}"
+                }
+            }
+        }
         stage('Triggering build of database') {
             steps {
                 echo "Running pathwaysdos_v4 pipeline ${DB_BUILD_JOB_NAME}"
