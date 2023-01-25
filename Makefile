@@ -112,13 +112,14 @@ provision: ## provision resources for hk and cron - mandatory PROFILE TASK  and 
 provision-hk: ## Provision environment - mandatory: PROFILE=[name], TASK=[task]
 	eval "$$(make secret-fetch-and-export-variables)"
 	echo "Provisioning $(PROFILE) lambda for hk task $(TASK)"
-	make create-temp-data-files TASK=$(TASK)
 	if [ "$(TASK)" == 'integration' ]; then
 		make provision-hk-integration-tester STACK=integration-test
 	else
+		make create-temp-data-files TASK=$(TASK)
 		make terraform-apply-auto-approve STACK=$(TASK) PROFILE=$(PROFILE)
+		make remove-temp-data-files TASK=$(TASK)
 	fi
-	make remove-temp-data-files TASK=$(TASK)
+
 
 provision-cron: ## cron specific version of provision PROFILE TASK DB_NAME
 	echo "Provisioning $(PROFILE) lambda $(TASK)-$(DB_NAME) for cron job"
@@ -165,14 +166,15 @@ plan: # Plan cron and hk lambdas - mandatory: PROFILE=[name], TASK=[hk task] DB_
 
 plan-hk: # Plan housekeeping lambda - mandatory: PROFILE=[name], TASK=[hk task]
 	echo "Planning for hk task $(TASK)"
-	make create-temp-data-files TASK=$(TASK)
 	eval "$$(make secret-fetch-and-export-variables)"
 	if [ "$(TASK)" == 'integration' ]; then
 			make plan-hk-integration-tester STACK=integration-test PROFILE=$(PROFILE)
 	else
+			make create-temp-data-files TASK=$(TASK)
 			make terraform-plan STACK=$(TASK) PROFILE=$(PROFILE)
+			make remove-temp-data-files TASK=$(TASK)
 	fi
-	make remove-temp-data-files TASK=$(TASK)
+
 
 plan-cron: # Plan cron job - mandatory: PROFILE=[name], TASK=[hk task] DB_NAME
 	echo "Planning for cron job $(TASK)-$(DB_NAME)"
