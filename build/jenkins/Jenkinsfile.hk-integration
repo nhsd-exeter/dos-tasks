@@ -5,6 +5,11 @@ pipeline {
             description: 'Debug mode - true will not tear down hk lambdas or database',
             name: 'Debug',
             defaultValue: false
+        ),
+        booleanParam(
+            description: 'true will do preliminary tear down hk lambdas or database',
+            name: 'Preliminary',
+            defaultValue: true
         )
     }
 
@@ -43,6 +48,7 @@ pipeline {
             }
         }
         stage('Precautionary teardown hk infrastructure') {
+            when { expression { params.Preliminary == true } }
             steps {
                 script {
                     echo 'Precautionary cleardown hk lambdas and integration test infrastructure'
