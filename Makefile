@@ -13,6 +13,7 @@ copy-cron-template-stack: ## update placeholder value for cron job target databa
 			$(TERRAFORM_DIR)/$(STACK)/cron-template/$(TASK)/main.tf
 	cp $(TERRAFORM_DIR)/$(STACK)/cron-template/$(TASK)/*.tf $(TERRAFORM_DIR)/$(STACK)/$(TASK)-$(DB_NAME)
 	cp $(TERRAFORM_DIR)/tasks-common/role-data.tf $(TERRAFORM_DIR)/$(STACK)/$(TASK)-$(DB_NAME)/role-data.tf
+	cp $(TERRAFORM_DIR)/tasks-common/security-group-data.tf $(TERRAFORM_DIR)/$(STACK)/$(TASK)-$(DB_NAME)/security-group-data.tf
 
 build-stack-for-cron-job: ## create a stack for cron and db - cron tasks only mandatory: TASK=[task] DB_NAME=[db name minus prefix eg test not pathwaysdos-test]
 	task_type=$$(make task-type NAME=$(TASK))
@@ -598,10 +599,12 @@ aws-ecr-get-security-threshold-scan:  ## Reports if vulnerabilities exist at thr
 create-temp-data-files: # Copies role-data file to required lambda stack - Mandatory: TASK - name of task stack to copy data file for iam role
 	cp $(TERRAFORM_DIR)/tasks-common/role-data.tf $(TERRAFORM_DIR)/$(TASK)/role-data.tf
 	cp $(TERRAFORM_DIR)/tasks-common/bucket-data.tf $(TERRAFORM_DIR)/$(TASK)/bucket-data.tf
+	cp $(TERRAFORM_DIR)/tasks-common/security-group-data.tf $(TERRAFORM_DIR)/$(TASK)/security-group-data.tf
 
 remove-temp-data-files: # Removes temp copy of role data file from TASK related stack - Mandatory: TASK - name of stack
 	rm -f $(TERRAFORM_DIR)/$(TASK)/role-data.tf
 	rm -f $(TERRAFORM_DIR)/$(TASK)/bucket-data.tf
+	rm -f $(TERRAFORM_DIR)/$(TASK)/security-group-data.tf
 
 
 create_temp_bucket_data_file: # Add bucket data file to terraform for each hk task and for creation of iam role Mandatory TASk
