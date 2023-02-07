@@ -20,9 +20,3 @@ data "aws_subnet" "texas_subnet" {
   count = length(data.aws_subnet_ids.texas_subnet_ids.ids)
   id    = tolist(data.aws_subnet_ids.texas_subnet_ids.ids)[count.index]
 }
-
-data "aws_security_group" "lambda_sg" {
-  name = "${var.service_prefix}-hk-sg"
-}
-
-
