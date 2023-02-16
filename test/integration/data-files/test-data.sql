@@ -40,3 +40,11 @@ values (1121,4017);
 -- create record to symptomdiscriminatorsynonyms job to delete later
 insert into pathwaysdos.symptomdiscriminatorsynonyms (name, symptomdiscriminatorid)
 values ('Integration test delete','11009');
+--
+--for stt integration testing
+-- remove all existing stt scenarios
+delete from scenarios s
+where s.scenarioid is not null
+-- remove all existing stt bundles
+delete from scenariobundles sb
+where sb.id is not null

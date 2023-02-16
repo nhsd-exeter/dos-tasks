@@ -313,6 +313,7 @@ build-tester: # Builds image used for testing - mandatory: PROFILE=[name]
 	mkdir $(DOCKER_DIR)/tester/assets/integration/data-files
 	cp $(APPLICATION_TEST_DIR)/integration/data-files/* $(DOCKER_DIR)/tester/assets/integration/data-files
 	make docker-image NAME=tester
+	rm -rf $(DOCKER_DIR)/tester/assets/integration
 
 push-tester: # Pushes image used for testing - mandatory: PROFILE=[name]
 	make docker-push NAME=tester
