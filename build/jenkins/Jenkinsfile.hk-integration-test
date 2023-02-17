@@ -27,6 +27,7 @@ pipeline {
         BUCKET = "${params.Bucket}"
         PROFILE = "${params.Profile}"
         FILENAME = "int_${TASK}.csv"
+        STT_FILENAME = '36.2.0_stt.zip'
         MAX_ATTEMPTS = 10
     }
     triggers { pollSCM("* * * * *") }
@@ -36,7 +37,30 @@ pipeline {
                 script { sh 'make show-configuration' }
             }
         }
+        stage('Load stt scenario zipfile to s3') {
+            when { expression { params.Task == "stt" } }
+            steps {
+                script {
+                    echo "Loading test file ${STT_FILENAME} to s3 bucket ${BUCKET}"
+                    catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                        sh "make load-single-integration-test-file-to-s3 FILENAME=${STT_FILENAME} BUCKET=${BUCKET}"
+                    }
+                }
+            }
+        }
+        stage('Check archive folder for stt zipfile file') {
+            when { expression { params.Task == "stt" } }
+            steps {
+                script {
+                    echo "Checking archive folder in s3 bucket ${BUCKET} for test file ${STT_FILENAME}"
+                    catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                        sh "make check-single-integration-test-file MAX_ATTEMPTS=${MAX_ATTEMPTS} FILENAME=${STT_FILENAME} BUCKET=${BUCKET}/archive"
+                    }
+                }
+            }
+        }
         stage('Load test file to s3') {
+            when { expression { params.Task != "stt" } }
             steps {
                 script {
                     echo "Loading test file ${FILENAME} to s3 bucket ${BUCKET}"
@@ -47,6 +71,7 @@ pipeline {
             }
         }
         stage('Check archive folder for test file') {
+            when { expression { params.Task != "stt" } }
             steps {
                 script {
                     echo "Checking archive folder in s3 bucket ${BUCKET} for test file ${FILENAME}"

@@ -8,7 +8,7 @@ from .. import handler
 
 file_path = "application.hk.integration.handler"
 env = 'integration'
-valid_tasks = ("data","symptomgroups","referralroles", "servicetypes", "symptomdiscriminators", "symptomgroupdiscriminators", "symptomdiscriminatorsynonyms")
+valid_tasks = ("data","symptomgroups","referralroles", "servicetypes", "symptomdiscriminators", "symptomgroupdiscriminators", "symptomdiscriminatorsynonyms", "stt")
 
 @patch(f"{file_path}.logger.log_for_audit")
 def test_is_valid_task_invalid_lc(mock_logger):
@@ -36,7 +36,7 @@ def test_valid_task_list():
 # This may be hard to maintain as nothing in this list can be in its actual position
 # add any new task as penultimate in list
 def test_invalid_task_list():
-    temp_valid_tasks = ("symptomgroups","referralroles","servicetypes","symptomdiscriminators","symptomgroupdiscriminators","symptomdiscriminatorsynonyms","data")
+    temp_valid_tasks = ("symptomgroups","referralroles","servicetypes","symptomdiscriminators","symptomgroupdiscriminators","symptomdiscriminatorsynonyms","stt", "data")
     assert len(handler.valid_tasks) == len(temp_valid_tasks)
     for i in range(len(handler.valid_tasks)):
         assert handler.valid_tasks[i] != temp_valid_tasks[i]
