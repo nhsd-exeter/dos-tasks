@@ -43,8 +43,8 @@ values ('Integration test delete','11009');
 --
 --for stt integration testing
 -- remove all existing stt scenarios
-delete from scenarios s
-where s.scenarioid is not null
+delete from pathwaysdos.scenarios s
+where s.scenarioid is not null;
 -- remove all existing stt bundles
-delete from scenariobundles sb
-where sb.id is not null
+delete from pathwaysdos.scenariobundles sb
+where sb.id is not null;
