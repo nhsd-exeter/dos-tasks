@@ -14,7 +14,7 @@ expected_scenario_id = 893
 expected_symptomgroup_id = 1014
 expected_symptom_discriminator_id = 4499
 expected_age_id = 1
-expected_gender_id = 1
+expected_gender_id = 2
 
 
 def get_stt_scenario_data(env, db_connection):
