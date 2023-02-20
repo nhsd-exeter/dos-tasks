@@ -35,7 +35,7 @@ pipeline {
         DB_SUFFIX = 'tasks'
         PIPELINE_DATABASE = "${DB_PREFIX}_${ENVIRONMENT}"
         BUCKET = "uec-dos-tasks-${PROFILE}-housekeeping-bucket/${ENVIRONMENT}"
-        DB_HOST = 'uec-core-dos-pipeline-primary.dos-db-rds'
+        DB_HOST = 'uec-core-dos-integration-data.dos-db-rds'
         SLACK_CHANNEL = 'dos-tasks-integration-notifications'
         PATHWAYSDOS_V4_BRANCH = 'develop'
         BRANCH_NAME = sh(returnStdout: true, script: "make git-branch-format BRANCH_NAME=${GIT_BRANCH}").trim()
