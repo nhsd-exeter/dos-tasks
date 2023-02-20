@@ -15,5 +15,5 @@ variable "vpc_terraform_state_key" {
 # }
 
 variable "db_security_group_name" {
-    description = "Identifier of security group attached to datastore"
+  description = "Identifier of security group attached to datastore"
 }
