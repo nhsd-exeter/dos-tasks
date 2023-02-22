@@ -32,8 +32,9 @@ TF_VAR_hk_integration_tester_lambda_function_name = $(PROJECT_ID)-$(ENV)-$(TF_VA
 # Lambda layer
 TF_VAR_uec_dos_tasks_python_libs = uec-dos-tasks-python-libs
 
-TF_VAR_db_security_group_name = live-lk8s-nonprod-core-dos-db-rds-postgres-sg
-#  aurora = uec-core-dos-integration-datastore-sg
+TF_VAR_db_security_group_name = uec-core-dos-integration-datastore-sg
+# pipeline rds live-lk8s-nonprod-core-dos-db-rds-postgres-sg
+#  integration aurora = uec-core-dos-integration-datastore-sg
 
 # Build slack secrets
 TF_VAR_sm_required = true
