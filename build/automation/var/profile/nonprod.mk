@@ -27,4 +27,4 @@ TF_VAR_splunk_firehose_role := dos_cw_w_events_firehose_access_role
 
 LAMBDA_VERSIONS_TO_RETAIN = 5
 
-TF_VAR_db_security_group_name = live-lk8s-nonprod-core-dos-db-rds-postgres-sg
+TF_VAR_db_security_group_name = uec-core-dos-integration-datastore-sg
