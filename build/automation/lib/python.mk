@@ -5,7 +5,7 @@ PYTHON_VERSION = $(PYTHON_VERSION_MAJOR).$(PYTHON_VERSION_MINOR).$(PYTHON_VERSIO
 PYTHON_BASE_PACKAGES = \
 	awscli-local==0.18 \
 	awscli==1.22.64 \
-	black==22.1.0 \
+	black==22.3.0 \
 	boto3==1.21.9 \
 	bpython \
 	configparser \

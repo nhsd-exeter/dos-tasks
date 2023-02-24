@@ -24,5 +24,5 @@ TF_VAR_splunk_firehose_role := dos_cw_w_events_firehose_access_role
 
 LAMBDA_VERSIONS_TO_RETAIN = 5
 
-# Derive the security group for RDS
-TF_VAR_db_identifier = uec-core-dos-live-db-12
+#TODO can be changed to new SG when available in live 
+TF_VAR_db_security_group_name = live-lk8s-prod-core-dos-db-rds-postgres-sg

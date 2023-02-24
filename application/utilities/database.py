@@ -148,7 +148,7 @@ class DB:
             else:
                 connection_details_set = False
                 logger.log_for_diagnostics(env, "No DB_PASSWORD secret set")
-            if profile != "prod" and env != "performance":
+            if profile != "live" and env != "performance":
                 self.db_name = "pathwaysdos_{}".format(env)
             else:
                 self.db_name = "pathwaysdos"
