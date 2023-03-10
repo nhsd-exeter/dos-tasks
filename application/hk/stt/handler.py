@@ -81,6 +81,19 @@ def file_check(zipped_element):
     else:
         return True
 
+def validate_symptom_discriminator_id(env, symptom_discriminator_id, db_connection):
+    is_valid = False
+    query, data = get_symptom_discriminator_by_id_query(symptom_discriminator_id)
+    result_set = database.execute_resultset_query(env, db_connection, query, data)
+    if len(result_set) > 0:
+        is_valid = True
+    return is_valid
+
+def get_symptom_discriminator_by_id_query(symptom_discriminator_id):
+    query = """select sd.id from pathwaysdos.symptomdiscriminators sd where sd.id = %s"""
+    data = (symptom_discriminator_id,)
+    return query, data
+
 
 def validate_template_scenario(env, template_scenario):
     valid_template = True
@@ -93,6 +106,11 @@ def validate_template_scenario(env, template_scenario):
         logger.log_for_audit(
             env, "Scenario {} references unrecognised disposition group".format(template_scenario.scenario_id)
         )
+    if template_scenario.symptom_discriminator_id is None:
+        logger.log_for_audit(
+            env, "Scenario {} references unrecognised symptom discriminator".format(template_scenario.scenario_id)
+        )
+        valid_template = False
     return valid_template
 
 
@@ -164,7 +182,8 @@ def process_scenario_file(env, file_name, scenario_file, bundle_id, db_connectio
         disposition_id = get_disposition_id(env, scenario_dict, db_connection)
         disposition_group_id = get_disposition_group_id(env, scenario_dict, db_connection)
         triage_report, symptom_discriminator_id = get_triage_line_data(scenario_dict)
-
+        if not validate_symptom_discriminator_id(env, symptom_discriminator_id, db_connection):
+            symptom_discriminator_id = None
         template_scenario = scenario.Scenario(
             bundle_id,
             scenario_id,
