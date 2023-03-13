@@ -81,6 +81,14 @@ def file_check(zipped_element):
     else:
         return True
 
+def validate_symptom_group_id(env, symptom_group_id, db_connection):
+    is_valid = False
+    query, data = get_symptom_group_by_id_query(symptom_group_id)
+    result_set = database.execute_resultset_query(env, db_connection, query, data)
+    if len(result_set) > 0:
+        is_valid = True
+    return is_valid
+
 def validate_symptom_discriminator_id(env, symptom_discriminator_id, db_connection):
     is_valid = False
     query, data = get_symptom_discriminator_by_id_query(symptom_discriminator_id)
@@ -184,6 +192,8 @@ def process_scenario_file(env, file_name, scenario_file, bundle_id, db_connectio
         triage_report, symptom_discriminator_id = get_triage_line_data(scenario_dict)
         if not validate_symptom_discriminator_id(env, symptom_discriminator_id, db_connection):
             symptom_discriminator_id = None
+        if not validate_symptom_group_id(env, symptom_group_id, db_connection):
+            symptom_group_id = None
         template_scenario = scenario.Scenario(
             bundle_id,
             scenario_id,
@@ -290,6 +300,10 @@ def get_symptom_group_id(scenario_dict):
     symptom_group_id = scenario_dict["NHSPathways"]["PathwaysCase"]["SymptomGroup"]
     return symptom_group_id
 
+def get_symptom_group_by_id_query(symptom_group_id):
+    query = """select id from pathwaysdos.symptomgroups where id = %s"""
+    data = (symptom_group_id,)
+    return query, data
 
 def get_disposition_code(scenario_dict):
     disposition_code = scenario_dict["NHSPathways"]["PathwaysCase"]["TriageDisposition"]["DispositionCode"]
