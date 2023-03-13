@@ -119,6 +119,11 @@ def validate_template_scenario(env, template_scenario):
             env, "Scenario {} references unrecognised symptom discriminator".format(template_scenario.scenario_id)
         )
         valid_template = False
+    if template_scenario.symptom_group_id is None:
+        logger.log_for_audit(
+            env, "Scenario {} references unrecognised symptom group".format(template_scenario.scenario_id)
+        )
+        valid_template = False
     return valid_template
 
 

@@ -594,6 +594,22 @@ def test_validate_template_scenario_invalid_symptom_discriminator(mock_dispositi
     mock_sg_validator.assert_called_once()
 
 @patch("psycopg2.connect")
+@patch(f"{file_path}.validate_symptom_group_id",return_value=False)
+@patch(f"{file_path}.validate_symptom_discriminator_id",return_value=True)
+@patch(f"{file_path}.logger.log_for_audit")
+@patch(f"{file_path}.get_disposition_group_id",return_value=7)
+@patch(f"{file_path}.get_disposition_id",return_value=8)
+def test_validate_template_scenario_invalid_symptom_group(mock_disposition, mock_disposition_group, mock_logger, mock_sd_validator, mock_sg_validator, mock_db_connect):
+    template_scenario = handler.process_scenario_file(env, sample_scenario_file_name,convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
+    valid_template = handler.validate_template_scenario(env, template_scenario)
+    assert valid_template == False
+    assert mock_logger.call_count == 1
+    mock_disposition.assert_called_once()
+    mock_disposition_group.assert_called_once()
+    mock_sd_validator.assert_called_once()
+    mock_sg_validator.assert_called_once()
+
+@patch("psycopg2.connect")
 @patch(f"{file_path}.get_disposition_group_id_query")
 @patch(f"{file_path}.database.execute_resultset_query")
 def test_get_disposition_group_id(mock_execute, mock_query, mock_db_connect):
