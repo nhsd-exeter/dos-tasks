@@ -175,6 +175,14 @@ def test_get_symptom_group_id():
     symptom_group = handler.get_symptom_group_id(scenario_dict)
     assert symptom_group == expected_symptom_group_id
 
+def test_get_symptom_group_by_id_query():
+    """Test function to build query to look up symptomgroup id"""
+    scenario_dict = handler.map_xml_to_json(convert_file_to_stream(sample_scenario_file_name))
+    symptom_group_id = handler.get_symptom_group_id(scenario_dict)
+    query, data = handler.get_symptom_group_by_id_query(symptom_group_id)
+    assert query == """select id from pathwaysdos.symptomgroups where id = %s"""
+    assert data == (symptom_group_id,)
+
 def test_get_disposition_id_query():
     """Test function to build query to look up disposition id from code"""
     scenario_dict = handler.map_xml_to_json(convert_file_to_stream(sample_scenario_file_name))
@@ -209,6 +217,26 @@ def test_get_disposition_group_id_query_empty_element():
     assert data == (disposition_group_uid,)
     assert disposition_group_uid == None
 
+
+@patch("psycopg2.connect")
+@patch(f"{file_path}.get_symptom_discriminator_by_id_query",side_effect=[{1:'',2:''}])
+@patch(f"{file_path}.database.execute_resultset_query",return_value=[{"id":1}])
+def test_valid_symptom_discriminator_id(mock_execute, mock_query, mock_db_connect):
+    """Test function to derive id of disposition from db based on code"""
+    symptom_discriminator_id = 1234
+    assert handler.validate_symptom_discriminator_id(env, symptom_discriminator_id, mock_db_connect)
+    mock_query.assert_called_once()
+    mock_execute.assert_called_once()
+
+@patch("psycopg2.connect")
+@patch(f"{file_path}.get_symptom_discriminator_by_id_query",side_effect=[{1:'',2:''}])
+@patch(f"{file_path}.database.execute_resultset_query",return_value=[])
+def test_invalid_symptom_discriminator_id(mock_execute, mock_query, mock_db_connect):
+    """Test function to derive id of disposition from db based on code"""
+    symptom_discriminator_id = 1234
+    assert handler.validate_symptom_discriminator_id(env, symptom_discriminator_id, mock_db_connect) == False
+    mock_query.assert_called_once()
+    mock_execute.assert_called_once()
 
 #
 @patch("psycopg2.connect")
@@ -298,9 +326,45 @@ def test_get_triage_line_data():
     assert symptom_discriminator_id == expected_symptom_discriminator_id
 
 @patch("psycopg2.connect")
+@patch(f"{file_path}.validate_symptom_group_id",return_value=False)
+@patch(f"{file_path}.validate_symptom_discriminator_id",return_value=True)
 @patch(f"{file_path}.get_disposition_group_id",return_value=5)
 @patch(f"{file_path}.get_disposition_id",return_value=6)
-def test_process_scenario(mock_disposition, mock_disposition_group, mock_db_connect):
+def test_process_scenario_invalid_symptom_group(mock_disposition, mock_disposition_group, mock_sd_validator, mock_sg_validator, mock_db_connect):
+    scenario = handler.process_scenario_file(env, sample_scenario_file_name, convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
+    assert scenario.bundle_id == bundle_id
+    assert scenario.scenario_id == expected_scenario_id
+    assert scenario.symptom_group_id == None
+    assert scenario.disposition_id == 6
+    assert scenario.disposition_group_id == 5
+    assert len(scenario.triage_report) == expected_triage_report_length
+    assert scenario.symptom_discriminator_id == expected_symptom_discriminator_id
+    assert scenario.gender_id == expected_gender_id
+    assert scenario.age_id == expected_age_id
+
+@patch("psycopg2.connect")
+@patch(f"{file_path}.validate_symptom_group_id",return_value=True)
+@patch(f"{file_path}.validate_symptom_discriminator_id",return_value=False)
+@patch(f"{file_path}.get_disposition_group_id",return_value=5)
+@patch(f"{file_path}.get_disposition_id",return_value=6)
+def test_process_scenario_invalid_symptom_discriminator(mock_disposition, mock_disposition_group, mock_sd_validator, mock_sg_validator, mock_db_connect):
+    scenario = handler.process_scenario_file(env, sample_scenario_file_name, convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
+    assert scenario.bundle_id == bundle_id
+    assert scenario.scenario_id == expected_scenario_id
+    assert scenario.symptom_group_id == expected_symptom_group_id
+    assert scenario.disposition_id == 6
+    assert scenario.disposition_group_id == 5
+    assert len(scenario.triage_report) == expected_triage_report_length
+    assert scenario.symptom_discriminator_id == None
+    assert scenario.gender_id == expected_gender_id
+    assert scenario.age_id == expected_age_id
+
+@patch("psycopg2.connect")
+@patch(f"{file_path}.validate_symptom_group_id",return_value=True)
+@patch(f"{file_path}.validate_symptom_discriminator_id",return_value=True)
+@patch(f"{file_path}.get_disposition_group_id",return_value=5)
+@patch(f"{file_path}.get_disposition_id",return_value=6)
+def test_process_scenario(mock_disposition, mock_disposition_group, mock_sd_validator, mock_sg_validator, mock_db_connect):
     scenario = handler.process_scenario_file(env, sample_scenario_file_name, convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
     assert scenario.bundle_id == bundle_id
     assert scenario.scenario_id == expected_scenario_id
@@ -317,29 +381,37 @@ def test_process_malformed_scenario():
         handler.process_scenario_file(malformed_scenario_file_name,convert_file_to_stream(malformed_scenario_file_name), bundle_id)
 
 @patch("psycopg2.connect")
+@patch(f"{file_path}.validate_symptom_group_id",return_value=True)
+@patch(f"{file_path}.validate_symptom_discriminator_id",return_value=True)
 @patch(f"{file_path}.get_disposition_group_id",return_value=5)
 @patch(f"{file_path}.get_disposition_id",return_value=5)
-def test_process_zipfile(mock_disposition, mock_disposition_group, mock_db_connect):
+def test_process_zipfile(mock_disposition, mock_disposition_group, mock_sd_validator, mock_sg_validator, mock_db_connect):
     scenario_count = handler.initialise_count()
     bundle = get_compressed_object(sample_bundle_file_name)
     processed = handler.process_zipfile(env, mock_db_connect, bundle,mock_zip_filename, bundle_id, scenario_count)
     assert processed == True
     assert mock_disposition.call_count == 3
     assert mock_disposition_group.call_count == 3
+    assert mock_sd_validator.call_count == 3
+    assert mock_sg_validator.call_count == 3
     assert scenario_count['added'] == 3
     assert scenario_count['rejected'] == 0
     assert scenario_count['nfa'] == 0
 
 @patch("psycopg2.connect")
+@patch(f"{file_path}.validate_symptom_group_id",return_value=True)
+@patch(f"{file_path}.validate_symptom_discriminator_id",return_value=True)
 @patch(f"{file_path}.get_disposition_group_id",return_value=5)
 @patch(f"{file_path}.get_disposition_id",return_value=5)
-def test_process_zipfile_with_folder(mock_disposition, mock_disposition_group, mock_db_connect):
+def test_process_zipfile_with_folder(mock_disposition, mock_disposition_group, mock_sd_validator, mock_sg_validator, mock_db_connect):
     scenario_count = handler.initialise_count()
     bundle = get_compressed_object(sample_compressed_folder_file_name)
     processed = handler.process_zipfile(env, mock_db_connect, bundle,mock_zip_filename, bundle_id, scenario_count)
     assert processed == True
     assert mock_disposition.call_count == 4
     assert mock_disposition_group.call_count == 4
+    assert mock_sd_validator.call_count == 4
+    assert mock_sg_validator.call_count == 4
     assert scenario_count['added'] == 4
     assert scenario_count['rejected'] == 0
     assert scenario_count['nfa'] == 0
@@ -442,9 +514,11 @@ def test_get_bundle_insert_query():
     assert data == (bundle_id,)
 
 @patch("psycopg2.connect")
+@patch(f"{file_path}.validate_symptom_group_id",return_value=True)
+@patch(f"{file_path}.validate_symptom_discriminator_id",return_value=True)
 @patch(f"{file_path}.get_disposition_group_id",return_value=7)
 @patch(f"{file_path}.get_disposition_id",return_value=8)
-def test_get_scenario_insert_query( mock_disposition, mock_disposition_group, mock_db_connect):
+def test_get_scenario_insert_query( mock_disposition, mock_disposition_group, mock_sd_validator, mock_sg_validator, mock_db_connect):
     expected_triage_report = "One.Two.Three"
     template_scenario = handler.process_scenario_file(env, sample_scenario_file_name,convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
     template_scenario.triage_report = expected_triage_report
@@ -466,12 +540,16 @@ dispositiongroupid, symptomdiscriminatorid, ageid, genderid, triagereport, creat
     )
     mock_disposition.assert_called_once()
     mock_disposition_group.assert_called_once()
+    mock_sd_validator.assert_called_once()
+    mock_sg_validator.assert_called_once()
 
 @patch("psycopg2.connect")
+@patch(f"{file_path}.validate_symptom_group_id",return_value=True)
+@patch(f"{file_path}.validate_symptom_discriminator_id",return_value=True)
 @patch(f"{file_path}.logger.log_for_audit")
 @patch(f"{file_path}.get_disposition_group_id",return_value=7)
 @patch(f"{file_path}.get_disposition_id",return_value=8)
-def test_validate_template_scenario_invalid_disposition(mock_disposition, mock_disposition_group, mock_logger, mock_db_connect):
+def test_validate_template_scenario_invalid_disposition(mock_disposition, mock_disposition_group, mock_logger, mock_sd_validator, mock_sg_validator, mock_db_connect):
     template_scenario = handler.process_scenario_file(env, sample_scenario_file_name,convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
     template_scenario.disposition_id = None
     valid_template = handler.validate_template_scenario(env, template_scenario)
@@ -479,12 +557,16 @@ def test_validate_template_scenario_invalid_disposition(mock_disposition, mock_d
     assert mock_logger.call_count == 1
     mock_disposition.assert_called_once()
     mock_disposition_group.assert_called_once()
+    mock_sd_validator.assert_called_once()
+    mock_sg_validator.assert_called_once()
 
 @patch("psycopg2.connect")
+@patch(f"{file_path}.validate_symptom_group_id",return_value=True)
+@patch(f"{file_path}.validate_symptom_discriminator_id",return_value=True)
 @patch(f"{file_path}.logger.log_for_audit")
 @patch(f"{file_path}.get_disposition_group_id",return_value=7)
 @patch(f"{file_path}.get_disposition_id",return_value=8)
-def test_validate_template_scenario_invalid_disposition_group(mock_disposition, mock_disposition_group, mock_logger, mock_db_connect):
+def test_validate_template_scenario_invalid_disposition_group(mock_disposition, mock_disposition_group, mock_logger, mock_sd_validator, mock_sg_validator, mock_db_connect):
     template_scenario = handler.process_scenario_file(env, sample_scenario_file_name,convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
     template_scenario.disposition_group_id = None
     valid_template = handler.validate_template_scenario(env, template_scenario)
@@ -492,6 +574,40 @@ def test_validate_template_scenario_invalid_disposition_group(mock_disposition, 
     assert mock_logger.call_count == 1
     mock_disposition.assert_called_once()
     mock_disposition_group.assert_called_once()
+    mock_sd_validator.assert_called_once()
+    mock_sg_validator.assert_called_once()
+
+@patch("psycopg2.connect")
+@patch(f"{file_path}.validate_symptom_group_id",return_value=True)
+@patch(f"{file_path}.validate_symptom_discriminator_id",return_value=False)
+@patch(f"{file_path}.logger.log_for_audit")
+@patch(f"{file_path}.get_disposition_group_id",return_value=7)
+@patch(f"{file_path}.get_disposition_id",return_value=8)
+def test_validate_template_scenario_invalid_symptom_discriminator(mock_disposition, mock_disposition_group, mock_logger, mock_sd_validator, mock_sg_validator, mock_db_connect):
+    template_scenario = handler.process_scenario_file(env, sample_scenario_file_name,convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
+    valid_template = handler.validate_template_scenario(env, template_scenario)
+    assert valid_template == False
+    assert mock_logger.call_count == 1
+    mock_disposition.assert_called_once()
+    mock_disposition_group.assert_called_once()
+    mock_sd_validator.assert_called_once()
+    mock_sg_validator.assert_called_once()
+
+@patch("psycopg2.connect")
+@patch(f"{file_path}.validate_symptom_group_id",return_value=False)
+@patch(f"{file_path}.validate_symptom_discriminator_id",return_value=True)
+@patch(f"{file_path}.logger.log_for_audit")
+@patch(f"{file_path}.get_disposition_group_id",return_value=7)
+@patch(f"{file_path}.get_disposition_id",return_value=8)
+def test_validate_template_scenario_invalid_symptom_group(mock_disposition, mock_disposition_group, mock_logger, mock_sd_validator, mock_sg_validator, mock_db_connect):
+    template_scenario = handler.process_scenario_file(env, sample_scenario_file_name,convert_file_to_stream(sample_scenario_file_name),bundle_id, mock_db_connect)
+    valid_template = handler.validate_template_scenario(env, template_scenario)
+    assert valid_template == False
+    assert mock_logger.call_count == 1
+    mock_disposition.assert_called_once()
+    mock_disposition_group.assert_called_once()
+    mock_sd_validator.assert_called_once()
+    mock_sg_validator.assert_called_once()
 
 @patch("psycopg2.connect")
 @patch(f"{file_path}.get_disposition_group_id_query")
@@ -576,6 +692,13 @@ def test_insert_duplicate_template_scenario(mock_insert, mock_execute, mock_logg
     assert mock_insert.call_count == 0
     assert mock_execute.call_count == 0
     assert mock_is_new.call_count == 1
+
+
+def test_get_symptom_discriminator_by_id_query():
+    symptom_discriminator_id = 1234
+    query,data = handler.get_symptom_discriminator_by_id_query(symptom_discriminator_id)
+    assert query == """select sd.id from pathwaysdos.symptomdiscriminators sd where sd.id = %s"""
+    assert data == (symptom_discriminator_id,)
 
 def generate_event_payload():
     """Utility function to generate dummy event data"""
