@@ -7,6 +7,11 @@ from utilities import secrets, logger, common
 secret_store = os.environ.get("SECRET_STORE")
 profile = os.environ.get("PROFILE")
 
+def derive_db_name(env):
+    if env == 'template':
+        return 'pipeline_template_latest'
+    else:
+        return  "pathwaysdos_{}".format(env)
 
 def close_connection(env, db_connection):
     # Close database connection
@@ -149,7 +154,7 @@ class DB:
                 connection_details_set = False
                 logger.log_for_diagnostics(env, "No DB_PASSWORD secret set")
             if profile != "live" and env != "performance":
-                self.db_name = "pathwaysdos_{}".format(env)
+                self.db_name = derive_db_name(env)
             else:
                 self.db_name = "pathwaysdos"
             logger.log_for_diagnostics(
