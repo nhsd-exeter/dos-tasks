@@ -174,9 +174,3 @@ class DB:
         except Exception as e:
             logger.log_for_error(env, "Connection parameters not set correctly")
             raise psycopg2.InterfaceError(e)
-
-    # def derive_db_name(self, env):
-    #     if env == 'template':
-    #         return 'pathwaysdos_template_latest'
-    #     else:
-    #         return  "pathwaysdos_{}".format(env)
