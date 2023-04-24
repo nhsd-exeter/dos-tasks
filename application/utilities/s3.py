@@ -30,6 +30,7 @@ class S3:
                 Bucket=bucket,
                 CopySource="{}/{}".format(bucket, file),
                 Key="{}/archive/{}".format(file.split("/")[0], file.split("/")[1]),
+                ServerSideEncryption='AES256',
             )
             return response
         except ClientError as e:
