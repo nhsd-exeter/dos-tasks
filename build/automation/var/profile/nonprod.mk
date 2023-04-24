@@ -27,4 +27,4 @@ TF_VAR_splunk_firehose_role := dos_cw_w_events_firehose_access_role
 
 LAMBDA_VERSIONS_TO_RETAIN = 5
 
-TF_VAR_db_security_group_name = uec-core-dos-integration-datastore-sg
+TF_VAR_db_security_group_name = uec-core-dos-pipeline-datastore-sg
