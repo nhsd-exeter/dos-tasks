@@ -171,7 +171,7 @@ aws-s3-upload: ### Upload file to bucket - mandatory: FILE=[local path (inside c
 	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
 		$(AWSCLI) s3 cp \
 			$(FILE) \
-			s3://$(URI) \
+			s3://$(URI) --sse AES256 \
 			$(ARGS) \
 	"
 
@@ -179,7 +179,7 @@ aws-s3-download: ### Download file from bucket - mandatory: URI=[remote path],FI
 	make -s docker-run-tools ARGS="$$(echo $(AWSCLI) | grep awslocal > /dev/null 2>&1 && echo '--env LOCALSTACK_HOST=$(LOCALSTACK_HOST)' ||:)" CMD=" \
 		$(AWSCLI) s3 cp \
 			s3://$(URI) \
-			$(FILE) \
+			$(FILE) --sse AES256 \
 			$(ARGS) \
 	"
 
