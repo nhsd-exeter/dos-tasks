@@ -1,4 +1,4 @@
-cron_string = env.BRANCH_NAME.equals("main") ? "29 17 * * *" : ""
+cron_string = env.BRANCH_NAME.equals("main") ? "01 18 * * *" : ""
 
 echo "Setting the cron schedule to: ${cron_string}"
 
