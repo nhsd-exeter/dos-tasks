@@ -44,12 +44,15 @@
       "Effect": "Deny",
       "NotPrincipal": {
         "AWS": [
-          "arn:aws:iam::AWS_ACCOUNT_ID_MGMT_TO_REPLACE:role/jenkins_assume_role",
-          "arn:aws:sts::AWS_ACCOUNT_ID_MGMT_TO_REPLACE:assumed-role/jenkins_assume_role/jenkins",
+          "arn:aws:iam::AWS_ACCOUNT_ID_MGMT_TO_REPLACE:role/uec-core-dos-jenkins-assume-role",
+          "arn:aws:sts::AWS_ACCOUNT_ID_MGMT_TO_REPLACE:assumed-role/uec-core-dos-jenkins-assume-role/jenkins",
           "arn:aws:iam::AWS_ACCOUNT_ID_MGMT_TO_REPLACE:root"
         ]
       },
-      "Action": ["ecr:BatchDeleteImage", "ecr:DeleteRepository"]
+      "Action": [
+        "ecr:BatchDeleteImage",
+        "ecr:DeleteRepository"
+      ]
     }
   ]
 }
