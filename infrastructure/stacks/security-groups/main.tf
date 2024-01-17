@@ -9,6 +9,22 @@ resource "aws_security_group" "hk_lambda_sg" {
     protocol        = "tcp"
     security_groups = [data.aws_security_group.datastore.id]
   }
+
+  egress {
+    description     = "Core DoS Performance DB Access"
+    from_port       = 5432
+    to_port         = 5432
+    protocol        = "tcp"
+    security_groups = [data.aws_security_group.datastore_performance.id]
+  }
+
+  egress {
+    description     = "Core DoS Regression DB Access"
+    from_port       = 5432
+    to_port         = 5432
+    protocol        = "tcp"
+    security_groups = [data.aws_security_group.datastore_regression.id]
+  }
   egress {
     description = "AWS API Outbound Access"
     from_port   = 443
