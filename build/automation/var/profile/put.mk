@@ -6,7 +6,7 @@
 PROJECT_IMAGE_TAG :=
 ENV := put
 SERVICE_PREFIX := $(PROJECT_ID)-$(ENV)
-
+AWS_ROLE_PIPELINE = jenkins_assume_role
 # ==============================================================================
 # Infrastructure variables
 
