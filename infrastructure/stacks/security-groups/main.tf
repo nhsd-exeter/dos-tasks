@@ -60,7 +60,7 @@ resource "aws_security_group_rule" "db_regression_sg_ingress" {
   from_port                = 5432
   to_port                  = 5432
   protocol                 = "tcp"
-  security_group_id        = data.aws_security_group.datastore.id
+  security_group_id        = data.aws_security_group.datastore_regression.id
   source_security_group_id = aws_security_group.hk_lambda_sg.id
   description              = "A rule to allow incoming connections from hk lambda to Regression Datastore Security Group"
 }
