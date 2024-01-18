@@ -11,6 +11,7 @@ resource "aws_security_group" "hk_lambda_sg" {
   }
 
   egress {
+    count           = var.add_perf_egress ? 1 : 0
     description     = "Core DoS Performance DB Access"
     from_port       = 5432
     to_port         = 5432
@@ -19,6 +20,7 @@ resource "aws_security_group" "hk_lambda_sg" {
   }
 
   egress {
+    count           = var.add_regression_egress ? 1: 0
     description     = "Core DoS Regression DB Access"
     from_port       = 5432
     to_port         = 5432
@@ -46,6 +48,7 @@ resource "aws_security_group_rule" "db_sg_ingress" {
 }
 
 resource "aws_security_group_rule" "db_perf_sg_ingress" {
+  count                    = var.add_perf_ingress ? 1 : 0
   type                     = "ingress"
   from_port                = 5432
   to_port                  = 5432
@@ -56,6 +59,7 @@ resource "aws_security_group_rule" "db_perf_sg_ingress" {
 }
 
 resource "aws_security_group_rule" "db_regression_sg_ingress" {
+  count                    = var.add_regression_ingress ? 1 : 0
   type                     = "ingress"
   from_port                = 5432
   to_port                  = 5432
