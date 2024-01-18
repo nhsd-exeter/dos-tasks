@@ -10,23 +10,30 @@ resource "aws_security_group" "hk_lambda_sg" {
     security_groups = [data.aws_security_group.datastore.id]
   }
 
-  egress {
-    count           = var.add_perf_egress ? 1 : 0
-    description     = "Core DoS Performance DB Access"
-    from_port       = 5432
-    to_port         = 5432
-    protocol        = "tcp"
-    security_groups = [data.aws_security_group.datastore_performance.id]
+  dynamic "egress" {
+    for_each = var.add_perf_egress ? [1] : []
+    content {
+      description     = "Core DoS Performance DB Access"
+      from_port       = 5432
+      to_port         = 5432
+      protocol        = "tcp"
+      security_groups = [data.aws_security_group.datastore_performance[0].id]
+    }
+
   }
 
-  egress {
-    count           = var.add_regression_egress ? 1: 0
-    description     = "Core DoS Regression DB Access"
-    from_port       = 5432
-    to_port         = 5432
-    protocol        = "tcp"
-    security_groups = [data.aws_security_group.datastore_regression.id]
+  dynamic "egress" {
+    for_each = var.add_regression_egress ? [1] : []
+    content {
+      description     = "Core DoS Regression DB Access"
+      from_port       = 5432
+      to_port         = 5432
+      protocol        = "tcp"
+      security_groups = [data.aws_security_group.datastore_regression[0].id]
+    }
+
   }
+
   egress {
     description = "AWS API Outbound Access"
     from_port   = 443
@@ -53,7 +60,7 @@ resource "aws_security_group_rule" "db_perf_sg_ingress" {
   from_port                = 5432
   to_port                  = 5432
   protocol                 = "tcp"
-  security_group_id        = data.aws_security_group.datastore_performance.id
+  security_group_id        = data.aws_security_group.datastore_performance[0].id
   source_security_group_id = aws_security_group.hk_lambda_sg.id
   description              = "A rule to allow incoming connections from hk lambda to Performance Datastore Security Group"
 }
@@ -64,7 +71,7 @@ resource "aws_security_group_rule" "db_regression_sg_ingress" {
   from_port                = 5432
   to_port                  = 5432
   protocol                 = "tcp"
-  security_group_id        = data.aws_security_group.datastore_regression.id
+  security_group_id        = data.aws_security_group.datastore_regression[0].id
   source_security_group_id = aws_security_group.hk_lambda_sg.id
   description              = "A rule to allow incoming connections from hk lambda to Regression Datastore Security Group"
 }
