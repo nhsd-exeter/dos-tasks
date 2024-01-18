@@ -31,6 +31,13 @@ LAMBDA_VERSIONS_TO_RETAIN = 5
 # Adding Performance and Regression SG as the legacy SG [live-lk8s-nonprod-core-dos-db-rds-postgres-sg]
 # with access to all DB is being deprecated
 # As a result adding additional SG to the Lambda used in nonprod
+TF_VAR_add_perf_security_group = true
+TF_VAR_add_regression_security_group = true
+TF_VAR_add_perf_egress = true
+TF_VAR_add_regression_egress = true
+TF_VAR_add_perf_ingress = true
+TF_VAR_add_regression_ingress = true
+
 TF_VAR_db_security_group_name = uec-core-dos-pipeline-datastore-hk-sg
 TF_VAR_db_performance_security_group_name =  uec-core-dos-performance-datastore-hk-sg
 TF_VAR_db_regression_security_group_name = uec-core-dos-regression-datastore-hk-sg
