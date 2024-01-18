@@ -5,6 +5,7 @@
 
 PROJECT_IMAGE_TAG :=
 ENV := live
+ENVIRONMENT := live
 SERVICE_PREFIX := $(PROJECT_ID)-$(ENV)
 AWS_ROLE_PIPELINE = jenkins_assume_role
 # ==============================================================================
